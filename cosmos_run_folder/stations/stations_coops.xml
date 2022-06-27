@@ -1,0 +1,198 @@
+<?xml version="1.0"?>
+<!-- Written on 11-Oct-2011 19:14:31 using the XML Toolbox for Matlab -->
+<root>
+  <station>
+    <name>8775870</name>
+    <coops_id>8775870</coops_id>
+    <longname>Bob Hall Pier, Corpus Christi, TX</longname>
+    <longitude type="float">-97.2167</longitude>
+    <latitude type="float">27.5800</latitude>
+    <type>tide_gauge</type>
+    <mllw type="float">-0.284</mllw>
+    <water_level_correction type="float">0.0</water_level_correction>
+  </station>
+  <station>
+    <name>8771341</name>
+    <coops_id>8771341</coops_id>
+    <longname>Galveston Bay Entrance, North Jetty, TX</longname>
+    <longitude type="float">-94.7250</longitude>
+    <latitude type="float">29.3567</latitude>
+    <type>tide_gauge</type>
+    <mllw type="float">-0.297</mllw>
+    <water_level_correction type="float">0.0</water_level_correction>
+  </station>
+  <station>
+    <name>8760922</name>
+    <coops_id>8760922</coops_id>
+    <longname>Pilots Station East, S.W. Pass, LA</longname>
+    <longitude type="float">-89.4067</longitude>
+    <latitude type="float">28.9317</latitude>
+    <type>tide_gauge</type>
+    <mllw type="float">-0.178</mllw>
+    <water_level_correction type="float">0.0</water_level_correction>
+  </station>
+  <station>
+    <name>8729210</name>
+    <coops_id>8729210</coops_id>
+    <longname>Panama City Beach, FL</longname>
+    <longitude type="float">-85.8783</longitude>
+    <latitude type="float">30.2133</latitude>
+    <type>tide_gauge</type>
+    <mllw type="float">-0.203</mllw>
+    <water_level_correction type="float">0.0</water_level_correction>
+  </station>
+  <station>
+    <name>8727520</name>
+    <coops_id>8727520</coops_id>
+    <longname>Cedar Key, FL</longname>
+    <longitude type="float">-83.0317</longitude>
+    <latitude type="float">29.1350</latitude>
+    <longitude_model type="float">-83.0917</longitude_model>
+    <latitude_model type="float">29.1350</latitude_model>
+    <type>tide_gauge</type>
+    <mllw type="float">-0.621</mllw>
+    <water_level_correction type="float">0.0</water_level_correction>
+  </station>
+  <station>
+    <name>8725110</name>
+    <coops_id>8725110</coops_id>
+    <longname>Naples, FL</longname>
+    <longitude type="float">-81.8083</longitude>
+    <latitude type="float">26.1317</latitude>
+    <type>tide_gauge</type>
+    <mllw type="float">-0.502</mllw>
+    <water_level_correction type="float">0.0</water_level_correction>
+  </station>
+  <station>
+    <name>8443970</name>
+    <coops_id>8443970</coops_id>
+    <longname>Boston, MA</longname>
+    <longitude type="float">-71.0533</longitude>
+    <latitude type="float">42.3550</latitude>
+    <longitude_model type="float">-70.981736</longitude_model>
+    <latitude_model type="float">42.336355</latitude_model>
+    <type>tide_gauge</type>
+    <mllw type="float">-1.586</mllw>
+    <water_level_correction type="float">0.15</water_level_correction>
+  </station>
+  <station>
+    <name>8510560</name>
+    <coops_id>8510560</coops_id>
+    <longname>Montauk, NY</longname>
+    <longitude type="float">-71.9600</longitude>
+    <latitude type="float">41.06</latitude>
+    <longitude_model type="float">-71.987089</longitude_model>
+    <latitude_model type="float">41.069476</latitude_model>
+    <type>tide_gauge</type>
+    <mllw type="float">-0.377</mllw>
+    <water_level_correction type="float">0.15</water_level_correction>
+  </station>
+  <station>
+    <name>8531680</name>
+    <coops_id>8531680</coops_id>
+    <longname>Sandy Hook, NJ</longname>
+    <longitude type="float">-74.0100</longitude>
+    <latitude type="float">40.4667</latitude>
+    <type>tide_gauge</type>
+    <mllw type="float">-0.785</mllw>
+    <water_level_correction type="float">0.15</water_level_correction>
+  </station>
+  <station>
+    <name>8534720</name>
+    <coops_id>8534720</coops_id>
+    <longname>Atlantic City, NJ</longname>
+    <longitude type="float">-74.4183</longitude>
+    <latitude type="float">39.3567</latitude>
+    <type>tide_gauge</type>
+    <mllw type="float">-0.675</mllw>
+    <water_level_correction type="float">0.15</water_level_correction>
+  </station>
+  <station>
+    <name>8570283</name>
+    <coops_id>8570283</coops_id>
+    <longname>Ocean City Inlet, MD</longname>
+    <longitude type="float">-75.0917</longitude>
+    <latitude type="float">38.3283</latitude>
+    <longitude_model type="float">-75.0717</longitude_model>
+    <latitude_model type="float">38.3283</latitude_model>
+    <type>tide_gauge</type>
+    <mllw type="float">-0.387</mllw>
+    <water_level_correction type="float">0.15</water_level_correction>
+  </station>
+  <station>
+    <name>8638901</name>
+    <coops_id>8638901</coops_id>
+    <longname>CBBT, Chesapeake Channel, VA</longname>
+    <longitude type="float">-76.0833</longitude>
+    <latitude type="float">37.0333</latitude>
+    <type>tide_gauge</type>
+    <mllw type="float">-0.441</mllw>
+    <water_level_correction type="float">0.15</water_level_correction>
+  </station>
+  <station>
+    <name>8651370</name>
+    <coops_id>8651370</coops_id>
+    <longname>Duck, NC</longname>
+    <longitude type="float">-75.7467</longitude>
+    <latitude type="float">36.1833</latitude>
+    <type>tide_gauge</type>
+    <mllw type="float">-0.539</mllw>
+    <water_level_correction type="float">0.15</water_level_correction>
+  </station>
+  <station>
+    <name>8658163</name>
+    <coops_id>8658163</coops_id>
+    <longname>Wrightsville Beach, NC</longname>
+    <longitude type="float">-77.7867</longitude>
+    <latitude type="float">34.2133</latitude>
+    <type>tide_gauge</type>
+    <mllw type="float">-0.658</mllw>
+    <water_level_correction type="float">0.15</water_level_correction>
+  </station>
+  <station>
+    <name>8661070</name>
+    <coops_id>8661070</coops_id>
+    <longname>Springmaid Pier, SC</longname>
+    <longitude type="float">-78.9183</longitude>
+    <latitude type="float">33.6550</latitude>
+    <type>tide_gauge</type>
+    <mllw type="float">-0.826</mllw>
+    <water_level_correction type="float">0.15</water_level_correction>
+  </station>
+  <station>
+    <name>8670870</name>
+    <coops_id>8670870</coops_id>
+    <longname>Fort Pulaski, GA</longname>
+    <longitude type="float">-80.9017</longitude>
+    <latitude type="float">32.0367</latitude>
+    <longitude_model type="float">-80.8017</longitude_model>
+    <latitude_model type="float">32.0367</latitude_model>
+    <type>tide_gauge</type>
+    <mllw type="float">-1.164</mllw>
+    <water_level_correction type="float">0.15</water_level_correction>
+  </station>
+  <station>
+    <name>8720218</name>
+    <coops_id>8720218</coops_id>
+    <longname>Mayport Bar Pilots Dock, FL</longname>
+    <longitude type="float">-81.4283</longitude>
+    <latitude type="float">30.3983</latitude>
+    <longitude_model type="float">-81.37</longitude_model>
+    <latitude_model type="float">30.3983</latitude_model>
+    <type>tide_gauge</type>
+    <mllw type="float">-0.752</mllw>
+    <water_level_correction type="float">0.15</water_level_correction>
+  </station>
+  <station>
+    <name>8721604</name>
+    <coops_id>8721604</coops_id>
+    <longname>Trident Pier, Port Canaveral, FL</longname>
+    <longitude type="float">-80.5933</longitude>
+    <latitude type="float">28.4150</latitude>
+    <longitude_model type="float">-80.5500</longitude_model>
+    <latitude_model type="float">28.4150</latitude_model>
+    <type>tide_gauge</type>
+    <mllw type="float">-0.572</mllw>
+    <water_level_correction type="float">0.15</water_level_correction>
+  </station>
+</root>

@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<!-- Written on 11-Oct-2011 19:14:31 using the XML Toolbox for Matlab -->
+<root>
+  <meteo_subset>
+    <name>gfs_forecast_0p25_conus</name>
+    <source>gfs_forecast_0p25</source>
+    <x_range type="float">-110.0,-50.0</x_range>
+    <y_range type="float">23.0,50.0</y_range>
+  </meteo_subset>
+  <meteo_subset>
+    <name>gfs_forecast_0p25_us_east_gom</name>
+    <source>gfs_forecast_0p25</source>
+    <x_range type="float">-100.0,-50.0</x_range>
+    <y_range type="float">17.0,50.0</y_range>
+  </meteo_subset>
+  <meteo_subset>
+    <name>gfs_anl_0p50_us_east_gom</name>
+    <source>gfs_anl_0p50</source>
+    <x_range type="float">-100.0,-50.0</x_range>
+    <y_range type="float">17.0,50.0</y_range>
+  </meteo_subset>
+  <meteo_subset>
+    <name>gfs_anl_0p50_conus</name>
+    <source>gfs_anl_0p50</source>
+    <x_range type="float">-110.0,-50.0</x_range>
+    <y_range type="float">23.0,50.0</y_range>
+  </meteo_subset>
+  <meteo_subset>
+    <name>gfs_anl_0p50_useast</name>
+    <source>gfs_anl_0p50</source>
+    <x_range type="float">-85.0,-60.0</x_range>
+    <y_range type="float">23.0,50.0</y_range>
+  </meteo_subset>
+  <meteo_subset>
+    <name>gfs_anl_0p50_ne_atlantic</name>
+    <source>gfs_anl_0p50</source>
+    <x_range type="float">-100.0,-54.0</x_range>
+    <y_range type="float">4.0,54.0</y_range>
+  </meteo_subset>
+  <meteo_subset>
+    <name>hurricane_michael_coamps</name>
+    <source>coamps_analysis</source>
+    <xystride>2</xystride>
+  </meteo_subset>
+  <meteo_subset>
+    <name>hurricane_michael_reanalysis</name>
+    <source>coamps_analysis</source>
+  </meteo_subset>
+</root>

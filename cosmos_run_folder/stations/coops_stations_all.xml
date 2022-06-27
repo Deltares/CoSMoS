@@ -1,0 +1,2884 @@
+<root>
+  <station>
+    <name>1611400</name>
+    <coops_id>1611400</coops_id>
+    <longname>Nawiliwili</longname>
+    <longitude type="float">-159.3561</longitude>
+    <latitude type="float">21.9544</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.250</MLLW>
+    <MHHW type="float">0.308</MHHW>
+  </station>
+  <station>
+    <name>1612340</name>
+    <coops_id>1612340</coops_id>
+    <longname>Honolulu</longname>
+    <longitude type="float">-157.867</longitude>
+    <latitude type="float">21.3067</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.250</MLLW>
+    <MHHW type="float">0.329</MHHW>
+  </station>
+  <station>
+    <name>1612480</name>
+    <coops_id>1612480</coops_id>
+    <longname>Mokuoloe</longname>
+    <longitude type="float">-157.79</longitude>
+    <latitude type="float">21.4331</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.320</MLLW>
+    <MHHW type="float">0.326</MHHW>
+  </station>
+  <station>
+    <name>1615680</name>
+    <coops_id>1615680</coops_id>
+    <longname>Kahului, Kahului Harbor</longname>
+    <longitude type="float">-156.4767</longitude>
+    <latitude type="float">20.895</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.341</MLLW>
+    <MHHW type="float">0.344</MHHW>
+  </station>
+  <station>
+    <name>1617433</name>
+    <coops_id>1617433</coops_id>
+    <longname>Kawaihae</longname>
+    <longitude type="float">-155.8294</longitude>
+    <latitude type="float">20.0366</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.277</MLLW>
+    <MHHW type="float">0.366</MHHW>
+  </station>
+  <station>
+    <name>1617760</name>
+    <coops_id>1617760</coops_id>
+    <longname>Hilo, Hilo Bay, Kuhio Bay</longname>
+    <longitude type="float">-155.06</longitude>
+    <latitude type="float">19.7303</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.351</MLLW>
+    <MHHW type="float">0.381</MHHW>
+  </station>
+  <station>
+    <name>1619910</name>
+    <coops_id>1619910</coops_id>
+    <longname>Sand Island, Midway Islands</longname>
+    <longitude type="float">-177.36</longitude>
+    <latitude type="float">28.2117</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.198</MLLW>
+    <MHHW type="float">0.186</MHHW>
+  </station>
+  <station>
+    <name>1630000</name>
+    <coops_id>1630000</coops_id>
+    <longname>Apra Harbor, Guam</longname>
+    <longitude type="float">144.6564</longitude>
+    <latitude type="float">13.4434</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.418</MLLW>
+    <MHHW type="float">0.296</MHHW>
+  </station>
+  <station>
+    <name>1631428</name>
+    <coops_id>1631428</coops_id>
+    <longname>Pago Bay, Guam</longname>
+    <longitude type="float">144.7969</longitude>
+    <latitude type="float">13.4283</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.308</MLLW>
+    <MHHW type="float">0.219</MHHW>
+  </station>
+  <station>
+    <name>1770000</name>
+    <coops_id>1770000</coops_id>
+    <longname>Pago Pago, American Samoa</longname>
+    <longitude type="float">-170.6894</longitude>
+    <latitude type="float">-14.2767</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.415</MLLW>
+    <MHHW type="float">0.436</MHHW>
+  </station>
+  <station>
+    <name>1820000</name>
+    <coops_id>1820000</coops_id>
+    <longname>Kwajalein, Marshall Islands</longname>
+    <longitude type="float">167.7361</longitude>
+    <latitude type="float">8.7317</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.567</MLLW>
+    <MHHW type="float">0.628</MHHW>
+  </station>
+  <station>
+    <name>1890000</name>
+    <coops_id>1890000</coops_id>
+    <longname>Wake Island, Pacific Ocean</longname>
+    <longitude type="float">166.6175</longitude>
+    <latitude type="float">19.2906</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.347</MLLW>
+    <MHHW type="float">0.369</MHHW>
+  </station>
+  <station>
+    <name>2695535</name>
+    <coops_id>2695535</coops_id>
+    <longname>Bermuda Biological Station</longname>
+    <longitude type="float">-64.695</longitude>
+    <latitude type="float">32.37</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.396</MLLW>
+    <MHHW type="float">0.442</MHHW>
+  </station>
+  <station>
+    <name>2695540</name>
+    <coops_id>2695540</coops_id>
+    <longname>Bermuda, St. Georges Island</longname>
+    <longitude type="float">-64.7033</longitude>
+    <latitude type="float">32.3733</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.405</MLLW>
+    <MHHW type="float">0.457</MHHW>
+  </station>
+  <station>
+    <name>8311030</name>
+    <coops_id>8311030</coops_id>
+    <longname>Ogdensburg</longname>
+    <longitude type="float">-75.494</longitude>
+    <latitude type="float">44.7017</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>8311062</name>
+    <coops_id>8311062</coops_id>
+    <longname>Alexandria Bay</longname>
+    <longitude type="float">-75.9345</longitude>
+    <latitude type="float">44.3311</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>8410140</name>
+    <coops_id>8410140</coops_id>
+    <longname>Eastport</longname>
+    <longitude type="float">-66.9829</longitude>
+    <latitude type="float">44.9046</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-2.957</MLLW>
+    <MHHW type="float">2.917</MHHW>
+  </station>
+  <station>
+    <name>8411060</name>
+    <coops_id>8411060</coops_id>
+    <longname>Cutler Farris Wharf</longname>
+    <longitude type="float">-67.2047</longitude>
+    <latitude type="float">44.657</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-2.192</MLLW>
+    <MHHW type="float">2.246</MHHW>
+  </station>
+  <station>
+    <name>8413320</name>
+    <coops_id>8413320</coops_id>
+    <longname>Bar Harbor</longname>
+    <longitude type="float">-68.2043</longitude>
+    <latitude type="float">44.3922</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.728</MLLW>
+    <MHHW type="float">1.737</MHHW>
+  </station>
+  <station>
+    <name>8418150</name>
+    <coops_id>8418150</coops_id>
+    <longname>Portland</longname>
+    <longitude type="float">-70.2442</longitude>
+    <latitude type="float">43.6581</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.506</MLLW>
+    <MHHW type="float">1.515</MHHW>
+  </station>
+  <station>
+    <name>8419317</name>
+    <coops_id>8419317</coops_id>
+    <longname>Wells</longname>
+    <longitude type="float">-70.5633</longitude>
+    <latitude type="float">43.32</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.454</MLLW>
+    <MHHW type="float">1.460</MHHW>
+  </station>
+  <station>
+    <name>8419870</name>
+    <coops_id>8419870</coops_id>
+    <longname>Seavey Island</longname>
+    <longitude type="float">-70.7411</longitude>
+    <latitude type="float">43.0797</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.350</MLLW>
+    <MHHW type="float">1.344</MHHW>
+  </station>
+  <station>
+    <name>8443970</name>
+    <coops_id>8443970</coops_id>
+    <longname>Boston</longname>
+    <longitude type="float">-71.0503</longitude>
+    <latitude type="float">42.3539</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.588</MLLW>
+    <MHHW type="float">1.545</MHHW>
+  </station>
+  <station>
+    <name>8447386</name>
+    <coops_id>8447386</coops_id>
+    <longname>Fall River</longname>
+    <longitude type="float">-71.1641</longitude>
+    <latitude type="float">41.7043</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.671</MLLW>
+    <MHHW type="float">0.783</MHHW>
+  </station>
+  <station>
+    <name>8447435</name>
+    <coops_id>8447435</coops_id>
+    <longname>Chatham, Lydia Cove</longname>
+    <longitude type="float">-69.9508</longitude>
+    <latitude type="float">41.6881</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.777</MLLW>
+    <MHHW type="float">0.799</MHHW>
+  </station>
+  <station>
+    <name>8447930</name>
+    <coops_id>8447930</coops_id>
+    <longname>Woods Hole</longname>
+    <longitude type="float">-70.6711</longitude>
+    <latitude type="float">41.5236</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.299</MLLW>
+    <MHHW type="float">0.372</MHHW>
+  </station>
+  <station>
+    <name>8449130</name>
+    <coops_id>8449130</coops_id>
+    <longname>Nantucket Island</longname>
+    <longitude type="float">-70.0964</longitude>
+    <latitude type="float">41.2853</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.539</MLLW>
+    <MHHW type="float">0.549</MHHW>
+  </station>
+  <station>
+    <name>8452660</name>
+    <coops_id>8452660</coops_id>
+    <longname>Newport</longname>
+    <longitude type="float">-71.3261</longitude>
+    <latitude type="float">41.5043</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.530</MLLW>
+    <MHHW type="float">0.643</MHHW>
+  </station>
+  <station>
+    <name>8452944</name>
+    <coops_id>8452944</coops_id>
+    <longname>Conimicut Light</longname>
+    <longitude type="float">-71.3433</longitude>
+    <latitude type="float">41.7167</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.640</MLLW>
+    <MHHW type="float">0.756</MHHW>
+  </station>
+  <station>
+    <name>8454000</name>
+    <coops_id>8454000</coops_id>
+    <longname>Providence</longname>
+    <longitude type="float">-71.4012</longitude>
+    <latitude type="float">41.8071</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.686</MLLW>
+    <MHHW type="float">0.789</MHHW>
+  </station>
+  <station>
+    <name>8454049</name>
+    <coops_id>8454049</coops_id>
+    <longname>Quonset Point</longname>
+    <longitude type="float">-71.41</longitude>
+    <latitude type="float">41.5869</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.570</MLLW>
+    <MHHW type="float">0.683</MHHW>
+  </station>
+  <station>
+    <name>8461490</name>
+    <coops_id>8461490</coops_id>
+    <longname>New London</longname>
+    <longitude type="float">-72.0955</longitude>
+    <latitude type="float">41.3717</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.469</MLLW>
+    <MHHW type="float">0.460</MHHW>
+  </station>
+  <station>
+    <name>8465705</name>
+    <coops_id>8465705</coops_id>
+    <longname>New Haven</longname>
+    <longitude type="float">-72.9083</longitude>
+    <latitude type="float">41.2833</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.015</MLLW>
+    <MHHW type="float">1.033</MHHW>
+  </station>
+  <station>
+    <name>8467150</name>
+    <coops_id>8467150</coops_id>
+    <longname>Bridgeport</longname>
+    <longitude type="float">-73.1817</longitude>
+    <latitude type="float">41.1733</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.103</MLLW>
+    <MHHW type="float">1.128</MHHW>
+  </station>
+  <station>
+    <name>8510560</name>
+    <coops_id>8510560</coops_id>
+    <longname>Montauk</longname>
+    <longitude type="float">-71.9594</longitude>
+    <latitude type="float">41.0483</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.378</MLLW>
+    <MHHW type="float">0.393</MHHW>
+  </station>
+  <station>
+    <name>8516945</name>
+    <coops_id>8516945</coops_id>
+    <longname>Kings Point</longname>
+    <longitude type="float">-73.765</longitude>
+    <latitude type="float">40.8103</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.186</MLLW>
+    <MHHW type="float">1.192</MHHW>
+  </station>
+  <station>
+    <name>8518750</name>
+    <coops_id>8518750</coops_id>
+    <longname>The Battery</longname>
+    <longitude type="float">-74.0142</longitude>
+    <latitude type="float">40.7006</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.783</MLLW>
+    <MHHW type="float">0.756</MHHW>
+  </station>
+  <station>
+    <name>8518962</name>
+    <coops_id>8518962</coops_id>
+    <longname>Turkey Point Hudson River NERRS</longname>
+    <longitude type="float">-73.9392</longitude>
+    <latitude type="float">42.0142</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.661</MLLW>
+    <MHHW type="float">0.643</MHHW>
+  </station>
+  <station>
+    <name>8519483</name>
+    <coops_id>8519483</coops_id>
+    <longname>Bergen Point West Reach</longname>
+    <longitude type="float">-74.1463</longitude>
+    <latitude type="float">40.6391</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.844</MLLW>
+    <MHHW type="float">0.835</MHHW>
+  </station>
+  <station>
+    <name>8531680</name>
+    <coops_id>8531680</coops_id>
+    <longname>Sandy Hook</longname>
+    <longitude type="float">-74.0094</longitude>
+    <latitude type="float">40.4669</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.786</MLLW>
+    <MHHW type="float">0.808</MHHW>
+  </station>
+  <station>
+    <name>8534720</name>
+    <coops_id>8534720</coops_id>
+    <longname>Atlantic City</longname>
+    <longitude type="float">-74.4181</longitude>
+    <latitude type="float">39.3567</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.674</MLLW>
+    <MHHW type="float">0.728</MHHW>
+  </station>
+  <station>
+    <name>8536110</name>
+    <coops_id>8536110</coops_id>
+    <longname>Cape May</longname>
+    <longitude type="float">-74.9597</longitude>
+    <latitude type="float">38.9678</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.783</MLLW>
+    <MHHW type="float">0.878</MHHW>
+  </station>
+  <station>
+    <name>8537121</name>
+    <coops_id>8537121</coops_id>
+    <longname>Ship John Shoal</longname>
+    <longitude type="float">-75.3767</longitude>
+    <latitude type="float">39.3054</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.927</MLLW>
+    <MHHW type="float">0.963</MHHW>
+  </station>
+  <station>
+    <name>8539094</name>
+    <coops_id>8539094</coops_id>
+    <longname>Burlington, Delaware River</longname>
+    <longitude type="float">-74.8733</longitude>
+    <latitude type="float">40.08</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.216</MLLW>
+    <MHHW type="float">1.177</MHHW>
+  </station>
+  <station>
+    <name>8540433</name>
+    <coops_id>8540433</coops_id>
+    <longname>Marcus Hook</longname>
+    <longitude type="float">-75.4094</longitude>
+    <latitude type="float">39.8117</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.957</MLLW>
+    <MHHW type="float">0.924</MHHW>
+  </station>
+  <station>
+    <name>8545240</name>
+    <coops_id>8545240</coops_id>
+    <longname>Philadelphia</longname>
+    <longitude type="float">-75.1417</longitude>
+    <latitude type="float">39.9333</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.064</MLLW>
+    <MHHW type="float">0.975</MHHW>
+  </station>
+  <station>
+    <name>8546252</name>
+    <coops_id>8546252</coops_id>
+    <longname>Bridesburg</longname>
+    <longitude type="float">-75.075</longitude>
+    <latitude type="float">39.9833</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.094</MLLW>
+    <MHHW type="float">1.030</MHHW>
+  </station>
+  <station>
+    <name>8548989</name>
+    <coops_id>8548989</coops_id>
+    <longname>Newbold</longname>
+    <longitude type="float">-74.7519</longitude>
+    <latitude type="float">40.1373</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.317</MLLW>
+    <MHHW type="float">1.241</MHHW>
+  </station>
+  <station>
+    <name>8551762</name>
+    <coops_id>8551762</coops_id>
+    <longname>Delaware City</longname>
+    <longitude type="float">-75.5883</longitude>
+    <latitude type="float">39.5817</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.899</MLLW>
+    <MHHW type="float">0.930</MHHW>
+  </station>
+  <station>
+    <name>8551910</name>
+    <coops_id>8551910</coops_id>
+    <longname>Reedy Point</longname>
+    <longitude type="float">-75.5719</longitude>
+    <latitude type="float">39.5583</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.890</MLLW>
+    <MHHW type="float">0.890</MHHW>
+  </station>
+  <station>
+    <name>8555889</name>
+    <coops_id>8555889</coops_id>
+    <longname>Brandywine Shoal Light</longname>
+    <longitude type="float">-75.113</longitude>
+    <latitude type="float">38.987</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.796</MLLW>
+    <MHHW type="float">0.881</MHHW>
+  </station>
+  <station>
+    <name>8557380</name>
+    <coops_id>8557380</coops_id>
+    <longname>Lewes</longname>
+    <longitude type="float">-75.1192</longitude>
+    <latitude type="float">38.7828</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.680</MLLW>
+    <MHHW type="float">0.738</MHHW>
+  </station>
+  <station>
+    <name>8570283</name>
+    <coops_id>8570283</coops_id>
+    <longname>Ocean City Inlet</longname>
+    <longitude type="float">-75.0911</longitude>
+    <latitude type="float">38.3283</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.387</MLLW>
+    <MHHW type="float">0.363</MHHW>
+  </station>
+  <station>
+    <name>8571421</name>
+    <coops_id>8571421</coops_id>
+    <longname>Bishops Head</longname>
+    <longitude type="float">-76.0383</longitude>
+    <latitude type="float">38.22</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.311</MLLW>
+    <MHHW type="float">0.317</MHHW>
+  </station>
+  <station>
+    <name>8571892</name>
+    <coops_id>8571892</coops_id>
+    <longname>Cambridge</longname>
+    <longitude type="float">-76.0617</longitude>
+    <latitude type="float">38.5725</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.311</MLLW>
+    <MHHW type="float">0.311</MHHW>
+  </station>
+  <station>
+    <name>8573364</name>
+    <coops_id>8573364</coops_id>
+    <longname>Tolchester Beach</longname>
+    <longitude type="float">-76.2445</longitude>
+    <latitude type="float">39.2134</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.256</MLLW>
+    <MHHW type="float">0.274</MHHW>
+  </station>
+  <station>
+    <name>8573927</name>
+    <coops_id>8573927</coops_id>
+    <longname>Chesapeake City</longname>
+    <longitude type="float">-75.81</longitude>
+    <latitude type="float">39.5267</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.475</MLLW>
+    <MHHW type="float">0.509</MHHW>
+  </station>
+  <station>
+    <name>8574680</name>
+    <coops_id>8574680</coops_id>
+    <longname>Baltimore, Fort McHenry, Patapsco River</longname>
+    <longitude type="float">-76.5794</longitude>
+    <latitude type="float">39.2669</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.247</MLLW>
+    <MHHW type="float">0.259</MHHW>
+  </station>
+  <station>
+    <name>8575512</name>
+    <coops_id>8575512</coops_id>
+    <longname>Annapolis</longname>
+    <longitude type="float">-76.4816</longitude>
+    <latitude type="float">38.9833</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.219</MLLW>
+    <MHHW type="float">0.216</MHHW>
+  </station>
+  <station>
+    <name>8577330</name>
+    <coops_id>8577330</coops_id>
+    <longname>Solomons Island</longname>
+    <longitude type="float">-76.4508</longitude>
+    <latitude type="float">38.3172</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.232</MLLW>
+    <MHHW type="float">0.219</MHHW>
+  </station>
+  <station>
+    <name>8594900</name>
+    <coops_id>8594900</coops_id>
+    <longname>Washington</longname>
+    <longitude type="float">-77.0217</longitude>
+    <latitude type="float">38.873</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.472</MLLW>
+    <MHHW type="float">0.494</MHHW>
+  </station>
+  <station>
+    <name>8631044</name>
+    <coops_id>8631044</coops_id>
+    <longname>Wachapreague</longname>
+    <longitude type="float">-75.6858</longitude>
+    <latitude type="float">37.6078</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.689</MLLW>
+    <MHHW type="float">0.677</MHHW>
+  </station>
+  <station>
+    <name>8632200</name>
+    <coops_id>8632200</coops_id>
+    <longname>Kiptopeke</longname>
+    <longitude type="float">-75.9884</longitude>
+    <latitude type="float">37.1652</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.436</MLLW>
+    <MHHW type="float">0.463</MHHW>
+  </station>
+  <station>
+    <name>8635027</name>
+    <coops_id>8635027</coops_id>
+    <longname>Dahlgren</longname>
+    <longitude type="float">-77.0366</longitude>
+    <latitude type="float">38.3197</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.287</MLLW>
+    <MHHW type="float">0.296</MHHW>
+  </station>
+  <station>
+    <name>8635750</name>
+    <coops_id>8635750</coops_id>
+    <longname>Lewisetta</longname>
+    <longitude type="float">-76.4647</longitude>
+    <latitude type="float">37.9953</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.232</MLLW>
+    <MHHW type="float">0.229</MHHW>
+  </station>
+  <station>
+    <name>8636580</name>
+    <coops_id>8636580</coops_id>
+    <longname>Windmill Point</longname>
+    <longitude type="float">-76.29</longitude>
+    <latitude type="float">37.6161</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.213</MLLW>
+    <MHHW type="float">0.210</MHHW>
+  </station>
+  <station>
+    <name>8637689</name>
+    <coops_id>8637689</coops_id>
+    <longname>Yorktown USCG Training Center</longname>
+    <longitude type="float">-76.4788</longitude>
+    <latitude type="float">37.2265</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.378</MLLW>
+    <MHHW type="float">0.408</MHHW>
+  </station>
+  <station>
+    <name>8638610</name>
+    <coops_id>8638610</coops_id>
+    <longname>Sewells Point</longname>
+    <longitude type="float">-76.33</longitude>
+    <latitude type="float">36.9467</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.415</MLLW>
+    <MHHW type="float">0.427</MHHW>
+  </station>
+  <station>
+    <name>8638901</name>
+    <coops_id>8638901</coops_id>
+    <longname>CBBT, Chesapeake Channel</longname>
+    <longitude type="float">-76.0833</longitude>
+    <latitude type="float">37.0329</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.448</MLLW>
+    <MHHW type="float">0.469</MHHW>
+  </station>
+  <station>
+    <name>8639348</name>
+    <coops_id>8639348</coops_id>
+    <longname>Money Point</longname>
+    <longitude type="float">-76.3017</longitude>
+    <latitude type="float">36.7783</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.479</MLLW>
+    <MHHW type="float">0.497</MHHW>
+  </station>
+  <station>
+    <name>8651370</name>
+    <coops_id>8651370</coops_id>
+    <longname>Duck</longname>
+    <longitude type="float">-75.7467</longitude>
+    <latitude type="float">36.1833</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.539</MLLW>
+    <MHHW type="float">0.585</MHHW>
+  </station>
+  <station>
+    <name>8652587</name>
+    <coops_id>8652587</coops_id>
+    <longname>Oregon Inlet Marina</longname>
+    <longitude type="float">-75.5481</longitude>
+    <latitude type="float">35.795</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.177</MLLW>
+    <MHHW type="float">0.183</MHHW>
+  </station>
+  <station>
+    <name>8654467</name>
+    <coops_id>8654467</coops_id>
+    <longname>USCG Station Hatteras</longname>
+    <longitude type="float">-75.7042</longitude>
+    <latitude type="float">35.2086</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.098</MLLW>
+    <MHHW type="float">0.101</MHHW>
+  </station>
+  <station>
+    <name>8656483</name>
+    <coops_id>8656483</coops_id>
+    <longname>Beaufort, Duke Marine Lab</longname>
+    <longitude type="float">-76.67</longitude>
+    <latitude type="float">34.72</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.521</MLLW>
+    <MHHW type="float">0.558</MHHW>
+  </station>
+  <station>
+    <name>8658120</name>
+    <coops_id>8658120</coops_id>
+    <longname>Wilmington</longname>
+    <longitude type="float">-77.9536</longitude>
+    <latitude type="float">34.2275</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.744</MLLW>
+    <MHHW type="float">0.683</MHHW>
+  </station>
+  <station>
+    <name>8658163</name>
+    <coops_id>8658163</coops_id>
+    <longname>Wrightsville Beach</longname>
+    <longitude type="float">-77.7867</longitude>
+    <latitude type="float">34.2133</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.655</MLLW>
+    <MHHW type="float">0.710</MHHW>
+  </station>
+  <station>
+    <name>8661070</name>
+    <coops_id>8661070</coops_id>
+    <longname>Springmaid Pier</longname>
+    <longitude type="float">-78.9183</longitude>
+    <latitude type="float">33.655</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.826</MLLW>
+    <MHHW type="float">0.881</MHHW>
+  </station>
+  <station>
+    <name>8662245</name>
+    <coops_id>8662245</coops_id>
+    <longname>Oyster Landing (N Inlet Estuary)</longname>
+    <longitude type="float">-79.1867</longitude>
+    <latitude type="float">33.3517</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.817</MLLW>
+    <MHHW type="float">0.738</MHHW>
+  </station>
+  <station>
+    <name>8665530</name>
+    <coops_id>8665530</coops_id>
+    <longname>Charleston, Cooper River Entrance</longname>
+    <longitude type="float">-79.9236</longitude>
+    <latitude type="float">32.7808</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.890</MLLW>
+    <MHHW type="float">0.866</MHHW>
+  </station>
+  <station>
+    <name>8670870</name>
+    <coops_id>8670870</coops_id>
+    <longname>Fort Pulaski</longname>
+    <longitude type="float">-80.9017</longitude>
+    <latitude type="float">32.0367</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.164</MLLW>
+    <MHHW type="float">1.122</MHHW>
+  </station>
+  <station>
+    <name>8720030</name>
+    <coops_id>8720030</coops_id>
+    <longname>Fernandina Beach</longname>
+    <longitude type="float">-81.4658</longitude>
+    <latitude type="float">30.6714</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.003</MLLW>
+    <MHHW type="float">0.997</MHHW>
+  </station>
+  <station>
+    <name>8720218</name>
+    <coops_id>8720218</coops_id>
+    <longname>Mayport (Bar Pilots Dock)</longname>
+    <longitude type="float">-81.4279</longitude>
+    <latitude type="float">30.3982</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.753</MLLW>
+    <MHHW type="float">0.756</MHHW>
+  </station>
+  <station>
+    <name>8720219</name>
+    <coops_id>8720219</coops_id>
+    <longname>Dames Point</longname>
+    <longitude type="float">-81.5592</longitude>
+    <latitude type="float">30.3872</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.567</MLLW>
+    <MHHW type="float">0.549</MHHW>
+  </station>
+  <station>
+    <name>8720226</name>
+    <coops_id>8720226</coops_id>
+    <longname>Southbank Riverwalk, St Johns River</longname>
+    <longitude type="float">-81.6591</longitude>
+    <latitude type="float">30.3205</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.323</MLLW>
+    <MHHW type="float">0.271</MHHW>
+  </station>
+  <station>
+    <name>8720357</name>
+    <coops_id>8720357</coops_id>
+    <longname>I-295 Buckman Bridge</longname>
+    <longitude type="float">-81.69</longitude>
+    <latitude type="float">30.1924</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.155</MLLW>
+    <MHHW type="float">0.152</MHHW>
+  </station>
+  <station>
+    <name>8721604</name>
+    <coops_id>8721604</coops_id>
+    <longname>Trident Pier, Port Canaveral</longname>
+    <longitude type="float">-80.5931</longitude>
+    <latitude type="float">28.4158</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.573</MLLW>
+    <MHHW type="float">0.625</MHHW>
+  </station>
+  <station>
+    <name>8722670</name>
+    <coops_id>8722670</coops_id>
+    <longname>Lake Worth Pier, Atlantic Ocean</longname>
+    <longitude type="float">-80.0342</longitude>
+    <latitude type="float">26.6128</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.469</MLLW>
+    <MHHW type="float">0.463</MHHW>
+  </station>
+  <station>
+    <name>8722956</name>
+    <coops_id>8722956</coops_id>
+    <longname>South Port Everglades</longname>
+    <longitude type="float">-80.1167</longitude>
+    <latitude type="float">26.0817</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.430</MLLW>
+    <MHHW type="float">0.418</MHHW>
+  </station>
+  <station>
+    <name>8723214</name>
+    <coops_id>8723214</coops_id>
+    <longname>Virginia Key, Biscayne Bay</longname>
+    <longitude type="float">-80.1617</longitude>
+    <latitude type="float">25.7317</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.344</MLLW>
+    <MHHW type="float">0.341</MHHW>
+  </station>
+  <station>
+    <name>8723970</name>
+    <coops_id>8723970</coops_id>
+    <longname>Vaca Key, Florida Bay</longname>
+    <longitude type="float">-81.1065</longitude>
+    <latitude type="float">24.711</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.155</MLLW>
+    <MHHW type="float">0.143</MHHW>
+  </station>
+  <station>
+    <name>8724580</name>
+    <coops_id>8724580</coops_id>
+    <longname>Key West</longname>
+    <longitude type="float">-81.8081</longitude>
+    <latitude type="float">24.5508</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.271</MLLW>
+    <MHHW type="float">0.280</MHHW>
+  </station>
+  <station>
+    <name>8725110</name>
+    <coops_id>8725110</coops_id>
+    <longname>Naples, Gulf of Mexico</longname>
+    <longitude type="float">-81.8075</longitude>
+    <latitude type="float">26.1317</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.503</MLLW>
+    <MHHW type="float">0.372</MHHW>
+  </station>
+  <station>
+    <name>8725520</name>
+    <coops_id>8725520</coops_id>
+    <longname>Fort Myers</longname>
+    <longitude type="float">-81.871</longitude>
+    <latitude type="float">26.648</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.192</MLLW>
+    <MHHW type="float">0.210</MHHW>
+  </station>
+  <station>
+    <name>8726384</name>
+    <coops_id>8726384</coops_id>
+    <longname>Port Manatee</longname>
+    <longitude type="float">-82.5625</longitude>
+    <latitude type="float">27.6383</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.354</MLLW>
+    <MHHW type="float">0.308</MHHW>
+  </station>
+  <station>
+    <name>8726520</name>
+    <coops_id>8726520</coops_id>
+    <longname>St. Petersburg, Tampa Bay</longname>
+    <longitude type="float">-82.6269</longitude>
+    <latitude type="float">27.7606</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.366</MLLW>
+    <MHHW type="float">0.323</MHHW>
+  </station>
+  <station>
+    <name>8726607</name>
+    <coops_id>8726607</coops_id>
+    <longname>Old Port Tampa</longname>
+    <longitude type="float">-82.5528</longitude>
+    <latitude type="float">27.8578</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.396</MLLW>
+    <MHHW type="float">0.360</MHHW>
+  </station>
+  <station>
+    <name>8726674</name>
+    <coops_id>8726674</coops_id>
+    <longname>East Bay</longname>
+    <longitude type="float">-82.4214</longitude>
+    <latitude type="float">27.9231</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.445</MLLW>
+    <MHHW type="float">0.372</MHHW>
+  </station>
+  <station>
+    <name>8726724</name>
+    <coops_id>8726724</coops_id>
+    <longname>Clearwater Beach</longname>
+    <longitude type="float">-82.8317</longitude>
+    <latitude type="float">27.9783</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.448</MLLW>
+    <MHHW type="float">0.387</MHHW>
+  </station>
+  <station>
+    <name>8727520</name>
+    <coops_id>8727520</coops_id>
+    <longname>Cedar Key</longname>
+    <longitude type="float">-83.0317</longitude>
+    <latitude type="float">29.135</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.622</MLLW>
+    <MHHW type="float">0.536</MHHW>
+  </station>
+  <station>
+    <name>8728690</name>
+    <coops_id>8728690</coops_id>
+    <longname>Apalachicola</longname>
+    <longitude type="float">-84.9806</longitude>
+    <latitude type="float">29.7244</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.277</MLLW>
+    <MHHW type="float">0.213</MHHW>
+  </station>
+  <station>
+    <name>8729108</name>
+    <coops_id>8729108</coops_id>
+    <longname>Panama City</longname>
+    <longitude type="float">-85.7</longitude>
+    <latitude type="float">30.1523</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.204</MLLW>
+    <MHHW type="float">0.204</MHHW>
+  </station>
+  <station>
+    <name>8729210</name>
+    <coops_id>8729210</coops_id>
+    <longname>Panama City Beach</longname>
+    <longitude type="float">-85.8783</longitude>
+    <latitude type="float">30.2133</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.204</MLLW>
+    <MHHW type="float">0.223</MHHW>
+  </station>
+  <station>
+    <name>8729840</name>
+    <coops_id>8729840</coops_id>
+    <longname>Pensacola</longname>
+    <longitude type="float">-87.2112</longitude>
+    <latitude type="float">30.4044</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.189</MLLW>
+    <MHHW type="float">0.195</MHHW>
+  </station>
+  <station>
+    <name>8732828</name>
+    <coops_id>8732828</coops_id>
+    <longname>Weeks Bay, Mobile Bay</longname>
+    <longitude type="float">-87.8254</longitude>
+    <latitude type="float">30.4169</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.244</MLLW>
+    <MHHW type="float">0.247</MHHW>
+  </station>
+  <station>
+    <name>8735180</name>
+    <coops_id>8735180</coops_id>
+    <longname>Dauphin Island</longname>
+    <longitude type="float">-88.075</longitude>
+    <latitude type="float">30.25</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.174</MLLW>
+    <MHHW type="float">0.198</MHHW>
+  </station>
+  <station>
+    <name>8735391</name>
+    <coops_id>8735391</coops_id>
+    <longname>Dog River Bridge</longname>
+    <longitude type="float">-88.088</longitude>
+    <latitude type="float">30.5652</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.244</MLLW>
+    <MHHW type="float">0.256</MHHW>
+  </station>
+  <station>
+    <name>8735523</name>
+    <coops_id>8735523</coops_id>
+    <longname>East Fowl River Bridge</longname>
+    <longitude type="float">-88.1139</longitude>
+    <latitude type="float">30.4436</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.223</MLLW>
+    <MHHW type="float">0.226</MHHW>
+  </station>
+  <station>
+    <name>8736897</name>
+    <coops_id>8736897</coops_id>
+    <longname>Coast Guard Sector Mobile</longname>
+    <longitude type="float">-88.0583</longitude>
+    <latitude type="float">30.6483</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.256</MLLW>
+    <MHHW type="float">0.259</MHHW>
+  </station>
+  <station>
+    <name>8737048</name>
+    <coops_id>8737048</coops_id>
+    <longname>Mobile State Docks</longname>
+    <longitude type="float">-88.0396</longitude>
+    <latitude type="float">30.7046</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.250</MLLW>
+    <MHHW type="float">0.253</MHHW>
+  </station>
+  <station>
+    <name>8737138</name>
+    <coops_id>8737138</coops_id>
+    <longname>Chickasaw Creek</longname>
+    <longitude type="float">-88.0736</longitude>
+    <latitude type="float">30.7819</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.262</MLLW>
+    <MHHW type="float">0.262</MHHW>
+  </station>
+  <station>
+    <name>8738043</name>
+    <coops_id>8738043</coops_id>
+    <longname>West Fowl River Bridge</longname>
+    <longitude type="float">-88.1586</longitude>
+    <latitude type="float">30.3766</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.256</MLLW>
+    <MHHW type="float">0.256</MHHW>
+  </station>
+  <station>
+    <name>8739803</name>
+    <coops_id>8739803</coops_id>
+    <longname>Bayou La Batre Bridge</longname>
+    <longitude type="float">-88.2478</longitude>
+    <latitude type="float">30.4062</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.250</MLLW>
+    <MHHW type="float">0.256</MHHW>
+  </station>
+  <station>
+    <name>8740166</name>
+    <coops_id>8740166</coops_id>
+    <longname>Grand Bay NERR, Mississippi Sound</longname>
+    <longitude type="float">-88.4029</longitude>
+    <latitude type="float">30.4132</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.235</MLLW>
+    <MHHW type="float">0.250</MHHW>
+  </station>
+  <station>
+    <name>8741533</name>
+    <coops_id>8741533</coops_id>
+    <longname>Pascagoula NOAA Lab</longname>
+    <longitude type="float">-88.5631</longitude>
+    <latitude type="float">30.3678</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.232</MLLW>
+    <MHHW type="float">0.235</MHHW>
+  </station>
+  <station>
+    <name>8747437</name>
+    <coops_id>8747437</coops_id>
+    <longname>Bay Waveland Yacht Club</longname>
+    <longitude type="float">-89.325</longitude>
+    <latitude type="float">30.325</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.274</MLLW>
+    <MHHW type="float">0.271</MHHW>
+  </station>
+  <station>
+    <name>8760721</name>
+    <coops_id>8760721</coops_id>
+    <longname>Pilottown</longname>
+    <longitude type="float">-89.2583</longitude>
+    <latitude type="float">29.1783</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.119</MLLW>
+    <MHHW type="float">0.125</MHHW>
+  </station>
+  <station>
+    <name>8760922</name>
+    <coops_id>8760922</coops_id>
+    <longname>Pilots Station East, S.W. Pass</longname>
+    <longitude type="float">-89.4075</longitude>
+    <latitude type="float">28.9322</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.180</MLLW>
+    <MHHW type="float">0.177</MHHW>
+  </station>
+  <station>
+    <name>8761305</name>
+    <coops_id>8761305</coops_id>
+    <longname>Shell Beach</longname>
+    <longitude type="float">-89.673</longitude>
+    <latitude type="float">29.8683</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.229</MLLW>
+    <MHHW type="float">0.219</MHHW>
+  </station>
+  <station>
+    <name>8761724</name>
+    <coops_id>8761724</coops_id>
+    <longname>Grand Isle</longname>
+    <longitude type="float">-89.957</longitude>
+    <latitude type="float">29.263</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.165</MLLW>
+    <MHHW type="float">0.158</MHHW>
+  </station>
+  <station>
+    <name>8761927</name>
+    <coops_id>8761927</coops_id>
+    <longname>New Canal Station</longname>
+    <longitude type="float">-90.1133</longitude>
+    <latitude type="float">30.0272</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.082</MLLW>
+    <MHHW type="float">0.082</MHHW>
+  </station>
+  <station>
+    <name>8761955</name>
+    <coops_id>8761955</coops_id>
+    <longname>Carrollton</longname>
+    <longitude type="float">-90.1355</longitude>
+    <latitude type="float">29.9329</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>8762075</name>
+    <coops_id>8762075</coops_id>
+    <longname>Port Fourchon, Belle Pass</longname>
+    <longitude type="float">-90.1993</longitude>
+    <latitude type="float">29.1142</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.192</MLLW>
+    <MHHW type="float">0.177</MHHW>
+  </station>
+  <station>
+    <name>8762482</name>
+    <coops_id>8762482</coops_id>
+    <longname>West Bank 1, Bayou Gauche</longname>
+    <longitude type="float">-90.4203</longitude>
+    <latitude type="float">29.7886</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>8762483</name>
+    <coops_id>8762483</coops_id>
+    <longname>I-10 Bonnet Carre Floodway</longname>
+    <longitude type="float">-90.39</longitude>
+    <latitude type="float">30.0679</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.091</MLLW>
+    <MHHW type="float">0.088</MHHW>
+  </station>
+  <station>
+    <name>8764044</name>
+    <coops_id>8764044</coops_id>
+    <longname>Berwick, Atchafalaya River</longname>
+    <longitude type="float">-91.2376</longitude>
+    <latitude type="float">29.6675</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.088</MLLW>
+    <MHHW type="float">0.073</MHHW>
+  </station>
+  <station>
+    <name>8764227</name>
+    <coops_id>8764227</coops_id>
+    <longname>LAWMA, Amerada Pass</longname>
+    <longitude type="float">-91.3381</longitude>
+    <latitude type="float">29.4496</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.259</MLLW>
+    <MHHW type="float">0.232</MHHW>
+  </station>
+  <station>
+    <name>8764314</name>
+    <coops_id>8764314</coops_id>
+    <longname>Eugene Island, North of , Gulf of Mexico</longname>
+    <longitude type="float">-91.3839</longitude>
+    <latitude type="float">29.3731</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.311</MLLW>
+    <MHHW type="float">0.256</MHHW>
+  </station>
+  <station>
+    <name>8766072</name>
+    <coops_id>8766072</coops_id>
+    <longname>Freshwater Canal Locks</longname>
+    <longitude type="float">-92.3052</longitude>
+    <latitude type="float">29.5517</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.363</MLLW>
+    <MHHW type="float">0.271</MHHW>
+  </station>
+  <station>
+    <name>8767816</name>
+    <coops_id>8767816</coops_id>
+    <longname>Lake Charles</longname>
+    <longitude type="float">-93.2217</longitude>
+    <latitude type="float">30.2236</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.238</MLLW>
+    <MHHW type="float">0.189</MHHW>
+  </station>
+  <station>
+    <name>8767961</name>
+    <coops_id>8767961</coops_id>
+    <longname>Bulk Terminal</longname>
+    <longitude type="float">-93.3008</longitude>
+    <latitude type="float">30.1902</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.229</MLLW>
+    <MHHW type="float">0.180</MHHW>
+  </station>
+  <station>
+    <name>8768094</name>
+    <coops_id>8768094</coops_id>
+    <longname>Calcasieu Pass</longname>
+    <longitude type="float">-93.3429</longitude>
+    <latitude type="float">29.7682</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.341</MLLW>
+    <MHHW type="float">0.210</MHHW>
+  </station>
+  <station>
+    <name>8770475</name>
+    <coops_id>8770475</coops_id>
+    <longname>Port Arthur</longname>
+    <longitude type="float">-93.931</longitude>
+    <latitude type="float">29.8671</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.183</MLLW>
+    <MHHW type="float">0.134</MHHW>
+  </station>
+  <station>
+    <name>8770520</name>
+    <coops_id>8770520</coops_id>
+    <longname>Rainbow Bridge</longname>
+    <longitude type="float">-93.8817</longitude>
+    <latitude type="float">29.98</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.168</MLLW>
+    <MHHW type="float">0.131</MHHW>
+  </station>
+  <station>
+    <name>8770613</name>
+    <coops_id>8770613</coops_id>
+    <longname>Morgans Point, Barbours Cut</longname>
+    <longitude type="float">-94.985</longitude>
+    <latitude type="float">29.6817</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.223</MLLW>
+    <MHHW type="float">0.183</MHHW>
+  </station>
+  <station>
+    <name>8770777</name>
+    <coops_id>8770777</coops_id>
+    <longname>Manchester</longname>
+    <longitude type="float">-95.2658</longitude>
+    <latitude type="float">29.7262</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.271</MLLW>
+    <MHHW type="float">0.223</MHHW>
+  </station>
+  <station>
+    <name>8770808</name>
+    <coops_id>8770808</coops_id>
+    <longname>High Island</longname>
+    <longitude type="float">-94.3903</longitude>
+    <latitude type="float">29.5947</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.226</MLLW>
+    <MHHW type="float">0.177</MHHW>
+  </station>
+  <station>
+    <name>8770822</name>
+    <coops_id>8770822</coops_id>
+    <longname>Texas Point, Sabine Pass</longname>
+    <longitude type="float">-93.8419</longitude>
+    <latitude type="float">29.6894</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.351</MLLW>
+    <MHHW type="float">0.238</MHHW>
+  </station>
+  <station>
+    <name>8770971</name>
+    <coops_id>8770971</coops_id>
+    <longname>Rollover Pass</longname>
+    <longitude type="float">-94.513</longitude>
+    <latitude type="float">29.515</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.226</MLLW>
+    <MHHW type="float">0.186</MHHW>
+  </station>
+  <station>
+    <name>8771013</name>
+    <coops_id>8771013</coops_id>
+    <longname>Eagle Point, Galveston Bay</longname>
+    <longitude type="float">-94.9183</longitude>
+    <latitude type="float">29.48</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.186</MLLW>
+    <MHHW type="float">0.155</MHHW>
+  </station>
+  <station>
+    <name>8771341</name>
+    <coops_id>8771341</coops_id>
+    <longname>Galveston Bay Entrance, North Jetty</longname>
+    <longitude type="float">-94.7248</longitude>
+    <latitude type="float">29.3573</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.296</MLLW>
+    <MHHW type="float">0.213</MHHW>
+  </station>
+  <station>
+    <name>8771450</name>
+    <coops_id>8771450</coops_id>
+    <longname>Galveston Pier 21</longname>
+    <longitude type="float">-94.7933</longitude>
+    <latitude type="float">29.31</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.253</MLLW>
+    <MHHW type="float">0.177</MHHW>
+  </station>
+  <station>
+    <name>8771486</name>
+    <coops_id>8771486</coops_id>
+    <longname>Galveston Railroad Bridge</longname>
+    <longitude type="float">-94.8971</longitude>
+    <latitude type="float">29.3026</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.229</MLLW>
+    <MHHW type="float">0.158</MHHW>
+  </station>
+  <station>
+    <name>8771972</name>
+    <coops_id>8771972</coops_id>
+    <longname>San Luis Pass</longname>
+    <longitude type="float">-95.1133</longitude>
+    <latitude type="float">29.095</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.210</MLLW>
+    <MHHW type="float">0.146</MHHW>
+  </station>
+  <station>
+    <name>8772471</name>
+    <coops_id>8772471</coops_id>
+    <longname>Freeport SPIP, Freeport Harbor</longname>
+    <longitude type="float">-95.2942</longitude>
+    <latitude type="float">28.9357</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.277</MLLW>
+    <MHHW type="float">0.232</MHHW>
+  </station>
+  <station>
+    <name>8772985</name>
+    <coops_id>8772985</coops_id>
+    <longname>Sargent</longname>
+    <longitude type="float">-95.6172</longitude>
+    <latitude type="float">28.7714</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.119</MLLW>
+    <MHHW type="float">0.091</MHHW>
+  </station>
+  <station>
+    <name>8773037</name>
+    <coops_id>8773037</coops_id>
+    <longname>Seadrift</longname>
+    <longitude type="float">-96.7124</longitude>
+    <latitude type="float">28.4069</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.058</MLLW>
+    <MHHW type="float">0.049</MHHW>
+  </station>
+  <station>
+    <name>8773146</name>
+    <coops_id>8773146</coops_id>
+    <longname>Matagorda City</longname>
+    <longitude type="float">-95.914</longitude>
+    <latitude type="float">28.7101</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.082</MLLW>
+    <MHHW type="float">0.061</MHHW>
+  </station>
+  <station>
+    <name>8773259</name>
+    <coops_id>8773259</coops_id>
+    <longname>Port Lavaca</longname>
+    <longitude type="float">-96.6098</longitude>
+    <latitude type="float">28.6406</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.149</MLLW>
+    <MHHW type="float">0.125</MHHW>
+  </station>
+  <station>
+    <name>8773701</name>
+    <coops_id>8773701</coops_id>
+    <longname>Port O'Connor</longname>
+    <longitude type="float">-96.3956</longitude>
+    <latitude type="float">28.4459</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.122</MLLW>
+    <MHHW type="float">0.098</MHHW>
+  </station>
+  <station>
+    <name>8773767</name>
+    <coops_id>8773767</coops_id>
+    <longname>Matagorda Bay Entrance Channel</longname>
+    <longitude type="float">-96.3301</longitude>
+    <latitude type="float">28.4269</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.226</MLLW>
+    <MHHW type="float">0.152</MHHW>
+  </station>
+  <station>
+    <name>8774230</name>
+    <coops_id>8774230</coops_id>
+    <longname>Aransas Wildlife Refuge</longname>
+    <longitude type="float">-96.795</longitude>
+    <latitude type="float">28.2283</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.052</MLLW>
+    <MHHW type="float">0.049</MHHW>
+  </station>
+  <station>
+    <name>8774770</name>
+    <coops_id>8774770</coops_id>
+    <longname>Rockport</longname>
+    <longitude type="float">-97.0467</longitude>
+    <latitude type="float">28.0217</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.058</MLLW>
+    <MHHW type="float">0.055</MHHW>
+  </station>
+  <station>
+    <name>8775222</name>
+    <coops_id>8775222</coops_id>
+    <longname>Viola Turning Basin</longname>
+    <longitude type="float">-97.5208</longitude>
+    <latitude type="float">27.8461</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.119</MLLW>
+    <MHHW type="float">0.085</MHHW>
+  </station>
+  <station>
+    <name>8775237</name>
+    <coops_id>8775237</coops_id>
+    <longname>Port Aransas</longname>
+    <longitude type="float">-97.0725</longitude>
+    <latitude type="float">27.8397</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.198</MLLW>
+    <MHHW type="float">0.119</MHHW>
+  </station>
+  <station>
+    <name>8775241</name>
+    <coops_id>8775241</coops_id>
+    <longname>Aransas, Aransas Pass</longname>
+    <longitude type="float">-97.0391</longitude>
+    <latitude type="float">27.8366</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.253</MLLW>
+    <MHHW type="float">0.165</MHHW>
+  </station>
+  <station>
+    <name>8775244</name>
+    <coops_id>8775244</coops_id>
+    <longname>Nueces Bay</longname>
+    <longitude type="float">-97.4859</longitude>
+    <latitude type="float">27.8328</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.110</MLLW>
+    <MHHW type="float">0.094</MHHW>
+  </station>
+  <station>
+    <name>8775283</name>
+    <coops_id>8775283</coops_id>
+    <longname>MODA</longname>
+    <longitude type="float">-97.2089</longitude>
+    <latitude type="float">27.8186</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.122</MLLW>
+    <MHHW type="float">0.094</MHHW>
+  </station>
+  <station>
+    <name>8775296</name>
+    <coops_id>8775296</coops_id>
+    <longname>USS Lexington, Corpus Christi Bay</longname>
+    <longitude type="float">-97.39</longitude>
+    <latitude type="float">27.8117</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.104</MLLW>
+    <MHHW type="float">0.079</MHHW>
+  </station>
+  <station>
+    <name>8775792</name>
+    <coops_id>8775792</coops_id>
+    <longname>Packery Channel</longname>
+    <longitude type="float">-97.2367</longitude>
+    <latitude type="float">27.6333</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.067</MLLW>
+    <MHHW type="float">0.061</MHHW>
+  </station>
+  <station>
+    <name>8775870</name>
+    <coops_id>8775870</coops_id>
+    <longname>Bob Hall Pier, Corpus Christi</longname>
+    <longitude type="float">-97.2164</longitude>
+    <latitude type="float">27.5808</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.283</MLLW>
+    <MHHW type="float">0.213</MHHW>
+  </station>
+  <station>
+    <name>8776139</name>
+    <coops_id>8776139</coops_id>
+    <longname>S. Bird Island</longname>
+    <longitude type="float">-97.3181</longitude>
+    <latitude type="float">27.4844</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>8776604</name>
+    <coops_id>8776604</coops_id>
+    <longname>Baffin Bay</longname>
+    <longitude type="float">-97.4052</longitude>
+    <latitude type="float">27.297</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>8777812</name>
+    <coops_id>8777812</coops_id>
+    <longname>Rincon Del San Jose</longname>
+    <longitude type="float">-97.4706</longitude>
+    <latitude type="float">26.8012</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>8778490</name>
+    <coops_id>8778490</coops_id>
+    <longname>Port Mansfield</longname>
+    <longitude type="float">-97.4257</longitude>
+    <latitude type="float">26.5576</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>8779280</name>
+    <coops_id>8779280</coops_id>
+    <longname>Realitos Peninsula</longname>
+    <longitude type="float">-97.2853</longitude>
+    <latitude type="float">26.2625</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.094</MLLW>
+    <MHHW type="float">0.076</MHHW>
+  </station>
+  <station>
+    <name>8779748</name>
+    <coops_id>8779748</coops_id>
+    <longname>South Padre Island CG Station</longname>
+    <longitude type="float">-97.1669</longitude>
+    <latitude type="float">26.0725</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.247</MLLW>
+    <MHHW type="float">0.171</MHHW>
+  </station>
+  <station>
+    <name>8779749</name>
+    <coops_id>8779749</coops_id>
+    <longname>SPI Brazos Santiago</longname>
+    <longitude type="float">-97.1547</longitude>
+    <latitude type="float">26.0675</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.265</MLLW>
+    <MHHW type="float">0.183</MHHW>
+  </station>
+  <station>
+    <name>8779770</name>
+    <coops_id>8779770</coops_id>
+    <longname>Port Isabel</longname>
+    <longitude type="float">-97.2155</longitude>
+    <latitude type="float">26.0612</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.247</MLLW>
+    <MHHW type="float">0.171</MHHW>
+  </station>
+  <station>
+    <name>9014070</name>
+    <coops_id>9014070</coops_id>
+    <longname>Algonac</longname>
+    <longitude type="float">-82.5267</longitude>
+    <latitude type="float">42.6211</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9014080</name>
+    <coops_id>9014080</coops_id>
+    <longname>St. Clair State Police</longname>
+    <longitude type="float">-82.4856</longitude>
+    <latitude type="float">42.8122</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9014087</name>
+    <coops_id>9014087</coops_id>
+    <longname>Dry Dock</longname>
+    <longitude type="float">-82.4433</longitude>
+    <latitude type="float">42.9453</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9014090</name>
+    <coops_id>9014090</coops_id>
+    <longname>Mouth of the Black River</longname>
+    <longitude type="float">-82.4189</longitude>
+    <latitude type="float">42.9747</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9014096</name>
+    <coops_id>9014096</coops_id>
+    <longname>Dunn Paper</longname>
+    <longitude type="float">-82.4217</longitude>
+    <latitude type="float">43.0033</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9014098</name>
+    <coops_id>9014098</coops_id>
+    <longname>Fort Gratiot</longname>
+    <longitude type="float">-82.4225</longitude>
+    <latitude type="float">43.0069</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9034052</name>
+    <coops_id>9034052</coops_id>
+    <longname>St Clair Shores</longname>
+    <longitude type="float">-82.8792</longitude>
+    <latitude type="float">42.4732</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9044020</name>
+    <coops_id>9044020</coops_id>
+    <longname>Gibraltar</longname>
+    <longitude type="float">-83.1867</longitude>
+    <latitude type="float">42.0917</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9044030</name>
+    <coops_id>9044030</coops_id>
+    <longname>Wyandotte</longname>
+    <longitude type="float">-83.1475</longitude>
+    <latitude type="float">42.2023</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9044036</name>
+    <coops_id>9044036</coops_id>
+    <longname>Fort Wayne</longname>
+    <longitude type="float">-83.0933</longitude>
+    <latitude type="float">42.2983</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9044049</name>
+    <coops_id>9044049</coops_id>
+    <longname>Windmill Point</longname>
+    <longitude type="float">-82.93</longitude>
+    <latitude type="float">42.3575</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9052000</name>
+    <coops_id>9052000</coops_id>
+    <longname>Cape Vincent</longname>
+    <longitude type="float">-76.332</longitude>
+    <latitude type="float">44.1303</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9052030</name>
+    <coops_id>9052030</coops_id>
+    <longname>Oswego</longname>
+    <longitude type="float">-76.5118</longitude>
+    <latitude type="float">43.4642</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9052058</name>
+    <coops_id>9052058</coops_id>
+    <longname>Rochester</longname>
+    <longitude type="float">-77.6257</longitude>
+    <latitude type="float">43.269</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9052076</name>
+    <coops_id>9052076</coops_id>
+    <longname>Olcott</longname>
+    <longitude type="float">-78.7273</longitude>
+    <latitude type="float">43.3384</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9063007</name>
+    <coops_id>9063007</coops_id>
+    <longname>Ashland Ave</longname>
+    <longitude type="float">-79.0599</longitude>
+    <latitude type="float">43.1</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9063009</name>
+    <coops_id>9063009</coops_id>
+    <longname>American Falls</longname>
+    <longitude type="float">-79.0614</longitude>
+    <latitude type="float">43.0811</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9063012</name>
+    <coops_id>9063012</coops_id>
+    <longname>Niagara Intake</longname>
+    <longitude type="float">-79.0139</longitude>
+    <latitude type="float">43.0769</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9063020</name>
+    <coops_id>9063020</coops_id>
+    <longname>Buffalo</longname>
+    <longitude type="float">-78.8905</longitude>
+    <latitude type="float">42.8774</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9063028</name>
+    <coops_id>9063028</coops_id>
+    <longname>Sturgeon Point</longname>
+    <longitude type="float">-79.0473</longitude>
+    <latitude type="float">42.6913</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9063038</name>
+    <coops_id>9063038</coops_id>
+    <longname>Erie, Lake Erie</longname>
+    <longitude type="float">-80.0758</longitude>
+    <latitude type="float">42.1539</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9063053</name>
+    <coops_id>9063053</coops_id>
+    <longname>Fairport</longname>
+    <longitude type="float">-81.2811</longitude>
+    <latitude type="float">41.7597</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9063063</name>
+    <coops_id>9063063</coops_id>
+    <longname>Cleveland</longname>
+    <longitude type="float">-81.6355</longitude>
+    <latitude type="float">41.5409</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9063079</name>
+    <coops_id>9063079</coops_id>
+    <longname>Marblehead</longname>
+    <longitude type="float">-82.7314</longitude>
+    <latitude type="float">41.5436</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9063085</name>
+    <coops_id>9063085</coops_id>
+    <longname>Toledo</longname>
+    <longitude type="float">-83.4723</longitude>
+    <latitude type="float">41.6936</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9063090</name>
+    <coops_id>9063090</coops_id>
+    <longname>Fermi Power Plant</longname>
+    <longitude type="float">-83.257</longitude>
+    <latitude type="float">41.96</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9075002</name>
+    <coops_id>9075002</coops_id>
+    <longname>Lakeport</longname>
+    <longitude type="float">-82.4933</longitude>
+    <latitude type="float">43.1417</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9075014</name>
+    <coops_id>9075014</coops_id>
+    <longname>Harbor Beach</longname>
+    <longitude type="float">-82.6431</longitude>
+    <latitude type="float">43.8464</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9075035</name>
+    <coops_id>9075035</coops_id>
+    <longname>Essexville</longname>
+    <longitude type="float">-83.8468</longitude>
+    <latitude type="float">43.6404</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9075065</name>
+    <coops_id>9075065</coops_id>
+    <longname>Alpena</longname>
+    <longitude type="float">-83.4286</longitude>
+    <latitude type="float">45.063</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9075080</name>
+    <coops_id>9075080</coops_id>
+    <longname>Mackinaw City</longname>
+    <longitude type="float">-84.7211</longitude>
+    <latitude type="float">45.8</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9075099</name>
+    <coops_id>9075099</coops_id>
+    <longname>De Tour Village</longname>
+    <longitude type="float">-83.8982</longitude>
+    <latitude type="float">45.9925</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9076024</name>
+    <coops_id>9076024</coops_id>
+    <longname>Rock Cut</longname>
+    <longitude type="float">-84.1912</longitude>
+    <latitude type="float">46.2648</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9076027</name>
+    <coops_id>9076027</coops_id>
+    <longname>West Neebish Island</longname>
+    <longitude type="float">-84.205</longitude>
+    <latitude type="float">46.2833</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9076033</name>
+    <coops_id>9076033</coops_id>
+    <longname>Little Rapids</longname>
+    <longitude type="float">-84.3017</longitude>
+    <latitude type="float">46.4858</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9076060</name>
+    <coops_id>9076060</coops_id>
+    <longname>U.S. Slip</longname>
+    <longitude type="float">-84.3404</longitude>
+    <latitude type="float">46.5008</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9076070</name>
+    <coops_id>9076070</coops_id>
+    <longname>S.W. Pier, St. Marys River</longname>
+    <longitude type="float">-84.3726</longitude>
+    <latitude type="float">46.5011</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9087023</name>
+    <coops_id>9087023</coops_id>
+    <longname>Ludington</longname>
+    <longitude type="float">-86.4416</longitude>
+    <latitude type="float">43.9474</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9087031</name>
+    <coops_id>9087031</coops_id>
+    <longname>Holland</longname>
+    <longitude type="float">-86.2128</longitude>
+    <latitude type="float">42.7733</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9087044</name>
+    <coops_id>9087044</coops_id>
+    <longname>Calumet Harbor</longname>
+    <longitude type="float">-87.5383</longitude>
+    <latitude type="float">41.7297</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9087057</name>
+    <coops_id>9087057</coops_id>
+    <longname>Milwaukee</longname>
+    <longitude type="float">-87.8876</longitude>
+    <latitude type="float">43.002</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9087068</name>
+    <coops_id>9087068</coops_id>
+    <longname>Kewaunee, Lake Michigan</longname>
+    <longitude type="float">-87.501</longitude>
+    <latitude type="float">44.464</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9087072</name>
+    <coops_id>9087072</coops_id>
+    <longname>Sturgeon Bay Canal</longname>
+    <longitude type="float">-87.3143</longitude>
+    <latitude type="float">44.7956</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9087077</name>
+    <coops_id>9087077</coops_id>
+    <longname>Green Bay East</longname>
+    <longitude type="float">-88.0011</longitude>
+    <latitude type="float">44.539</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9087088</name>
+    <coops_id>9087088</coops_id>
+    <longname>Menominee</longname>
+    <longitude type="float">-87.5899</longitude>
+    <latitude type="float">45.0959</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9087096</name>
+    <coops_id>9087096</coops_id>
+    <longname>Port Inland</longname>
+    <longitude type="float">-85.8715</longitude>
+    <latitude type="float">45.9699</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9099004</name>
+    <coops_id>9099004</coops_id>
+    <longname>Point Iroquois</longname>
+    <longitude type="float">-84.6309</longitude>
+    <latitude type="float">46.4845</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9099018</name>
+    <coops_id>9099018</coops_id>
+    <longname>Marquette C.G.</longname>
+    <longitude type="float">-87.3786</longitude>
+    <latitude type="float">46.5456</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9099044</name>
+    <coops_id>9099044</coops_id>
+    <longname>Ontonagon</longname>
+    <longitude type="float">-89.3242</longitude>
+    <latitude type="float">46.8744</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9099064</name>
+    <coops_id>9099064</coops_id>
+    <longname>Duluth</longname>
+    <longitude type="float">-92.092</longitude>
+    <latitude type="float">46.7758</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9099090</name>
+    <coops_id>9099090</coops_id>
+    <longname>Grand Marais, Lake Superior</longname>
+    <longitude type="float">-90.3413</longitude>
+    <latitude type="float">47.7486</latitude>
+    <type>tide_gauge</type>
+  </station>
+  <station>
+    <name>9410170</name>
+    <coops_id>9410170</coops_id>
+    <longname>San Diego, San Diego Bay</longname>
+    <longitude type="float">-117.1736</longitude>
+    <latitude type="float">32.7142</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.896</MLLW>
+    <MHHW type="float">0.847</MHHW>
+  </station>
+  <station>
+    <name>9410230</name>
+    <coops_id>9410230</coops_id>
+    <longname>La Jolla</longname>
+    <longitude type="float">-117.2571</longitude>
+    <latitude type="float">32.8669</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.832</MLLW>
+    <MHHW type="float">0.789</MHHW>
+  </station>
+  <station>
+    <name>9410660</name>
+    <coops_id>9410660</coops_id>
+    <longname>Los Angeles</longname>
+    <longitude type="float">-118.2729</longitude>
+    <latitude type="float">33.7199</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.860</MLLW>
+    <MHHW type="float">0.814</MHHW>
+  </station>
+  <station>
+    <name>9410840</name>
+    <coops_id>9410840</coops_id>
+    <longname>Santa Monica</longname>
+    <longitude type="float">-118.5</longitude>
+    <latitude type="float">34.0083</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.850</MLLW>
+    <MHHW type="float">0.805</MHHW>
+  </station>
+  <station>
+    <name>9411340</name>
+    <coops_id>9411340</coops_id>
+    <longname>Santa Barbara</longname>
+    <longitude type="float">-119.6928</longitude>
+    <latitude type="float">34.4031</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.847</MLLW>
+    <MHHW type="float">0.796</MHHW>
+  </station>
+  <station>
+    <name>9411406</name>
+    <coops_id>9411406</coops_id>
+    <longname>Oil Platform Harvest</longname>
+    <longitude type="float">-120.6819</longitude>
+    <latitude type="float">34.4692</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.829</MLLW>
+    <MHHW type="float">0.762</MHHW>
+  </station>
+  <station>
+    <name>9412110</name>
+    <coops_id>9412110</coops_id>
+    <longname>Port San Luis</longname>
+    <longitude type="float">-120.7542</longitude>
+    <latitude type="float">35.1688</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.853</MLLW>
+    <MHHW type="float">0.771</MHHW>
+  </station>
+  <station>
+    <name>9413450</name>
+    <coops_id>9413450</coops_id>
+    <longname>Monterey</longname>
+    <longitude type="float">-121.8881</longitude>
+    <latitude type="float">36.605</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.863</MLLW>
+    <MHHW type="float">0.765</MHHW>
+  </station>
+  <station>
+    <name>9414290</name>
+    <coops_id>9414290</coops_id>
+    <longname>San Francisco</longname>
+    <longitude type="float">-122.4659</longitude>
+    <latitude type="float">37.8063</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.951</MLLW>
+    <MHHW type="float">0.829</MHHW>
+  </station>
+  <station>
+    <name>9414523</name>
+    <coops_id>9414523</coops_id>
+    <longname>Redwood City</longname>
+    <longitude type="float">-122.21</longitude>
+    <latitude type="float">37.5067</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.341</MLLW>
+    <MHHW type="float">1.158</MHHW>
+  </station>
+  <station>
+    <name>9414750</name>
+    <coops_id>9414750</coops_id>
+    <longname>Alameda</longname>
+    <longitude type="float">-122.3</longitude>
+    <latitude type="float">37.7717</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.052</MLLW>
+    <MHHW type="float">0.960</MHHW>
+  </station>
+  <station>
+    <name>9414863</name>
+    <coops_id>9414863</coops_id>
+    <longname>Richmond</longname>
+    <longitude type="float">-122.4096</longitude>
+    <latitude type="float">37.923</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.991</MLLW>
+    <MHHW type="float">0.850</MHHW>
+  </station>
+  <station>
+    <name>9415020</name>
+    <coops_id>9415020</coops_id>
+    <longname>Point Reyes</longname>
+    <longitude type="float">-122.9736</longitude>
+    <latitude type="float">37.9942</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.945</MLLW>
+    <MHHW type="float">0.811</MHHW>
+  </station>
+  <station>
+    <name>9415102</name>
+    <coops_id>9415102</coops_id>
+    <longname>Martinez-Amorco Pier</longname>
+    <longitude type="float">-122.1252</longitude>
+    <latitude type="float">38.0346</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.872</MLLW>
+    <MHHW type="float">0.762</MHHW>
+  </station>
+  <station>
+    <name>9415144</name>
+    <coops_id>9415144</coops_id>
+    <longname>Port Chicago</longname>
+    <longitude type="float">-122.0395</longitude>
+    <latitude type="float">38.056</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.780</MLLW>
+    <MHHW type="float">0.716</MHHW>
+  </station>
+  <station>
+    <name>9416841</name>
+    <coops_id>9416841</coops_id>
+    <longname>Arena Cove</longname>
+    <longitude type="float">-123.7111</longitude>
+    <latitude type="float">38.9146</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.957</MLLW>
+    <MHHW type="float">0.832</MHHW>
+  </station>
+  <station>
+    <name>9418767</name>
+    <coops_id>9418767</coops_id>
+    <longname>North Spit</longname>
+    <longitude type="float">-124.2172</longitude>
+    <latitude type="float">40.7663</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.128</MLLW>
+    <MHHW type="float">0.960</MHHW>
+  </station>
+  <station>
+    <name>9419750</name>
+    <coops_id>9419750</coops_id>
+    <longname>Crescent City</longname>
+    <longitude type="float">-124.1844</longitude>
+    <latitude type="float">41.7456</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.128</MLLW>
+    <MHHW type="float">0.966</MHHW>
+  </station>
+  <station>
+    <name>9431647</name>
+    <coops_id>9431647</coops_id>
+    <longname>Port Orford</longname>
+    <longitude type="float">-124.4983</longitude>
+    <latitude type="float">42.739</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.198</MLLW>
+    <MHHW type="float">1.021</MHHW>
+  </station>
+  <station>
+    <name>9432780</name>
+    <coops_id>9432780</coops_id>
+    <longname>Charleston</longname>
+    <longitude type="float">-124.322</longitude>
+    <latitude type="float">43.345</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.244</MLLW>
+    <MHHW type="float">1.079</MHHW>
+  </station>
+  <station>
+    <name>9435380</name>
+    <coops_id>9435380</coops_id>
+    <longname>South Beach</longname>
+    <longitude type="float">-124.0449</longitude>
+    <latitude type="float">44.6254</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.356</MLLW>
+    <MHHW type="float">1.186</MHHW>
+  </station>
+  <station>
+    <name>9437540</name>
+    <coops_id>9437540</coops_id>
+    <longname>Garibaldi</longname>
+    <longitude type="float">-123.9189</longitude>
+    <latitude type="float">45.5545</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.372</MLLW>
+    <MHHW type="float">1.164</MHHW>
+  </station>
+  <station>
+    <name>9439040</name>
+    <coops_id>9439040</coops_id>
+    <longname>Astoria</longname>
+    <longitude type="float">-123.7683</longitude>
+    <latitude type="float">46.2073</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.375</MLLW>
+    <MHHW type="float">1.250</MHHW>
+  </station>
+  <station>
+    <name>9439099</name>
+    <coops_id>9439099</coops_id>
+    <longname>Wauna</longname>
+    <longitude type="float">-123.4089</longitude>
+    <latitude type="float">46.1617</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.036</MLLW>
+    <MHHW type="float">1.094</MHHW>
+  </station>
+  <station>
+    <name>9439201</name>
+    <coops_id>9439201</coops_id>
+    <longname>St Helens</longname>
+    <longitude type="float">-122.7962</longitude>
+    <latitude type="float">45.8633</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.454</MLLW>
+    <MHHW type="float">0.530</MHHW>
+  </station>
+  <station>
+    <name>9440083</name>
+    <coops_id>9440083</coops_id>
+    <longname>Vancouver</longname>
+    <longitude type="float">-122.697</longitude>
+    <latitude type="float">45.6317</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.411</MLLW>
+    <MHHW type="float">0.561</MHHW>
+  </station>
+  <station>
+    <name>9440422</name>
+    <coops_id>9440422</coops_id>
+    <longname>Longview</longname>
+    <longitude type="float">-122.9542</longitude>
+    <latitude type="float">46.1061</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.625</MLLW>
+    <MHHW type="float">0.762</MHHW>
+  </station>
+  <station>
+    <name>9440569</name>
+    <coops_id>9440569</coops_id>
+    <longname>Skamokawa</longname>
+    <longitude type="float">-123.4565</longitude>
+    <latitude type="float">46.2703</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.137</MLLW>
+    <MHHW type="float">1.146</MHHW>
+  </station>
+  <station>
+    <name>9440581</name>
+    <coops_id>9440581</coops_id>
+    <longname>Cape Disappointment</longname>
+    <longitude type="float">-124.0463</longitude>
+    <latitude type="float">46.281</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.311</MLLW>
+    <MHHW type="float">1.149</MHHW>
+  </station>
+  <station>
+    <name>9440910</name>
+    <coops_id>9440910</coops_id>
+    <longname>Toke Point</longname>
+    <longitude type="float">-123.9669</longitude>
+    <latitude type="float">46.7075</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.457</MLLW>
+    <MHHW type="float">1.262</MHHW>
+  </station>
+  <station>
+    <name>9441102</name>
+    <coops_id>9441102</coops_id>
+    <longname>Westport</longname>
+    <longitude type="float">-124.1051</longitude>
+    <latitude type="float">46.9043</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.484</MLLW>
+    <MHHW type="float">1.301</MHHW>
+  </station>
+  <station>
+    <name>9442396</name>
+    <coops_id>9442396</coops_id>
+    <longname>La Push, Quillayute River</longname>
+    <longitude type="float">-124.6369</longitude>
+    <latitude type="float">47.913</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.396</MLLW>
+    <MHHW type="float">1.201</MHHW>
+  </station>
+  <station>
+    <name>9443090</name>
+    <coops_id>9443090</coops_id>
+    <longname>Neah Bay</longname>
+    <longitude type="float">-124.6019</longitude>
+    <latitude type="float">48.3703</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.317</MLLW>
+    <MHHW type="float">1.109</MHHW>
+  </station>
+  <station>
+    <name>9444090</name>
+    <coops_id>9444090</coops_id>
+    <longname>Port Angeles</longname>
+    <longitude type="float">-123.44</longitude>
+    <latitude type="float">48.125</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.292</MLLW>
+    <MHHW type="float">0.860</MHHW>
+  </station>
+  <station>
+    <name>9444900</name>
+    <coops_id>9444900</coops_id>
+    <longname>Port Townsend</longname>
+    <longitude type="float">-122.7595</longitude>
+    <latitude type="float">48.1129</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.524</MLLW>
+    <MHHW type="float">1.073</MHHW>
+  </station>
+  <station>
+    <name>9446484</name>
+    <coops_id>9446484</coops_id>
+    <longname>Tacoma</longname>
+    <longitude type="float">-122.413</longitude>
+    <latitude type="float">47.27</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-2.085</MLLW>
+    <MHHW type="float">1.506</MHHW>
+  </station>
+  <station>
+    <name>9447130</name>
+    <coops_id>9447130</coops_id>
+    <longname>Seattle</longname>
+    <longitude type="float">-122.3392</longitude>
+    <latitude type="float">47.6019</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-2.024</MLLW>
+    <MHHW type="float">1.439</MHHW>
+  </station>
+  <station>
+    <name>9449424</name>
+    <coops_id>9449424</coops_id>
+    <longname>Cherry Point</longname>
+    <longitude type="float">-122.758</longitude>
+    <latitude type="float">48.8633</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.609</MLLW>
+    <MHHW type="float">1.180</MHHW>
+  </station>
+  <station>
+    <name>9449880</name>
+    <coops_id>9449880</coops_id>
+    <longname>Friday Harbor</longname>
+    <longitude type="float">-123.0129</longitude>
+    <latitude type="float">48.5453</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.387</MLLW>
+    <MHHW type="float">0.978</MHHW>
+  </station>
+  <station>
+    <name>9450460</name>
+    <coops_id>9450460</coops_id>
+    <longname>Ketchikan</longname>
+    <longitude type="float">-131.6261</longitude>
+    <latitude type="float">55.3319</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-2.460</MLLW>
+    <MHHW type="float">2.249</MHHW>
+  </station>
+  <station>
+    <name>9451054</name>
+    <coops_id>9451054</coops_id>
+    <longname>Port Alexander</longname>
+    <longitude type="float">-134.6477</longitude>
+    <latitude type="float">56.2466</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.747</MLLW>
+    <MHHW type="float">1.585</MHHW>
+  </station>
+  <station>
+    <name>9451600</name>
+    <coops_id>9451600</coops_id>
+    <longname>Sitka</longname>
+    <longitude type="float">-135.342</longitude>
+    <latitude type="float">57.0517</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.612</MLLW>
+    <MHHW type="float">1.417</MHHW>
+  </station>
+  <station>
+    <name>9452210</name>
+    <coops_id>9452210</coops_id>
+    <longname>Juneau</longname>
+    <longitude type="float">-134.4106</longitude>
+    <latitude type="float">58.2988</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-2.615</MLLW>
+    <MHHW type="float">2.353</MHHW>
+  </station>
+  <station>
+    <name>9452400</name>
+    <coops_id>9452400</coops_id>
+    <longname>Skagway, Taiya Inlet</longname>
+    <longitude type="float">-135.328</longitude>
+    <latitude type="float">59.4508</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-2.691</MLLW>
+    <MHHW type="float">2.408</MHHW>
+  </station>
+  <station>
+    <name>9452634</name>
+    <coops_id>9452634</coops_id>
+    <longname>Elfin Cove</longname>
+    <longitude type="float">-136.3469</longitude>
+    <latitude type="float">58.1947</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.747</MLLW>
+    <MHHW type="float">1.606</MHHW>
+  </station>
+  <station>
+    <name>9453220</name>
+    <coops_id>9453220</coops_id>
+    <longname>Yakutat, Yakutat Bay</longname>
+    <longitude type="float">-139.7331</longitude>
+    <latitude type="float">59.5483</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.615</MLLW>
+    <MHHW type="float">1.457</MHHW>
+  </station>
+  <station>
+    <name>9454050</name>
+    <coops_id>9454050</coops_id>
+    <longname>Cordova</longname>
+    <longitude type="float">-145.755</longitude>
+    <latitude type="float">60.5583</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-2.054</MLLW>
+    <MHHW type="float">1.783</MHHW>
+  </station>
+  <station>
+    <name>9454240</name>
+    <coops_id>9454240</coops_id>
+    <longname>Valdez</longname>
+    <longitude type="float">-146.3631</longitude>
+    <latitude type="float">61.1242</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.981</MLLW>
+    <MHHW type="float">1.722</MHHW>
+  </station>
+  <station>
+    <name>9455090</name>
+    <coops_id>9455090</coops_id>
+    <longname>Seward</longname>
+    <longitude type="float">-149.4267</longitude>
+    <latitude type="float">60.12</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.695</MLLW>
+    <MHHW type="float">1.545</MHHW>
+  </station>
+  <station>
+    <name>9455500</name>
+    <coops_id>9455500</coops_id>
+    <longname>Seldovia</longname>
+    <longitude type="float">-151.7199</longitude>
+    <latitude type="float">59.4405</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-2.914</MLLW>
+    <MHHW type="float">2.588</MHHW>
+  </station>
+  <station>
+    <name>9455760</name>
+    <coops_id>9455760</coops_id>
+    <longname>Nikiski</longname>
+    <longitude type="float">-151.3981</longitude>
+    <latitude type="float">60.6833</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-3.441</MLLW>
+    <MHHW type="float">2.819</MHHW>
+  </station>
+  <station>
+    <name>9455920</name>
+    <coops_id>9455920</coops_id>
+    <longname>Anchorage</longname>
+    <longitude type="float">-149.8904</longitude>
+    <latitude type="float">61.2375</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-5.020</MLLW>
+    <MHHW type="float">3.868</MHHW>
+  </station>
+  <station>
+    <name>9457292</name>
+    <coops_id>9457292</coops_id>
+    <longname>Kodiak Island</longname>
+    <longitude type="float">-152.5139</longitude>
+    <latitude type="float">57.7303</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.372</MLLW>
+    <MHHW type="float">1.301</MHHW>
+  </station>
+  <station>
+    <name>9457804</name>
+    <coops_id>9457804</coops_id>
+    <longname>Alitak</longname>
+    <longitude type="float">-154.248</longitude>
+    <latitude type="float">56.8974</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.881</MLLW>
+    <MHHW type="float">1.695</MHHW>
+  </station>
+  <station>
+    <name>9459450</name>
+    <coops_id>9459450</coops_id>
+    <longname>Sand Point</longname>
+    <longitude type="float">-160.5043</longitude>
+    <latitude type="float">55.3317</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.183</MLLW>
+    <MHHW type="float">1.024</MHHW>
+  </station>
+  <station>
+    <name>9459881</name>
+    <coops_id>9459881</coops_id>
+    <longname>King Cove</longname>
+    <longitude type="float">-162.3261</longitude>
+    <latitude type="float">55.0599</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.122</MLLW>
+    <MHHW type="float">0.957</MHHW>
+  </station>
+  <station>
+    <name>9461380</name>
+    <coops_id>9461380</coops_id>
+    <longname>Adak Island</longname>
+    <longitude type="float">-176.632</longitude>
+    <latitude type="float">51.8633</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.649</MLLW>
+    <MHHW type="float">0.482</MHHW>
+  </station>
+  <station>
+    <name>9461710</name>
+    <coops_id>9461710</coops_id>
+    <longname>Atka</longname>
+    <longitude type="float">-174.1725</longitude>
+    <latitude type="float">52.2319</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.600</MLLW>
+    <MHHW type="float">0.442</MHHW>
+  </station>
+  <station>
+    <name>9462450</name>
+    <coops_id>9462450</coops_id>
+    <longname>Nikolski</longname>
+    <longitude type="float">-168.8713</longitude>
+    <latitude type="float">52.9406</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.701</MLLW>
+    <MHHW type="float">0.518</MHHW>
+  </station>
+  <station>
+    <name>9462620</name>
+    <coops_id>9462620</coops_id>
+    <longname>Unalaska</longname>
+    <longitude type="float">-166.5403</longitude>
+    <latitude type="float">53.8792</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.634</MLLW>
+    <MHHW type="float">0.463</MHHW>
+  </station>
+  <station>
+    <name>9463502</name>
+    <coops_id>9463502</coops_id>
+    <longname>Port Moller</longname>
+    <longitude type="float">-160.5736</longitude>
+    <latitude type="float">55.9858</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-1.783</MLLW>
+    <MHHW type="float">1.411</MHHW>
+  </station>
+  <station>
+    <name>9464212</name>
+    <coops_id>9464212</coops_id>
+    <longname>Village Cove, St Paul Island</longname>
+    <longitude type="float">-170.2853</longitude>
+    <latitude type="float">57.1253</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.573</MLLW>
+    <MHHW type="float">0.415</MHHW>
+  </station>
+  <station>
+    <name>9468333</name>
+    <coops_id>9468333</coops_id>
+    <longname>Unalakleet</longname>
+    <longitude type="float">-160.7843</longitude>
+    <latitude type="float">63.8714</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.472</MLLW>
+    <MHHW type="float">0.579</MHHW>
+  </station>
+  <station>
+    <name>9468756</name>
+    <coops_id>9468756</coops_id>
+    <longname>Nome, Norton Sound</longname>
+    <longitude type="float">-165.4396</longitude>
+    <latitude type="float">64.4946</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.250</MLLW>
+    <MHHW type="float">0.216</MHHW>
+  </station>
+  <station>
+    <name>9491094</name>
+    <coops_id>9491094</coops_id>
+    <longname>Red Dog Dock</longname>
+    <longitude type="float">-164.0644</longitude>
+    <latitude type="float">67.5758</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.149</MLLW>
+    <MHHW type="float">0.155</MHHW>
+  </station>
+  <station>
+    <name>9497645</name>
+    <coops_id>9497645</coops_id>
+    <longname>Prudhoe Bay</longname>
+    <longitude type="float">-148.5317</longitude>
+    <latitude type="float">70.4114</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.104</MLLW>
+    <MHHW type="float">0.110</MHHW>
+  </station>
+  <station>
+    <name>9751364</name>
+    <coops_id>9751364</coops_id>
+    <longname>Christiansted Harbor, St Croix</longname>
+    <longitude type="float">-64.6984</longitude>
+    <latitude type="float">17.7477</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.116</MLLW>
+    <MHHW type="float">0.113</MHHW>
+  </station>
+  <station>
+    <name>9751381</name>
+    <coops_id>9751381</coops_id>
+    <longname>Lameshur Bay, St John</longname>
+    <longitude type="float">-64.7242</longitude>
+    <latitude type="float">18.3182</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.122</MLLW>
+    <MHHW type="float">0.131</MHHW>
+  </station>
+  <station>
+    <name>9751401</name>
+    <coops_id>9751401</coops_id>
+    <longname>Lime Tree Bay</longname>
+    <longitude type="float">-64.7538</longitude>
+    <latitude type="float">17.6947</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.113</MLLW>
+    <MHHW type="float">0.104</MHHW>
+  </station>
+  <station>
+    <name>9751639</name>
+    <coops_id>9751639</coops_id>
+    <longname>Charlotte Amalie</longname>
+    <longitude type="float">-64.92</longitude>
+    <latitude type="float">18.3358</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.116</MLLW>
+    <MHHW type="float">0.125</MHHW>
+  </station>
+  <station>
+    <name>9752235</name>
+    <coops_id>9752235</coops_id>
+    <longname>Culebra</longname>
+    <longitude type="float">-65.3025</longitude>
+    <latitude type="float">18.3009</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.165</MLLW>
+    <MHHW type="float">0.177</MHHW>
+  </station>
+  <station>
+    <name>9752619</name>
+    <coops_id>9752619</coops_id>
+    <longname>Isabel Segunda, Vieques Island</longname>
+    <longitude type="float">-65.4439</longitude>
+    <latitude type="float">18.1525</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.180</MLLW>
+    <MHHW type="float">0.195</MHHW>
+  </station>
+  <station>
+    <name>9752695</name>
+    <coops_id>9752695</coops_id>
+    <longname>Esperanza, Vieques Island</longname>
+    <longitude type="float">-65.4714</longitude>
+    <latitude type="float">18.0939</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.119</MLLW>
+    <MHHW type="float">0.107</MHHW>
+  </station>
+  <station>
+    <name>9753216</name>
+    <coops_id>9753216</coops_id>
+    <longname>Fajardo</longname>
+    <longitude type="float">-65.6311</longitude>
+    <latitude type="float">18.3353</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.223</MLLW>
+    <MHHW type="float">0.238</MHHW>
+  </station>
+  <station>
+    <name>9754228</name>
+    <coops_id>9754228</coops_id>
+    <longname>Yabucoa Harbor</longname>
+    <longitude type="float">-65.833</longitude>
+    <latitude type="float">18.0551</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.107</MLLW>
+    <MHHW type="float">0.113</MHHW>
+  </station>
+  <station>
+    <name>9755371</name>
+    <coops_id>9755371</coops_id>
+    <longname>San Juan, La Puntilla, San Juan Bay</longname>
+    <longitude type="float">-66.1164</longitude>
+    <latitude type="float">18.4592</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.232</MLLW>
+    <MHHW type="float">0.247</MHHW>
+  </station>
+  <station>
+    <name>9757809</name>
+    <coops_id>9757809</coops_id>
+    <longname>Arecibo</longname>
+    <longitude type="float">-66.7024</longitude>
+    <latitude type="float">18.4805</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.250</MLLW>
+    <MHHW type="float">0.283</MHHW>
+  </station>
+  <station>
+    <name>9759110</name>
+    <coops_id>9759110</coops_id>
+    <longname>Magueyes Island</longname>
+    <longitude type="float">-67.0464</longitude>
+    <latitude type="float">17.9701</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.101</MLLW>
+    <MHHW type="float">0.101</MHHW>
+  </station>
+  <station>
+    <name>9759394</name>
+    <coops_id>9759394</coops_id>
+    <longname>Mayaguez</longname>
+    <longitude type="float">-67.16</longitude>
+    <latitude type="float">18.22</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.192</MLLW>
+    <MHHW type="float">0.226</MHHW>
+  </station>
+  <station>
+    <name>9759938</name>
+    <coops_id>9759938</coops_id>
+    <longname>Mona Island</longname>
+    <longitude type="float">-67.9385</longitude>
+    <latitude type="float">18.0899</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.125</MLLW>
+    <MHHW type="float">0.122</MHHW>
+  </station>
+  <station>
+    <name>9761115</name>
+    <coops_id>9761115</coops_id>
+    <longname>Barbuda</longname>
+    <longitude type="float">-61.8206</longitude>
+    <latitude type="float">17.5908</latitude>
+    <type>tide_gauge</type>
+    <MLLW type="float">-0.134</MLLW>
+    <MHHW type="float">0.091</MHHW>
+  </station>
+</root>

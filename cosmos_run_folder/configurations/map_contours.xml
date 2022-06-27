@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<root>
+  <tile_map name="flood_map">
+    <legend_text>Flood depth</legend_text>
+    <contour>
+      <legend_text> > 2.0 m</legend_text>
+      <lower type="float">2.0</lower>
+      <upper type="float">999999.0</upper>
+      <rgb type="int">255, 0, 0</rgb>
+    </contour>
+    <contour>
+      <legend_text>1.0 - 2.0 m</legend_text>
+      <lower type="float">1.0</lower>
+      <upper type="float">2.0</upper>
+      <rgb type="int">255, 165, 0</rgb>
+    </contour>
+    <contour>
+      <legend_text>0.3 - 1.0 m</legend_text>
+      <lower type="float">0.3</lower>
+      <upper type="float">1.0</upper>
+      <rgb type="int">255, 255, 0</rgb>
+    </contour>
+    <contour>
+      <legend_text>0.1 - 0.3 m</legend_text>
+      <lower type="float">0.1</lower>
+      <upper type="float">0.3</upper>
+      <rgb type="int">0, 255, 0</rgb>
+    </contour>
+  </tile_map>
+  <tile_map name="Hm0">
+    <legend_text>Wave height (m)</legend_text>
+    <color_map>jet</color_map>
+    <lower type="float">1.0</lower>
+    <upper type="float">10.0</upper>
+    <step type="float">1.0</step>
+  </tile_map>
+  <tile_map name="sedero">
+    <legend_text>Erosion / Sedimentation (m)</legend_text>
+    <color_map>jet</color_map>
+    <lower type="float">-1.0</lower>
+    <upper type="float">1.0</upper>
+    <step type="float">0.25</step>
+  </tile_map>
+</root>

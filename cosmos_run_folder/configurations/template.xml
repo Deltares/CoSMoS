@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<root>
+  <delft3dfm_exe_path>yourdelft3dfmpath</delft3dfm_exe_path>
+  <sfincs_exe_path>yoursfincspath</sfincs_exe_path>
+  <hurrywave_exe_path>yourhurrywavepath</hurrywave_exe_path>
+  <xbeach_exe_path>yourxbeachpath</xbeach_exe_path>
+  <ftp_hostname>yourhostname</ftp_hostname>
+  <ftp_path>yourftppath</ftp_path>
+  <ftp_username>yourusername</ftp_username>
+  <ftp_password>yourpassword</ftp_password>
+  <webviewer_version>yourwebviewerversion</webviewer_version>
+  <cycle_interval type="int">6</cycle_interval>
+</root>
