@@ -49,3 +49,19 @@ pip install -e .
 or something like:
 
 pip install -e d:\checkouts\github\CoSMoS
+
+
+Steps to install including CoSMoS environment:
+Install packages:
+
+	1) Make local Git clone of https://github.com/Deltares/CoSMoS, e.g. in d:\repos\CoSMoS\
+	
+	2) Open Miniconda3 (anaconda prompt)
+	
+	3) Cd d:\repos\CoSMoS\
+	
+	4) conda env create -f cosmos_environment.yml
+	
+	5) pip install -e d:\repos\CoSMoS\
+	
+	6) conda activate cosmos
