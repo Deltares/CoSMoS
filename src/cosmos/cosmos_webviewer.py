@@ -7,10 +7,13 @@ Created on Mon May 10 14:28:48 2021
 
 import datetime
 import os
+import numpy as np
+import pandas as pd
 from geojson import Point, Feature, FeatureCollection
 
 from .cosmos_main import cosmos
 from .cosmos_timeseries import merge_timeseries as merge
+from .cosmos_tiling import make_wave_map_tiles
 
 import cht.misc.fileops as fo
 import cht.misc.misc_tools
@@ -68,11 +71,30 @@ class WebViewer:
                                      cosmos.scenario.name)
         fo.rmdir(scenario_path)
         fo.mkdir(os.path.join(scenario_path))
-        fo.mkdir(os.path.join(scenario_path, "timeseries"))
+        
+        # Map variables
+        self.map_variables = []
+  
+        self.copy_timeseries()        
+        self.copy_floodmap()        
+        self.make_wave_maps()        
 
+        mv_file = os.path.join(scenario_path,
+                               "variables.js")
+        
+        cht.misc.misc_tools.write_json_js(mv_file, self.map_variables, "var map_variables =")
+
+
+    def copy_timeseries(self):
+
+        scenario_path = os.path.join(self.path,
+                                     "data",
+                                     cosmos.scenario.name)
+
+        # Stations and buoys
         cosmos.log("Copying time series ...")
                 
-        # Stations and buoys
+        fo.mkdir(os.path.join(scenario_path, "timeseries"))
         
         # Set stations to upload (only upload for high-res nested models)
         for model in cosmos.scenario.model:
@@ -157,14 +179,14 @@ class WebViewer:
                             s = v.to_csv(date_format='%Y-%m-%dT%H:%M:%S',
                                          float_format='%.3f',
                                          header=False)                             
-                            cht.misc_tools.write_csv_js(csv_file, s, 'var csv = `date_time,wl')
+                            cht.misc.misc_tools.write_csv_js(csv_file, s, 'var csv = `date_time,wl')
         
         # Save stations geojson file
         if features:
             feature_collection = FeatureCollection(features)
             stations_file = os.path.join(scenario_path,
                                     "stations.geojson.js")
-            cht.misc_tools.write_json_js(stations_file, feature_collection, "var stations =")
+            cht.misc.misc_tools.write_json_js(stations_file, feature_collection, "var stations =")
                         
 
         # Wave buoys
@@ -211,13 +233,13 @@ class WebViewer:
                             s = v.to_csv(date_format='%Y-%m-%dT%H:%M:%S',
                                          float_format='%.3f',
                                          header=False) 
-                            cht.misc_tools.write_csv_js(csv_file, s, "var csv = `date_time,hm0,tp")
+                            cht.misc.misc_tools.write_csv_js(csv_file, s, "var csv = `date_time,hm0,tp")
     
         if features:
             feature_collection = FeatureCollection(features)
             buoys_file = os.path.join(scenario_path,
                                     "wavebuoys.geojson.js")
-            cht.misc_tools.write_json_js(buoys_file, feature_collection, "var buoys =")
+            cht.misc.misc_tools.write_json_js(buoys_file, feature_collection, "var buoys =")
         
         # Extreme runup height
         for model in cosmos.scenario.model:
@@ -226,9 +248,13 @@ class WebViewer:
                                                     "BW_output.nc"))                
                 model.domain.write_to_geojson(scenario_path, cosmos.scenario.name)
                 model.domain.write_to_csv(scenario_path, cosmos.scenario.name)
-        
-        # Map variables
-        map_variables = []
+
+    def copy_floodmap(self):
+
+        scenario_path = os.path.join(self.path,
+                                     "data",
+                                     cosmos.scenario.name)
+             
         
         # Flood maps
         
@@ -265,60 +291,139 @@ class WebViewer:
                 lgn["contours"] = contours
                 dct["legend"]   = lgn
             
-            map_variables.append(dct)
+            self.map_variables.append(dct)
+
+    def make_wave_maps(self):
             
         # Wave maps
-        
-        # Check if flood maps are available
-        wave_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-                                      "hm0")
-        
-        if fo.exists(wave_map_path):
-            
-            
-            wvpath = os.path.join(scenario_path)
-            fo.copy_file(wave_map_path, wvpath)
-            dct={}
-            dct["name"]        = "hm0" 
-            dct["long_name"]   = "Wave height"
-            dct["description"] = "These are Hm0 wave heights."
-            dct["format"]      = "xyz_tile_layer"
-            
-            all_time_folders = fo.list_folders(os.path.join(wave_map_path, "*"))
-            tms = []
-            
-            for folder in all_time_folders:
-                tm = {}
-                tm["name"] = os.path.basename(folder)
-                tms.append(tm)
+        scenario_path = os.path.join(self.path,
+                                     "data",
+                                     cosmos.scenario.name)
 
-            dct["times"]        = tms  
-            
-            mp = next((x for x in cosmos.config.map_contours if x["name"] == "Hm0"), None)    
-            
-            lgn = {}
-            lgn["text"] = mp["string"]
+        # Make wave map tiles
+        if cosmos.config.make_wave_maps:
 
-            cntrs = mp["contours"]
-
-            contours = []
+            # Wave map for the entire simulation
+            dt1 = datetime.timedelta(hours=1)
+            dt6 = datetime.timedelta(hours=6)
+#            dt7 = datetime.timedelta(hours=7)
+            t0 = cosmos.cycle_time.replace(tzinfo=None)    
+            t1 = cosmos.stop_time
             
-            for cntr in cntrs:
+            # First determine max wave height for all simulations 
+            hm0mx = 0.0
+            okay  = False
+            for model in cosmos.scenario.model:
+                if model.type=="hurrywave":
+                    index_path = os.path.join(model.path, "tiling", "indices")
+                    if model.make_wave_map and os.path.exists(index_path):            
+                        file_name = os.path.join(model.cycle_output_path, "hurrywave_map.nc")
+                        hm0max = model.domain.read_hm0max(hm0max_file=file_name,
+                                                          time_range=[t0, t1 + dt1])
+                        hm0mx = max(hm0mx, np.nanmax(hm0max))
+                        okay = True
 
-                contour = {}
-                contour["text"]  = cntr["string"]
-                contour["color"] = "#" + cntr["hex"]
-                contours.append(contour)
+            if okay:
+                cosmos.log("Making wave map tiles ...")                
+                    
+                print("Maximum wave height : " + '%6.2f'%hm0mx + " m")                         
     
-                lgn["contours"] = contours
-                dct["legend"]   = lgn
-            
-            map_variables.append(dct)
-            
-        mv_file = os.path.join(scenario_path,
-                               "variables.js")
+                # Set color scale        
+                if hm0mx<=2.0:
+                    contour_set = "Hm0_2m"
+                elif hm0mx<=5.0:   
+                    contour_set = "Hm0_5m"
+                elif hm0mx<=10.0:   
+                    contour_set = "Hm0_10m"
+                elif hm0mx<=20.0:   
+                    contour_set = "Hm0_20m"
+    
+    
+                pathstr = []
+                namestr = []
+                
+                # 6-hour increments
+                requested_times = pd.date_range(start=t0 + dt6,
+                                                end=t1,
+                                                freq='6H').to_pydatetime().tolist()
+    
+                for it, t in enumerate(requested_times):
+                    pathstr.append((t - dt6).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
+                    namestr.append((t - dt6).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC")
+    
+                pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
+                td = t1 - t0
+                hrstr = str(int(td.days * 24 + td.seconds/3600))
+                namestr.append("Combined " + hrstr + "-hour forecast")
+                    
+                for model in cosmos.scenario.model:
+                    if model.type=="hurrywave":
+                        index_path = os.path.join(model.path, "tiling", "indices")            
+                        if model.make_wave_map and os.path.exists(index_path):                            
+                            
+                            cosmos.log("Making wave map tiles for model " + model.long_name + " ...")                
         
-        cht.misc_tools.write_json_js(mv_file, map_variables, "var map_variables =")
+                            file_name = os.path.join(model.cycle_output_path, "hurrywave_map.nc")
+                            
+                            # Wave map over 6-hour increments                    
+                            for it, t in enumerate(requested_times):
+                                hm0max = model.domain.read_hm0max(hm0max_file=file_name,
+                                                                  time_range=[t - dt1, t + dt1])                        
+                                hm0_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+                                                            "hm0",
+                                                            pathstr[it])                        
+                                make_wave_map_tiles(hm0max, index_path, hm0_map_path, contour_set)
+        
+                            # Full simulation        
+                            hm0_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+                                                        "hm0",
+                                                        pathstr[-1])                    
+                            hm0max = model.domain.read_hm0max(hm0max_file=file_name,
+                                                              time_range=[t0, t1 + dt1])        
+                            make_wave_map_tiles(hm0max, index_path, hm0_map_path, contour_set)
+                
+                # Check if wave maps are available
+                wave_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+                                              "hm0")
+                
+                wvpath = os.path.join(scenario_path)
+                fo.copy_file(wave_map_path, wvpath)
+                dct={}
+                dct["name"]        = "hm0" 
+                dct["long_name"]   = "Wave height"
+                dct["description"] = "These are Hm0 wave heights."
+                dct["format"]      = "xyz_tile_layer"
+                
+                tms = []            
+                for it, pth in enumerate(pathstr):
+                    tm = {}
+                    tm["name"]   = pth
+                    tm["string"] = namestr[it]
+                    tms.append(tm)
+    
+                dct["times"]        = tms  
+                
+                mp = next((x for x in cosmos.config.map_contours if x["name"] == contour_set), None)    
+                
+                lgn = {}
+                lgn["text"] = mp["string"]
+    
+                cntrs = mp["contours"]
+    
+                contours = []
+                
+                for cntr in cntrs:
+    
+                    contour = {}
+                    contour["text"]  = cntr["string"]
+                    contour["color"] = "#" + cntr["hex"]
+                    contours.append(contour)
+        
+                    lgn["contours"] = contours
+                    dct["legend"]   = lgn
+                
+                self.map_variables.append(dct)
+            
 
     def upload(self):        
 
@@ -404,7 +509,7 @@ def update_scenarios_js(sc_file):
     isame = -1
     cosmos.log("Updating scenario file : " + sc_file)
     if fo.exists(sc_file):
-        scs = cht.misc_tools.read_json_js(sc_file)
+        scs = cht.misc.misc_tools.read_json_js(sc_file)
         for isc, sc in enumerate(scs):
             if sc["name"] == cosmos.scenario.name:
                 isame = isc
@@ -432,4 +537,4 @@ def update_scenarios_js(sc_file):
         # New scenario in web viewer    
         scs.append(newsc)        
 
-    cht.misc_tools.write_json_js(sc_file, scs, "var scenario =")
+    cht.misc.misc_tools.write_json_js(sc_file, scs, "var scenario =")

@@ -42,9 +42,9 @@ def make_flood_map_tiles(zsmax, index_path, topo_path, flood_map_path,
                    zbmax=1.0,
                    quiet=True)
 
-def make_wave_map_tiles(hm0max, index_path, wave_map_path):
+def make_wave_map_tiles(hm0max, index_path, wave_map_path, contour_set):
 
-    mp = next((x for x in cosmos.config.map_contours if x["name"] == "Hm0"), None)
+    mp = next((x for x in cosmos.config.map_contours if x["name"] == contour_set), None)
     
     if mp is not None:
         color_values = mp["contours"]    

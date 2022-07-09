@@ -47,6 +47,8 @@ class CoSMoS_HurryWave(Model):
 #        nsecs = (self.wave_stop_time - self.wave_start_time).total_seconds()
 #        self.domain.input.dtmaxout = nsecs
         self.domain.input.dtmaxout = 21600.0
+        self.domain.input.dtmapout = 21600.0
+        self.domain.input.outputformat = "net"
 
         # Boundary conditions        
         if self.wave_nested:
@@ -60,16 +62,16 @@ class CoSMoS_HurryWave(Model):
             self.domain.write_boundary_conditions()
                     
         # Meteo forcing
+        self.meteo_atmospheric_pressure = False
+        self.meteo_precipitation = False
         if self.meteo_wind:
 
-            if self.meteo_wind:
+            meteo.write_meteo_input_files(self,
+                                          "hurrywave",
+                                          self.domain.input.tref)
 
-                meteo.write_meteo_input_files(self,
-                                              "hurrywave",
-                                              self.domain.input.tref)
-
-                self.domain.input.amufile = "hurrywave.amu"
-                self.domain.input.amvfile = "hurrywave.amv"
+            self.domain.input.amufile = "hurrywave.amu"
+            self.domain.input.amvfile = "hurrywave.amv"
     
             # if self.meteo_spiderweb:
             #     self.domain.input.spwfile = self.meteo_spiderweb
@@ -256,13 +258,15 @@ class CoSMoS_HurryWave(Model):
                 else:
                     file_name = os.path.join(output_path, "hurrywave_map.nc")
 
+                # Wave map for the entire simulation
                 dt1 = datetime.timedelta(hours=1)
                 dt6 = datetime.timedelta(hours=6)
                 dt7 = datetime.timedelta(hours=7)
                 t0 = cosmos.cycle_time.replace(tzinfo=None)    
                 t1 = cosmos.stop_time
                 tr = [t0 + dt7, t1 + dt1]
-                tstr = (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ")
+                tstr = "combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ")
+                ttlstr = "Combined 48-hour forecast"
 
                 hm0_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
                                             "hm0",
@@ -272,11 +276,11 @@ class CoSMoS_HurryWave(Model):
                                                  time_range=tr)
     
                 make_wave_map_tiles(hm0max, index_path, hm0_map_path)
+
+                # Wave map over 6-hour increments
                 
                 # Loop through time
                 t0 = cosmos.cycle_time.replace(tzinfo=None)    
-#                t1 = cosmos.stop_time - dt
-                
                 requested_times = pd.date_range(start=t0 + dt6,
                                           end=t1,
                                           freq='6H').to_pydatetime().tolist()
@@ -288,6 +292,7 @@ class CoSMoS_HurryWave(Model):
                                                      time_range=tr)
                     
                     tstr = (t - dt6).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ")
+                    ttlstr = (t - dt6).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC"
                     hm0_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
                                                 "hm0",
                                                 tstr)

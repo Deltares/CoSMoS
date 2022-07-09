@@ -73,6 +73,7 @@ class CoSMoS_SFINCS(Model):
         self.domain.input.dtmapout = 21600.0
         self.domain.input.dtmaxout = 21600.0
         self.domain.input.outputformat = "net"
+        self.domain.input.bzsfile  = "sfincs.bzs"
 
         if self.flow_nested:
             self.domain.input.pavbnd = -999.0
@@ -249,10 +250,12 @@ class CoSMoS_SFINCS(Model):
             fo.copy_file(src, self.job_path)
                 
         # Make observation points
-        for station in self.station:
-            self.domain.add_observation_point(station.x,
-                                              station.y,
-                                              station.name)
+        if self.station:
+            self.domain.input.obsfile  = "sfincs.obs"
+            for station in self.station:
+                self.domain.add_observation_point(station.x,
+                                                  station.y,
+                                                  station.name)
                 
         # Add observation points for nested models (Nesting 1)
         if self.nested_flow_models:

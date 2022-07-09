@@ -74,6 +74,8 @@ class MainLoop:
             if cosmos.config.cycle:
                 cosmos.next_cycle_time = cosmos.cycle_time + datetime.timedelta(hours=cosmos.config.cycle_interval)
                 cosmos.cycle_time = cosmos.config.cycle
+                cosmos.stop_time = cosmos.cycle_time + \
+                    datetime.timedelta(hours=xml_obj.runtime[0].value)    
                 # Set back to None, so it's not used anymore in the next cycle                
                 cosmos.config.cycle = None
                                 
