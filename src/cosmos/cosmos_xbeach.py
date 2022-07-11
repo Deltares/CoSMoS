@@ -76,6 +76,8 @@ class CoSMoS_XBeach(Model):
                 self.domain.wave_boundary_point[ipnt].geometry.x = wave_nesting_point_x[ipnt]
                 self.domain.wave_boundary_point[ipnt].geometry.y = wave_nesting_point_y[ipnt]
 
+        if hasattr(xml_obj, "zb_deshoal"):
+            self.domain.zb_deshoal = xml_obj.zb_deshoal[0].value
         # Copy some attributes to the model domain (needed for nesting)
         self.domain.crs   = self.crs
         self.domain.type  = self.type
@@ -102,8 +104,8 @@ class CoSMoS_XBeach(Model):
             # Round to nearest hour
             h0 = self.peak_boundary_time.hour
             tpeak = self.peak_boundary_time.replace(microsecond=0, second=0, minute=0, hour=h0)
-            t0 = tpeak - 2*datetime.timedelta(hours=1)
-            t1 = tpeak + 2*datetime.timedelta(hours=1)
+            t0 = tpeak - 12*datetime.timedelta(hours=1)
+            t1 = tpeak + 12*datetime.timedelta(hours=1)
             t0 = max(t0, self.flow_start_time)
             t1 = min(t1, self.flow_stop_time)
             self.domain.tref  = t0

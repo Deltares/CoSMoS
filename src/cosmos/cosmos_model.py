@@ -58,9 +58,10 @@ class Model:
         self.wave               = False
         self.mhhw               = 0.0
         self.cluster            = None
-        self.boundary_twl_treshold = -999.0
+        self.boundary_twl_treshold = 999.0
         self.peak_boundary_twl     = None
         self.peak_boundary_time    = None
+        self.zb_deshoal         = None
 
     def read_generic(self):
         
