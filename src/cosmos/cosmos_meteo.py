@@ -50,6 +50,26 @@ def read_meteo_sources():
                       time_interval=1)
     cosmos.meteo_source.append(src)
 
+    src = MeteoSource("coamps_tc_hindcast",
+                      "coamps_tc_hindcast",
+                      "analysis",
+                      crs=CRS.from_epsg(4326))
+    cosmos.meteo_source.append(src)
+
+    src = MeteoSource("coamps_tc_forecast",
+                      "coamps_tc_forecast",
+                      "forecast",
+                      crs=CRS.from_epsg(4326),
+                      delay=6)
+    cosmos.meteo_source.append(src)
+
+    src = MeteoSource("coamps_tc_retro_forecast",
+                      "coamps_tc_retro_forecast",
+                      "forecast",
+                      crs=CRS.from_epsg(4326),
+                      delay=6)
+    cosmos.meteo_source.append(src)
+
     # Meteo subsets
     # Read from xml file
     xml_file = os.path.join(cosmos.config.main_path,
@@ -76,9 +96,9 @@ def read_meteo_sources():
                     y_range = xml_subset.y_range[0].value
                 xystride = 1    
                 tstride  = 1    
-                if hasattr(xml_subset,"xystride"):
+                if hasattr(xml_subset, "xystride"):
                     xystride = int(xml_subset.xystride[0].value)
-                if hasattr(xml_subset,"tstride"):
+                if hasattr(xml_subset, "tstride"):
                     tstride = int(xml_subset.tstride[0].value)
                 subset = MeteoGrid(name=name,
                                    source=src,
