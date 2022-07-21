@@ -16,7 +16,7 @@ from .cosmos_tiling import make_sedero_tiles
 import cht.misc.xmlkit as xml
 import cht.misc.fileops as fo
 from cht.xbeach.xbeach import XBeach
-import cht.misc.nesting as nesting
+import cht.nesting.nesting as nesting
 
 class CoSMoS_XBeach(Model):
     
@@ -78,6 +78,7 @@ class CoSMoS_XBeach(Model):
 
         if hasattr(xml_obj, "zb_deshoal"):
             self.domain.zb_deshoal = xml_obj.zb_deshoal[0].value
+            
         # Copy some attributes to the model domain (needed for nesting)
         self.domain.crs   = self.crs
         self.domain.type  = self.type
