@@ -85,7 +85,7 @@ class Cluster:
                             model = self.model[names[isort[i]]]
                             iok = False
                             if self.use_threshold:
-                                if zmax_all[i]>0.0: 
+                                if zmax_all[isort[i]]>0.0: 
 #                                if model.peak_boundary_twl>model.boundary_twl_treshold:
                                     iok = True
                             else:
