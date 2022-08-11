@@ -7,10 +7,11 @@ Spyder Editor
 import time
 import sched
 import os
+import socket
 
 import psutil
 from random import random
-
+   
 class CosmosRunParallel:
     
     def __init__(self):
@@ -34,15 +35,19 @@ class CosmosRunParallel:
                 attempts += 1
                 time.sleep(10)
                 print("Attempt " + str(attempts) + " to find jobs-folder")
-                if attempts > 10:
+                if attempts > 100:
                     self.status = "finished"
                     print("All models finished")
                 else:
                     continue
             else:
-                attempts = 0
-                self.scheduler.enter(dt,1,self.run,())
-                self.scheduler.run()
+                # First check whether we still want to continue running, or want to kill all simulations
+                if os.path.exists(os.path.join(job_path, "kill_all.txt")):
+                    os.system('taskkill /fi "WINDOWTITLE eq Running CoSMoS"')
+                else:
+                    attempts = 0
+                    self.scheduler.enter(dt,1,self.run,())
+                    self.scheduler.run()
             
     def stop(self):
         self.scheduler.cancel()
@@ -55,8 +60,13 @@ class CosmosRunParallel:
                running = running + 1
                
         if running == self.running:
-            # model_list = [ f.path for f in os.scandir(self.job_path) if f.is_dir() ]
-            model_list = [ f.name for f in os.scandir(self.job_path) if f.is_dir() ]
+            attempts = 0
+            try:
+                # model_list = [ f.path for f in os.scandir(self.job_path) if f.is_dir() ]
+                model_list = [ f.name for f in os.scandir(self.job_path) if f.is_dir() ]
+            except:
+                time.sleep(10)
+                return None
         
             for model in model_list:
                 #
@@ -64,16 +74,21 @@ class CosmosRunParallel:
                                          "ready.txt")
                        
                 if os.path.exists(file_name):
-                    os.remove(file_name)
+                    try:
+                        os.remove(file_name)
+                    except:
+                        return  
                     
                     # Make run batch file
                     fid = open("tmp.bat", "w")
+                    fid.write("title Running CoSMoS" + "\n")
                     fid.write("mkdir " + os.path.join(self.local_path,model) + "\n")
                     fid.write("xcopy " + os.path.join(self.job_path,model) + " " + os.path.join(self.local_path,model) + " /E /Q /Y" + "\n")
                     fid.write(self.local_path[0:2] + "\n")
                     fid.write("cd " + os.path.join(self.local_path,model) + "\n")
                     fid.write("call run.bat\n")
                     fid.write("move finished.txt finished_local.txt" + " \n")
+                    fid.write("echo " + socket.gethostname() + ">> finished_local.txt"  + " \n" )
                     fid.write("xcopy " + os.path.join(self.local_path,model) + " " + os.path.join(self.job_path,model) + " /E /Q /Y" + "\n")
                     fid.write(self.job_path[0:2] + "\n")
                     fid.write("cd " + os.path.join(self.job_path,model) + "\n")
@@ -85,14 +100,3 @@ class CosmosRunParallel:
                     os.system('start tmp.bat')
                     print("Running " + model)
                     break
-                    
-                
-    def move_file(src, dst):
-        import shutil
-        import glob
-        
-        for full_file_name in glob.glob(src):
-            src_name = os.path.basename(full_file_name)        
-            if os.path.exists(os.path.join(dst, src_name)):
-                os.remove(os.path.join(dst, src_name))
-            shutil.move(full_file_name, dst)
