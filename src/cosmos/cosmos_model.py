@@ -53,6 +53,7 @@ class Model:
         self.polygon            = None
         self.make_flood_map     = False
         self.make_wave_map      = False
+        self.make_sedero_map    = False
         self.sa_correction      = None
         self.ssa_correction     = None
         self.wave               = False
@@ -103,6 +104,9 @@ class Model:
         if hasattr(xml_obj, "make_wave_map"):
             if xml_obj.make_wave_map[0].value[0].lower() == "y":
                 self.make_wave_map = True
+        if hasattr(xml_obj, "make_sedero_map"):
+            if xml_obj.make_sedero_map[0].value[0].lower() == "y":
+                self.make_sedero_map = True
         if hasattr(xml_obj, "sa_correction"):
             self.sa_correction = xml_obj.sa_correction[0].value
         if hasattr(xml_obj, "ssa_correction"):
