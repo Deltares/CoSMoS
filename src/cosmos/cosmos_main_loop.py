@@ -63,7 +63,7 @@ class MainLoop:
                 t = datetime.datetime.now(datetime.timezone.utc) - \
                     datetime.timedelta(hours=delay)
                 h0 = t.hour
-                h0 = h0 - np.mod(h0, 6)
+                h0 = h0 - np.mod(h0, cosmos.config.cycle_interval)
                 cosmos.cycle_time = t.replace(microsecond=0, second=0, minute=0, hour=h0)
 
             cosmos.stop_time = cosmos.cycle_time + \
@@ -192,15 +192,21 @@ class MainLoop:
 
         # Remove older cycles
         if not self.just_initialize and cosmos.config.cycle_mode == "continuous":           
-            if cosmos.config.remove_old_cycles>0:
+            if cosmos.config.remove_old_cycles>0 and not cosmos.storm_flag:
                 # Get list of all cycles
                 cycle_list = fo.list_folders(os.path.join(cosmos.scenario.path,"*z"))
+
                 tkeep = cosmos.cycle_time.replace(tzinfo=None) - datetime.timedelta(hours=cosmos.config.remove_old_cycles)
                 for cycle in cycle_list:
+                    if cycle in cosmos.storm_keeplist:
+                        continue
                     t = datetime.datetime.strptime(cycle[-12:],"%Y%m%d_%Hz")
                     if t<tkeep:
                         cosmos.log("Removing older cycle : " + cycle[-12:])
                         fo.rmdir(cycle)
+            elif cosmos.storm_flag:
+                cycle_list = fo.list_folders(os.path.join(cosmos.scenario.path,"*z"))
+                cosmos.storm_keeplist.append(cycle_list[-1])
                         
         # Create scenario cycle paths
         fo.mkdir(cosmos.scenario.cycle_path)

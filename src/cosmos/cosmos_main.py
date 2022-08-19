@@ -26,7 +26,9 @@ class CoSMoS:
         
         self.config          = Config()
         self.cycle_time      = None        
-        self.cycle_stop_time = None        
+        self.cycle_stop_time = None  
+        self.storm_flag      = False
+        self.storm_keeplist  = []
         
     def initialize(self, main_path):        
 
@@ -118,13 +120,13 @@ class CoSMoS:
             f.write(tstr + message + "\n")
             f.close()
 
-    def make_webviewer(self, sc_name, wv_name, upload=False, cycle=None):   
+    def make_webviewer(self, sc_name, wv_name, upload=False, cycle=None,config_file="default.xml"):   
 
         if not cosmos.config.main_path:
             cosmos.log("Error: CoSMoS main path not set! Do this by running cosmos.initialize(main_path) or passing main_path as input argument to cosmos.run().")
             return
         
-        self.run(sc_name, just_initialize=True, cycle=cycle)
+        self.run(sc_name,config_file=config_file, just_initialize=True, cycle=cycle)
                 
         from .cosmos_webviewer import WebViewer
         
