@@ -145,6 +145,11 @@ def download_and_collect_meteo():
                                  tstride=meteo_subset.tstride)
             if meteo_subset.last_analysis_time:
                 cosmos.log("Last analysis time : " + meteo_subset.last_analysis_time.strftime("%Y%m%d_%H%M%S"))
+                file_name = os.path.join(meteo_subset.path, meteo_subset.last_analysis_time.strftime("%Y%m%d_%Hz"), "coamps_used.txt")
+                if os.path.exists(file_name):
+                    cosmos.storm_flag = True
+                else:
+                    cosmos.storm_flag = False
 
 def write_meteo_input_files(model, prefix, tref, path=None):
     
