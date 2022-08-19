@@ -21,12 +21,14 @@ def post_process():
 
     
     # Make wave map tiles
-    if cosmos.config.make_wave_maps:
+    if cosmos.config.make_wave_maps and not cosmos.config.webviewer:
         # First determine max wave height for all simulations 
         hm0mx = 0.0
         for model in cosmos.scenario.model:
             index_path = os.path.join(model.path, "tiling", "indices")
-            if model.make_wave_map and os.path.exists(index_path):            
+            if model.make_wave_map and os.path.exists(index_path):
+                if "sfincs" in model.name.lower():
+                    continue
                 file_name = os.path.join(model.cycle_output_path, "hurrywave_map.nc")
                 hm0max = model.domain.read_hm0max(hm0max_file=file_name)
                 hm0mx = max(hm0mx, np.max(hm0max))
@@ -43,7 +45,9 @@ def post_process():
             
         for model in cosmos.scenario.model:
             index_path = os.path.join(model.path, "tiling", "indices")            
-            if model.make_wave_map and os.path.exists(index_path):                            
+            if model.make_wave_map and os.path.exists(index_path):
+                if "sfincs" in model.name.lower():
+                    continue                            
                 file_name = os.path.join(model.cycle_output_path, "hurrywave_map.nc")
 
                 # Wave map for the entire simulation
