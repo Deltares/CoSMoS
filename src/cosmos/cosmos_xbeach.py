@@ -8,10 +8,12 @@ Created on Tue May 11 16:02:04 2021
 import os
 import numpy as np
 import datetime
+import xarray as xr
 
 from .cosmos_main import cosmos
 from .cosmos_model import Model
 from .cosmos_tiling import make_sedero_tiles
+
 
 import cht.misc.xmlkit as xml
 import cht.misc.fileops as fo
@@ -187,6 +189,7 @@ class CoSMoS_XBeach(Model):
         
         # Output        
         fo.move_file(os.path.join(job_path, "*.nc"), output_path)
+        fo.move_file(os.path.join(job_path, "finished.txt"), output_path)
 
         # Input
         fo.move_file(os.path.join(job_path, "*.*"), input_path)
@@ -199,14 +202,22 @@ class CoSMoS_XBeach(Model):
         index_path = os.path.join(self.path, "tiling", "indices")
         
         if os.path.exists(index_path):
+            # settings
+            var = 'sedero'
+            elev_min = -2
             
             try:
-
-                nc_file = os.path.join(output_path, "xboutput.nc")
-                sedero  = self.domain.read_sedero(nc_file=nc_file)
-                    
+                # read xbeach output
+                output_file = os.path.join(output_path, 'xboutput.nc')
+                dt = xr.open_dataset(output_file)
+        
+                # mask xbeach output based on a min elevation of the initial topobathymetry
+                val = dt[var][-1, :, :].where(dt['zb'][0, :, :] > elev_min)
+                val_masked = val.values
+                
                 cosmos.log("Making sedimenation/erosion tiles for model " + self.name)    
-                make_sedero_tiles(sedero, index_path, sedero_map_path)
+                # make pngs
+                make_sedero_tiles(val_masked, index_path, sedero_map_path)
                 cosmos.log("Sedimentation/erosion tiles done.")    
             except:
                 print("ERROR while making xbeach tiles")
