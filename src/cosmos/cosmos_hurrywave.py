@@ -186,7 +186,8 @@ class CoSMoS_HurryWave(Model):
         fo.move_file(os.path.join(job_path, "hurrywave_map.nc"), output_path)
         fo.move_file(os.path.join(job_path, "hurrywave_his.nc"), output_path)
         fo.move_file(os.path.join(job_path, "hurrywave_sp2.nc"), output_path)
-        
+        fo.move_file(os.path.join(job_path, "*.txt"), output_path)
+
         fo.move_file(os.path.join(job_path, "hurrywave.rst"), input_path)
 
         # Restart files 
@@ -245,7 +246,7 @@ class CoSMoS_HurryWave(Model):
             #               float_format='%.3f')        
 
         # Make wave map tiles
-        if cosmos.config.make_wave_maps and self.make_wave_map:
+        if cosmos.config.make_wave_maps and self.make_wave_map and not cosmos.config.webviewer:
 
             index_path = os.path.join(self.path, "tiling", "indices")
             
@@ -273,9 +274,9 @@ class CoSMoS_HurryWave(Model):
                                             tstr)
 
                 hm0max = self.domain.read_hm0max(hm0max_file=file_name,
-                                                 time_range=tr)
+                                                  time_range=tr)
     
-                make_wave_map_tiles(hm0max, index_path, hm0_map_path)
+                make_wave_map_tiles(hm0max, index_path, hm0_map_path,"Hm0")
 
                 # Wave map over 6-hour increments
                 
@@ -289,7 +290,7 @@ class CoSMoS_HurryWave(Model):
                 for it, t in enumerate(requested_times):
                     tr = [t - dt1, t + dt1]
                     hm0max = self.domain.read_hm0max(hm0max_file=file_name,
-                                                     time_range=tr)
+                                                      time_range=tr)
                     
                     tstr = (t - dt6).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ")
                     ttlstr = (t - dt6).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC"
@@ -297,7 +298,7 @@ class CoSMoS_HurryWave(Model):
                                                 "hm0",
                                                 tstr)
                     
-                    make_wave_map_tiles(hm0max, index_path, hm0_map_path)
+                    make_wave_map_tiles(hm0max, index_path, hm0_map_path,"Hm0")
 
                 cosmos.log("Wave map tiles done.")    
 
