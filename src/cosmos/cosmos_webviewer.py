@@ -77,7 +77,8 @@ class WebViewer:
   
         self.copy_timeseries()        
         self.copy_floodmap()        
-        self.make_wave_maps()        
+        self.make_wave_maps()
+        self.copy_sederomap()        
 
         mv_file = os.path.join(scenario_path,
                                "variables.js")
@@ -423,11 +424,52 @@ class WebViewer:
                     dct["legend"]   = lgn
                 
                 self.map_variables.append(dct)
+                
+    def copy_sederomap(self):
+
+        scenario_path = os.path.join(self.path,
+                                     "data",
+                                     cosmos.scenario.name)
+             
+        # Check if sedero maps are available
+        sedero_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+                                      "sedero")
+        
+        if fo.exists(sedero_path):
+
+            wvpath = os.path.join(scenario_path)
+            fo.copy_file(sedero_path, wvpath)
+            dct={}
+            dct["name"]        = "sedero"
+            dct["long_name"]   = "Sedimentation/erosion"
+            dct["description"] = "This is a sedimentation/erosion map. It can tell if your house will wash away."
+            dct["format"]      = "xyz_tile_layer"
+
+            mp = next((x for x in cosmos.config.map_contours if x["name"] == "sedero"), None)    
+            
+            lgn = {}
+            lgn["text"] = mp["string"]
+
+            cntrs = mp["contours"]
+
+            contours = []
+            
+            for cntr in cntrs:
+
+                contour = {}
+                contour["text"]  = cntr["string"]
+                contour["color"] = "#" + cntr["hex"]
+                contours.append(contour)
+    
+                lgn["contours"] = contours
+                dct["legend"]   = lgn
+            
+            self.map_variables.append(dct)
             
 
     def upload(self):        
 
-        from cht.sftp import SSHSession
+        from cht.misc.sftp import SSHSession
         
         cosmos.log("Uploading web viewer ...")
         
@@ -474,8 +516,7 @@ class WebViewer:
                 remote_file = remote_path + "/scenarios.js"
                 local_file  = os.path.join(".", "scenarios.js")
                 f.get(remote_file, local_file)
-                update_scenarios_js(local_file)
-                
+                update_scenarios_js(local_file)                
                 # Copy new scenarios.js to server
                 f.put(local_file, remote_path + "/scenarios.js")
                 # Delete local scenarios.js
@@ -489,8 +530,9 @@ class WebViewer:
     
             cosmos.log("Done uploading.")
             
-        except:
+        except BaseException as e:
             cosmos.log("An error occurred while uploading !")
+            cosmos.log(str(e))
             
             try:
                 f.sftp.close()    
