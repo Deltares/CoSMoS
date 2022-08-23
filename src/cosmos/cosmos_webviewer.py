@@ -10,6 +10,8 @@ import os
 import numpy as np
 import pandas as pd
 from geojson import Point, Feature, FeatureCollection
+from pyproj import CRS
+from pyproj import Transformer
 
 from .cosmos_main import cosmos
 from .cosmos_timeseries import merge_timeseries as merge
@@ -75,10 +77,11 @@ class WebViewer:
         # Map variables
         self.map_variables = []
   
-        self.copy_timeseries()        
+        self.copy_timeseries()
         self.copy_floodmap()        
         self.make_wave_maps()
-        self.copy_sederomap()        
+        self.copy_sederomap()
+#        self.make_meteo_maps()
 
         mv_file = os.path.join(scenario_path,
                                "variables.js")
@@ -128,7 +131,7 @@ class WebViewer:
 
         for model in cosmos.scenario.model:
             if model.station and model.flow:
-                for station in model.station:                
+                for station in model.station:
                     if station.type == "tide_gauge" and station.upload:
                         
                         point = Point((station.longitude, station.latitude))
@@ -329,7 +332,7 @@ class WebViewer:
                     
                 print("Maximum wave height : " + '%6.2f'%hm0mx + " m")                         
     
-                # Set color scale        
+                # Set color scale
                 if hm0mx<=2.0:
                     contour_set = "Hm0_2m"
                 elif hm0mx<=5.0:   
@@ -465,7 +468,97 @@ class WebViewer:
                 dct["legend"]   = lgn
             
             self.map_variables.append(dct)
+
+
+        # Markers for XBeach models that ran
+
+        features = []
+        wgs84 = CRS.from_epsg(4326)
+
+        for model in cosmos.scenario.model:
             
+            if model.type == "xbeach":
+                
+                # Use wave nesting point to put the marker
+                xp = model.wave_nesting_point_x[0]
+                yp = model.wave_nesting_point_y[0]                
+                transformer = Transformer.from_crs(model.crs, wgs84, always_xy=True)
+                lon, lat = transformer.transform(xp, yp)
+                
+                point = Point((lon, lat))
+                
+                features.append(Feature(geometry=point,
+                                        properties={"name": model.name,
+                                                    "long_name": model.long_name}))
+                        
+        # Save xbeach geojson file
+        if features:
+            feature_collection = FeatureCollection(features)
+            stations_file = os.path.join(scenario_path,
+                                    "xbeach.geojson.js")
+            cht.misc.misc_tools.write_json_js(stations_file, feature_collection, "var xb_markers =")
+            
+    def make_meteo_maps(self):
+        
+        from cht.misc import xmlkit as xml
+
+        scenario_path = os.path.join(self.path,
+                                     "data",
+                                     cosmos.scenario.name)
+
+        # Wind
+        xml_obj = xml.xml2obj(cosmos.scenario.file_name)
+        if hasattr(xml_obj, "meteo_dataset"):
+            meteo_dataset = xml_obj.meteo_dataset[0].value
+
+        for meteo_subset in cosmos.meteo_subset:
+            if meteo_dataset == meteo_subset.name:
+                file_name = os.path.join(scenario_path, "wind.json")
+                meteo_subset.write_wind_to_json(file_name, time_range=None, iref=2, js=True)
+                
+                # Add wind to map variables
+
+                wndmx=25.0
+    
+                if wndmx<=20.0:
+                    contour_set = "wnd20"
+                elif wndmx<=40.0:   
+                    contour_set = "wnd40"
+                else:   
+                    contour_set = "wnd60"
+        
+                dct={}
+                dct["name"]        = "wind"
+                dct["long_name"]   = "Wind"
+                dct["description"] = "This is a wind map. It can tell if your house will blow away."
+                dct["format"]      = "vector_field"
+    
+                mp = next((x for x in cosmos.config.map_contours if x["name"] == contour_set), None)    
+                
+                lgn = {}
+                lgn["text"] = mp["string"]
+                    
+                cntrs = mp["contours"]
+    
+                contours = []
+                
+                for cntr in cntrs:
+    
+                    contour = {}
+                    contour["text"]  = cntr["string"]
+                    contour["color"] = "#" + cntr["hex"]
+                    contours.append(contour)
+        
+                    lgn["contours"] = contours
+                    dct["legend"]   = lgn
+                
+                self.map_variables.append(dct)
+        
+        # Cumulative rainfall
+
+
+
+        pass
 
     def upload(self):        
 
