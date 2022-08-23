@@ -99,12 +99,28 @@ class ModelLoop:
             model.post_process()
             model.status = "finished"
             
-            # Write finished file            
-            file_name = os.path.join(cosmos.scenario.cycle_job_list_path,
-                                     model.name + ".finished")            
-            fid = open(file_name, "w")
-            fid.write("finished")
-            fid.close()
+            # Write finished file
+            #later change to if cosmos.config.run_mode == "parallel":            
+            try: 
+                finished_file_name = os.path.join(model.cycle_output_path, "finished.txt")
+                fid = open(finished_file_name, 'r')
+                pcname = fid.read().splitlines()[1]
+                fid.close()
+                
+                cosmos.log(model.long_name + " was run by " + pcname)
+                
+                file_name = os.path.join(cosmos.scenario.cycle_job_list_path,
+                         model.name + ".finished")            
+                fid = open(file_name, "w")
+                fid.write("finished by " + pcname)
+                fid.close()
+                             
+            except:
+                file_name = os.path.join(cosmos.scenario.cycle_job_list_path,
+                                         model.name + ".finished")            
+                fid = open(file_name, "w")
+                fid.write("finished")
+                fid.close()
 
         
         # Now check if all simulations are completely finished    
