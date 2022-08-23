@@ -88,7 +88,47 @@ def read_config_file():
                 cnt["hex"]   = rgb2hex(tuple(cnt["rgb"]))
                 
                 map_type["contours"].append(cnt)
+        elif hasattr(tm, 'rgb_file'):
+            filename = tm.rgb_file[0].value
+            # filename = r"p:\11206085-onr-fhics\03_cosmos\configurations\GMT_globe.txt"
+            with open(filename) as f:
+                array = []
+                for line in f: # read rest of lines
+                    array.append([float(x) for x in line.split()])
+                    
+            nsteps = len(array)        
+            zmin = tm.lower[0].value
+            zmax = tm.upper[0].value
+            
+            difference = zmax - zmin
+            step = difference/nsteps
+            
+            for i in range(nsteps):
 
+                zl = round(zmin + i*step,1)
+                zu = round(zl + step,1)
+                z  = round(zl + 0.5*step,1)
+                
+                rgb = []
+                rgb.append(int(array[i][0]))
+                rgb.append(int(array[i][1]))
+                rgb.append(int(array[i][2]))
+                cnt={}
+                if i==0:
+                    cnt["string"] = "< " + str(zmin)
+                elif i==nsteps - 1:
+                    cnt["string"] = "> " + str(zmax)
+                else: 
+                    cnt["string"] = str(zl) + " - " + str(zu)                    
+                cnt["lower_value"] = zl
+                cnt["upper_value"] = zu
+                cnt["rgb"]   = rgb
+                cnt["hex"]   = rgb2hex(tuple(rgb))
+
+                map_type["contours"].append(cnt)
+            
+            map_type["contours"] = map_type["contours"][::-1]
+            
         else:
             zmin = tm.lower[0].value
             zmax = tm.upper[0].value

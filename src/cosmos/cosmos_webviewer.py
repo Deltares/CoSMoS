@@ -79,7 +79,7 @@ class WebViewer:
         self.copy_floodmap()        
         self.make_wave_maps()
         self.copy_sederomap()        
-
+        self.copy_bedlevelmaps()
         mv_file = os.path.join(scenario_path,
                                "variables.js")
         
@@ -463,6 +463,84 @@ class WebViewer:
     
                 lgn["contours"] = contours
                 dct["legend"]   = lgn
+            
+            self.map_variables.append(dct)
+            
+    def copy_bedlevelmaps(self):
+
+        scenario_path = os.path.join(self.path,
+                                     "data",
+                                     cosmos.scenario.name)
+             
+        # Check if sedero maps are available
+        zb0_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+                                      "zb0")
+        zbend_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+                              "zbend")
+        
+        if fo.exists(zb0_path):
+
+            wvpath = os.path.join(scenario_path)
+            fo.copy_file(zb0_path, wvpath)
+            dct={}
+            dct["name"]        = "zb0"
+            dct["long_name"]   = "Pre-storm bed level"
+            dct["description"] = "These were the bed levels prior to the storm"
+            dct["format"]      = "xyz_tile_layer"
+
+            mp = next((x for x in cosmos.config.map_contours if x["name"] == "bed_levels"), None)    
+            
+            lgn = {}
+            lgn["text"] = mp["string"]
+
+            cntrs = mp["contours"]
+
+            contours = []
+            
+            for icntr,cntr in enumerate(cntrs):
+                if icntr in np.arange(0, 101,10):
+                    contour = {}
+                    contour["text"]  = cntr["string"]
+                    contour["color"] = "#" + cntr["hex"]
+                    contours.append(contour)
+        
+                    lgn["contours"] = contours
+                    dct["legend"]   = lgn
+                else:
+                    continue
+            
+            self.map_variables.append(dct)
+            
+        if fo.exists(zbend_path):
+
+            wvpath = os.path.join(scenario_path)
+            fo.copy_file(zbend_path, wvpath)
+            dct={}
+            dct["name"]        = "zbend"
+            dct["long_name"]   = "Post-storm bed level"
+            dct["description"] = "These are the predicted bed levels after the storm"
+            dct["format"]      = "xyz_tile_layer"
+
+            mp = next((x for x in cosmos.config.map_contours if x["name"] == "bed_levels"), None)    
+            
+            lgn = {}
+            lgn["text"] = mp["string"]
+
+            cntrs = mp["contours"]
+
+            contours = []
+            
+            for icntr,cntr in enumerate(cntrs):
+                if icntr in np.arange(0, 101,10):
+                    contour = {}
+                    contour["text"]  = cntr["string"]
+                    contour["color"] = "#" + cntr["hex"]
+                    contours.append(contour)
+        
+                    lgn["contours"] = contours
+                    dct["legend"]   = lgn
+                else:
+                    continue
             
             self.map_variables.append(dct)
             

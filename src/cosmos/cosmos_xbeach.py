@@ -13,6 +13,8 @@ import xarray as xr
 from .cosmos_main import cosmos
 from .cosmos_model import Model
 from .cosmos_tiling import make_sedero_tiles
+from .cosmos_tiling import make_bedlevel_tiles
+
 
 
 import cht.misc.xmlkit as xml
@@ -198,27 +200,40 @@ class CoSMoS_XBeach(Model):
         
         output_path = self.cycle_output_path
         sedero_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-                                       "sedero")            
+                                       "sedero")
+        zb0_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+                                       "zb0")  
+        zbend_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+                                       "zbend")              
         index_path = os.path.join(self.path, "tiling", "indices")
         
         if os.path.exists(index_path):
             # settings
-            var = 'sedero'
-            elev_min = -2
-            
             try:
                 # read xbeach output
                 output_file = os.path.join(output_path, 'xboutput.nc')
                 dt = xr.open_dataset(output_file)
-        
-                # mask xbeach output based on a min elevation of the initial topobathymetry
-                val = dt[var][-1, :, :].where(dt['zb'][0, :, :] > elev_min)
-                val_masked = val.values
-                
-                cosmos.log("Making sedimenation/erosion tiles for model " + self.name)    
-                # make pngs
-                make_sedero_tiles(val_masked, index_path, sedero_map_path)
-                cosmos.log("Sedimentation/erosion tiles done.")    
             except:
                 print("ERROR while making xbeach tiles")
+                return
+        
+            var = 'sedero'
+            elev_min = -2
+            # mask xbeach output based on a min elevation of the initial topobathymetry
+            val = dt[var][-1, :, :].where(dt['zb'][0, :, :] > elev_min)
+            val_masked = val.values
+            
+            cosmos.log("Making sedimenation/erosion tiles for model " + self.name)
+            # make pngs
+            make_sedero_tiles(val_masked, index_path, sedero_map_path)
+            cosmos.log("Sedimentation/erosion tiles done.")
+            
+            zb0 = dt['zb'][0, :, :].values
+            zbend = dt['zb'][-1, :, :].values
+            cosmos.log("Making bedlevel tiles for model " + self.name)
+            make_bedlevel_tiles(zb0, index_path, zb0_map_path)
+            make_bedlevel_tiles(zbend, index_path, zbend_map_path)
+            cosmos.log("Bed level tiles done.")
+            
+
                 

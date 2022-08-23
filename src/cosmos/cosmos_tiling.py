@@ -61,3 +61,14 @@ def make_sedero_tiles(sedero, index_path, sedero_map_path):
         make_png_tiles(sedero, index_path, sedero_map_path,
                        color_values=color_values,
                        quiet=True)
+        
+def make_bedlevel_tiles(bedlevel, index_path, bedlevel_map_path):
+
+    mp = next((x for x in cosmos.config.map_contours if x["name"] == "bed_levels"), None)
+    
+    if mp is not None:
+        color_values = mp["contours"]    
+        make_png_tiles(bedlevel, index_path, bedlevel_map_path,
+                       color_values=color_values,
+                       quiet=True)
+
