@@ -81,7 +81,7 @@ class WebViewer:
         self.copy_floodmap()        
         self.make_wave_maps()
         self.copy_sederomap()
-#        self.make_meteo_maps()
+        self.make_meteo_maps()
         self.copy_bedlevelmaps()
         mv_file = os.path.join(scenario_path,
                                "variables.js")
@@ -275,6 +275,7 @@ class WebViewer:
             dct["long_name"]   = "Flood map"
             dct["description"] = "This is a flood map. It can tell if you will drown."
             dct["format"]      = "xyz_tile_layer"
+            dct["max_native_zoom"]  = 13
 
             mp = next((x for x in cosmos.config.map_contours if x["name"] == "flood_map"), None)    
             
@@ -397,6 +398,7 @@ class WebViewer:
                 dct["long_name"]   = "Wave height"
                 dct["description"] = "These are Hm0 wave heights."
                 dct["format"]      = "xyz_tile_layer"
+                dct["max_native_zoom"]  = 10
                 
                 tms = []            
                 for it, pth in enumerate(pathstr):
@@ -447,6 +449,7 @@ class WebViewer:
             dct["long_name"]   = "Sedimentation/erosion"
             dct["description"] = "This is a sedimentation/erosion map. It can tell if your house will wash away."
             dct["format"]      = "xyz_tile_layer"
+            dct["max_native_zoom"]  = 16
 
             mp = next((x for x in cosmos.config.map_contours if x["name"] == "sedero"), None)    
             
@@ -513,25 +516,42 @@ class WebViewer:
 
         for meteo_subset in cosmos.meteo_subset:
             if meteo_dataset == meteo_subset.name:
-                file_name = os.path.join(scenario_path, "wind.json")
-                meteo_subset.write_wind_to_json(file_name, time_range=None, iref=2, js=True)
+                
+                # TODO these ranges 
+                xlim = [-100.0, -50.0]
+                ylim = [8.0, 45.0]
+                
+                subset = meteo_subset.subset(xlim=xlim,
+                                             ylim=ylim,
+                                             time_range=[],
+                                             stride=2)
+                # Get maximum wind speed
+                u = subset.quantity[0].u
+                v = subset.quantity[0].v
+                vmag = np.sqrt(u*u + v*v)
+                wndmx = np.max(vmag)
+                
+                file_name = os.path.join(scenario_path, "wind.json.js")
+                subset.write_wind_to_json(file_name, time_range=None, js=True)
                 
                 # Add wind to map variables
 
-                wndmx=25.0
-    
                 if wndmx<=20.0:
                     contour_set = "wnd20"
+                    wndmx=20.0                
                 elif wndmx<=40.0:   
                     contour_set = "wnd40"
+                    wndmx=40.0                
                 else:   
                     contour_set = "wnd60"
+                    wndmx=60.0                
         
                 dct={}
                 dct["name"]        = "wind"
                 dct["long_name"]   = "Wind"
                 dct["description"] = "This is a wind map. It can tell if your house will blow away."
                 dct["format"]      = "vector_field"
+                dct["max"]         = wndmx
     
                 mp = next((x for x in cosmos.config.map_contours if x["name"] == contour_set), None)    
                 

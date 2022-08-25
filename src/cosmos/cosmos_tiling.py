@@ -39,6 +39,7 @@ def make_flood_map_tiles(zsmax, index_path, topo_path, flood_map_path,
     make_floodmap_tiles(zsmax, index_path, flood_map_path, topo_path,
                    option="deterministic",
                    color_values=color_values,
+                   zoom_range=[0, 13],
                    zbmax=1.0,
                    quiet=True)
 
@@ -50,6 +51,7 @@ def make_wave_map_tiles(hm0max, index_path, wave_map_path, contour_set):
         color_values = mp["contours"]    
         make_png_tiles(hm0max, index_path, wave_map_path,
                        color_values=color_values,
+                       zoom_range=[0, 10],
                        quiet=True)
 
 def make_sedero_tiles(sedero, index_path, sedero_map_path):
@@ -60,6 +62,7 @@ def make_sedero_tiles(sedero, index_path, sedero_map_path):
         color_values = mp["contours"]    
         make_png_tiles(sedero, index_path, sedero_map_path,
                        color_values=color_values,
+                       zoom_range=[0, 16],
                        quiet=True)
         
 def make_bedlevel_tiles(bedlevel, index_path, bedlevel_map_path):
@@ -70,5 +73,6 @@ def make_bedlevel_tiles(bedlevel, index_path, bedlevel_map_path):
         color_values = mp["contours"]    
         make_png_tiles(bedlevel, index_path, bedlevel_map_path,
                        color_values=color_values,
+                       zoom_range=[0, 16],
                        quiet=True)
 
