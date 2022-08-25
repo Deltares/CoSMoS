@@ -480,8 +480,8 @@ class WebViewer:
             if model.type == "xbeach":
                 
                 # Use wave nesting point to put the marker
-                xp = model.wave_nesting_point_x[0]
-                yp = model.wave_nesting_point_y[0]                
+                xp = model.domain.wave_boundary_point[0].geometry.x
+                yp = model.domain.wave_boundary_point[0].geometry.y            
                 transformer = Transformer.from_crs(model.crs, wgs84, always_xy=True)
                 lon, lat = transformer.transform(xp, yp)
                 
@@ -489,7 +489,9 @@ class WebViewer:
                 
                 features.append(Feature(geometry=point,
                                         properties={"name": model.name,
-                                                    "long_name": model.long_name}))
+                                                    "long_name": model.long_name,
+                                                    "flow_nested": model.flow_nested_name,
+                                                    "wave_nested": model.wave_nested_name}))
                         
         # Save xbeach geojson file
         if features:
