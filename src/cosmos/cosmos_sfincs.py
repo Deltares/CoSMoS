@@ -74,6 +74,8 @@ class CoSMoS_SFINCS(Model):
         self.domain.input.dtmaxout = 21600.0
         self.domain.input.outputformat = "net"
         self.domain.input.bzsfile  = "sfincs.bzs"
+        self.domain.input.storecumprcp = 1
+        
 
         if self.flow_nested:
             self.domain.input.pavbnd = -999.0

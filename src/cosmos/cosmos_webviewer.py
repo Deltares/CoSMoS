@@ -16,6 +16,7 @@ from pyproj import Transformer
 from .cosmos_main import cosmos
 from .cosmos_timeseries import merge_timeseries as merge
 from .cosmos_tiling import make_wave_map_tiles
+from .cosmos_tiling import make_precipitation_tiles
 
 import cht.misc.fileops as fo
 import cht.misc.misc_tools
@@ -520,7 +521,7 @@ class WebViewer:
             if meteo_dataset == meteo_subset.name:
                 
                 # TODO these ranges 
-                xlim = [-100.0, -50.0]
+                xlim = [-99.0, -55.0]
                 ylim = [8.0, 45.0]
                 
                 subset = meteo_subset.subset(xlim=xlim,
@@ -577,10 +578,132 @@ class WebViewer:
                 self.map_variables.append(dct)
         
         # Cumulative rainfall
+        
+        # Rainfall map for the entire simulation
+        dt1 = datetime.timedelta(hours=1)
+#        dt6 = datetime.timedelta(hours=6)
+        dt24 = datetime.timedelta(hours=24)
+        t0 = cosmos.cycle_time.replace(tzinfo=None)    
+        t1 = cosmos.stop_time
+        
+        # First determine max precip for all simulations 
+        pmx = 0.0
+        okay  = False
+        for model in cosmos.scenario.model:
+            if model.type=="sfincs":
+                index_path = os.path.join(model.path, "tiling", "indices")
+#                if model.make_precip_map and os.path.exists(index_path):            
+                if os.path.exists(index_path):            
+                    file_name = os.path.join(model.cycle_output_path, "sfincs_map.nc")
+                    p0max = model.domain.read_cumulative_precipitation(file_name=file_name,
+                                                                       time_range=[t0 + dt1, t1 + dt1])
+                    pmx = max(pmx, np.nanmax(p0max))
+                    okay = True
 
+        if okay:
 
+            cosmos.log("Making precipitation tiles ...")                
+                
+            print("Maximum precipitation : " + '%6.2f'%pmx + " mm")                         
 
-        pass
+            # Set color scale
+            if pmx<=50.0:
+                contour_set = "precip0050"
+            elif pmx<=100.0:   
+                contour_set = "precip0100"
+            elif pmx<=200.0:   
+                contour_set = "precip0200"
+            elif pmx<=500.0:   
+                contour_set = "precip0500"
+            else:    
+                contour_set = "precip1000"
+
+            pathstr = []
+            namestr = []
+            
+            # 24-hour increments
+            requested_times = pd.date_range(start=t0 + dt24,
+                                            end=t1,
+                                            freq='24H').to_pydatetime().tolist()
+
+            for it, t in enumerate(requested_times):
+                pathstr.append((t - dt24).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
+                namestr.append((t - dt24).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC")
+
+            # pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
+            # td = t1 - t0
+            # hrstr = str(int(td.days * 24 + td.seconds/3600))
+            # namestr.append("Combined " + hrstr + "-hour forecast")
+                
+            for model in cosmos.scenario.model:
+                if model.type=="sfincs":
+                    index_path = os.path.join(model.path, "tiling", "indices")            
+#                    if model.make_wave_map and os.path.exists(index_path):                            
+                    if os.path.exists(index_path):                            
+                        
+                        cosmos.log("Making precip tiles for model " + model.long_name + " ...")                
+    
+                        file_name = os.path.join(model.cycle_output_path, "sfincs_map.nc")
+                        
+                        # Precip map over 24-hour increments                    
+                        for it, t in enumerate(requested_times):
+                            p = model.domain.read_cumulative_precipitation(file_name=file_name,
+                                                                           time_range=[t - dt24 + dt1, t + dt1])                        
+                            p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+                                                        "precipitation",
+                                                        pathstr[it])                        
+                            make_precipitation_tiles(p, index_path, p_map_path, contour_set)
+    
+                        # # Full simulation        
+                        # hm0_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+                        #                             "hm0",
+                        #                             pathstr[-1])                    
+                        # hm0max = model.domain.read_hm0max(hm0max_file=file_name,
+                        #                                   time_range=[t0, t1 + dt1])        
+                        # make_wave_map_tiles(hm0max, index_path, hm0_map_path, contour_set)
+            
+            # Check if wave maps are available
+            p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+                                          "precipitation")
+            
+            ppath = os.path.join(scenario_path)
+            fo.copy_file(p_map_path, ppath)
+            dct={}
+            dct["name"]        = "precipitation" 
+            dct["long_name"]   = "Cumulative rainfall"
+            dct["description"] = "These are cumulative precipitations."
+            dct["format"]      = "xyz_tile_layer"
+            dct["max_native_zoom"]  = 10
+            
+            tms = []            
+            for it, pth in enumerate(pathstr):
+                tm = {}
+                tm["name"]   = pth
+                tm["string"] = namestr[it]
+                tms.append(tm)
+
+            dct["times"]        = tms  
+            
+            mp = next((x for x in cosmos.config.map_contours if x["name"] == contour_set), None)    
+            
+            lgn = {}
+            lgn["text"] = mp["string"]
+
+            cntrs = mp["contours"]
+
+            contours = []
+            
+            for cntr in cntrs:
+
+                contour = {}
+                contour["text"]  = cntr["string"]
+                contour["color"] = "#" + cntr["hex"]
+                contours.append(contour)
+    
+                lgn["contours"] = contours
+                dct["legend"]   = lgn
+            
+            self.map_variables.append(dct)
 
     def copy_bedlevelmaps(self):
 

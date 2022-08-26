@@ -4,6 +4,7 @@ Created on Mon Sep 20 12:17:22 2021
 
 @author: ormondt
 """
+import numpy as np
 
 from .cosmos_main import cosmos
 from cht.tiling.tiling import make_png_tiles
@@ -50,6 +51,19 @@ def make_wave_map_tiles(hm0max, index_path, wave_map_path, contour_set):
     if mp is not None:
         color_values = mp["contours"]    
         make_png_tiles(hm0max, index_path, wave_map_path,
+                       color_values=color_values,
+                       zoom_range=[0, 10],
+                       quiet=True)
+
+def make_precipitation_tiles(pcum, index_path, p_map_path, contour_set):
+    
+    pcum[np.where(pcum<1.0)] = np.nan
+
+    mp = next((x for x in cosmos.config.map_contours if x["name"] == contour_set), None)
+    
+    if mp is not None:
+        color_values = mp["contours"]    
+        make_png_tiles(pcum, index_path, p_map_path,
                        color_values=color_values,
                        zoom_range=[0, 10],
                        quiet=True)
