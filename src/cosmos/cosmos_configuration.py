@@ -7,6 +7,7 @@ Created on Tue May 11 16:02:04 2021
 
 import os
 from matplotlib import cm
+import numpy as np
 
 import cht.misc.xmlkit as xml
 from .cosmos_main import cosmos
@@ -15,9 +16,10 @@ from cht.misc.misc_tools import rgb2hex
 def read_config_file():
     
     main_path = cosmos.config.main_path
+    config_path = os.path.join(main_path,
+                               "configurations")
     
-    config_file = os.path.join(main_path,
-                               "configurations",
+    config_file = os.path.join(config_path,
                                cosmos.config.config_file)
     
     # Defaults
@@ -69,7 +71,7 @@ def read_config_file():
         cosmos.config.remove_old_cycles = xml_obj.remove_old_cycles[0].value
 
     # Map contours
-    contour_file = os.path.join(main_path, "configurations", "map_contours.xml")
+    contour_file = os.path.join(config_path, "map_contours.xml")
     xml_obj = xml.xml2obj(contour_file)
     cosmos.config.map_contours = []
     maps = xml_obj.tile_map
@@ -79,6 +81,9 @@ def read_config_file():
         map_type["string"] = tm.legend_text[0].value
         map_type["contours"] = []
         if hasattr(tm, "contour"):
+
+            # Contours are provided
+
             for c in tm.contour:
                 cnt = {}
                 cnt["string"] = c.legend_text[0].value
@@ -88,77 +93,60 @@ def read_config_file():
                 cnt["hex"]   = rgb2hex(tuple(cnt["rgb"]))
                 
                 map_type["contours"].append(cnt)
-        elif hasattr(tm, 'rgb_file'):
-            filename = tm.rgb_file[0].value
-            # filename = r"p:\11206085-onr-fhics\03_cosmos\configurations\GMT_globe.txt"
-            with open(filename) as f:
-                array = []
-                for line in f: # read rest of lines
-                    array.append([float(x) for x in line.split()])
-                    
-            nsteps = len(array)        
-            zmin = tm.lower[0].value
-            zmax = tm.upper[0].value
-            
-            difference = zmax - zmin
-            step = difference/nsteps
-            
-            for i in range(nsteps):
-
-                zl = round(zmin + i*step,1)
-                zu = round(zl + step,1)
-                z  = round(zl + 0.5*step,1)
-                
-                rgb = []
-                rgb.append(int(array[i][0]))
-                rgb.append(int(array[i][1]))
-                rgb.append(int(array[i][2]))
-                cnt={}
-                if i==0:
-                    cnt["string"] = "< " + str(zmin)
-                elif i==nsteps - 1:
-                    cnt["string"] = "> " + str(zmax)
-                else: 
-                    cnt["string"] = str(zl) + " - " + str(zu)                    
-                cnt["lower_value"] = zl
-                cnt["upper_value"] = zu
-                cnt["rgb"]   = rgb
-                cnt["hex"]   = rgb2hex(tuple(rgb))
-
-                map_type["contours"].append(cnt)
-            
-            map_type["contours"] = map_type["contours"][::-1]
-            
         else:
+
+            # Contours from contour map in config folder
+
+            filename = os.path.join(config_path, tm.color_map[0].value + ".txt")
+
+            vals  = np.loadtxt(filename)
+            nrows = np.shape(vals)[0]
+            ncols = np.shape(vals)[1]
+            if ncols==4:
+                v = np.squeeze(vals[:,0])
+                r = np.squeeze(vals[:,1])
+                g = np.squeeze(vals[:,2])
+                b = np.squeeze(vals[:,3])
+            else:    
+                v = np.arange(0.0, 1.000001, 1.0/(nrows-1))
+                r = np.squeeze(vals[:,0])
+                g = np.squeeze(vals[:,1])
+                b = np.squeeze(vals[:,2])
+                    
             zmin = tm.lower[0].value
             zmax = tm.upper[0].value
             step = tm.step[0].value
-            nsteps = int((zmax - zmin)/step) + 2
+            nsteps = round((zmax-zmin)/step + 2)    
+            
             for i in range(nsteps):
-
+                
+                # Interpolate
                 zl = zmin + (i - 1)*step
                 zu = zl + step
-                z  = zl + 0.5*step
-                zrel = (z - zmin + step)/(zmax + 0.5*step - zmin + 0.5*step)
-                rgb0 = cm.jet(zrel)
-                rgb = []
-                rgb.append(int(rgb0[0]*255))
-                rgb.append(int(rgb0[1]*255))
-                rgb.append(int(rgb0[2]*255))
+                z  = i/((nsteps - 1)*1.0)
+                rr = round(np.interp(z, v, r))
+                gg = round(np.interp(z, v, g))
+                bb = round(np.interp(z, v, b))                
+                rgb = [rr, gg, bb]
+
                 cnt={}
                 if i==0:
                     cnt["string"] = "< " + str(zmin)
+                    cnt["lower_value"] = -1.0e6
+                    cnt["upper_value"] = zu
                 elif i==nsteps - 1:
                     cnt["string"] = "> " + str(zmax)
+                    cnt["lower_value"] = zl
+                    cnt["upper_value"] = 1.0e6
                 else: 
                     cnt["string"] = str(zl) + " - " + str(zu)                    
-                cnt["lower_value"] = zl
-                cnt["upper_value"] = zu
+                    cnt["lower_value"] = zl
+                    cnt["upper_value"] = zu
                 cnt["rgb"]   = rgb
                 cnt["hex"]   = rgb2hex(tuple(rgb))
 
                 map_type["contours"].append(cnt)
             
             map_type["contours"] = map_type["contours"][::-1]
-
+            
         cosmos.config.map_contours.append(map_type)    
