@@ -9,7 +9,7 @@ import datetime
 import os
 import numpy as np
 import pandas as pd
-from geojson import Point, Feature, FeatureCollection
+from geojson import Point, LineString, Feature, FeatureCollection
 from pyproj import CRS
 from pyproj import Transformer
 
@@ -576,6 +576,55 @@ class WebViewer:
                     dct["legend"]   = lgn
                 
                 self.map_variables.append(dct)
+                
+                # Cyclone track(s)
+                subset = meteo_subset.subset(time_range=[],
+                                             stride=1)
+
+                tracks = meteo_subset.find_cyclone_tracks(xlim=[-110.0,-30.0],
+                                                          ylim=[5.0, 45.0],
+                                                          pcyc=99500.0)
+                
+                if tracks:
+                    features = []
+                    for track in tracks:
+                        
+                        points=[]
+                    
+                        for ip in range(np.size(track.lon)):
+                            point = Point((track.lon[ip], track.lat[ip]))               
+                            if track.vmax[ip]<64.0:
+                                cat = "TS"
+                            elif track.vmax[ip]<83.0:
+                                cat = "1"
+                            elif track.vmax[ip]<96.0:    
+                                cat = "2"
+                            elif track.vmax[ip]<113.0:    
+                                cat = "3"
+                            elif track.vmax[ip]<137.0:    
+                                cat = "4"
+                            else:    
+                                cat = "5"
+                            features.append(Feature(geometry=point,
+                                                    properties={"time":track.time[ip].strftime("%Y/%m/%d %H:%M") + " UTC",
+                                                                "lon":track.lon[ip],
+                                                                "lat":track.lat[ip],
+                                                                "vmax":1.13*track.vmax[ip]/1.94384,
+                                                                "pc":track.pc[ip],
+                                                                "category":cat}))
+                            
+                            points.append([track.lon[ip], track.lat[ip]])
+                        
+                        trk = LineString(coordinates=points)
+                        features.append(Feature(geometry=trk,
+                                                properties={"name":"No name"}))
+                    
+                    feature_collection = FeatureCollection(features)
+                    file_name = os.path.join(scenario_path, "track.geojson.js")
+                    cht.misc.misc_tools.write_json_js(file_name,
+                                                      feature_collection,
+                                                      "var track_data =")
+                                
         
         # Cumulative rainfall
         
