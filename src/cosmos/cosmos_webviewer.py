@@ -82,8 +82,8 @@ class WebViewer:
         self.copy_floodmap()        
         self.make_wave_maps()
         self.copy_sederomap()
-        self.make_meteo_maps()
         self.copy_bedlevelmaps()
+        self.make_meteo_maps()
         mv_file = os.path.join(scenario_path,
                                "variables.js")
         
@@ -288,14 +288,13 @@ class WebViewer:
             contours = []
             
             for cntr in cntrs:
-
                 contour = {}
                 contour["text"]  = cntr["string"]
                 contour["color"] = "#" + cntr["hex"]
                 contours.append(contour)
     
-                lgn["contours"] = contours
-                dct["legend"]   = lgn
+            lgn["contours"] = contours
+            dct["legend"]   = lgn
             
             self.map_variables.append(dct)
 
@@ -426,8 +425,8 @@ class WebViewer:
                     contour["color"] = "#" + cntr["hex"]
                     contours.append(contour)
         
-                    lgn["contours"] = contours
-                    dct["legend"]   = lgn
+                lgn["contours"] = contours
+                dct["legend"]   = lgn
                 
                 self.map_variables.append(dct)
                 
@@ -462,14 +461,13 @@ class WebViewer:
             contours = []
             
             for cntr in cntrs:
-
                 contour = {}
                 contour["text"]  = cntr["string"]
                 contour["color"] = "#" + cntr["hex"]
                 contours.append(contour)
     
-                lgn["contours"] = contours
-                dct["legend"]   = lgn
+            lgn["contours"] = contours
+            dct["legend"]   = lgn
             
             self.map_variables.append(dct)
 
@@ -565,15 +563,14 @@ class WebViewer:
     
                 contours = []
                 
-                for cntr in cntrs:
-    
+                for cntr in cntrs:    
                     contour = {}
                     contour["text"]  = cntr["string"]
                     contour["color"] = "#" + cntr["hex"]
                     contours.append(contour)
         
-                    lgn["contours"] = contours
-                    dct["legend"]   = lgn
+                lgn["contours"] = contours
+                dct["legend"]   = lgn
                 
                 self.map_variables.append(dct)
                 
@@ -743,14 +740,13 @@ class WebViewer:
             contours = []
             
             for cntr in cntrs:
-
                 contour = {}
                 contour["text"]  = cntr["string"]
                 contour["color"] = "#" + cntr["hex"]
                 contours.append(contour)
     
-                lgn["contours"] = contours
-                dct["legend"]   = lgn
+            lgn["contours"] = contours
+            dct["legend"]   = lgn
             
             self.map_variables.append(dct)
 
@@ -784,18 +780,26 @@ class WebViewer:
             cntrs = mp["contours"]
 
             contours = []
+
+            for cntr in cntrs:
+                contour = {}
+                contour["text"]  = cntr["string"]
+                contour["color"] = "#" + cntr["hex"]
+                contours.append(contour)    
+            lgn["contours"] = contours
+            dct["legend"]   = lgn
             
-            for icntr,cntr in enumerate(cntrs):
-                if icntr in np.arange(0, 101,10):
-                    contour = {}
-                    contour["text"]  = cntr["string"]
-                    contour["color"] = "#" + cntr["hex"]
-                    contours.append(contour)
+            # for icntr,cntr in enumerate(cntrs):
+            #     if icntr in np.arange(0, 101,10):
+            #         contour = {}
+            #         contour["text"]  = cntr["string"]
+            #         contour["color"] = "#" + cntr["hex"]
+            #         contours.append(contour)
         
-                    lgn["contours"] = contours
-                    dct["legend"]   = lgn
-                else:
-                    continue
+            #         lgn["contours"] = contours
+            #         dct["legend"]   = lgn
+            #     else:
+            #         continue
             
             self.map_variables.append(dct)
             
@@ -818,17 +822,30 @@ class WebViewer:
 
             contours = []
             
-            for icntr,cntr in enumerate(cntrs):
-                if icntr in np.arange(0, 101,10):
-                    contour = {}
-                    contour["text"]  = cntr["string"]
-                    contour["color"] = "#" + cntr["hex"]
-                    contours.append(contour)
+            for cntr in cntrs:
+                contour = {}
+                contour["text"]  = cntr["string"]
+                contour["color"] = "#" + cntr["hex"]
+                contours.append(contour)    
+            lgn["contours"] = contours
+            dct["legend"]   = lgn
+
+
+            # cntrs = mp["contours"]
+
+            # contours = []
+            
+            # for icntr,cntr in enumerate(cntrs):
+            #     if icntr in np.arange(0, 101,10):
+            #         contour = {}
+            #         contour["text"]  = cntr["string"]
+            #         contour["color"] = "#" + cntr["hex"]
+            #         contours.append(contour)
         
-                    lgn["contours"] = contours
-                    dct["legend"]   = lgn
-                else:
-                    continue
+            #         lgn["contours"] = contours
+            #         dct["legend"]   = lgn
+            #     else:
+            #         continue
             
             self.map_variables.append(dct)
             
