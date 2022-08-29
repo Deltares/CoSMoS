@@ -256,6 +256,8 @@ class WebViewer:
 
     def copy_floodmap(self):
 
+        cosmos.log("Copying flood map tiles ...")
+
         scenario_path = os.path.join(self.path,
                                      "data",
                                      cosmos.scenario.name)
@@ -432,6 +434,8 @@ class WebViewer:
                 
     def copy_sederomap(self):
 
+        cosmos.log("Copying sed/ero map tiles ...")
+        
         scenario_path = os.path.join(self.path,
                                      "data",
                                      cosmos.scenario.name)
@@ -505,6 +509,8 @@ class WebViewer:
     def make_meteo_maps(self):
         
         from cht.misc import xmlkit as xml
+
+        cosmos.log("Making meteo map tiles ...")
 
         scenario_path = os.path.join(self.path,
                                      "data",
@@ -752,6 +758,8 @@ class WebViewer:
 
     def copy_bedlevelmaps(self):
 
+        cosmos.log("Copying bed level map tiles ...")
+        
         scenario_path = os.path.join(self.path,
                                      "data",
                                      cosmos.scenario.name)
