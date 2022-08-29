@@ -434,7 +434,7 @@ class WebViewer:
                 
     def copy_sederomap(self):
 
-        cosmos.log("Copying sed/ero map tiles ...")
+        cosmos.log("Copying sedimentation/erosion map tiles ...")
         
         scenario_path = os.path.join(self.path,
                                      "data",
