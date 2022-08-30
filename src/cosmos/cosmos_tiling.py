@@ -52,7 +52,7 @@ def make_wave_map_tiles(hm0max, index_path, wave_map_path, contour_set):
         color_values = mp["contours"]    
         make_png_tiles(hm0max, index_path, wave_map_path,
                        color_values=color_values,
-                       zoom_range=[0, 10],
+                       zoom_range=[0, 9],
                        quiet=True)
 
 def make_precipitation_tiles(pcum, index_path, p_map_path, contour_set):

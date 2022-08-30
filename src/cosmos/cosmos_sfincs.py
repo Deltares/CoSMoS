@@ -128,34 +128,7 @@ class CoSMoS_SFINCS(Model):
                 for pnt in self.domain.flow_boundary_point:
                     pnt.data += vv
                 
-            # if self.sa_correction or self.ssa_correction:
-            #     times = self.domain.flow_boundary_point[0].data.index
-            #     names = []
-            #     amp   = []
-            #     phi   = []
-            #     if self.sa_correction:
-            #         names.append("SA")
-            #         amp.append(self.sa_correction[0])
-            #         phi.append(self.sa_correction[1])
-            #     if self.ssa_correction:
-            #         names.append("SSA")
-            #         amp.append(self.ssa_correction[0])
-            #         phi.append(self.ssa_correction[1])                
-            #     df = pd.DataFrame()
-            #     df["component"] = pd.Series(names) 
-            #     df["amplitude"] = pd.Series(amp) 
-            #     df["phase"]     = pd.Series(phi) 
-            #     df = df.set_index("component")
-            #     vv = predict(df, times)
-
-            #     for pnt in self.domain.flow_boundary_point:
-            #         pnt.data += vv
-            
             self.domain.write_flow_boundary_conditions()
-            
-            # # In case of nesting in a BEWARE model, re-write bnd file
-            # if self.flow_nested.type.lower() == "beware":
-            #     self.domain.write_flow_boundary_points()
             
             
         elif self.domain.input.bcafile:
@@ -191,8 +164,6 @@ class CoSMoS_SFINCS(Model):
            
             # We do this following bit just to make sure the file names are set.
             # The user should probably make sure that they are present in the sfincs.inp file.
-
-#            self.domain.input.bwvfile = "sfincs.bwv"
 
             nest2(self.wave_nested.domain,
                   self.domain,

@@ -204,8 +204,6 @@ class CoSMoS_HurryWave(Model):
         output_path = self.cycle_output_path
         post_path   = self.cycle_post_path
             
-#        zstfile = os.path.join(output_path, "zst.txt")
-        
         if not self.domain.input.tref:
             # This model has been run before. The model instance has not data on tref, obs points etc.
             self.domain.read_input_file(os.path.join(input_path, "hurrywave.inp"))
@@ -224,82 +222,197 @@ class CoSMoS_HurryWave(Model):
                 df.index.name='date_time'
                 df["Hm0"]=vhm0[station.name]
                 df["Tp"]=vtp[station.name]
-#                vv=v[station.name]
-#                vv.index.name='date_time'
-#                vv.name='hm0'
                 file_name = os.path.join(post_path,
                                          "waves." + station.name + ".csv")
                 df.to_csv(file_name,
                           date_format='%Y-%m-%dT%H:%M:%S',
                           float_format='%.3f')        
 
-            # v = self.domain.read_timeseries_output(path=output_path,
-            #                                        parameter="tp")
-            # for station in self.station:                
-            #     vv=v[station.name]
-            #     df.index.name='date_time'
-            #     vv.name='hm0'
-            #     file_name = os.path.join(post_path,
-            #                              "tp." + station.name + ".csv")
-            #     vv.to_csv(file_name,
-            #               date_format='%Y-%m-%dT%H:%M:%S',
-            #               float_format='%.3f')        
 
         # Make wave map tiles
-        if cosmos.config.make_wave_maps and self.make_wave_map and not cosmos.config.webviewer:
+        if cosmos.config.make_wave_maps:
 
-            index_path = os.path.join(self.path, "tiling", "indices")
+            # 24 hour increments  
+            dtinc = 24
+
+            # Wave map for the entire simulation
+            dt1 = datetime.timedelta(hours=1)
+            dt  = datetime.timedelta(hours=dtinc)
+            t0  = cosmos.cycle_time.replace(tzinfo=None)    
+            t1  = cosmos.stop_time
             
-            if os.path.exists(index_path):
+            # Determine if wave maps can be made
+            okay  = False
+            index_path = os.path.join(self.path, "tiling", "indices")
+            if self.make_wave_map and os.path.exists(index_path):            
+                 okay = True
+
+            if okay:
+
+                cosmos.log("Making wave map tiles for model " + self.long_name + " ...")                
+
+                contour_set = "Hm0"            
+                pathstr = []
                 
-                if self.domain.input.outputformat[0:2] == "bin":
-                    file_name = os.path.join(output_path, "hm0max.dat")
-                elif self.domain.input.outputformat[0:2] == "asc":
-                    file_name = os.path.join(output_path, "hm0max.txt")
-                else:
-                    file_name = os.path.join(output_path, "hurrywave_map.nc")
-
-                # Wave map for the entire simulation
-                dt1 = datetime.timedelta(hours=1)
-                dt6 = datetime.timedelta(hours=6)
-                dt7 = datetime.timedelta(hours=7)
-                t0 = cosmos.cycle_time.replace(tzinfo=None)    
-                t1 = cosmos.stop_time
-                tr = [t0 + dt7, t1 + dt1]
-                tstr = "combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ")
-                ttlstr = "Combined 48-hour forecast"
-
-                hm0_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-                                            "hm0",
-                                            tstr)
-
-                hm0max = self.domain.read_hm0max(hm0max_file=file_name,
-                                                  time_range=tr)
+                # 6-hour increments
+                requested_times = pd.date_range(start=t0 + dt,
+                                                end=t1,
+                                                freq=str(dtinc) + "H").to_pydatetime().tolist()
     
-                make_wave_map_tiles(hm0max, index_path, hm0_map_path,"Hm0")
-
-                # Wave map over 6-hour increments
-                
-                # Loop through time
-                t0 = cosmos.cycle_time.replace(tzinfo=None)    
-                requested_times = pd.date_range(start=t0 + dt6,
-                                          end=t1,
-                                          freq='6H').to_pydatetime().tolist()
-                
-                cosmos.log("Making wave map tiles ...")    
                 for it, t in enumerate(requested_times):
-                    tr = [t - dt1, t + dt1]
+                    pathstr.append((t - dt).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
+    
+                pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
+                            
+                file_name = os.path.join(self.cycle_output_path, "hurrywave_map.nc")
+                
+                # Wave map over dt-hour increments                    
+                for it, t in enumerate(requested_times):
                     hm0max = self.domain.read_hm0max(hm0max_file=file_name,
-                                                      time_range=tr)
-                    
-                    tstr = (t - dt6).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ")
-                    ttlstr = (t - dt6).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC"
+                                                      time_range=[t - dt + dt1, t + dt1])                        
                     hm0_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
                                                 "hm0",
-                                                tstr)
-                    
-                    make_wave_map_tiles(hm0max, index_path, hm0_map_path,"Hm0")
+                                                pathstr[it])                        
+                    make_wave_map_tiles(hm0max, index_path, hm0_map_path, contour_set)
 
-                cosmos.log("Wave map tiles done.")    
+                # Full simulation        
+                hm0_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+                                            "hm0",
+                                            pathstr[-1])                    
+                hm0max = self.domain.read_hm0max(hm0max_file=file_name,
+                                                  time_range=[t0, t1 + dt1])        
+                make_wave_map_tiles(hm0max, index_path, hm0_map_path, contour_set)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#         # Make wave map tiles
+# #        if cosmos.config.make_wave_maps and self.make_wave_map and not cosmos.config.webviewer:
+#         if cosmos.config.make_wave_maps and self.make_wave_map:
+
+#             index_path = os.path.join(self.path, "tiling", "indices")
+            
+#             if os.path.exists(index_path):
+                
+#                 if self.domain.input.outputformat[0:2] == "bin":
+#                     file_name = os.path.join(output_path, "hm0max.dat")
+#                 elif self.domain.input.outputformat[0:2] == "asc":
+#                     file_name = os.path.join(output_path, "hm0max.txt")
+#                 else:
+#                     file_name = os.path.join(output_path, "hurrywave_map.nc")
+
+
+
+                
+#                 # 6-hour increments
+#                 requested_times = pd.date_range(start=t0 + dt6,
+#                                                 end=t1,
+#                                                 freq='6H').to_pydatetime().tolist()
+    
+#                 for it, t in enumerate(requested_times):
+#                     pathstr.append((t - dt6).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
+#                     namestr.append((t - dt6).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC")
+    
+#                 pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
+#                 td = t1 - t0
+#                 hrstr = str(int(td.days * 24 + td.seconds/3600))
+#                 namestr.append("Combined " + hrstr + "-hour forecast")
+                    
+#                 for model in cosmos.scenario.model:
+#                     if model.type=="hurrywave":
+#                         index_path = os.path.join(model.path, "tiling", "indices")            
+#                         if model.make_wave_map and os.path.exists(index_path):                            
+                            
+#                             cosmos.log("Making wave map tiles for model " + model.long_name + " ...")                
+        
+#                             file_name = os.path.join(model.cycle_output_path, "hurrywave_map.nc")
+                            
+#                             # Wave map over 6-hour increments                    
+#                             for it, t in enumerate(requested_times):
+#                                 hm0max = model.domain.read_hm0max(hm0max_file=file_name,
+#                                                                   time_range=[t - dt1, t + dt1])                        
+#                                 hm0_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+#                                                             "hm0",
+#                                                             pathstr[it])                        
+#                                 make_wave_map_tiles(hm0max, index_path, hm0_map_path, contour_set)
+        
+#                             # Full simulation        
+#                             hm0_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+#                                                         "hm0",
+#                                                         pathstr[-1])                    
+#                             hm0max = model.domain.read_hm0max(hm0max_file=file_name,
+#                                                               time_range=[t0, t1 + dt1])        
+#                             make_wave_map_tiles(hm0max, index_path, hm0_map_path, contour_set)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#                 # Wave map for the entire simulation
+#                 dt1 = datetime.timedelta(hours=1)
+# #                dt6 = datetime.timedelta(hours=6)
+#                 dt24 = datetime.timedelta(hours=24)
+# #                dt7 = datetime.timedelta(hours=7)
+#                 t0 = cosmos.cycle_time.replace(tzinfo=None)    
+#                 t1 = cosmos.stop_time
+#                 tr = [t0 + dt7, t1 + dt1]
+#                 tstr = "combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ")
+#                 ttlstr = "Combined 48-hour forecast"
+
+#                 hm0_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+#                                             "hm0",
+#                                             tstr)
+
+#                 hm0max = self.domain.read_hm0max(hm0max_file=file_name,
+#                                                   time_range=tr)
+    
+#                 make_wave_map_tiles(hm0max, index_path, hm0_map_path,"Hm0")
+
+#                 # Wave map over 6-hour increments
+                
+#                 # Loop through time
+#                 t0 = cosmos.cycle_time.replace(tzinfo=None)    
+#                 requested_times = pd.date_range(start=t0 + dt6,
+#                                           end=t1,
+#                                           freq='6H').to_pydatetime().tolist()
+                
+#                 cosmos.log("Making wave map tiles ...")    
+#                 for it, t in enumerate(requested_times):
+#                     tr = [t - dt1, t + dt1]
+#                     hm0max = self.domain.read_hm0max(hm0max_file=file_name,
+#                                                       time_range=tr)
+                    
+#                     tstr = (t - dt6).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ")
+#                     ttlstr = (t - dt6).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC"
+#                     hm0_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+#                                                 "hm0",
+#                                                 tstr)
+                    
+#                     make_wave_map_tiles(hm0max, index_path, hm0_map_path,"Hm0")
+
+#                 cosmos.log("Wave map tiles done.")    
 
 
