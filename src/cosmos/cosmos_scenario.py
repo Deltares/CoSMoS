@@ -418,7 +418,11 @@ class Scenario:
                 # Loop through all available models
                 for model in self.model:
                     okay = True
-                    if not model.flow_nested and not model.wave_nested:
+                    if type_list:
+                        if not model.type in type_list:
+                            okay = False
+                            continue
+                    if not model.flow_nested_name and not model.wave_nested_name:
                         okay = False
                         continue                                            
                     # Filter by region
@@ -428,10 +432,6 @@ class Scenario:
                             okay = False
                             continue
                     # Filter by type
-                    if type_list:
-                        if not model.type in type_list:
-                            okay = False
-                            continue
                     if okay:
                         cl.add_model(model)
                     

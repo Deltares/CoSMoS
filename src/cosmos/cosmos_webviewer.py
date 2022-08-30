@@ -72,6 +72,9 @@ class WebViewer:
         scenario_path = os.path.join(self.path,
                                      "data",
                                      cosmos.scenario.name)
+
+        cosmos.log("Removing old scenario folder from web viewer ...")
+
         fo.rmdir(scenario_path)
         fo.mkdir(os.path.join(scenario_path))
         
