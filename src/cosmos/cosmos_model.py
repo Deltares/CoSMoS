@@ -27,8 +27,10 @@ class Model:
         self.flow               = False
         self.wave               = False
         self.priority           = 10    
-        self.flow_nested        = False
-        self.wave_nested        = False
+#        self.flow_nested        = False
+#        self.wave_nested        = False
+        self.flow_nested        = None
+        self.wave_nested        = None
         self.flow_nested_name   = None
         self.wave_nested_name   = None
         self.nested_flow_models = []
@@ -77,11 +79,11 @@ class Model:
                 
         if hasattr(xml_obj, "flownested"):
             if not xml_obj.flownested[0].value == "none":
-                self.flow_nested = True
+#                self.flow_nested = True
                 self.flow_nested_name = xml_obj.flownested[0].value
         if hasattr(xml_obj, "wavenested"):
             if not xml_obj.wavenested[0].value == "none":
-                self.wave_nested = True
+#                self.wave_nested = True
                 self.wave_nested_name = xml_obj.wavenested[0].value
         coordsys     = xml_obj.coordsys[0].value
         self.crs = CRS(coordsys)        

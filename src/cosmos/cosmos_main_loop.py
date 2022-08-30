@@ -343,7 +343,7 @@ def get_start_and_stop_times():
         nested_wave_start_time = start_time
         
         while nested:
-            
+
             model.wave_start_time = min(model.wave_start_time,
                                         nested_wave_start_time)
             

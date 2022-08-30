@@ -9,6 +9,7 @@ import os
 import pandas as pd
 import numpy as np
 import shutil
+import datetime
 
 from cht.sfincs.sfincs import SFINCS
 import cht.misc.fileops as fo
@@ -399,26 +400,84 @@ class CoSMoS_SFINCS(Model):
                           date_format='%Y-%m-%dT%H:%M:%S',
                           float_format='%.3f')        
 
+
         # Make flood map tiles
-#        if cosmos.config.make_flood_maps and self.make_flood_map and self.domain.input.outputformat=="bin":
         if cosmos.config.make_flood_maps and self.make_flood_map:
 
-            flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+            flood_map_pathflood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
                                           "flood_map")
             
             index_path = os.path.join(self.path, "tiling", "indices")
             topo_path = os.path.join(self.path, "tiling", "topobathy")
             
             if os.path.exists(index_path) and os.path.exists(topo_path):
+                
+                cosmos.log("Making flood map tiles for model " + self.long_name + " ...")                
 
-                if self.domain.input.outputformat[0:3]=="bin":                
-                    zsmax_file = os.path.join(output_path, "zsmax.dat")
-                    zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file)
-                else:
-                    zsmax_file = os.path.join(output_path, "sfincs_map.nc")
-                    zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file)
+                # 24 hour increments  
+                dtinc = 24
+    
+                # Wave map for the entire simulation
+                dt1 = datetime.timedelta(hours=1)
+                dt  = datetime.timedelta(hours=dtinc)
+                t0  = cosmos.cycle_time.replace(tzinfo=None)    
+                t1  = cosmos.stop_time
                     
-                cosmos.log("Making flood map tiles for model " + self.name)    
+                pathstr = []
+                
+                # 6-hour increments
+                requested_times = pd.date_range(start=t0 + dt,
+                                                end=t1,
+                                                freq=str(dtinc) + "H").to_pydatetime().tolist()
+    
+                for it, t in enumerate(requested_times):
+                    pathstr.append((t - dt).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
+    
+                pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
+                            
+                zsmax_file = os.path.join(output_path, "sfincs_map.nc")
+                
+                # Wave map over dt-hour increments                    
+                for it, t in enumerate(requested_times):
+
+                    zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file,
+                                                   time_range=[t - dt + dt1, t + dt1])
+                    flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+                                                  "flood_map",
+                                                  pathstr[it])                                            
+                    make_flood_map_tiles(zsmax, index_path, topo_path, flood_map_path,
+                                             water_level_correction=0.0)
+
+                # Full simulation        
+                flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+                                              "flood_map",
+                                               pathstr[-1])                    
+                zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file,
+                                               time_range=[t0, t1 + dt1])
                 make_flood_map_tiles(zsmax, index_path, topo_path, flood_map_path,
-                                         water_level_correction=0.0)
-                cosmos.log("Flood map tiles done.")    
+                                     water_level_correction=0.0)
+
+
+#         # Make flood map tiles
+# #        if cosmos.config.make_flood_maps and self.make_flood_map and self.domain.input.outputformat=="bin":
+#         if cosmos.config.make_flood_maps and self.make_flood_map:
+
+#             flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+#                                           "flood_map")
+            
+#             index_path = os.path.join(self.path, "tiling", "indices")
+#             topo_path = os.path.join(self.path, "tiling", "topobathy")
+            
+#             if os.path.exists(index_path) and os.path.exists(topo_path):
+
+#                 if self.domain.input.outputformat[0:3]=="bin":                
+#                     zsmax_file = os.path.join(output_path, "zsmax.dat")
+#                     zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file)
+#                 else:
+#                     zsmax_file = os.path.join(output_path, "sfincs_map.nc")
+#                     zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file)
+                    
+#                 cosmos.log("Making flood map tiles for model " + self.name)    
+#                 make_flood_map_tiles(zsmax, index_path, topo_path, flood_map_path,
+#                                          water_level_correction=0.0)
+#                 cosmos.log("Flood map tiles done.")    
