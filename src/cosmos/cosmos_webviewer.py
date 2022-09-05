@@ -57,7 +57,7 @@ class WebViewer:
             fo.copy_file(template_path, self.path)
 
             # Change the title string in index.html to the scenario long name
-            cht.misc_tools.findreplace(os.path.join(self.path, "index.html"),
+            cht.misc.misc_tools.findreplace(os.path.join(self.path, "index.html"),
                                        "COSMOS_VIEWER",
                                        cosmos.scenario.long_name)
 
@@ -86,6 +86,7 @@ class WebViewer:
         self.copy_wave_maps()
         self.copy_sederomap()
         self.copy_bedlevelmaps()
+        self.make_runup_map()
         self.make_meteo_maps()
         mv_file = os.path.join(scenario_path,
                                "variables.js")
@@ -249,13 +250,13 @@ class WebViewer:
                                     "wavebuoys.geojson.js")
             cht.misc.misc_tools.write_json_js(buoys_file, feature_collection, "var buoys =")
         
-        # Extreme runup height
-        for model in cosmos.scenario.model:
-            if model.type == 'beware':
-                model.domain.read_data(os.path.join(model.cycle_output_path,
-                                                    "BW_output.nc"))                
-                model.domain.write_to_geojson(scenario_path, cosmos.scenario.name)
-                model.domain.write_to_csv(scenario_path, cosmos.scenario.name)
+        # # Extreme runup height
+        # for model in cosmos.scenario.model:
+        #     if model.type == 'beware':
+        #         model.domain.read_data(os.path.join(model.cycle_output_path,
+        #                                             "BW_output.nc"))                
+        #         model.domain.write_to_geojson(scenario_path, cosmos.scenario.name)
+        #         model.domain.write_to_csv(scenario_path, cosmos.scenario.name)
 
     def copy_floodmap(self):
 
@@ -834,6 +835,208 @@ class WebViewer:
             
             self.map_variables.append(dct)
             
+
+    def make_runup_map(self):        
+
+        output_path = os.path.join(self.path,
+                                     "data",
+                                     cosmos.scenario.name)
+
+        # Extreme runup height
+
+        for model in cosmos.scenario.model:
+            if model.type == 'beware':
+
+                
+
+                model.domain.read_data(os.path.join(model.cycle_output_path,
+                                                    "BW_output.nc"))                
+
+                features = []
+                transformer = Transformer.from_crs(model.crs,
+                                                   'WGS 84',
+                                                   always_xy=True)
+                
+                for ip in range(len(model.domain.filename)):
+                    x, y = transformer.transform(model.domain.xp[ip],
+                                                 model.domain.yp[ip])
+                    point = Point((x, y))
+                    name = 'Loc nr: ' +  str(model.domain.filename[ip])
+                                
+                    id = np.argmax(model.domain.R2p[ip,:])                                                                       
+                    features.append(Feature(geometry=point,
+                                            properties={"model_name":model.name,
+                                                        "LocNr":int(model.domain.filename[ip]),
+                                                        "Lon":x,
+                                                        "Lat":y,                                                
+                                                        "Setup":round(model.domain.setup[ip, id],2),
+                                                        "Swash":round(model.domain.swash[ip, id],2),
+                                                        "TWL":round(model.domain.R2p[ip, id],2)}))
+                
+                feature_collection = FeatureCollection(features)
+                
+                if features:
+                    feature_collection = FeatureCollection(features)
+                    output_path_runup =  os.path.join(output_path, 'extreme_runup_height\\')
+                    fo.mkdir(output_path_runup)
+                    file_name = os.path.join(output_path_runup,
+                                            "extreme_runup_height.geojson.js")
+                    cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var runup =")
+
+                dct={}
+                dct["name"]        = "extreme_runup_height"
+                dct["long_name"]   = "Extreme run-up"
+                dct["description"] = "These are the predicted extreme run-up heights"
+                dct["format"]      = "geojson"
+
+
+                mp = next((x for x in cosmos.config.map_contours if x["name"] == "run_up"), None)                    
+ 
+                lgn = {}
+                lgn["text"] = mp["string"]
+    
+                cntrs = mp["contours"]
+    
+                contours = []
+                
+                for cntr in cntrs:
+                    contour = {}
+                    contour["text"]  = cntr["string"]
+                    contour["color"] = "#" + cntr["hex"]
+                    contours.append(contour)
+        
+                lgn["contours"] = contours
+                dct["legend"]   = lgn
+
+    
+                self.map_variables.append(dct)
+
+                    
+                features = []
+                    
+                for ip in range(len(model.domain.filename)):
+                    x, y = transformer.transform(model.domain.xo[ip],
+                                                  model.domain.yo[ip])
+                    point = Point((x, y))
+                    name = 'Loc nr: ' +  str(model.domain.filename[ip])
+                                
+                    id = np.argmax(model.domain.R2p[ip,:])                                                                       
+                    features.append(Feature(geometry=point,
+                                            properties={"LocNr":int(model.domain.filename[ip]),
+                                                        "Lon": x,
+                                                        "Lat": y,
+                                                        "Hs":round(model.domain.Hs[ip, id],2),
+                                                        "Tp":round(model.domain.Tp[ip, id],1),
+                                                        "WL":round(model.domain.WL[ip, id],2)}))
+                
+                feature_collection = FeatureCollection(features)
+                
+                if features:
+                    feature_collection = FeatureCollection(features)
+                    output_path_waves =  os.path.join(output_path, 'extreme_sea_level_and_wave_height\\')
+                    os.mkdir(output_path_waves)
+                    file_name = os.path.join(output_path_waves,     
+                                            "extreme_sea_level_and_wave_height.geojson.js")
+                    cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var swl =")
+                # with open(output_path + r"\\" + scenario + '.TWL.geojson.js', 'w') as fl:
+                #     fl.write('const point_' + scenario + '_TWL = ')
+                #     dump(feature_collection, fl)
+                #     fl.write("  \n   \n")
+                #     fl.write('pt_' + scenario + '_' + 'BT' + '_TWL.addData(point_' + scenario + '_TWL);')
+
+                dct={}
+                dct["name"]        = "extreme_sea_level_and_wave_height"
+                dct["long_name"]   = "Extreme run-up boundaries"
+                dct["description"] = "These are the run-up boundary conditions"
+                dct["format"]      = "geojson"
+
+                mp = next((x for x in cosmos.config.map_contours if x["name"] == "run_up"), None)                    
+ 
+                lgn = {}
+                lgn["text"] = mp["string"]
+    
+                cntrs = mp["contours"]
+    
+                contours = []
+                
+                for cntr in cntrs:
+                    contour = {}
+                    contour["text"]  = cntr["string"]
+                    contour["color"] = "#" + cntr["hex"]
+                    contours.append(contour)
+        
+                lgn["contours"] = contours
+                dct["legend"]   = lgn
+    
+                self.map_variables.append(dct)
+
+
+        # Time series 
+            
+        for ip in range(len(model.domain.filename)):
+
+            d= {'WL': model.domain.WL[ip,:],'Setup': model.domain.setup[ip,:], 'Swash': model.domain.swash[ip,:], 'Runup': model.domain.R2p[ip,:]}       
+
+            v= pd.DataFrame(data=d, index =  pd.date_range(model.domain.input.tstart, periods=len(model.domain.swash[ip,:]), freq= '0.5H'))
+            obs_file = "extreme_runup_height." + model.domain.runid + "." +str(model.domain.filename[ip]) + ".csv.js"
+
+            local_file_path = os.path.join(output_path,  "timeseries",
+                                               obs_file)
+#            local_file_path = os.path.join(output_path,  
+#                                           obs_file)
+            s= v.to_csv(path_or_buf=None,
+                         date_format='%Y-%m-%dT%H:%M:%S',
+                         float_format='%.3f',
+                         header= False, index_label= 'datetime')        
+            
+            cht.misc.misc_tools.write_csv_js(local_file_path, s, "var csv = `date_time,wl,setup,swash,runup")
+
+
+#         features = []
+            
+#         for ip in range(len(self.filename)):
+#             x, y = transformer.transform(self.xp[ip],
+#                                          self.yp[ip])
+#             point = Point((x, y))
+#             name = 'Loc nr: ' +  str(self.filename[ip])
+                        
+#             obs_file = "extreme_runup_height." + self.runid + "." +str(self.filename[ip]) + ".csv.js"
+                                                          
+#             features.append(Feature(geometry=point,
+#                                     properties={"name":int(self.filename[ip]),
+#                                                 "LocNr":int(self.filename[ip]),
+#                                                 "Lon":x,
+#                                                 "Lat":y,
+#                                                 "model_name":self.name,
+#                                                 "model_type":self.type,
+#                                                 "TWL":  np.round(np.max(self.R2p[ip,:]),2),
+#                                                 "obs_file": obs_file}))
+#             d= {'WL': self.WL[ip,:],'Setup': self.setup[ip,:], 'Swash': self.swash[ip,:], 'Runup': self.R2p[ip,:]}       
+#             v= pd.DataFrame(data=d, index =  pd.date_range(self.input.tstart, periods=len(self.swash[ip,:]), freq= '0.5H'))
+    
+#             local_file_path = os.path.join(output_path,  "timeseries",
+#                                                obs_file)
+# #            local_file_path = os.path.join(output_path,  
+# #                                           obs_file)
+#             s= v.to_csv(path_or_buf=None,
+#                          date_format='%Y-%m-%dT%H:%M:%S',
+#                          float_format='%.3f',
+#                          header= False, index_label= 'datetime')        
+            
+#             cht.misc.misc_tools.write_csv_js(local_file_path, s, "var csv = `date_time,wl,setup,swash,runup")
+                             
+#         if features:
+#             feature_collection = FeatureCollection(features)
+#             runup_file = os.path.join(output_path,
+#                                     "twls.geojson.js")
+#             cht.misc.misc_tools.write_json_js(runup_file, feature_collection, "var TWL =")
+
+
+
+
+#                model.domain.write_to_geojson(scenario_path, cosmos.scenario.name)
+#                model.domain.write_to_csv(scenario_path, cosmos.scenario.name)
+
 
     def upload(self):        
 
