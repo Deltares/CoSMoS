@@ -912,63 +912,63 @@ class WebViewer:
                 self.map_variables.append(dct)
 
                     
-                features = []
+                # features = []
                     
-                for ip in range(len(model.domain.filename)):
-                    x, y = transformer.transform(model.domain.xo[ip],
-                                                  model.domain.yo[ip])
-                    point = Point((x, y))
-                    name = 'Loc nr: ' +  str(model.domain.filename[ip])
+                # for ip in range(len(model.domain.filename)):
+                #     x, y = transformer.transform(model.domain.xo[ip],
+                #                                   model.domain.yo[ip])
+                #     point = Point((x, y))
+                #     name = 'Loc nr: ' +  str(model.domain.filename[ip])
                                 
-                    id = np.argmax(model.domain.R2p[ip,:])                                                                       
-                    features.append(Feature(geometry=point,
-                                            properties={"LocNr":int(model.domain.filename[ip]),
-                                                        "Lon": x,
-                                                        "Lat": y,
-                                                        "Hs":round(model.domain.Hs[ip, id],2),
-                                                        "Tp":round(model.domain.Tp[ip, id],1),
-                                                        "WL":round(model.domain.WL[ip, id],2)}))
+                #     id = np.argmax(model.domain.R2p[ip,:])                                                                       
+                #     features.append(Feature(geometry=point,
+                #                             properties={"LocNr":int(model.domain.filename[ip]),
+                #                                         "Lon": x,
+                #                                         "Lat": y,
+                #                                         "Hs":round(model.domain.Hs[ip, id],2),
+                #                                         "Tp":round(model.domain.Tp[ip, id],1),
+                #                                         "WL":round(model.domain.WL[ip, id],2)}))
                 
-                feature_collection = FeatureCollection(features)
+                # feature_collection = FeatureCollection(features)
                 
-                if features:
-                    feature_collection = FeatureCollection(features)
-                    output_path_waves =  os.path.join(output_path, 'extreme_sea_level_and_wave_height\\')
-                    os.mkdir(output_path_waves)
-                    file_name = os.path.join(output_path_waves,     
-                                            "extreme_sea_level_and_wave_height.geojson.js")
-                    cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var swl =")
-                # with open(output_path + r"\\" + scenario + '.TWL.geojson.js', 'w') as fl:
-                #     fl.write('const point_' + scenario + '_TWL = ')
-                #     dump(feature_collection, fl)
-                #     fl.write("  \n   \n")
-                #     fl.write('pt_' + scenario + '_' + 'BT' + '_TWL.addData(point_' + scenario + '_TWL);')
+                # if features:
+                #     feature_collection = FeatureCollection(features)
+                #     output_path_waves =  os.path.join(output_path, 'extreme_sea_level_and_wave_height\\')
+                #     os.mkdir(output_path_waves)
+                #     file_name = os.path.join(output_path_waves,     
+                #                             "extreme_sea_level_and_wave_height.geojson.js")
+                #     cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var swl =")
+                # # with open(output_path + r"\\" + scenario + '.TWL.geojson.js', 'w') as fl:
+                # #     fl.write('const point_' + scenario + '_TWL = ')
+                # #     dump(feature_collection, fl)
+                # #     fl.write("  \n   \n")
+                # #     fl.write('pt_' + scenario + '_' + 'BT' + '_TWL.addData(point_' + scenario + '_TWL);')
 
-                dct={}
-                dct["name"]        = "extreme_sea_level_and_wave_height"
-                dct["long_name"]   = "Extreme run-up boundaries"
-                dct["description"] = "These are the run-up boundary conditions"
-                dct["format"]      = "geojson"
+                # dct={}
+                # dct["name"]        = "extreme_sea_level_and_wave_height"
+                # dct["long_name"]   = "Extreme run-up boundaries"
+                # dct["description"] = "These are the run-up boundary conditions"
+                # dct["format"]      = "geojson"
 
-                mp = next((x for x in cosmos.config.map_contours if x["name"] == "run_up"), None)                    
+                # mp = next((x for x in cosmos.config.map_contours if x["name"] == "run_up"), None)                    
  
-                lgn = {}
-                lgn["text"] = mp["string"]
+                # lgn = {}
+                # lgn["text"] = mp["string"]
     
-                cntrs = mp["contours"]
+                # cntrs = mp["contours"]
     
-                contours = []
+                # contours = []
                 
-                for cntr in cntrs:
-                    contour = {}
-                    contour["text"]  = cntr["string"]
-                    contour["color"] = "#" + cntr["hex"]
-                    contours.append(contour)
+                # for cntr in cntrs:
+                #     contour = {}
+                #     contour["text"]  = cntr["string"]
+                #     contour["color"] = "#" + cntr["hex"]
+                #     contours.append(contour)
         
-                lgn["contours"] = contours
-                dct["legend"]   = lgn
+                # lgn["contours"] = contours
+                # dct["legend"]   = lgn
     
-                self.map_variables.append(dct)
+                # self.map_variables.append(dct)
 
 
         # Time series 
