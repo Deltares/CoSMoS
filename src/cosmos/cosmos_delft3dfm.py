@@ -16,11 +16,11 @@ from .cosmos_model import Model
 import cht.misc.xmlkit as xml
 from cht.delft3dfm.delft3dfm import Delft3DFM
 import cht.misc.fileops as fo
-from cht.nesting import nest1
-from cht.nesting import nest2
+from cht.nesting.nesting import nest1
+from cht.nesting.nesting import nest2
 import cosmos.cosmos_meteo as meteo
 
-from cht.misc_tools import findreplace
+from cht.misc.misc_tools import findreplace
 
 class CoSMoS_Delft3DFM(Model):
     
