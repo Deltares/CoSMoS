@@ -60,7 +60,7 @@ function csvToArray(str, delimiter = ",") {
   response["values"] = values
   response["setup"] = setup
   response["WL"] = WL
-  
+
   return response
 }
 
@@ -77,11 +77,12 @@ function loadjs(file_name, success, failed) {
 
 function callback_computed() {
     var response = csvToArray(csv, delimiter=",")
+    debugger
     let times  = response["times"]
     let vals   = response["values"]
 	let vals2   = response["setup"]
 	let vals3   = response["WL"]
-		
+
 	var trace2 = {
         type: "scatter",
         mode: "lines",
@@ -92,7 +93,7 @@ function callback_computed() {
         hovertemplate: 'Offshore WL: %{y:0.1f}<extra></extra>'
     }
     Plotly.addTraces('test', [trace2]);
-	
+
 	var trace3 = {
         type: "scatter",
         mode: "lines",
@@ -103,7 +104,7 @@ function callback_computed() {
         hovertemplate: 'Setup: %{y:0.1f}<extra></extra>'
     }
     Plotly.addTraces('test', [trace3]);
-	
+
 	var trace1 = {
         type: "scatter",
         mode: "lines",
@@ -140,7 +141,7 @@ t0      = new Date(tc);
 t0_axis = new Date(tc);
 t1      = new Date(tc);
 t0.setTime(t0.getTime() - 36*3600*1000);
-t0_axis.setTime(t0_axis.getTime() - 24*3600*1000);
+t0_axis.setTime(t0_axis.getTime());
 t1.setTime(t1.getTime() + duration*3600*1000);
 
 minute_name = '00';
@@ -156,7 +157,10 @@ hour_name   = pad(t1.getHours(),2);
 t1_string = `${year_name}${month_name}${day_name} ${hour_name}:${minute_name}`
 
     // Load the data
-    url='../data/' + scenario + '/timeseries/' + obsfile
+//    url='../data/' + scenario + '/timeseries/' + obsfile
+    url='../data/' + scenario + '/timeseries/extreme_runup_height.' + model_name + '.' + name + '.csv.js'
+
+
 //    d3.csv(url).then(function(data) { callback (data)});
     loadjs(url, callback_computed, timeseriesError);
 
@@ -181,9 +185,9 @@ t1_string = `${year_name}${month_name}${day_name} ${hour_name}:${minute_name}`
             gridwidth: 1,
             gridcolor: '#ffffff',
             dtick: 21600000,
-//            tickmode: 'auto',
+            tickmode: 'auto',
 //            tickformat: '%a %e %b \n %Y',
-            tickformat: '%H \n %a %e %b',
+//            tickformat: '%H \n %a %e %b',
             tickangle: 0,
             tickfont: {
                 color: '#000000'

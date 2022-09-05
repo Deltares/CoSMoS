@@ -1,9 +1,11 @@
 function thresholdsRUNUP(value) {
+  // Low vulnerability: < 100 m
+  // Moderate vulnerability: 100 - 300 m/yr
+  // High vulnerability: 300 - 1000 m
+  // Very high vulnerability: > 1000 m
   let color = cviColors[4]
-  if( value <= 0) {
-    color = '#CCFFFF00'
-  } else if ( value < 1) {
-    color = cviColors[1]
+  if( value < 1) {
+    color = cviColors[0]
   } else if ( value < 2) {
     color = cviColors[1]
   } else if ( value < 4) {
@@ -14,62 +16,36 @@ function thresholdsRUNUP(value) {
   return color
 }
 
-function thresholdsHs(value) {
-  let color = cviColors[4]
-  if( value < 0) {
-    color = '#CCFFFF00'
-  } else if ( value < 2) {
-    color = '#40E0D0'
-  } else if ( value < 4) {
-    color = '#40E0D0'
-  } else if ( value < 6) {
-    color = '#00BFFF'
-  } else if ( value >= 6) {
-    color = '#0909FF'
-  }
-  return color
-}
-
 const onEachFeatureTWL50 = function (feature, layer) {
   const html = 'Location nr: &#9;' + feature.properties.LocNr + '<br />' +
-  'Latitude: &#9;' + feature.properties.Lat + ' [dgr N] &#9;' + '<br />' +
-  'Longitude: &#9;' + feature.properties.Lon + ' [dgr E] &#9;' + '<br />' +
+  'Latitude: &#9;' + parseFloat(feature.properties.Lat).toFixed(3)  + ' [dgr N] &#9;' + '<br />' +
+  'Longitude: &#9;' + parseFloat(feature.properties.Lon).toFixed(3) + ' [dgr E] &#9;' + '<br />' +
   'Wave run-up height: &#9;' + feature.properties.TWL +
   ' [m above MSL] &#9;' + '<br />'
   layer.bindTooltip(L.tooltip({ direction: 'top' }).setContent(html));
-  layer.bindPopup(html);
+//  layer.bindPopup(html);
 
   var popup = L.popup({"maxWidth": "100%"});
-  wlurl = 'html/runup_timeseries.html?'
-//  wlurl = wlurl +       `name=${feature.properties.LocNr}`
-//  wlurl = wlurl + '&' + `longname=${feature.properties.LocNr}`
-  wlurl = wlurl +       `name=` + '0074'
+  wlurl = 'html/total_water_level_timeseries.html?'
+  wlurl = wlurl +       `name=${feature.properties.LocNr}`
   wlurl = wlurl + '&' + `longname=${feature.properties.LocNr}`
+//  wlurl = wlurl +       `name=` + '0074'
+//  wlurl = wlurl + '&' + `longname=${feature.properties.LocNr}`
   wlurl = wlurl + '&' + `id=${feature.properties.id}`
   wlurl = wlurl + '&' + `cycle=${currentScenario["cycle"]}`
   wlurl = wlurl + '&' + `duration=${currentScenario["duration"]}`
   wlurl = wlurl + '&' + `model_name=${feature.properties.model_name}`
-  wlurl = wlurl + '&' + 'model_name=beware_puerto_rico'
   wlurl = wlurl + '&' + `scenario=${currentScenario["name"]}`
-  var content = `<iframe src="${wlurl}" width="600" height="350"></iframe>`
+  var content = `<iframe src="${wlurl}" width="730" height="500"></iframe>`
   popup.setContent(content);
   layer.bindPopup(popup,{maxWidth : "auto"});
 
+
 };
-
-
-const onEachFeatureTWL100 = function (feature, layer) {
-  const html = 'Location nr: &#9;' + feature.properties.LocNr + '<br />' +
-    'Latitude: &#9;' + feature.properties.Lat + ' [dgr N] &#9;' + '<br />' +
-    'Longitude: &#9;' + feature.properties.Lon + ' [dgr E] &#9;' + '<br />' +
-    'Wave run-up height: &#9;' + feature.properties.TWL + ' [m above MSL] &#9;' + '<br />'
-  layer.bindTooltip(L.tooltip({ direction: 'top' }).setContent(html));
-  layer.bindPopup(html);
-
-}
 
 // Format for the points:
 const pointToLayerTWL = function (feature, latlng) {
+//	console.log(latlng)
   return new L.CircleMarker(latlng, {
     radius: 3,
     fillOpacity: 0.7,
@@ -85,13 +61,14 @@ function makeExtremeRunupLayer() {
     pointToLayer: pointToLayerTWL,
     onEachFeature: onEachFeatureTWL50
   })
-  layers["extreme_runup_height"] = lyr;
-  var fname = "data/" + currentScenario["name"] + "/extreme_runup_height/extreme_runup_height.geojson.js"
-  loadjs(fname, runupLoaded, runupFailed);
+  layers["extreme_runup_height"].push(lyr);
+//  layers["extreme_runup_height"] = lyr;
+  loadjs("data/" + currentScenario["name"] + "/extreme_runup_height/extreme_runup_height.geojson.js", runupLoaded, runupFailed);
 }
 
 function runupLoaded() {
-  layers["extreme_runup_height"].addData(runup);
+//	console.log(runup)
+  layers["extreme_runup_height"][0].addData(runup);
 }
 
 function runupFailed() {
@@ -105,7 +82,7 @@ const pointToLayerSWL = function (feature, latlng) {
     radius: 3,
     fillOpacity: 0.25,
 	opacity: 0,
-    color: thresholdsHs(feature.properties.Hs)
+    color: 'blue'
   });
 };
 
@@ -144,12 +121,12 @@ function makeExtremeSWLLayer() {
     pointToLayer: pointToLayerSWL,
     onEachFeature: onEachFeatureSWL50
   })
-  layers["extreme_sea_level_and_wave_height"] = lyr;
+  layers["extreme_sea_level_and_wave_height"].push(lyr);
   loadjs("data/" + currentScenario["name"] + "/extreme_sea_level_and_wave_height/extreme_sea_level_and_wave_height.geojson.js", swlLoaded, swlFailed);
 }
 
 function swlLoaded() {
-  layers["extreme_sea_level_and_wave_height"].addData(swl);
+  layers["extreme_sea_level_and_wave_height"][0].addData(swl);
 }
 
 function swlFailed() {

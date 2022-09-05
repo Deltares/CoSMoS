@@ -63,7 +63,6 @@ L.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
   },
   //-------------------------------------------------------------
   onAdd: function onAdd(map) {
-    console.log('canvas onAdd', this);
     this._map = map;
     this._canvas = L.DomUtil.create("canvas", "leaflet-layer");
     this.tiles = {};
@@ -316,7 +315,6 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
       }
     } // create canvas, add to map pane
 
-
     this._canvasLayer = L.canvasLayer({
       pane: pane
     }).delegate(this);
@@ -340,7 +338,6 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
     this.fire("load");
   },
   setOpacity: function setOpacity(opacity) {
-    console.log("this._canvasLayer", this._canvasLayer);
 
     this._canvasLayer.setOpacity(opacity);
   },
@@ -389,7 +386,6 @@ L.VelocityLayer = (L.Layer ? L.Layer : L.Class).extend({
     var bounds = this._map.getBounds();
 
     var size = this._map.getSize(); // bounds, width, height, extent
-
 
     this._windy.start([[0, 0], [size.x, size.y]], size.x, size.y, [[bounds._southWest.lng, bounds._southWest.lat], [bounds._northEast.lng, bounds._northEast.lat]]);
   },
@@ -521,7 +517,6 @@ var Windy = function Windy(params) {
 //  }
   var date;
   var λ0, φ0, Δλ, Δφ, ni, nj;
-
   var setData = function setData(data) {
     gridData = data;
   };
@@ -730,7 +725,6 @@ var Windy = function Windy(params) {
     var u = wind[0] * scale;
     var v = wind[1] * scale;
     var d = distortion(projection, λ, φ, x, y); // Scale distortion vectors by u and v, then add.
-
     wind[0] = d[0] * u + d[2] * v;
     wind[1] = d[1] * u + d[3] * v;
     return wind;
@@ -827,15 +821,20 @@ var Windy = function Windy(params) {
 
   var interpolateColumns = function interpolateColumns(grids, bounds, extent, fw) {
 
+    var nmx = columns0.length;
+    var mmx = columns0[0].length;
+
     var iii = 0
-    for (var x = bounds.x; x <= bounds.xMax; x += iref) {
+    for (var x = bounds.x; x <= bounds.xMax - 1; x += iref) {
       var jjj = 0
-      for (var y = bounds.y; y <= bounds.yMax; y += iref) {
-		  if (columns0[iii][jjj] && columns1[iii][jjj]) {
+      for (var y = bounds.y; y <= bounds.yMax - 1; y += iref) {
+//         if (iii<nmx && jjj<mmx) {
+           if (columns0[iii][jjj] && columns1[iii][jjj]) {
              columns[iii][jjj][0] = (1.0 - fw)*columns0[iii][jjj][0] + fw*columns1[iii][jjj][0]
              columns[iii][jjj][1] = (1.0 - fw)*columns0[iii][jjj][1] + fw*columns1[iii][jjj][1]
              columns[iii][jjj][2] = (1.0 - fw)*columns0[iii][jjj][2] + fw*columns1[iii][jjj][2]
-          }
+           }
+//	     }
         jjj += 1
       }
       iii += 1
@@ -843,6 +842,7 @@ var Windy = function Windy(params) {
   };
 
   var interpolateField = function interpolateField(grids, bounds, extent, i1) {
+
     var projection = {}; // map.crs used instead
 
     var mapArea = (extent.south - extent.north) * (extent.west - extent.east);
@@ -1022,17 +1022,13 @@ var Windy = function Windy(params) {
 
 			var tsec = wind_field_times[0] + animation_time*1000
 			var tdate = new Date(tsec);
-			document.getElementById('animation_time_string').innerHTML = tdate.toString()
+			document.getElementById('wind_time_string').innerHTML = tdate.toString()
 
             next_update_time = animation_time + dt_update
 
             fw = (animation_time - last_wind_update_time)/wind_field_dt
 
             // update columns
-//            console.log(animation_time)
-//            console.log(next_update_time)
-//            console.log(dt_update)
-//            console.log(fw)
             interpolateColumns(grids, bounds, mapBounds, fw)
 
         }
@@ -1059,10 +1055,12 @@ var Windy = function Windy(params) {
     })();
   };
 
+  if (gridData) {
   for (var i = 0; i < gridData.length; i++) {
       // get the time
       wind_field_times.push(Date.parse(gridData[i][0].header.refTime))
       grids.push(buildGrid(gridData[i]))
+  }
   }
 
   var start = function start(bounds, width, height, extent) {
@@ -1077,8 +1075,8 @@ var Windy = function Windy(params) {
     };
     stop(); // build grid
 
-    var iblock0 = 0
-    var iblock1 = 1
+    iblock0 = 0
+    iblock1 = 1
 
     wind_field_dt        = (wind_field_times[1] - wind_field_times[0])/1000
     wind_field_last_time = (wind_field_times[wind_field_times.length - 1] - wind_field_times[0])/1000

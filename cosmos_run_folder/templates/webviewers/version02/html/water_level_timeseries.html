@@ -34,6 +34,7 @@ function pad(num, size) {
 <body>
 
     <div id="test"></div>
+    <p id="model_text">Model:</p>
 
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
@@ -228,9 +229,9 @@ t1_string = `${year_name}${month_name}${day_name} ${hour_name}:${minute_name}`
             gridwidth: 1,
             gridcolor: '#ffffff',
             dtick: 21600000,
-//            tickmode: 'auto',
+            tickmode: 'auto',
 //            tickformat: '%a %e %b \n %Y',
-            tickformat: '%H \n %a %e %b',
+//            tickformat: '%H \n %a %e %b',
             tickangle: 0,
             tickfont: {
                 color: '#000000'
@@ -249,12 +250,12 @@ t1_string = `${year_name}${month_name}${day_name} ${hour_name}:${minute_name}`
             gridwidth: 1,
             gridcolor: '#ffffff',
             zeroline: false,
-//            range: [-1, 8],
-            dtick: 0.5,
+            tickmode: "auto",
+//            dtick: 0.5,
             hoverformat: '.1f',
             tickfont: {
                 color: '#000000'
-            },
+            }
         },
         legend: {
             orientation: 'h',
@@ -281,6 +282,9 @@ t1_string = `${year_name}${month_name}${day_name} ${hour_name}:${minute_name}`
     };
 //    Plotly.addTraces('test', now_line);
 
+      document.getElementById("model_text").innerHTML = "Model: " + model_name;
+      document.getElementById("model_text").style.fontFamily = "sans-serif";
+      document.getElementById("model_text").style.fontSize   = "x-small";
     </script>
 </body>
 </html>

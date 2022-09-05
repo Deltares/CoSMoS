@@ -1,38 +1,86 @@
-function thresholdsRUNUP(value) {
-  let color = cviColors[4]
-  if( value <= 0) {
-    color = '#CCFFFF00'
-  } else if ( value < 1) {
-    color = cviColors[1]
-  } else if ( value < 2) {
-    color = cviColors[1]
-  } else if ( value < 4) {
-    color = cviColors[2]
-  } else if ( value >= 4) {
-    color = cviColors[3]
-  }
-  return color
-}
 var tide_gauges
 var wave_buoys
-var twl_locs
+var xbeach_markers
 
 var tidegauge_icon = L.icon({
     iconUrl: 'img/markers/tide_gauge.png',
+    iconSize:     [16, 16], // size of the icon
+    shadowSize:   [36, 42], // size of the shadow
+    iconAnchor:   [8, 8], // point of the icon which will correspond to marker's location
+    shadowAnchor: [8, 8],  // the same for the shadow
+    popupAnchor:  [8, 8] // point from which the popup should open relative to the iconAnchor
+});
+
+var wavebuoy_icon = L.icon({
+    iconUrl: 'img/markers/wave_buoy.png',
+    iconSize:     [16, 16], // size of the icon
+    shadowSize:   [36, 42], // size of the shadow
+    iconAnchor:   [8, 8], // point of the icon which will correspond to marker's location
+    shadowAnchor: [8, 8],  // the same for the shadow
+    popupAnchor:  [8, 8] // point from which the popup should open relative to the iconAnchor
+});
+
+var xbeach_icon = L.icon({
+    iconUrl: 'img/markers/erosion_marker_rw.png',
     iconSize:     [24, 24], // size of the icon
-    shadowSize:   [50, 64], // size of the shadow
+    shadowSize:   [54, 63], // size of the shadow
     iconAnchor:   [12, 12], // point of the icon which will correspond to marker's location
     shadowAnchor: [12, 12],  // the same for the shadow
     popupAnchor:  [12, 12] // point from which the popup should open relative to the iconAnchor
 });
 
-var wavebuoy_icon = L.icon({
-    iconUrl: 'img/markers/wave_buoy.png',
-    iconSize:     [24, 24], // size of the icon
-    shadowSize:   [50, 64], // size of the shadow
-    iconAnchor:   [12, 12], // point of the icon which will correspond to marker's location
-    shadowAnchor: [12, 12],  // the same for the shadow
-    popupAnchor:  [12, 12] // point from which the popup should open relative to the iconAnchor
+var ts_icon = L.icon({
+    iconUrl: 'img/markers/Tropical_storm_icon_c2.png',
+    iconSize:     [16, 32], // size of the icon
+    shadowSize:   [36, 84], // size of the shadow
+    iconAnchor:   [ 8, 16], // point of the icon which will correspond to marker's location
+    shadowAnchor: [ 8, 16],  // the same for the shadow
+    popupAnchor:  [ 8, 16] // point from which the popup should open relative to the iconAnchor
+});
+
+var c1_icon = L.icon({
+    iconUrl: 'img/markers/Category_1_hurricane_icon_c2.png',
+    iconSize:     [16, 32], // size of the icon
+    shadowSize:   [36, 84], // size of the shadow
+    iconAnchor:   [ 8, 16], // point of the icon which will correspond to marker's location
+    shadowAnchor: [ 8, 16],  // the same for the shadow
+    popupAnchor:  [ 8, 16] // point from which the popup should open relative to the iconAnchor
+});
+
+var c2_icon = L.icon({
+    iconUrl: 'img/markers/Category_2_hurricane_icon_c2.png',
+    iconSize:     [16, 32], // size of the icon
+    shadowSize:   [36, 84], // size of the shadow
+    iconAnchor:   [ 8, 16], // point of the icon which will correspond to marker's location
+    shadowAnchor: [ 8, 16],  // the same for the shadow
+    popupAnchor:  [ 8, 16] // point from which the popup should open relative to the iconAnchor
+});
+
+var c3_icon = L.icon({
+    iconUrl: 'img/markers/Category_3_hurricane_icon_c2.png',
+    iconSize:     [16, 32], // size of the icon
+    shadowSize:   [36, 84], // size of the shadow
+    iconAnchor:   [ 8, 16], // point of the icon which will correspond to marker's location
+    shadowAnchor: [ 8, 16],  // the same for the shadow
+    popupAnchor:  [ 8, 16] // point from which the popup should open relative to the iconAnchor
+});
+
+var c4_icon = L.icon({
+    iconUrl: 'img/markers/Category_4_hurricane_icon_c2.png',
+    iconSize:     [16, 32], // size of the icon
+    shadowSize:   [36, 84], // size of the shadow
+    iconAnchor:   [ 8, 16], // point of the icon which will correspond to marker's location
+    shadowAnchor: [ 8, 16],  // the same for the shadow
+    popupAnchor:  [ 8, 16] // point from which the popup should open relative to the iconAnchor
+});
+
+var c5_icon = L.icon({
+    iconUrl: 'img/markers/Category_5_hurricane_icon_c2.png',
+    iconSize:     [16, 32], // size of the icon
+    shadowSize:   [36, 84], // size of the shadow
+    iconAnchor:   [ 8, 16], // point of the icon which will correspond to marker's location
+    shadowAnchor: [ 8, 16],  // the same for the shadow
+    popupAnchor:  [ 8, 16] // point from which the popup should open relative to the iconAnchor
 });
 
 
@@ -56,7 +104,7 @@ function addStations() {
       wlurl = wlurl + '&' + `obsfile=${feature.properties.obs_file}`
       wlurl = wlurl + '&' + `model_name=${feature.properties.model_name}`
       wlurl = wlurl + '&' + `scenario=${currentScenario["name"]}`
-      var content = `<iframe src="${wlurl}" width="730" height="480"></iframe>`
+      var content = `<iframe src="${wlurl}" width="730" height="500"></iframe>`
       popup.setContent(content);
       layer.bindPopup(popup,{maxWidth : "auto"});
       },
@@ -91,7 +139,8 @@ function addBuoys() {
 //        wlurl = wlurl + '&' + `duration=${duration}`
         wlurl = wlurl + '&' + `model_name=${feature.properties.model_name}`
         wlurl = wlurl + '&' + `scenario=${currentScenario["name"]}`
-        var content = `<iframe src="${wlurl}" width="730" height="480"></iframe>`
+        wlurl = wlurl + '&' + `model_name=${feature.properties.model_name}`
+        var content = `<iframe src="${wlurl}" width="730" height="500"></iframe>`
         popup.setContent(content);
         layer.bindPopup(popup,{maxWidth : "auto"});
         },
@@ -107,42 +156,80 @@ function addBuoys() {
 
 }
 
-function addTWLs() {
+function addXBeachMarkers() {
 
-  if (twl_locs) {
-	  // Remove old stations
-	  twl_locs.remove();
+  if (xbeach_markers) {
+	  // Remove old xbeach_markers
+	  xbeach_markers.remove();
   }
+   if (xb_markers) {
 
-  if (TWL) {
-  twl_locs = L.geoJson(TWL, {onEachFeature: function (feature, layer) {
-      var popup = L.popup({"maxWidth": "100%"});
-      wlurl = 'html/total_water_level_timeseries.html?'
-      wlurl = wlurl +       `name=${feature.properties.name}`
-      wlurl = wlurl + '&' + `obsfile=${feature.properties.obs_file}`
-      wlurl = wlurl + '&' + `scenario=${currentScenario["name"]}`
-      var content = `<iframe src="${wlurl}" width="730" height="480"></iframe>`
-      popup.setContent(content);
-	  const html = 'Location nr: &#9;' + feature.properties.LocNr + '<br />' +
-    'Latitude: &#9;' + feature.properties.Lat + ' [dgr N] &#9;' + '<br />' +
-    'Longitude: &#9;' + feature.properties.Lon + ' [dgr E] &#9;' + '<br />' +
-    'Wave run-up height: &#9;' + feature.properties.TWL + ' [m above MSL] &#9;' + '<br />'
-	  layer.bindTooltip(L.tooltip({ direction: 'top' }).setContent(html));
-      layer.bindPopup(popup,{maxWidth : "auto"});
+      xbeach_markers = L.geoJson(xb_markers, {onEachFeature: function (feature, layer) {
+		const html = 'Model : &#9;' + feature.properties.long_name + '<br />'
+		  layer.bindTooltip(L.tooltip({ direction: 'top' }).setContent(html));
+		  layer.bindPopup(html);
       },
       pointToLayer: function(feature,latlng){
-        return new L.CircleMarker(latlng, {
-		 radius: 4,
-		 fillOpacity: 0.7,
-			opacity: 0,
-		  color: thresholdsRUNUP(feature.properties.TWL)
-		  });
-
+      return L.marker(latlng,{icon: xbeach_icon});
       }
     }
-  );
-  twl_locs.addTo(map);
+    );
+    xbeach_markers.addTo(map);
 
+   }
+
+}
+
+function addCycloneTrack() {
+
+if (cyclone_track) {
+    // Remove old cyclone_track
+    cyclone_track.remove();
+}
+
+if (track_data) {
+    cyclone_track = L.geoJson(track_data, {onEachFeature: function (feature, layer) {
+        if ('lon' in feature.properties) {
+		const html = 'Time: &#9;' + feature.properties.time + '<br />' +
+			'Category: &#9;' + feature.properties.category + ' &#9;' + '<br />' +
+			'Latitude: &#9;' + feature.properties.lat.toFixed(1) + ' &#9;' + '<br />' +
+			'Longitude: &#9;' + feature.properties.lon.toFixed(1) + ' &#9;' + '<br />' +
+			'Vmax: &#9;' + feature.properties.vmax.toFixed(0) + ' knots &#9;' + '<br />' +
+			'Pressure: &#9;' + (0.01*feature.properties.pc).toFixed(0) + ' mbar &#9;' + '<br />'
+
+		  layer.bindTooltip(L.tooltip({ direction: 'top' }).setContent(html));
+		  layer.bindPopup(html);
+	  }
+
+        },
+        pointToLayer: function(feature,latlng){
+
+                if (feature.properties.category=="TS") {
+                    var tcicon=ts_icon
+                }
+                else if (feature.properties.category=="1") {
+                    var tcicon=c1_icon
+                }
+                else if (feature.properties.category=="2") {
+                    var tcicon=c2_icon
+                }
+                else if (feature.properties.category=="3") {
+                    var tcicon=c3_icon
+                }
+                else if (feature.properties.category=="4") {
+                    var tcicon=c4_icon
+                }
+                else if (feature.properties.category=="5") {
+                    var tcicon=c5_icon
+                }
+
+          return L.marker(latlng,{icon: tcicon});
+        }
+
+      }
+    );
+
+    cyclone_track.addTo(map);
   }
 
 }

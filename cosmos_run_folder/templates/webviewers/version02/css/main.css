@@ -39,9 +39,39 @@ body {
   overflow-x: hidden;
 }
 
-.deltares_logo {
+#nopp_logo {
   position: absolute;
-  bottom: 10px;
+  bottom: 215px;
+  left: 20px;
+  width: 120px;
+  height: 30px;
+  z-index: 400;
+  pointer-events: none;
+}
+
+#nrl_logo {
+  position: absolute;
+  bottom: 140px;
+  left: 30px;
+  width: 100px;
+  height: 67px;
+  z-index: 400;
+  pointer-events: none;
+}
+
+#usgs_logo {
+  position: absolute;
+  bottom: 90px;
+  left: 30px;
+  width: 100px;
+  height: 40px;
+  z-index: 400;
+  pointer-events: none;
+}
+
+#deltares_logo {
+  position: absolute;
+  bottom: 40px;
   left: 5px;
   width: 150px;
   height: 50px;
@@ -49,14 +79,24 @@ body {
   pointer-events: none;
 }
 
-.nrl_logo {
+#unesco_logo {
   position: absolute;
-  bottom: 60px;
-  left: 30px;
-  width: 100px;
-  height: 67px;
+  bottom: -10px;
+  left: 10px;
+  width: 140px;
+  height: 70px;
   z-index: 400;
   pointer-events: none;
+}
+
+#description_text {
+  width: 320px;
+  font-size: 15px;
+  border-style: none;
+}
+
+.timeselector {
+  font-size: 11px;
 }
 
 .info {
