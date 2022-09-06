@@ -258,22 +258,15 @@ class CoSMoS_Delft3DFM(Model):
         
         # Extract water levels
 
-        input_path  = self.cycle_input_path
         output_path = self.cycle_output_path
-#        input_path  = self.cycle_input_path
         post_path   = self.cycle_post_path
 
         hisfile = os.path.join(output_path, self.runid + "_his.nc")
         
-        # if not self.domain.input.refdate:
-        #     # This model has been run before. The model instance has no data on tref, obs points etc.
-        #     input_path = os.path.join(self.cycle_path,
-        #                                "input")
-        #     self.domain.read_input_file(os.path.join(input_path,
-        #                                              self.runid + ".mdu"))
-        #     self.domain.read_observation_points()
-        
         if self.station:
+
+            cosmos.log("Extracting time series from model " + self.name)    
+
             v = self.domain.read_timeseries_output(file_name=hisfile)
             for station in self.station:
                 vv=v[station.name]
