@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!-- Written on 29-Oct-2009 02:19:49 using the XML Toolbox for Matlab -->
+<root>
+  <longname>Hurrycane Maria (GFS) - Puerto Rico</longname>
+  <shortname>hurricane_maria</shortname>
+  <lon type="float">-66.0</lon>
+  <lat type="float">18.2</lat>
+  <zoom type="int">9</zoom>  
+  <type>hindcast</type>
+  <cycle type="datetime">20170920 120000</cycle> 
+  <runtime type="float">12</runtime>
+  <runinterval type="float">6</runinterval>
+  <meteo_dataset>gfs_anl_0p50_ne_atlantic</meteo_dataset>
+  <observations_path>hurricane_maria</observations_path>
+  <model>
+    <name>delft3dfm_gom</name>
+    <type>delft3dfm</type>
+    <wind>yes</wind>
+    <atmospheric_pressure>yes</atmospheric_pressure>
+  </model>  
+  <model>
+    <name>beware_puertorico</name>
+    <type>beware</type>
+    <wind>no</wind>
+    <atmospheric_pressure>no</atmospheric_pressure>
+    <precipitation>no</precipitation>
+  </model>
+</root>
