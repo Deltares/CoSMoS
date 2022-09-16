@@ -847,8 +847,6 @@ class WebViewer:
         for model in cosmos.scenario.model:
             if model.type == 'beware':
 
-                
-
                 model.domain.read_data(os.path.join(model.cycle_output_path,
                                                     "BW_output.nc"))                
 
@@ -971,71 +969,71 @@ class WebViewer:
                 # self.map_variables.append(dct)
 
 
-        # Time series 
+                # Time series 
+                    
+                for ip in range(len(model.domain.filename)):
+        
+                    d= {'WL': model.domain.WL[ip,:],'Setup': model.domain.setup[ip,:], 'Swash': model.domain.swash[ip,:], 'Runup': model.domain.R2p[ip,:]}       
+        
+                    v= pd.DataFrame(data=d, index =  pd.date_range(model.domain.input.tstart, periods=len(model.domain.swash[ip,:]), freq= '0.5H'))
+                    obs_file = "extreme_runup_height." + model.domain.runid + "." +str(model.domain.filename[ip]) + ".csv.js"
+        
+                    local_file_path = os.path.join(output_path,  "timeseries",
+                                                       obs_file)
+        #            local_file_path = os.path.join(output_path,  
+        #                                           obs_file)
+                    s= v.to_csv(path_or_buf=None,
+                                 date_format='%Y-%m-%dT%H:%M:%S',
+                                 float_format='%.3f',
+                                 header= False, index_label= 'datetime')        
+                    
+                    cht.misc.misc_tools.write_csv_js(local_file_path, s, "var csv = `date_time,wl,setup,swash,runup")
+        
+        
+        #         features = []
+                    
+        #         for ip in range(len(self.filename)):
+        #             x, y = transformer.transform(self.xp[ip],
+        #                                          self.yp[ip])
+        #             point = Point((x, y))
+        #             name = 'Loc nr: ' +  str(self.filename[ip])
+                                
+        #             obs_file = "extreme_runup_height." + self.runid + "." +str(self.filename[ip]) + ".csv.js"
+                                                                  
+        #             features.append(Feature(geometry=point,
+        #                                     properties={"name":int(self.filename[ip]),
+        #                                                 "LocNr":int(self.filename[ip]),
+        #                                                 "Lon":x,
+        #                                                 "Lat":y,
+        #                                                 "model_name":self.name,
+        #                                                 "model_type":self.type,
+        #                                                 "TWL":  np.round(np.max(self.R2p[ip,:]),2),
+        #                                                 "obs_file": obs_file}))
+        #             d= {'WL': self.WL[ip,:],'Setup': self.setup[ip,:], 'Swash': self.swash[ip,:], 'Runup': self.R2p[ip,:]}       
+        #             v= pd.DataFrame(data=d, index =  pd.date_range(self.input.tstart, periods=len(self.swash[ip,:]), freq= '0.5H'))
             
-        for ip in range(len(model.domain.filename)):
-
-            d= {'WL': model.domain.WL[ip,:],'Setup': model.domain.setup[ip,:], 'Swash': model.domain.swash[ip,:], 'Runup': model.domain.R2p[ip,:]}       
-
-            v= pd.DataFrame(data=d, index =  pd.date_range(model.domain.input.tstart, periods=len(model.domain.swash[ip,:]), freq= '0.5H'))
-            obs_file = "extreme_runup_height." + model.domain.runid + "." +str(model.domain.filename[ip]) + ".csv.js"
-
-            local_file_path = os.path.join(output_path,  "timeseries",
-                                               obs_file)
-#            local_file_path = os.path.join(output_path,  
-#                                           obs_file)
-            s= v.to_csv(path_or_buf=None,
-                         date_format='%Y-%m-%dT%H:%M:%S',
-                         float_format='%.3f',
-                         header= False, index_label= 'datetime')        
-            
-            cht.misc.misc_tools.write_csv_js(local_file_path, s, "var csv = `date_time,wl,setup,swash,runup")
-
-
-#         features = []
-            
-#         for ip in range(len(self.filename)):
-#             x, y = transformer.transform(self.xp[ip],
-#                                          self.yp[ip])
-#             point = Point((x, y))
-#             name = 'Loc nr: ' +  str(self.filename[ip])
-                        
-#             obs_file = "extreme_runup_height." + self.runid + "." +str(self.filename[ip]) + ".csv.js"
-                                                          
-#             features.append(Feature(geometry=point,
-#                                     properties={"name":int(self.filename[ip]),
-#                                                 "LocNr":int(self.filename[ip]),
-#                                                 "Lon":x,
-#                                                 "Lat":y,
-#                                                 "model_name":self.name,
-#                                                 "model_type":self.type,
-#                                                 "TWL":  np.round(np.max(self.R2p[ip,:]),2),
-#                                                 "obs_file": obs_file}))
-#             d= {'WL': self.WL[ip,:],'Setup': self.setup[ip,:], 'Swash': self.swash[ip,:], 'Runup': self.R2p[ip,:]}       
-#             v= pd.DataFrame(data=d, index =  pd.date_range(self.input.tstart, periods=len(self.swash[ip,:]), freq= '0.5H'))
-    
-#             local_file_path = os.path.join(output_path,  "timeseries",
-#                                                obs_file)
-# #            local_file_path = os.path.join(output_path,  
-# #                                           obs_file)
-#             s= v.to_csv(path_or_buf=None,
-#                          date_format='%Y-%m-%dT%H:%M:%S',
-#                          float_format='%.3f',
-#                          header= False, index_label= 'datetime')        
-            
-#             cht.misc.misc_tools.write_csv_js(local_file_path, s, "var csv = `date_time,wl,setup,swash,runup")
-                             
-#         if features:
-#             feature_collection = FeatureCollection(features)
-#             runup_file = os.path.join(output_path,
-#                                     "twls.geojson.js")
-#             cht.misc.misc_tools.write_json_js(runup_file, feature_collection, "var TWL =")
-
-
-
-
-#                model.domain.write_to_geojson(scenario_path, cosmos.scenario.name)
-#                model.domain.write_to_csv(scenario_path, cosmos.scenario.name)
+        #             local_file_path = os.path.join(output_path,  "timeseries",
+        #                                                obs_file)
+        # #            local_file_path = os.path.join(output_path,  
+        # #                                           obs_file)
+        #             s= v.to_csv(path_or_buf=None,
+        #                          date_format='%Y-%m-%dT%H:%M:%S',
+        #                          float_format='%.3f',
+        #                          header= False, index_label= 'datetime')        
+                    
+        #             cht.misc.misc_tools.write_csv_js(local_file_path, s, "var csv = `date_time,wl,setup,swash,runup")
+                                     
+        #         if features:
+        #             feature_collection = FeatureCollection(features)
+        #             runup_file = os.path.join(output_path,
+        #                                     "twls.geojson.js")
+        #             cht.misc.misc_tools.write_json_js(runup_file, feature_collection, "var TWL =")
+        
+        
+        
+        
+        #                model.domain.write_to_geojson(scenario_path, cosmos.scenario.name)
+        #                model.domain.write_to_csv(scenario_path, cosmos.scenario.name)
 
 
     def upload(self):        
