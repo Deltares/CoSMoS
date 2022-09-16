@@ -605,7 +605,7 @@ class WebViewer:
                                                         properties={"time":track.time[ip].strftime("%Y/%m/%d %H:%M") + " UTC",
                                                                     "lon":track.lon[ip],
                                                                     "lat":track.lat[ip],
-                                                                    "vmax":1.13*track.vmax[ip]/1.94384,
+                                                                    "vmax":track.vmax[ip],
                                                                     "pc":track.pc[ip],
                                                                     "category":cat}))
                                 
