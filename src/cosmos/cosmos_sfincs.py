@@ -437,25 +437,28 @@ class CoSMoS_SFINCS(Model):
                             
                 zsmax_file = os.path.join(output_path, "sfincs_map.nc")
                 
-                # Wave map over dt-hour increments                    
-                for it, t in enumerate(requested_times):
-
-                    zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file,
-                                                   time_range=[t - dt + dt1, t + dt1])
+                try:
+                    # Inundation map over dt-hour increments                    
+                    for it, t in enumerate(requested_times):
+    
+                        zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file,
+                                                       time_range=[t - dt + dt1, t + dt1])
+                        flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+                                                      "flood_map",
+                                                      pathstr[it])                                            
+                        make_flood_map_tiles(zsmax, index_path, topo_path, flood_map_path,
+                                                 water_level_correction=0.0)
+    
+                    # Full simulation        
                     flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
                                                   "flood_map",
-                                                  pathstr[it])                                            
+                                                   pathstr[-1])                    
+                    zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file,
+                                                   time_range=[t0, t1 + dt1])
                     make_flood_map_tiles(zsmax, index_path, topo_path, flood_map_path,
-                                             water_level_correction=0.0)
-
-                # Full simulation        
-                flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-                                              "flood_map",
-                                               pathstr[-1])                    
-                zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file,
-                                               time_range=[t0, t1 + dt1])
-                make_flood_map_tiles(zsmax, index_path, topo_path, flood_map_path,
-                                     water_level_correction=0.0)
+                                         water_level_correction=0.0)
+                except:
+                    print("An error occured while making flood map tiles")
 
 
 #         # Make flood map tiles

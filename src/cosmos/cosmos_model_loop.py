@@ -75,7 +75,8 @@ class ModelLoop:
                                         
             model.pre_process()  # Adjust model input (nesting etc.)
 
-            if cosmos.config.run_mode == "serial":
+#            if cosmos.config.run_mode == "serial":
+            if cosmos.config.run_mode == "serial" or model.type=="beware":
                 cosmos.log("Submitting " + model.long_name + " ...")
                 model.submit_job()
             elif cosmos.config.run_mode == "parallel":
