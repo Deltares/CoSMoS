@@ -665,6 +665,11 @@ class WebViewer:
                 pathstr.append((t - dt24).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
                 namestr.append((t - dt24).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC")
 
+            pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
+            td = t1 - t0
+            hrstr = str(int(td.days * 24 + td.seconds/3600))
+            namestr.append("Combined " + hrstr + "-hour forecast")
+
             for model in cosmos.scenario.model:
                 if model.type=="sfincs":
                     index_path = os.path.join(model.path, "tiling", "indices")            
@@ -683,14 +688,15 @@ class WebViewer:
                                                         "precipitation",
                                                         pathstr[it])                        
                             make_precipitation_tiles(p, index_path, p_map_path, contour_set)
-    
-                        # # Full simulation        
-                        # hm0_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-                        #                             "hm0",
-                        #                             pathstr[-1])                    
-                        # hm0max = model.domain.read_hm0max(hm0max_file=file_name,
-                        #                                   time_range=[t0, t1 + dt1])        
-                        # make_wave_map_tiles(hm0max, index_path, hm0_map_path, contour_set)
+
+
+                        # Full simulation       
+                        p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+                                                  "precipitation",
+                                                   pathstr[-1])                        
+                        p = model.domain.read_cumulative_precipitation(file_name=file_name,
+                                                                       time_range=[t0 + dt1, t1 + dt1])                        
+                        make_precipitation_tiles(p, index_path, p_map_path, contour_set)
             
             # Check if wave maps are available
             p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
