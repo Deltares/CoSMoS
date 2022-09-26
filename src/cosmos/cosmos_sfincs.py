@@ -454,7 +454,7 @@ class CoSMoS_SFINCS(Model):
                                                   "flood_map",
                                                    pathstr[-1])                    
                     zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file,
-                                                   time_range=[t0, t1 + dt1])
+                                                   time_range=[t0 + dt1, t1 + dt1])
                     make_flood_map_tiles(zsmax, index_path, topo_path, flood_map_path,
                                          water_level_correction=0.0)
                 except:
