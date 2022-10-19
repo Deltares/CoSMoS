@@ -40,6 +40,8 @@ class CoSMoS:
         """
         
         self.config.main_path = main_path
+        
+        os.environ['HDF5_DISABLE_VERSION_CHECK'] = '2'
 
     def run(self,
             scenario_name,
