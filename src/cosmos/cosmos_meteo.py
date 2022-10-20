@@ -148,6 +148,10 @@ def download_and_collect_meteo():
                 file_name = os.path.join(meteo_subset.path, meteo_subset.last_analysis_time.strftime("%Y%m%d_%Hz"), "coamps_used.txt")
                 if os.path.exists(file_name):
                     cosmos.storm_flag = True
+                    keepfile_name = os.path.join(cosmos.scenario.cycle_path, "keep.txt")
+                    fid = open(keepfile_name, "w")  # Why is there no path here?
+                    fid.write("Coamps data was used in this cycle so we want to keep it \n")
+                    fid.close()
                 else:
                     cosmos.storm_flag = False
 
