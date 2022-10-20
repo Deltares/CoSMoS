@@ -1,1 +1,9 @@
 __pycache__
+/src/deltares_cosmos.egg-info
+/src/cosmos/__pycache__
+/cosmos_run_folder/jobs
+/cosmos_run_folder/models
+/cosmos_run_folder/scenarios
+/cosmos_run_folder/*.log
+/cosmos_run_folder/*.py
+/cosmos_run_folder/*.bat
