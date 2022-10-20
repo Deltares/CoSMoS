@@ -200,6 +200,10 @@ class MainLoop:
                 for cycle in cycle_list:
                     if cycle in cosmos.storm_keeplist:
                         continue
+                    keepfile_name = os.path.join(cycle, "keep.txt")
+                    if os.path.exists(keepfile_name):
+                        cosmos.storm_keeplist.append(cycle)
+                        continue
                     t = datetime.datetime.strptime(cycle[-12:],"%Y%m%d_%Hz")
                     if t<tkeep:
                         pass
