@@ -60,7 +60,8 @@ def read_meteo_sources():
                       "coamps_tc_forecast",
                       "forecast",
                       crs=CRS.from_epsg(4326),
-                      delay=6)
+                      delay=6,
+                      time_interval=1)
     cosmos.meteo_source.append(src)
 
     src = MeteoSource("coamps_tc_retro_forecast",

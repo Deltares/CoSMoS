@@ -520,7 +520,7 @@ class WebViewer:
                 ylim = [8.0, 45.0]
                 
                 if meteo_subset.x is not None:
-                    
+                                        
                     subset = meteo_subset.subset(xlim=xlim,
                                                  ylim=ylim,
                                                  time_range=[],
@@ -574,12 +574,15 @@ class WebViewer:
                     self.map_variables.append(dct)
                     
                     # Cyclone track(s)
-                    subset = meteo_subset.subset(time_range=[],
-                                                 stride=1)
+
+                    # subset = meteo_subset.subset(time_range=[],
+                    #                              stride=1,
+                    #                              tstride=tstride)
     
                     tracks = meteo_subset.find_cyclone_tracks(xlim=[-110.0,-30.0],
                                                               ylim=[5.0, 45.0],
-                                                              pcyc=99500.0)
+                                                              pcyc=99500.0,
+                                                              dt=6)
                     
                     if tracks:
                         features = []
@@ -671,7 +674,7 @@ class WebViewer:
             namestr.append("Combined " + hrstr + "-hour forecast")
 
             for model in cosmos.scenario.model:
-                if model.type=="sfincs":
+                if model.type=="sfincs" and model.meteo_precipitation:
                     index_path = os.path.join(model.path, "tiling", "indices")            
 #                    if model.make_wave_map and os.path.exists(index_path):                            
                     if os.path.exists(index_path):                            

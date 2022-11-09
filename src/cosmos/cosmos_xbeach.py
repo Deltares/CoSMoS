@@ -60,7 +60,6 @@ class CoSMoS_XBeach(Model):
                         
         # Now read in the domain data
         input_file  = os.path.join(self.path, "input", "params.txt")
-        print("Skipping boundary points " + self.name)
         self.domain = XBeach(input_file=input_file, get_boundary_coordinates=False)
         # Give names to the boundary points
         for ipnt, pnt in enumerate(self.domain.flow_boundary_point):
