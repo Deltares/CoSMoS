@@ -85,9 +85,9 @@ class WebViewer:
         self.copy_floodmap()        
         self.copy_wave_maps()
         self.copy_sederomap()
-        self.copy_bedlevelmaps()
+        # self.copy_bedlevelmaps()
         self.make_runup_map()
-        self.make_meteo_maps()
+        # self.make_meteo_maps()
         mv_file = os.path.join(scenario_path,
                                "variables.js")
         
@@ -109,14 +109,23 @@ class WebViewer:
         for model in cosmos.scenario.model:
             
             all_nested_models = model.get_all_nested_models("flow")
+            if model.type=='beware':
+                for station in model.station:
+                    station.upload = False 
+
             if all_nested_models:
                 all_nested_stations = []
+                if all_nested_models[0].type == 'beware':
+                    all_nested_models= [model]
+                    bw=1
+                else:
+                    bw=0
                 for mdl in all_nested_models:
                     for st in mdl.station:
                         all_nested_stations.append(st.name)
                 for station in model.station:
                     if station.type == "tide_gauge":
-                        if station.name in all_nested_stations:
+                        if station.name in all_nested_stations and bw==0:                            
                             station.upload = False 
     
             all_nested_models = model.get_all_nested_models("wave")
@@ -920,6 +929,113 @@ class WebViewer:
         
                     self.map_variables.append(dct)
     
+                    # Horizontal runup
+
+                    features = []
+                    
+                    dfx = pd.read_csv(os.path.join(model.path, 'input', 'runup.x'), index_col=0,
+                        delim_whitespace=True)
+                    dfy = pd.read_csv(os.path.join(model.path, 'input', 'runup.y'), index_col=0,
+                        delim_whitespace=True)                    
+                    r2max= dfx.columns.values
+
+                    for ip in range(len(model.domain.filename)):
+                       
+                        name = 'Loc nr: ' +  str(model.domain.filename[ip])
+                                    
+                        id = np.argmax(model.domain.R2p[ip,:])   
+
+                        id2= np.argwhere(r2max.astype(float)>=model.domain.R2p[ip,id])[0]
+                        
+                        x, y = transformer.transform(dfx[r2max[id2]].values[ip][0],
+                                                     dfy[r2max[id2]].values[ip][0])
+                        point = Point((x, y))
+
+                        features.append(Feature(geometry=point,
+                                                 properties={"model_name":model.name,
+                                                            "LocNr":int(model.domain.filename[ip]),
+                                                            "Lon":x,
+                                                            "Lat":y,                                                
+                                                            "Setup":round(model.domain.setup[ip, id],2),
+                                                            "Swash":round(model.domain.swash[ip, id],2),
+                                                            "TWL":round(model.domain.R2p[ip, id],2)}))
+                    feature_collection = FeatureCollection(features)
+
+                    if features:
+                        feature_collection = FeatureCollection(features)
+                        output_path_runup =  os.path.join(output_path, 'extreme_horizontal_runup_height\\')
+                        os.mkdir(output_path_runup)
+                        file_name = os.path.join(output_path_runup,     
+                                                "extreme_horizontal_runup_height.geojson.js")
+                        cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var runup_vert =")
+
+
+                    dct={}
+                    dct["name"]        = "extreme_horizontal_runup_height"
+                    dct["long_name"]   = "Extreme Horizontal Runup"
+                    dct["description"] = "This is the extreme horizontal runup."
+                    dct["format"]      = "geojson"
+                    # dct["legend"]      = {"text": "Offshore WL", "contours": [{"text": " 0.0&nbsp-&nbsp;0.33&#8201;m", "color": "#CCFFFF"}, {"text": " 0.33&nbsp;-&nbsp;1.0&#8201;m", "color": "#40E0D0"}, {"text": " 1.0&nbsp-&nbsp;2.0&#8201;m", "color": "#00BFFF"}, {"text": "&gt; 2.0&#8201;m", "color": "#0909FF"}]}
+                    
+                    mp = next((x for x in cosmos.config.map_contours if x["name"] == "run_up"), None)                    
+     
+                    lgn = {}
+                    lgn["text"] = mp["string"]
+        
+                    cntrs = mp["contours"]
+        
+                    contours = []
+                    
+                    for cntr in cntrs:
+                        contour = {}
+                        contour["text"]  = cntr["string"]
+                        contour["color"] = "#" + cntr["hex"]
+                        contours.append(contour)
+            
+                    lgn["contours"] = contours
+                    dct["legend"]   = lgn
+
+                    self.map_variables.append(dct)                
+
+
+                    features = []
+                        
+                    for ip in range(len(model.domain.filename)):
+                        x, y = transformer.transform(model.domain.xo[ip],
+                                                     model.domain.yo[ip])
+                        point = Point((x, y))
+                        name = 'Loc nr: ' +  str(model.domain.filename[ip])
+                                    
+                        id = np.argmax(model.domain.R2p[ip,:])                                                               
+                        features.append(Feature(geometry=point,
+                                                properties={"model_name":model.name,
+                                                            "LocNr":int(model.domain.filename[ip]),
+                                                            "Lon": round(x,3),
+                                                            "Lat": round(y,3),
+                                                            "Hs":round(model.domain.Hs[ip, id],2),
+                                                            "Tp":round(model.domain.Tp[ip, id],1),
+                                                            "WL":round(model.domain.WL[ip, id],2)}))
+                    feature_collection = FeatureCollection(features)
+
+                    if features:
+                        feature_collection = FeatureCollection(features)
+                        output_path_waves =  os.path.join(output_path, 'extreme_sea_level_and_wave_height\\')
+                        os.mkdir(output_path_waves)
+                        file_name = os.path.join(output_path_waves,     
+                                                "extreme_sea_level_and_wave_height.geojson.js")
+                        cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var swl =")
+
+
+                    dct={}
+                    dct["name"]        = "extreme_sea_level_and_wave_height"
+                    dct["long_name"]   = "Extreme SWL and Hs"
+                    dct["description"] = "This is the total offshore water level (tide + surge) and wave conditions."
+                    dct["format"]      = "geojson"
+                    dct["legend"]      = {"text": "Offshore WL", "contours": [{"text": " 0.0&nbsp-&nbsp;0.33&#8201;m", "color": "#CCFFFF"}, {"text": " 0.33&nbsp;-&nbsp;1.0&#8201;m", "color": "#40E0D0"}, {"text": " 1.0&nbsp-&nbsp;2.0&#8201;m", "color": "#00BFFF"}, {"text": "&gt; 2.0&#8201;m", "color": "#0909FF"}]}
+                    
+                    self.map_variables.append(dct)
+                
+
                     # Time series 
                         
                     for ip in range(len(model.domain.filename)):
