@@ -161,7 +161,7 @@ class CoSMoS_Delft3DFM(Model):
         trstsec = self.domain.input.tstop.replace(tzinfo=None) - self.domain.input.refdate            
         if self.meteo_subset:
             if self.meteo_subset.last_analysis_time:
-                trstsec = self.meteo_subset.last_analysis_time.replace(tzinfo=None) - self.domain.input.tref
+                trstsec = self.meteo_subset.last_analysis_time.replace(tzinfo=None) - self.domain.input.refdate
         self.domain.input.rstinterval = trstsec.total_seconds()
         
         # # Get restart file from previous cycle
@@ -185,7 +185,7 @@ class CoSMoS_Delft3DFM(Model):
         fid.write("@ echo off\n")
         fid.write("DATE /T > running.txt\n")
         exe_path = os.path.join("call " + cosmos.config.delft3dfm_exe_path,
-                                "x64\\dimr\\scripts\\run_dimr.bat dimr_config.xml\n")
+                                 "x64\\dimr\\scripts\\run_dimr.bat dimr_config.xml\n")
         fid.write(exe_path)
         fid.write("move running.txt finished.txt\n")
         fid.write("exit\n")
@@ -277,4 +277,21 @@ class CoSMoS_Delft3DFM(Model):
                                          "waterlevel." + station.name + ".csv")
                 vv.to_csv(file_name,
                           date_format='%Y-%m-%dT%H:%M:%S',
-                          float_format='%.3f')        
+                          float_format='%.3f')
+
+        # Extract waves
+        if self.wave:
+            
+            if self.station:
+
+                cosmos.log("Extracting wave time series from model " + self.name)    
+                wavefile = [os.path.join(output_path, "wavh-wave-nest.nc"), os.path.join(output_path, "wavh-wave-Entire_swn.nc")]
+                v = self.domain.read_timeseries_output(file_name=hisfile, file_name_wave = wavefile)
+                for station in self.station:
+                    vv=v[station.name]
+                    vv.index.name='date_time'
+                    file_name = os.path.join(post_path,
+                                            "waves." + station.name + ".csv")
+                    vv.to_csv(file_name,
+                            date_format='%Y-%m-%dT%H:%M:%S',
+                            float_format='%.3f')        
