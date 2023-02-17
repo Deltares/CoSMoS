@@ -131,12 +131,17 @@ class WebViewer:
             all_nested_models = model.get_all_nested_models("wave")
             if all_nested_models:
                 all_nested_stations = []
+                if all_nested_models[0].type == 'beware':
+                    all_nested_models= [model]
+                    bw=1
+                else:
+                    bw=0
                 for mdl in all_nested_models:
                     for st in mdl.station:
                         all_nested_stations.append(st.name)
                 for station in model.station:
                     if station.type == "wave_buoy":
-                        if station.name in all_nested_stations:
+                        if station.name in all_nested_stations and bw==0:
                             station.upload = False 
         
         # Tide stations
@@ -169,7 +174,9 @@ class WebViewer:
                                                             "mllw":station.mllw,
                                                             "model_name":model.name,
                                                             "model_type":model.type,
-                                                            "obs_file":obs_file}))
+                                                            "cycle": cosmos.cycle_string,
+                                                            "obs_file":obs_file,
+                                                            "obs_folder": cosmos.scenario.observations_path}))
                         
                         # Merge time series from previous cycles
                         # Go two days back
@@ -220,12 +227,27 @@ class WebViewer:
                             name = station.long_name + " (" + station.ndbc_id + ")"
                         else:
                             name = station.long_name
+
+                        # Check if there is a file in the observations that matches this station
+                        obs_file = None
+                        if cosmos.scenario.observations_path and station.id:
+                            obs_pth = os.path.join(cosmos.config.main_path,
+                                               "observations",
+                                               cosmos.scenario.observations_path,
+                                               "waves")                        
+                            fname = "waves." + station.id + ".observed.csv.js"
+                            if os.path.exists(os.path.join(obs_pth, fname)):
+                                obs_file = fname
+
                         features.append(Feature(geometry=point,
                                                 properties={"name":station.name,
                                                             "long_name":name,
                                                             "id": station.ndbc_id,
                                                             "model_name":model.name,
-                                                            "model_type":model.type}))
+                                                            "model_type":model.type,
+                                                            "cycle": cosmos.cycle_string,
+                                                             "obs_file":obs_file,
+                                                             "obs_folder": cosmos.scenario.observations_path}))
     
                         path = cosmos.scenario.timeseries_path
                         t0 = cosmos.cycle_time - datetime.timedelta(hours=48)
