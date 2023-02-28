@@ -13,8 +13,9 @@ from matplotlib import path
 import pandas as pd                     
 from scipy import interpolate
 import numpy as np
+import toml
 
-from .cosmos_main import cosmos
+from .cosmos import cosmos
 from .cosmos_cluster import cluster_dict as cluster
 
 import cht.misc.xmlkit as xml
@@ -48,9 +49,9 @@ class Model:
         self.meteo_subset       = None
         self.meteo_spiderweb    = None
         self.meteo_dataset      = None
-        self.meteo_wind         = True
+        self.meteo_wind                 = True
         self.meteo_atmospheric_pressure = True
-        self.meteo_precipitation        = False
+        self.meteo_precipitation        = True
         self.runid              = None
         self.polygon            = None
         self.make_flood_map     = False
@@ -67,59 +68,62 @@ class Model:
         self.zb_deshoal         = None
 
     def read_generic(self):
+
+        mdl_dict = toml.load(self.file_name)
+
+        # Turn into object        
+        for key, value in mdl_dict.items():
+            setattr(self, key, value)
+
+        self.crs = CRS(self.crs)
         
-        try:
-            xml_obj = xml.xml2obj(self.file_name)
-        except:
-            print("Error reading " + self.file_name + " !")
-        
-        self.long_name = xml_obj.longname[0].value
-        self.type      = xml_obj.type[0].value.lower()
-        self.runid     = xml_obj.runid[0].value
+#         self.long_name = xml_obj.longname[0].value
+#         self.type      = xml_obj.type[0].value.lower()
+#         self.runid     = xml_obj.runid[0].value
                 
-        if hasattr(xml_obj, "flownested"):
-            if not xml_obj.flownested[0].value == "none":
-#                self.flow_nested = True
-                self.flow_nested_name = xml_obj.flownested[0].value
-        if hasattr(xml_obj, "wavenested"):
-            if not xml_obj.wavenested[0].value == "none":
-#                self.wave_nested = True
-                self.wave_nested_name = xml_obj.wavenested[0].value
-        coordsys     = xml_obj.coordsys[0].value
-        self.crs = CRS(coordsys)        
-        if hasattr(xml_obj, "xlim1") and hasattr(xml_obj, "xlim2") and hasattr(xml_obj, "ylim1")  and hasattr(xml_obj, "ylim2"):
-            self.xlim = [xml_obj.xlim1[0].value, xml_obj.xlim2[0].value]
-            self.ylim = [xml_obj.ylim1[0].value, xml_obj.ylim2[0].value]
-        if hasattr(xml_obj, "flowspinup"):
-            self.flow_spinup_time = xml_obj.flowspinup[0].value
-        if hasattr(xml_obj, "wavespinup"):
-            self.wave_spinup_time = xml_obj.wavespinup[0].value
-        if hasattr(xml_obj, "vertical_reference_level_name"):
-            self.vertical_reference_level_name = xml_obj.vertical_reference_level_name[0].value
-        if hasattr(xml_obj, "vertical_reference_level_difference_with_msl"):
-            self.vertical_reference_level_difference_with_msl = xml_obj.vertical_reference_level_difference_with_msl[0].value
-        if hasattr(xml_obj, "boundary_water_level_correction"):
-            self.boundary_water_level_correction = xml_obj.boundary_water_level_correction[0].value
-        if hasattr(xml_obj, "make_flood_map"):
-            if xml_obj.make_flood_map[0].value[0].lower() == "y":
-                self.make_flood_map = True
-        if hasattr(xml_obj, "make_wave_map"):
-            if xml_obj.make_wave_map[0].value[0].lower() == "y":
-                self.make_wave_map = True
-        if hasattr(xml_obj, "make_sedero_map"):
-            if xml_obj.make_sedero_map[0].value[0].lower() == "y":
-                self.make_sedero_map = True
-        if hasattr(xml_obj, "sa_correction"):
-            self.sa_correction = xml_obj.sa_correction[0].value
-        if hasattr(xml_obj, "ssa_correction"):
-            self.ssa_correction = xml_obj.ssa_correction[0].value
-        if hasattr(xml_obj, "wave"):
-            if xml_obj.wave[0].value[0].lower() == "y":
-                self.wave = True
-        if hasattr(xml_obj, "cluster"):
-            self.cluster = xml_obj.cluster[0].value[0].lower()
-        if hasattr(xml_obj, "boundary_twl_treshold"):
-            self.boundary_twl_treshold = xml_obj.boundary_twl_treshold[0].value
+#         if hasattr(xml_obj, "flownested"):
+#             if not xml_obj.flownested[0].value == "none":
+# #                self.flow_nested = True
+#                 self.flow_nested_name = xml_obj.flownested[0].value
+#         if hasattr(xml_obj, "wavenested"):
+#             if not xml_obj.wavenested[0].value == "none":
+# #                self.wave_nested = True
+#                 self.wave_nested_name = xml_obj.wavenested[0].value
+#         coordsys     = xml_obj.coordsys[0].value
+#         self.crs = CRS(coordsys)        
+#         if hasattr(xml_obj, "xlim1") and hasattr(xml_obj, "xlim2") and hasattr(xml_obj, "ylim1")  and hasattr(xml_obj, "ylim2"):
+#             self.xlim = [xml_obj.xlim1[0].value, xml_obj.xlim2[0].value]
+#             self.ylim = [xml_obj.ylim1[0].value, xml_obj.ylim2[0].value]
+#         if hasattr(xml_obj, "flowspinup"):
+#             self.flow_spinup_time = xml_obj.flowspinup[0].value
+#         if hasattr(xml_obj, "wavespinup"):
+#             self.wave_spinup_time = xml_obj.wavespinup[0].value
+#         if hasattr(xml_obj, "vertical_reference_level_name"):
+#             self.vertical_reference_level_name = xml_obj.vertical_reference_level_name[0].value
+#         if hasattr(xml_obj, "vertical_reference_level_difference_with_msl"):
+#             self.vertical_reference_level_difference_with_msl = xml_obj.vertical_reference_level_difference_with_msl[0].value
+#         if hasattr(xml_obj, "boundary_water_level_correction"):
+#             self.boundary_water_level_correction = xml_obj.boundary_water_level_correction[0].value
+#         if hasattr(xml_obj, "make_flood_map"):
+#             if xml_obj.make_flood_map[0].value[0].lower() == "y":
+#                 self.make_flood_map = True
+#         if hasattr(xml_obj, "make_wave_map"):
+#             if xml_obj.make_wave_map[0].value[0].lower() == "y":
+#                 self.make_wave_map = True
+#         if hasattr(xml_obj, "make_sedero_map"):
+#             if xml_obj.make_sedero_map[0].value[0].lower() == "y":
+#                 self.make_sedero_map = True
+#         if hasattr(xml_obj, "sa_correction"):
+#             self.sa_correction = xml_obj.sa_correction[0].value
+#         if hasattr(xml_obj, "ssa_correction"):
+#             self.ssa_correction = xml_obj.ssa_correction[0].value
+#         if hasattr(xml_obj, "wave"):
+#             if xml_obj.wave[0].value[0].lower() == "y":
+#                 self.wave = True
+#         if hasattr(xml_obj, "cluster"):
+#             self.cluster = xml_obj.cluster[0].value[0].lower()
+#         if hasattr(xml_obj, "boundary_twl_treshold"):
+#             self.boundary_twl_treshold = xml_obj.boundary_twl_treshold[0].value
             
                 
         # Read polygon around model
@@ -136,17 +140,16 @@ class Model:
                              self.polygon.vertices.max(axis=0)[1]]
            
         # Stations
-        if hasattr(xml_obj, "station"):
-
-            for istat in range(len(xml_obj.station)):
-                
+        if self.station:
+            station_list = self.station
+            self.station = []
+            for istat in range(len(station_list)):                
                 # Find matching stations from complete stations list
-
-                name = xml_obj.station[istat].value
+                name = station_list[istat]
                 self.add_stations(name)
                 
         
-    def prepare(self):
+    def set_paths(self):
         
         # First model and restart folders if necessary
 
@@ -176,7 +179,7 @@ class Model:
                                               region, tp, name, "wave")
 
         # Model folder in the jobs folder
-        self.job_path = os.path.join(cosmos.config.job_path,
+        self.job_path = os.path.join(cosmos.config.path.jobs,
                                      cosmos.scenario.name,
                                      self.name)        
 
@@ -311,7 +314,7 @@ class Model:
         if name[-3:].lower() == "xml":
 
             # Get all stations in file
-            stations = cosmos.stations.find_by_file(name)
+            stations = cosmos.config.stations.find_by_file(name)
 
             for st in stations:
 
@@ -335,7 +338,7 @@ class Model:
                                         
         else:
 
-            station = copy.copy(cosmos.stations.find_by_name(name))
+            station = copy.copy(cosmos.config.stations.find_by_name(name))
 
             station.longitude_model = station.longitude
             station.latitude_model  = station.latitude

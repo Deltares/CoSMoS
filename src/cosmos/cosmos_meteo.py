@@ -9,7 +9,7 @@ from pyproj import CRS
 import numpy as np
 import datetime
 
-from .cosmos_main import cosmos
+from .cosmos import cosmos
 from cht.meteo.meteo import MeteoSource
 from cht.meteo.meteo import MeteoGrid
 import cht.misc.xmlkit as xml
@@ -73,12 +73,12 @@ def read_meteo_sources():
 
     # Meteo subsets
     # Read from xml file
-    xml_file = os.path.join(cosmos.config.main_path,
+    xml_file = os.path.join(cosmos.config.path.main,
                             "meteo",
                             "meteo_subsets.xml")
     xml_obj = xml.xml2obj(xml_file)
     
-    meteo_path = os.path.join(cosmos.config.main_path, "meteo")
+    meteo_path = os.path.join(cosmos.config.path.main, "meteo")
     parameters = ["wind","barometric_pressure","precipitation"]
     
     has_source_list = []
@@ -136,7 +136,7 @@ def download_and_collect_meteo():
                      t1 = max(t1, model.flow_stop_time)
         if download:
             # Download the data
-            if cosmos.config.get_meteo:
+            if cosmos.config.cycle.get_meteo:
                 cosmos.log("Downloading meteo data : " + meteo_subset.name)
                 meteo_subset.download([t0, t1])
             # Collect the data from netcdf files    

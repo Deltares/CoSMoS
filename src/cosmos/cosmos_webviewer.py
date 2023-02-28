@@ -13,7 +13,7 @@ from geojson import Point, LineString, Feature, FeatureCollection
 from pyproj import CRS
 from pyproj import Transformer
 
-from .cosmos_main import cosmos
+from .cosmos import cosmos
 from .cosmos_timeseries import merge_timeseries as merge
 from .cosmos_tiling import make_wave_map_tiles
 from .cosmos_tiling import make_precipitation_tiles
@@ -26,8 +26,8 @@ class WebViewer:
     def __init__(self, name):
 
         self.name    = name
-        self.path    = os.path.join(cosmos.config.main_path, "webviewers", name)
-        self.version = cosmos.config.webviewer_version
+        self.path    = os.path.join(cosmos.config.path.main, "webviewers", name)
+        self.version = cosmos.config.webviewer.version
         if fo.exists(self.path):
             self.exists = True
         else:
@@ -49,9 +49,9 @@ class WebViewer:
 
             fo.mkdir(self.path)
 
-            template_path = os.path.join(cosmos.config.main_path,
-                                         "templates",
-                                         "webviewers",
+            template_path = os.path.join(cosmos.config.path.main,
+                                         "configuration",
+                                         "webviewer_templates",
                                          self.version,
                                          "*")
             fo.copy_file(template_path, self.path)
@@ -154,7 +154,7 @@ class WebViewer:
                         # Check if there is a file in the observations that matches this station
                         obs_file = None
                         if cosmos.scenario.observations_path and station.id:
-                            obs_pth = os.path.join(cosmos.config.main_path,
+                            obs_pth = os.path.join(cosmos.config.path.main,
                                                "observations",
                                                cosmos.scenario.observations_path,
                                                "water_levels")                        
@@ -175,8 +175,8 @@ class WebViewer:
                         # Go two days back
                         path = cosmos.scenario.timeseries_path
 #                        path = model.archive_path
-                        t0 = cosmos.cycle_time - datetime.timedelta(hours=48)
-                        t1 = cosmos.cycle_time
+                        t0 = cosmos.cycle - datetime.timedelta(hours=48)
+                        t1 = cosmos.cycle
                         v  = merge(path,
                                    model.name,
                                    model.region,
@@ -228,8 +228,8 @@ class WebViewer:
                                                             "model_type":model.type}))
     
                         path = cosmos.scenario.timeseries_path
-                        t0 = cosmos.cycle_time - datetime.timedelta(hours=48)
-                        t1 = cosmos.cycle_time
+                        t0 = cosmos.cycle - datetime.timedelta(hours=48)
+                        t1 = cosmos.cycle
                         
                         # Hm0
                         v  = merge(path,
@@ -288,7 +288,7 @@ class WebViewer:
     
             # Wave map for the entire simulation
             dt  = datetime.timedelta(hours=dtinc)
-            t0  = cosmos.cycle_time.replace(tzinfo=None)    
+            t0  = cosmos.cycle.replace(tzinfo=None)    
             t1  = cosmos.stop_time
 
             pathstr = []
@@ -357,7 +357,7 @@ class WebViewer:
 
         # Wave map for the entire simulation
         dt  = datetime.timedelta(hours=dtinc)
-        t0  = cosmos.cycle_time.replace(tzinfo=None)    
+        t0  = cosmos.cycle.replace(tzinfo=None)    
         t1  = cosmos.stop_time
         
         okay  = False
@@ -640,7 +640,7 @@ class WebViewer:
         dt1 = datetime.timedelta(hours=1)
 #        dt6 = datetime.timedelta(hours=6)
         dt24 = datetime.timedelta(hours=24)
-        t0 = cosmos.cycle_time.replace(tzinfo=None)    
+        t0 = cosmos.cycle.replace(tzinfo=None)    
         t1 = cosmos.stop_time
         
         # First determine max precip for all simulations 
@@ -1157,8 +1157,8 @@ def update_scenarios_js(sc_file):
     newsc["lon"]         = cosmos.scenario.lon    
     newsc["lat"]         = cosmos.scenario.lat
     newsc["zoom"]        = cosmos.scenario.zoom    
-    newsc["cycle"]       = cosmos.cycle_time.strftime('%Y-%m-%dT%H:%M:%S')
-    newsc["duration"]    = str(cosmos.scenario.run_duration)
+    newsc["cycle"]       = cosmos.cycle.strftime('%Y-%m-%dT%H:%M:%S')
+    newsc["duration"]    = str(cosmos.scenario.runtime)
 
     now = datetime.datetime.utcnow()
     newsc["last_update"] = now.strftime("%Y/%m/%d %H:%M:%S" + " (UTC)")

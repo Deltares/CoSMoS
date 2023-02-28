@@ -9,7 +9,7 @@ import os
 import pandas as pd
 import datetime
 
-from .cosmos_main import cosmos
+from .cosmos import cosmos
 from .cosmos_model import Model
 from .cosmos_tiling import make_wave_map_tiles
 import cosmos.cosmos_meteo as meteo
@@ -25,8 +25,7 @@ class CoSMoS_HurryWave(Model):
         # Read in the HurryWave model
         
         # Now read in the domain data
-        input_file  = os.path.join(self.path, "input", "hurrywave.inp")
-        self.domain = HurryWave(input_file)
+        self.domain = HurryWave(path=os.path.join(self.path, "input"), load=True)
 
         # Copy some attributes to the model domain (needed for nesting)
         self.domain.crs   = self.crs
@@ -41,14 +40,14 @@ class CoSMoS_HurryWave(Model):
         self.domain.path = self.job_path
         
         # Start and stop times
-        self.domain.input.tref     = cosmos.scenario.ref_date
-        self.domain.input.tstart   = self.wave_start_time
-        self.domain.input.tstop    = self.wave_stop_time
+        self.domain.input.variables.tref     = cosmos.scenario.ref_date
+        self.domain.input.variables.tstart   = self.wave_start_time
+        self.domain.input.variables.tstop    = self.wave_stop_time
 #        nsecs = (self.wave_stop_time - self.wave_start_time).total_seconds()
 #        self.domain.input.dtmaxout = nsecs
-        self.domain.input.dtmaxout = 21600.0
-        self.domain.input.dtmapout = 21600.0
-        self.domain.input.outputformat = "net"
+        self.domain.input.variables.dtmaxout = 21600.0
+        self.domain.input.variables.dtmapout = 21600.0
+        self.domain.input.variables.outputformat = "net"
 
         # Boundary conditions        
         if self.wave_nested:
@@ -58,8 +57,8 @@ class CoSMoS_HurryWave(Model):
                           self.domain,
                           output_path=self.wave_nested.cycle_output_path)
 
-            self.domain.input.bspfile = "hurrywave.bsp"
-            self.domain.write_boundary_conditions()
+            self.domain.input.variables.bspfile = "hurrywave.bsp"
+            self.domain.boundary_conditions.write()
                     
         # Meteo forcing
         self.meteo_atmospheric_pressure = False
@@ -68,10 +67,10 @@ class CoSMoS_HurryWave(Model):
 
             meteo.write_meteo_input_files(self,
                                           "hurrywave",
-                                          self.domain.input.tref)
+                                          self.domain.input.variables.tref)
 
-            self.domain.input.amufile = "hurrywave.amu"
-            self.domain.input.amvfile = "hurrywave.amv"
+            self.domain.input.variables.amufile = "hurrywave.amu"
+            self.domain.input.variables.amvfile = "hurrywave.amv"
     
             # if self.meteo_spiderweb:
             #     self.domain.input.spwfile = self.meteo_spiderweb
@@ -85,8 +84,8 @@ class CoSMoS_HurryWave(Model):
             
             # Spiderweb file given, copy to job folder
 
-            self.domain.input.spwfile = self.meteo_spiderweb
-            meteo_path = os.path.join(cosmos.config.main_path, "meteo", "spiderwebs")
+            self.domain.input.variables.spwfile = self.meteo_spiderweb
+            meteo_path = os.path.join(cosmos.config.path.main, "meteo", "spiderwebs")
             src = os.path.join(meteo_path, self.meteo_spiderweb)
             fo.copy_file(src, self.job_path)
 
@@ -94,11 +93,11 @@ class CoSMoS_HurryWave(Model):
         if self.station:
 
             for station in self.station:
-                if not self.domain.input.obsfile:
-                    self.domain.input.obsfile = "hurrywave.obs"
-                self.domain.add_observation_point(station.x,
-                                                  station.y,
-                                                  station.name)
+                if not self.domain.input.variables.obsfile:
+                    self.domain.input.variables.obsfile = "hurrywave.obs"
+                self.domain.observation_points_regular.add_point(station.x,
+                                                                 station.y,
+                                                                 station.name)
 #            self.domain.write_observation_points()
                 
         # Add observation points for nested models (Nesting 1)
@@ -121,24 +120,24 @@ class CoSMoS_HurryWave(Model):
                     nesting.nest1(self.domain, nested_model.domain)
                     
             if specout:        
-                if not self.domain.input.ospfile:
-                    self.domain.input.ospfile = "hurrywave.osp"
-                self.domain.write_observation_points_sp2()                            
-                if self.domain.input.dtsp2out == 0.0:
-                    self.domain.input.dtsp2out = 3600.0
+                if not self.domain.input.variables.ospfile:
+                    self.domain.input.variables.ospfile = "hurrywave.osp"
+                self.domain.observation_points_sp2.write()                            
+                if self.domain.input.variables.dtsp2out == 0.0:
+                    self.domain.input.variables.dtsp2out = 3600.0
 
-        if self.domain.observation_point:
-            if not self.domain.input.obsfile:
-                self.domain.input.obsfile = "hurrywave.obs"            
-            self.domain.write_observation_points()
+        if len(self.domain.observation_points_regular.gdf)>0:
+            if not self.domain.input.variables.obsfile:
+                self.domain.input.variables.obsfile = "hurrywave.obs"            
+            self.domain.observation_points_regular.write()
 
         # Make restart file
-        trstsec = self.domain.input.tstop.replace(tzinfo=None) - self.domain.input.tref            
+        trstsec = self.domain.input.variables.tstop.replace(tzinfo=None) - self.domain.input.variables.tref            
         if self.meteo_subset:
             if self.meteo_subset.last_analysis_time:
-                trstsec = self.meteo_subset.last_analysis_time.replace(tzinfo=None) - self.domain.input.tref
-        self.domain.input.trstout  = trstsec.total_seconds()
-        self.domain.input.dtrstout = 0.0
+                trstsec = self.meteo_subset.last_analysis_time.replace(tzinfo=None) - self.domain.input.variables.tref
+        self.domain.input.variables.trstout  = trstsec.total_seconds()
+        self.domain.input.variables.dtrstout = 0.0
         
         # Get restart file from previous cycle
         if self.wave_restart_file:
@@ -147,18 +146,18 @@ class CoSMoS_HurryWave(Model):
             dst = os.path.join(self.job_path,
                                "hurrywave.rst")
             fo.copy_file(src, dst)
-            self.domain.input.rstfile = "hurrywave.rst"
-            self.domain.input.tspinup = 0.0
+            self.domain.input.variables.rstfile = "hurrywave.rst"
+            self.domain.input.variables.tspinup = 0.0
 
         # Now write input file (sfincs.inp)
-        self.domain.write_input_file()
+        self.domain.input.write()
 
         # Make run batch file
         batch_file = os.path.join(self.job_path, "run.bat")
         fid = open(batch_file, "w")
         fid.write("@ echo off\n")
         fid.write("DATE /T > running.txt\n")
-        exe_path = os.path.join(cosmos.config.hurrywave_exe_path, "hurrywave.exe")
+        exe_path = os.path.join(cosmos.config.executables.hurrywave_path, "hurrywave.exe")
         fid.write(exe_path + "\n")
         fid.write("move running.txt finished.txt\n")
         # fid.write("exit\n")
@@ -204,7 +203,7 @@ class CoSMoS_HurryWave(Model):
         output_path = self.cycle_output_path
         post_path   = self.cycle_post_path
             
-        if not self.domain.input.tref:
+        if not self.domain.input.variables.tref:
             # This model has been run before. The model instance has not data on tref, obs points etc.
             self.domain.read_input_file(os.path.join(input_path, "hurrywave.inp"))
             self.domain.read_observation_points()
@@ -230,7 +229,7 @@ class CoSMoS_HurryWave(Model):
 
 
         # Make wave map tiles
-        if cosmos.config.make_wave_maps:
+        if cosmos.config.cycle.make_wave_maps:
 
             # 24 hour increments  
             dtinc = 24
@@ -238,7 +237,7 @@ class CoSMoS_HurryWave(Model):
             # Wave map for the entire simulation
             dt1 = datetime.timedelta(hours=1)
             dt  = datetime.timedelta(hours=dtinc)
-            t0  = cosmos.cycle_time.replace(tzinfo=None)    
+            t0  = cosmos.cycle.replace(tzinfo=None)    
             t1  = cosmos.stop_time
             
             # Determine if wave maps can be made
@@ -280,7 +279,7 @@ class CoSMoS_HurryWave(Model):
                                             "hm0",
                                             pathstr[-1])                    
                 hm0max = self.domain.read_hm0max(hm0max_file=file_name,
-                                                  time_range=[t0, t1 + dt1])        
+                                                 time_range=[t0, t1 + dt1])        
                 make_wave_map_tiles(hm0max, index_path, hm0_map_path, contour_set)
 
 

@@ -8,7 +8,7 @@ import time
 import sched
 import os
 
-from .cosmos_main import cosmos
+from .cosmos import cosmos
 from .cosmos_cluster import cluster_dict as cluster
 from .cosmos_postprocess import post_process
 import cht.misc.fileops as fo
@@ -76,13 +76,13 @@ class ModelLoop:
             model.pre_process()  # Adjust model input (nesting etc.)
 
 #            if cosmos.config.run_mode == "serial":
-            if cosmos.config.run_mode == "serial" or model.type=="beware":
+            if cosmos.config.cycle.run_mode == "serial" or model.type=="beware":
                 cosmos.log("Submitting " + model.long_name + " ...")
                 model.submit_job()
-            elif cosmos.config.run_mode == "parallel":
+            elif cosmos.config.cycle.run_mode == "parallel":
                 cosmos.log("Ready to run " + model.long_name + " ...")
                 # Write ready file            
-                file_name = os.path.join(cosmos.config.job_path,
+                file_name = os.path.join(cosmos.config.path.jobs,
                                          cosmos.scenario.name,
                                          model.name,
                                          "ready.txt")
@@ -140,16 +140,16 @@ class ModelLoop:
             self.status = "done"
                                     
             # Move log file to scenario cycle path               
-            log_file = os.path.join(cosmos.config.main_path, "cosmos.log")
+            log_file = os.path.join(cosmos.config.path.main, "cosmos.log")
             fo.move_file(log_file, cosmos.scenario.cycle_path)
             
             # Delete jobs folder
-            if cosmos.config.run_mode == "serial":
-                pth = os.path.join(cosmos.config.job_path,
+            if cosmos.config.cycle.run_mode == "serial":
+                pth = os.path.join(cosmos.config.path.jobs,
                                    cosmos.scenario.name)
                 fo.rmdir(pth)
 
-            if cosmos.config.cycle_mode == "continuous" and cosmos.next_cycle_time:
+            if cosmos.config.cycle.mode == "continuous" and cosmos.next_cycle_time:
                 # Start new main loop
                 cosmos.main_loop.start(cycle_time=cosmos.next_cycle_time)
             else:
@@ -223,13 +223,13 @@ def update_waiting_list():
         
         # Sort waiting list according to prioritization
         waiting_list.sort(key=lambda x: priorities, reverse = True)
-        if cosmos.config.run_mode == "serial":
+        if cosmos.config.cycle.run_mode == "serial":
             # Only put first job in waiting list
             waiting_list = waiting_list[:1]        
             if running:
                 # There is already a model running. Wait for it to finish.
                 waiting_list = []
-        elif cosmos.config.run_mode == "parallel":
+        elif cosmos.config.cycle.run_mode == "parallel":
             # Put all jobs at certain priority level in waiting list
             waiting_list = waiting_list[:]        
 

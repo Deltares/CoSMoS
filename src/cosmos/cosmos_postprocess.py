@@ -10,7 +10,7 @@ import os
 #import pandas as pd
 #import datetime
 
-from .cosmos_main import cosmos
+from .cosmos import cosmos
 from .cosmos_webviewer import WebViewer
 #from .cosmos_tiling import make_wave_map_tiles
 
@@ -22,10 +22,10 @@ def post_process():
     if cosmos.config.webviewer:
         # Build new web viewer, or copy scenario data to existing viewer
         
-        wv = WebViewer(cosmos.config.webviewer)
+        wv = WebViewer(cosmos.config.webviewer.name)
         wv.make()
         
-        if cosmos.config.upload:
+        if cosmos.config.cycle.upload:
             current_path = os.getcwd()
             try:
                 wv.upload()

@@ -10,7 +10,7 @@ import numpy as np
 import datetime
 import xarray as xr
 
-from .cosmos_main import cosmos
+from .cosmos import cosmos
 from .cosmos_model import Model
 from .cosmos_tiling import make_sedero_tiles
 from .cosmos_tiling import make_bedlevel_tiles

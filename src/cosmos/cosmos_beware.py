@@ -18,7 +18,7 @@ from cht.misc.deltares_ini import IniStruct
 from cht.tide.tide_predict import predict
 from cht.misc.misc_tools import findreplace
 
-from .cosmos_main import cosmos
+from .cosmos import cosmos
 from .cosmos_model import Model
 from .cosmos_tiling import make_flood_map_tiles
 

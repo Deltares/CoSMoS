@@ -16,7 +16,7 @@ import cht.misc.fileops as fo
 from cht.tide.tide_predict import predict
 from cht.misc.deltares_ini import IniStruct
 
-from .cosmos_main import cosmos
+from .cosmos import cosmos
 from .cosmos_model import Model
 from .cosmos_tiling import make_flood_map_tiles
 import cosmos.cosmos_meteo as meteo
@@ -32,15 +32,6 @@ class CoSMoS_SFINCS(Model):
     def read_model_specific(self):
         
         # Read in the SFINCS model
-        
-        # First set some defaults
-#        self.flow_spinup_time = 0.0
-        
-#        xml_obj = xml.xml2obj(self.file_name)        
-#        if hasattr(xml_obj, "flowspinup"):
-#            self.flow_spinup_time = float(xml_obj.flowspinup[0].value)
-                        
-        # Now read in the domain data
         input_file  = os.path.join(self.path, "input", "sfincs.inp")
         self.domain = SFINCS(input_file)
 
@@ -273,7 +264,7 @@ class CoSMoS_SFINCS(Model):
         fid = open(batch_file, "w")
         fid.write("@ echo off\n")
         fid.write("DATE /T > running.txt\n")
-        exe_path = os.path.join(cosmos.config.sfincs_exe_path, "sfincs.exe")
+        exe_path = os.path.join(cosmos.config.executables.sfincs_path, "sfincs.exe")
         fid.write(exe_path + "\n")
         fid.write("move running.txt finished.txt\n")
         fid.close()
@@ -312,10 +303,10 @@ class CoSMoS_SFINCS(Model):
                                                     "sfincs.obs")
                             self.flow_nested.domain.read_observation_points(file_name=obs_file)                    
                     
-                    nesting.nest2(self.flow_nested.domain,
-                                  self.domain,
-                                  output_path=output_path,
-                                  boundary_water_level_correction=self.boundary_water_level_correction)
+                    nest2(self.flow_nested.domain,
+                          self.domain,
+                          output_path=output_path,
+                          boundary_water_level_correction=self.boundary_water_level_correction)
         
                     bzsfile = os.path.join(member_path, self.domain.input.bzsfile)
                     self.domain.write_flow_boundary_conditions(file_name=bzsfile)
@@ -402,9 +393,9 @@ class CoSMoS_SFINCS(Model):
 
 
         # Make flood map tiles
-        if cosmos.config.make_flood_maps and self.make_flood_map:
+        if cosmos.config.cycle.make_flood_maps and self.make_flood_map:
 
-            flood_map_pathflood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+            flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
                                           "flood_map")
             
             index_path = os.path.join(self.path, "tiling", "indices")
@@ -420,7 +411,7 @@ class CoSMoS_SFINCS(Model):
                 # Wave map for the entire simulation
                 dt1 = datetime.timedelta(hours=1)
                 dt  = datetime.timedelta(hours=dtinc)
-                t0  = cosmos.cycle_time.replace(tzinfo=None)    
+                t0  = cosmos.cycle.replace(tzinfo=None)    
                 t1  = cosmos.stop_time
                     
                 pathstr = []
