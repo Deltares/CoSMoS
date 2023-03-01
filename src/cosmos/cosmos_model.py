@@ -28,8 +28,6 @@ class Model:
         self.flow               = False
         self.wave               = False
         self.priority           = 10    
-#        self.flow_nested        = False
-#        self.wave_nested        = False
         self.flow_nested        = None
         self.wave_nested        = None
         self.flow_nested_name   = None
