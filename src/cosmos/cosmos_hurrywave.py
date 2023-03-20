@@ -8,6 +8,7 @@ Created on Tue May 11 16:02:04 2021
 import os
 import pandas as pd
 import datetime
+import shutil
 
 from .cosmos_main import cosmos
 from .cosmos_model import Model
@@ -164,6 +165,63 @@ class CoSMoS_HurryWave(Model):
         # fid.write("exit\n")
         fid.close()
 
+        # Now loop through ensemble members
+        if cosmos.scenario.track_ensemble and self.ensemble:
+            
+            # Use main folder as best_track folder with spiderweb forcing
+            # os.rename(self.job_path, self.job_path + "_besttrack")
+            fo.copy_file(cosmos.scenario.best_track_file, os.path.join(self.job_path, "hurrywave.spw"))
+            self.domain.input.spwfile = "hurrywave.spw"
+            self.domain.input.amufile = None
+            self.domain.input.amvfile = None
+            self.domain.write_input_file()
+
+            for member_name in cosmos.scenario.member_names:
+                
+                # Job path for this ensemble member
+                member_path = self.job_path + "_" + member_name
+                fo.mkdir(member_path)
+
+                # Boundary conditions 
+                zcor = self.boundary_water_level_correction - self.vertical_reference_level_difference_with_msl
+       
+                if self.wave_nested:
+                    # Get boundary conditions from overall model (Nesting 2)
+                    if self.wave_nested.ensemble:
+                         output_file = "hurrywave_sp2_" + member_name + '.nc'
+                    else:
+                        output_file = None
+
+                    nesting.nest2(self.wave_nested.domain,
+                        self.domain,
+                        output_path=self.wave_nested.cycle_output_path,
+                        output_file= output_file,
+                        boundary_water_level_correction=zcor)
+
+                    self.domain.input.bspfile = "hurrywave.bsp"
+                    self.domain.input.bndfile = r"..\\" + os.path.basename(self.domain.path) + r"\\hurrywave.bnd"
+                    self.domain.write_boundary_conditions(file_name = os.path.join(member_path, self.domain.input.bspfile))
+                
+                # Copy spw file to member path
+                meteo_path = os.path.join(cosmos.config.main_path, "meteo")
+                spwfile = os.path.join(meteo_path,
+                                       cosmos.scenario.track_ensemble,
+                                       member_name + ".spw")
+                fo.copy_file(spwfile, os.path.join(member_path, "hurrywave.spw"))
+                
+                # Adjust input and save to .inp file
+                self.domain.input.spwfile = "hurrywave.spw"  
+                self.domain.input.amufile = None
+                self.domain.input.amvfile = None
+                self.domain.input.depfile = r"..\\" + os.path.basename(self.domain.path) + r"\\hurrywave.dep"
+                self.domain.input.mskfile = r"..\\" + os.path.basename(self.domain.path) + r"\\hurrywave.msk"
+                self.domain.input.obsfile = r"..\\" + os.path.basename(self.domain.path) + r"\\hurrywave.obs"
+                self.domain.input.ospfile = r"..\\" + os.path.basename(self.domain.path) + r"\\hurrywave.osp"
+
+
+                self.domain.write_input_file(input_file= os.path.join(member_path, 'hurrywave.inp'))
+                fo.copy_file(os.path.join(self.job_path, 'run.bat'), member_path)
+
         # Set the path back to the one in cosmos\models\etc.
         self.domain.path = pth
 
@@ -196,8 +254,33 @@ class CoSMoS_HurryWave(Model):
         # Input
         fo.move_file(os.path.join(job_path, "*.*"), input_path)
 
+        if cosmos.scenario.track_ensemble and self.ensemble:
+            # And now for the ensemble members
+            # Only output
+            for member_name in cosmos.scenario.member_names:
+                
+                pth = self.job_path + "_" + member_name
+
+                if os.path.isfile(os.path.join(pth, "hurrywave_his.nc")):
+                    fo.move_file(os.path.join(pth, "hurrywave_his.nc"), os.path.join(self.cycle_output_path, 'hurrywave_his_'+ member_name +'.nc'))
+                if os.path.isfile(os.path.join(pth, "hurrywave_map.nc")):
+                    fo.move_file(os.path.join(pth, "hurrywave_map.nc"), os.path.join(self.cycle_output_path, 'hurrywave_map_'+ member_name +'.nc'))
+                if os.path.isfile(os.path.join(pth, "hurrywave_sp2.nc")):
+                    fo.move_file(os.path.join(pth, "hurrywave_sp2.nc"), os.path.join(self.cycle_output_path, 'hurrywave_sp2_'+ member_name +'.nc'))
+                if os.path.isfile(os.path.join(pth, "hurrywave.rst")):
+                    fo.move_file(os.path.join(pth, "hurrywave.rst"), os.path.join(self.cycle_output_path, 'hurrywave_'+ member_name +'.rst'))
+
+                try:
+                    shutil.rmtree(pth)
+                except:
+                    # Folder was probably open in another application
+                    pass
+
+
     def post_process(self):
-        
+        import xarray as xr
+        import numpy as np
+        import cht.misc.prob_maps as pm
         # Extract water levels
 
         input_path  = self.cycle_input_path
@@ -209,6 +292,22 @@ class CoSMoS_HurryWave(Model):
             self.domain.read_input_file(os.path.join(input_path, "hurrywave.inp"))
             self.domain.read_observation_points()
         
+        if cosmos.scenario.track_ensemble and self.ensemble:
+            
+            # Make probabilistic flood maps
+            file_list= fo.list_files(os.path.join(output_path, "hurrywave_map_*"))
+            prcs= np.concatenate((np.arange(0, 0.9, 0.05), np.arange(0.9, 1, 0.01)))
+            vars= ["hm0", "tp"]
+            output_file_name = os.path.join(output_path, "hurrywave_map_ensemble.nc")
+            #pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
+
+            # Make probabilistic wave timeseries
+            file_list= fo.list_files(os.path.join(output_path, "hurrywave_his_*"))
+            prcs= [0.05, 0.5, 0.95]#np.concatenate((np.arange(0, 0.9, 0.05), np.arange(0.9, 1, 0.01)))
+            vars= ["point_hm0", "point_tp"]
+            output_file_name = os.path.join(output_path, "hurrywave_his_ensemble.nc")
+            pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
+
         if self.station:
 
             vhm0 = self.domain.read_timeseries_output(path=output_path,
@@ -222,6 +321,19 @@ class CoSMoS_HurryWave(Model):
                 df.index.name='date_time'
                 df["Hm0"]=vhm0[station.name]
                 df["Tp"]=vtp[station.name]
+
+                if cosmos.scenario.track_ensemble and self.ensemble:
+                    for i,v in enumerate(prcs):
+                        vhm0 = self.domain.read_timeseries_output(path=output_path,
+                                            file_name= "hurrywave_his_ensemble.nc",
+                                            parameter= "hm0_" + str(round(v*100)))
+                        vtp  = self.domain.read_timeseries_output(path=output_path,
+                                            file_name= "hurrywave_his_ensemble.nc",
+                                            parameter="tp_"+ str(round(v*100)))
+                        df["Hm0_" + str(round(v*100))]=vhm0[station.name]
+                        df["Tp_" + str(round(v*100))]=vtp[station.name]
+
+
                 file_name = os.path.join(post_path,
                                          "waves." + station.name + ".csv")
                 df.to_csv(file_name,

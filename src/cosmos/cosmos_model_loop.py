@@ -89,7 +89,18 @@ class ModelLoop:
                 fid = open(file_name, "w")
                 fid.write("Model is ready to run")
                 fid.close()
-            
+                
+                if cosmos.scenario.track_ensemble and model.ensemble:
+                     for member_name in cosmos.scenario.member_names:
+                        # Write ready file            
+                        file_name = os.path.join(cosmos.config.job_path,
+                                                cosmos.scenario.name,
+                                                model.name + "_" + member_name,
+                                                "ready.txt")
+                        fid = open(file_name, "w")
+                        fid.write("Model is ready to run")
+                        fid.close()
+
             model.status = "running"
 
         # Now do post-processing on simulations that were finished

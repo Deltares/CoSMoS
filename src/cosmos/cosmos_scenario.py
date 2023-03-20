@@ -60,15 +60,44 @@ class Scenario:
             ensemble_path = os.path.join(cosmos.config.main_path,
                                          "meteo",
                                          self.track_ensemble)
+
+            # If nr of tracks indicated in scenario file, generate new spw files based on .cyc file in ensemble folder
+            if hasattr(xml_obj, "ensemble_nrtracks"):
+                fo.delete_file(fo.list_files(os.path.join(ensemble_path, "*.spw")))
+
+                from cht.tropical_cyclone.tropical_cyclone import TropicalCyclone
+                from cht.tropical_cyclone.tropical_cyclone import TropicalCycloneEnsemble
+                from cht.tropical_cyclone.tropical_cyclone import holland2010, wind_radii_nederhoff
+                from datetime import datetime, timedelta
+
+                tc= TropicalCyclone()
+                file_name_cyc =fo.list_files(os.path.join(ensemble_path, "*.cyc"))
+                cycname = os.path.basename(file_name_cyc[0]).split('.')[0]
+
+                tc.from_ddb_cyc(file_name_cyc[0])
+                tc.account_for_forward_speed()
+                tc.estimate_missing_values()
+                tc.include_rainfall = True
+
+                self.ensemble_nrtracks = xml_obj.ensemble_nrtracks[0].value
+                tc2= TropicalCycloneEnsemble(name= cycname, TropicalCyclone= tc)
+                tc2.tstart  = xml_obj.cycle[0].value
+                tc2.tend    = xml_obj.cycle[0].value+timedelta(hours=self.run_duration)
+                tc2.compute_ensemble(number_of_realizations= self.ensemble_nrtracks)
+
+                tc2.to_shapefile(folder_path=ensemble_path)
+                tc2.to_spiderweb(folder_path=ensemble_path)
+
             file_names = fo.list_files(os.path.join(ensemble_path, "*.spw"))
+
             # Loop through file names
             for file_name in file_names:                
-                if file_name[-13:-4]=="besttrack":
+                if file_name[-9:-4]=="00000":
                     cosmos.scenario.best_track_file = os.path.join(ensemble_path,
-                                                                   file_name)
+                                                                file_name)
                 else:
                     cosmos.scenario.member_names.append(os.path.split(file_name)[1][0:-4])
-            
+        
         else:
             self.track_ensemble = None
             
@@ -78,6 +107,7 @@ class Scenario:
         scn_meteo_wind                 = True
         scn_meteo_atmospheric_pressure = True
         scn_meteo_precipitation        = True
+        scn_ensemble                   = False
         scn_make_flood_map             = True
         scn_make_wave_map              = True
 
@@ -104,6 +134,12 @@ class Scenario:
                 scn_meteo_precipitation = True
             else:    
                 scn_meteo_precipitation = False
+
+        if hasattr(xml_obj, "ensemble"):
+            if xml_obj.ensemble[0].value[0] == "y":
+                scn_ensemble = True
+            else:    
+                scn_ensemble = False
 
         ### Web viewer
         if hasattr(xml_obj, "lon"):
@@ -136,6 +172,7 @@ class Scenario:
             mdl_meteo_wind                 = None
             mdl_meteo_atmospheric_pressure = None
             mdl_meteo_precipitation        = None
+            mdl_ensemble                   = None
             mdl_make_flood_map             = None
             mdl_make_wave_map              = None
             
@@ -159,6 +196,11 @@ class Scenario:
                     mdl_meteo_precipitation = True
                 else:    
                     mdl_meteo_precipitation = False                    
+            if hasattr(mdl, "ensemble"):
+                if mdl.ensemble[0].value[0] == "y":
+                    mdl_ensemble = True
+                else:    
+                    mdl_ensemble = False        
 
             if hasattr(mdl, "make_flood_map"):
                 if mdl.make_flood_map[0].value[0].lower() == "y":
@@ -184,6 +226,7 @@ class Scenario:
                 models_in_scenario[name]["meteo_wind"]                 = scn_meteo_wind
                 models_in_scenario[name]["meteo_atmospheric_pressure"] = scn_meteo_atmospheric_pressure
                 models_in_scenario[name]["meteo_precipitation"]        = scn_meteo_precipitation
+                models_in_scenario[name]["ensemble"]                   = scn_ensemble
                 models_in_scenario[name]["make_flood_map"]             = scn_make_flood_map
                 models_in_scenario[name]["make_wave_map"]              = scn_make_wave_map
 
@@ -198,6 +241,8 @@ class Scenario:
                     models_in_scenario[name]["meteo_atmospheric_pressure"] = mdl_meteo_atmospheric_pressure
                 if mdl_meteo_precipitation is True or mdl_meteo_precipitation is False:
                     models_in_scenario[name]["meteo_precipitation"]        = mdl_meteo_precipitation
+                if mdl_ensemble is True or mdl_ensemble is False:
+                    models_in_scenario[name]["ensemble"]             = mdl_ensemble
                 if mdl_make_flood_map is True or mdl_make_flood_map is False:
                     models_in_scenario[name]["make_flood_map"]             = mdl_make_flood_map 
                 if mdl_make_wave_map is True or mdl_make_wave_map is False:
@@ -248,6 +293,7 @@ class Scenario:
                         models_in_scenario[name]["meteo_wind"]                 = scn_meteo_wind
                         models_in_scenario[name]["meteo_atmospheric_pressure"] = scn_meteo_atmospheric_pressure
                         models_in_scenario[name]["meteo_precipitation"]        = scn_meteo_precipitation
+                        models_in_scenario[name]["ensemble"]                   = scn_ensemble
                         models_in_scenario[name]["make_flood_map"]             = scn_make_flood_map
                         models_in_scenario[name]["make_wave_map"]              = scn_make_wave_map
         
@@ -262,6 +308,8 @@ class Scenario:
                             models_in_scenario[name]["meteo_atmospheric_pressure"] = mdl_meteo_atmospheric_pressure
                         if mdl_meteo_precipitation:
                             models_in_scenario[name]["meteo_precipitation"]        = mdl_meteo_precipitation
+                        if mdl_ensemble:
+                            models_in_scenario[name]["ensemble"]             = mdl_ensemble
                         if mdl_make_flood_map:
                             models_in_scenario[name]["make_flood_map"]             = mdl_make_flood_map 
                         if mdl_make_wave_map:
@@ -330,6 +378,7 @@ class Scenario:
             model.meteo_wind                 = properties["meteo_wind"]
             model.meteo_precipitation        = properties["meteo_precipitation"]
             model.meteo_atmospheric_pressure = properties["meteo_atmospheric_pressure"]
+            model.ensemble                   = properties["ensemble"]
             model.make_flood_map             = properties["make_flood_map"]
             model.make_wave_map              = properties["make_wave_map"]
 
@@ -375,7 +424,7 @@ class Scenario:
             #                                   "archive")        
                         
             self.model.append(model)
-        
+                
         ### Add models to clusters 
         if hasattr(xml_obj, "cluster"):
             for xml_cluster in xml_obj.cluster:

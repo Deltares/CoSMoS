@@ -247,15 +247,16 @@ class Model:
 
     def submit_job(self):
 
-        if cosmos.scenario.track_ensemble and cosmos.config.run_ensemble:
+        if cosmos.scenario.track_ensemble and self.ensemble:
             
             # Make run batch file
             fid = open("tmp.bat", "w")
-            
+            fid.write(self.job_path[0:2] + "\n")     
+
             for member_name in cosmos.scenario.member_names:
             
                 # Job path for this ensemble member
-                pth = self.job_path + "_" + member_name           
+                pth = self.job_path + "_" + member_name      
                 fid.write("cd " + pth + "\n")
                 fid.write("call run.bat\n")
 
