@@ -214,16 +214,25 @@ class CoSMoS_BEWARE(Model):
                 if os.path.isfile(os.path.join(pth, "beware_his.nc")):
                     fo.move_file(os.path.join(pth, "beware_his.nc"), os.path.join(self.cycle_output_path, 'beware_his_'+ member_name +'.nc'))
 
+                try:
+                    shutil.rmtree(pth)
+                except:
+                    # Folder was probably open in another application
+                    pass
+
     def post_process(self):
         # Post-processing occurs in cosmos_webviewer.py
         import numpy as np
         import cht.misc.prob_maps as pm
         
+        output_path = self.cycle_output_path
+        post_path   = self.cycle_post_path
+
         if cosmos.scenario.track_ensemble and self.ensemble:
             
             # Make probabilistic runup timeseries
             file_list= fo.list_files(os.path.join(output_path, "beware_his_*"))
-            prcs= np.concatenate((np.arange(0, 0.9, 0.1), np.arange(0.9, 1, 0.01)))
+            prcs= [0.05, 0.5, 0.95] #np.concatenate((np.arange(0, 0.9, 0.1), np.arange(0.9, 1, 0.01)))
             vars= ["R2_tot", "R2_set", "R2_wl"]
             output_file_name = os.path.join(output_path, "beware_his_ensemble.nc")
             pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)

@@ -489,8 +489,11 @@ class CoSMoS_SFINCS(Model):
                 nc_file = os.path.join(output_path, "zst.txt")
             else:    
                 nc_file = os.path.join(output_path, "sfincs_his.nc")
-            
-            v = self.domain.read_timeseries_output(file_name=nc_file)
+
+            name_list=[]
+            for station in self.station:
+                name_list.append(station.name)
+            v = self.domain.read_timeseries_output(name_list = name_list, file_name=nc_file)
             
             # Water levels in the csv files have the same datum as the model !!!            
             for station in self.station:
@@ -502,7 +505,7 @@ class CoSMoS_SFINCS(Model):
                 if cosmos.scenario.track_ensemble and self.ensemble:
                     nc_file = os.path.join(output_path, "sfincs_his_ensemble.nc")
                     for ii,vv in enumerate(prcs):
-                        tmp = self.domain.read_timeseries_output(file_name=nc_file, parameter = "point_zs_" + str(round(vv*100)))
+                        tmp = self.domain.read_timeseries_output(name_list = name_list, file_name=nc_file, parameter = "point_zs_" + str(round(vv*100)))
                         df["wl_" + str(round(vv*100))]=tmp[station.name]
                         df["wl_" + str(round(vv*100))]= df["wl_" + str(round(vv*100))]+ station.water_level_correction
 
