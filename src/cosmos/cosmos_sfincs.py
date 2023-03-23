@@ -259,7 +259,7 @@ class CoSMoS_SFINCS(Model):
         fid.write("@ echo off\n")
         fid.write("DATE /T > running.txt\n")
         exe_path = os.path.join(cosmos.config.sfincs_exe_path, "sfincs.exe")
-        #fid.write(exe_path + "\n")
+        fid.write(exe_path + "\n")
         fid.write("move running.txt finished.txt\n")
         fid.close()
 
