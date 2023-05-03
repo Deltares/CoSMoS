@@ -74,22 +74,18 @@ class CoSMoS_HurryWave(Model):
             self.domain.input.amufile = "hurrywave.amu"
             self.domain.input.amvfile = "hurrywave.amv"
     
-            # if self.meteo_spiderweb:
-            #     self.domain.input.spwfile = self.meteo_spiderweb
-            #     self.domain.input.baro    = 1
-            #     src = os.path.join("d:\\cosmos\\externalforcing\\meteo\\",
-            #                        "spiderwebs",
-            #                        self.meteo_spiderweb)
-            #     fo.copy_file(src, self.job_path)
-
-        if self.meteo_spiderweb:
+        if self.meteo_spiderweb or cosmos.scenario.track_ensemble:
             
             # Spiderweb file given, copy to job folder
-
-            self.domain.input.spwfile = self.meteo_spiderweb
-            meteo_path = os.path.join(cosmos.config.main_path, "meteo", "spiderwebs")
-            src = os.path.join(meteo_path, self.meteo_spiderweb)
-            fo.copy_file(src, self.job_path)
+            if self.meteo_spiderweb:
+                self.domain.input.spwfile = self.meteo_spiderweb
+                meteo_path = os.path.join(cosmos.config.main_path, "meteo", "spiderwebs")
+                fo.copy_file(os.path.join(meteo_path, self.meteo_spiderweb), self.job_path)
+            elif cosmos.scenario.track_ensemble:
+                self.domain.input.spwfile = "hurrywave.spw"
+                fo.copy_file(cosmos.scenario.best_track_file, os.path.join(self.job_path, "hurrywave.spw"))
+            self.domain.input.amufile = None
+            self.domain.input.amvfile = None
 
         # Make observation points
         if self.station:
@@ -332,7 +328,6 @@ class CoSMoS_HurryWave(Model):
                                             parameter="tp_"+ str(round(v*100)))
                         df["Hm0_" + str(round(v*100))]=vhm0[station.name]
                         df["Tp_" + str(round(v*100))]=vtp[station.name]
-
 
                 file_name = os.path.join(post_path,
                                          "waves." + station.name + ".csv")
