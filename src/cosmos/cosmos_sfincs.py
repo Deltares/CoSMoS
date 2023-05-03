@@ -121,16 +121,25 @@ class CoSMoS_SFINCS(Model):
             zcor = self.boundary_water_level_correction - self.vertical_reference_level_difference_with_msl
             
             if cosmos.scenario.model:
-                nest2(self.flow_nested.domain,
+                if self.flow_nested.type == "sfincs":    
+                    nest2(self.flow_nested.domain,
+                        self.domain,
+                        output_path=self.flow_nested.cycle_output_path,
+                        output_file= 'sfincs_his.nc',
+                        boundary_water_level_correction=zcor,
+                        option="flow")
+
+                if self.flow_nested.type == "beware":    
+                    nest2(self.flow_nested.domain,
                     self.domain,
                     output_path=self.flow_nested.cycle_output_path,
-                    output_file= 'sfincs_his.nc',
+                    output_file= 'beware_his.nc',
                     boundary_water_level_correction=zcor,
-                    option="flow")
-
-            if self.flow_nested.type == "beware":                
-                # Make sfincs bnd file
-                self.domain.write_flow_boundary_points(file_name = 'tmp' )
+                    option="flow")            
+                    
+                    # Make sfincs bnd file
+                    self.domain.write_flow_boundary_points()
+                self.domain.write_flow_boundary_conditions()
 
             if self.domain.input.corfile:
                 
@@ -182,7 +191,7 @@ class CoSMoS_SFINCS(Model):
                     
             self.domain.write_flow_boundary_conditions()
 
-        if self.wave and self.wave_nested:
+        if self.wave_nested:
             
             # Get wave boundary conditions from overall model (Nesting 2)
 
@@ -211,12 +220,27 @@ class CoSMoS_SFINCS(Model):
                 self.domain.write_wavemaker_forcing_points()
                 self.domain.write_wavemaker_forcing_conditions()
             else:
-                self.domain.input.bhsfile = "sfincs.bhs"
-                self.domain.input.btpfile = "sfincs.btp"
-                self.domain.input.bwdfile = "sfincs.bwd"
-                self.domain.input.bdsfile = "sfincs.bds"
+                self.domain.input.snapwave_bhsfile = "snapwave.bhs"
+                self.domain.input.snapwave_btpfile = "snapwave.btp"
+                self.domain.input.snapwave_bwdfile = "snapwave.bwd"
+                self.domain.input.snapwave_bdsfile = "snapwave.bds"
                 self.domain.write_wave_boundary_conditions()
-                    
+
+        # If SFINCS nested in Hurrywave for SNAPWAVE setup, separately run BEWARE nesting for LF waves
+        if self.bw_nested:
+            nest2(self.bw_nested.domain,
+                self.domain,
+                output_path=self.bw_nested.cycle_output_path,
+                option="wave")
+            self.domain.input.wfpfile = "sfincs.wfp"
+            self.domain.input.whifile = "sfincs.whi"
+            self.domain.input.wtifile = "sfincs.wti"
+
+            self.domain.write_wavemaker_forcing_points()
+            self.domain.write_whi_file()
+            self.domain.write_wti_file()
+
+
         # Meteo forcing
         if self.meteo_wind or self.meteo_atmospheric_pressure or self.meteo_precipitation:
 
@@ -237,19 +261,27 @@ class CoSMoS_SFINCS(Model):
             else:
                 self.domain.input.scsfile = None
 
-        if self.meteo_spiderweb:
+        if self.meteo_spiderweb or cosmos.scenario.track_ensemble:
+
+            if self.meteo_spiderweb:
             
-            # Spiderweb file given, copy to job folder
-            self.domain.input.spwfile = "sfincs.spw"
+                # Spiderweb file given, copy to job folder
+                self.domain.input.spwfile = self.meteo_spiderweb
+                meteo_path = os.path.join(cosmos.config.main_path, "meteo", "spiderwebs")
+                src = os.path.join(meteo_path, self.meteo_spiderweb)
+                fo.copy_file(os.path.join(meteo_path, self.meteo_spiderweb), self.job_path)
+
+            elif cosmos.scenario.track_ensemble:
+                self.domain.input.spwfile = "sfincs.spw"   
+                fo.copy_file(cosmos.scenario.best_track_file, os.path.join(self.job_path, "sfincs.spw"))
+            
+            self.domain.input.baro    = 1
             self.domain.input.utmzone = self.crs.utm_zone
             self.domain.input.amufile = None
             self.domain.input.amvfile = None
             self.domain.input.ampfile = None
             self.domain.input.amprfile = None
-            meteo_path = os.path.join(cosmos.config.main_path, "meteo", "spiderwebs")
-            src = os.path.join(meteo_path, self.meteo_spiderweb)
-            fo.copy_file(src, self.job_path)
-               
+
         # Now write input file (sfincs.inp)
         self.domain.write_input_file()
 
@@ -259,7 +291,7 @@ class CoSMoS_SFINCS(Model):
         fid.write("@ echo off\n")
         fid.write("DATE /T > running.txt\n")
         exe_path = os.path.join(cosmos.config.sfincs_exe_path, "sfincs.exe")
-        #fid.write(exe_path + "\n")
+        fid.write(exe_path + "\n")
         fid.write("move running.txt finished.txt\n")
         fid.close()
 
@@ -270,6 +302,7 @@ class CoSMoS_SFINCS(Model):
             # os.rename(self.job_path, self.job_path + "_besttrack")
             fo.copy_file(cosmos.scenario.best_track_file, os.path.join(self.job_path, "sfincs.spw"))
             self.domain.input.spwfile = "sfincs.spw"
+            self.domain.input.baro    = 1
             self.domain.input.utmzone = self.crs.utm_zone
             self.domain.input.amufile = None
             self.domain.input.amvfile = None
@@ -315,7 +348,8 @@ class CoSMoS_SFINCS(Model):
                         self.domain,
                         output_path=self.flow_nested.cycle_output_path,
                         output_file= output_file,
-                        boundary_water_level_correction=zcor)                        
+                        boundary_water_level_correction=zcor,
+                        option="flow")                        
 
                     if self.domain.input.corfile:
                 
@@ -353,7 +387,7 @@ class CoSMoS_SFINCS(Model):
                     self.domain.input.bcafile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.bca"
                     self.domain.input.bzsfile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.bzs"
 
-                if self.wave and self.wave_nested:
+                if self.wave_nested:
                     if self.wave_nested.ensemble:
                         if self.wave_nested.type == "beware":
                             output_file = "beware_his_" + member_name + '.nc'
@@ -374,21 +408,41 @@ class CoSMoS_SFINCS(Model):
                         self.domain.input.wtifile = "sfincs.wti"
                         self.domain.input.wstfile = "sfincs.wst"
 
-                        self.domain.write_wavemaker_forcing_points(file_name = os.path.join(member_path, self.domain.input.wfpfile))
+                        self.domain.input.wfpfile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.wfp"
                         self.domain.write_whi_file(file_name = os.path.join(member_path, self.domain.input.whifile))
                         self.domain.write_wti_file(file_name = os.path.join(member_path, self.domain.input.wtifile))
                         self.domain.write_wst_file(file_name = os.path.join(member_path, self.domain.input.wstfile))
+
                     elif self.wave_nested.type == "hurrywave":
-                        self.domain.input.bhsfile = "sfincs.bhs"
-                        self.domain.input.btpfile = "sfincs.btp"
-                        self.domain.input.bwdfile = "sfincs.bwd"
-                        self.domain.input.bdsfile = "sfincs.bds"
+                        self.domain.input.snapwave_bhsfile = "snapwave.bhs"
+                        self.domain.input.snapwave_btpfile = "snapwave.btp"
+                        self.domain.input.snapwave_bwdfile = "snapwave.bwd"
+                        self.domain.input.snapwave_bdsfile = "snapwave.bds"
 
-                        self.domain.write_bhs_file(file_name = os.path.join(member_path, self.domain.input.bhsfile))
-                        self.domain.write_btp_file(file_name = os.path.join(member_path, self.domain.input.btpfile))
-                        self.domain.write_bwd_file(file_name = os.path.join(member_path, self.domain.input.bwdfile))
-                        self.domain.write_bds_file(file_name = os.path.join(member_path, self.domain.input.bdsfile))    
+                        self.domain.write_bhs_file(file_name = os.path.join(member_path, self.domain.input.snapwave_bhsfile))
+                        self.domain.write_btp_file(file_name = os.path.join(member_path, self.domain.input.snapwave_btpfile))
+                        self.domain.write_bwd_file(file_name = os.path.join(member_path, self.domain.input.snapwave_bwdfile))
+                        self.domain.write_bds_file(file_name = os.path.join(member_path, self.domain.input.snapwave_bdsfile))    
 
+                if self.bw_nested:
+                    if self.bw_nested.ensemble:
+                        output_file = "beware_his_" + member_name + '.nc'
+                    else:
+                        output_file= None
+                    
+                    nest2(self.bw_nested.domain,
+                        self.domain,
+                        output_path=self.bw_nested.cycle_output_path,
+                        output_file= output_file,
+                        option="wave")
+                    self.domain.input.wfpfile = "sfincs.wfp"
+                    self.domain.input.whifile = "sfincs.whi"
+                    self.domain.input.wtifile = "sfincs.wti"
+
+                    self.domain.input.wfpfile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.wfp"
+                    self.domain.write_whi_file(file_name = os.path.join(member_path, self.domain.input.whifile))
+                    self.domain.write_wti_file(file_name = os.path.join(member_path, self.domain.input.wtifile))
+                    
                 # Copy spw file to member path
                 meteo_path = os.path.join(cosmos.config.main_path, "meteo")
                 spwfile = os.path.join(meteo_path,
@@ -398,16 +452,32 @@ class CoSMoS_SFINCS(Model):
 
                 # Adjust input and save to .inp file
                 self.domain.input.spwfile = "sfincs.spw"
+                self.domain.input.baro    = 1
                 self.domain.input.utmzone = self.crs.utm_zone
                 self.domain.input.amufile = None
                 self.domain.input.amvfile = None
                 self.domain.input.ampfile = None
                 self.domain.input.amprfile = None
+                if self.domain.input.depfile is not None:
+                    self.domain.input.depfile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.dep"
                 self.domain.input.mskfile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.msk"
-                self.domain.input.indexfile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.ind"
+                if self.domain.input.indexfile is not None:
+                    self.domain.input.indexfile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.ind"
                 self.domain.input.bndfile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.bnd"
-                self.domain.input.sbgfile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.sbg"
-                self.domain.input.obsfile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.obs"
+                if self.domain.input.sbgfile is not None:
+                    self.domain.input.sbgfile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.sbg"
+                if self.domain.input.obsfile is not None:    
+                    self.domain.input.obsfile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.obs"
+                try:
+                    if self.domain.input.qtrfile is not None:
+                        self.domain.input.qtrfile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.qtr"
+                except:
+                    pass
+                try:
+                    if self.domain.input.scsfile is not None:
+                        self.domain.input.scsfile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.scs"
+                except:
+                    pass
 
                 self.domain.write_input_file(input_file= os.path.join(member_path, "sfincs.inp"))
                 fo.copy_file(os.path.join(self.job_path, 'run.bat'), member_path)
@@ -472,14 +542,14 @@ class CoSMoS_SFINCS(Model):
             prcs= [0.05, 0.5, 0.95]#np.concatenate((np.arange(0, 0.9, 0.05), np.arange(0.9, 1, 0.01)))            
             vars= ["zs", "zsmax"]
             output_file_name = os.path.join(output_path, "sfincs_map_ensemble.nc")
-            #pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
+            # pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
 
             # Make probabilistic water level timeseries
             file_list= fo.list_files(os.path.join(output_path, "sfincs_his_*"))
             prcs=  [0.05, 0.5, 0.95]
             vars= ["point_zs"]
             output_file_name = os.path.join(output_path, "sfincs_his_ensemble.nc")
-            #pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
+            # pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
 
         if self.station:
 
@@ -502,12 +572,12 @@ class CoSMoS_SFINCS(Model):
                 df['wl']= v[station.name]                          
                 df['wl'] = df['wl'] + station.water_level_correction
 
-                if cosmos.scenario.track_ensemble and self.ensemble:
-                    nc_file = os.path.join(output_path, "sfincs_his_ensemble.nc")
-                    for ii,vv in enumerate(prcs):
-                        tmp = self.domain.read_timeseries_output(name_list = name_list, file_name=nc_file, parameter = "point_zs_" + str(round(vv*100)))
-                        df["wl_" + str(round(vv*100))]=tmp[station.name]
-                        df["wl_" + str(round(vv*100))]= df["wl_" + str(round(vv*100))]+ station.water_level_correction
+                # if cosmos.scenario.track_ensemble and self.ensemble:
+                #    nc_file = os.path.join(output_path, "sfincs_his_ensemble.nc")
+                #    for ii,vv in enumerate(prcs):
+                #        tmp = self.domain.read_timeseries_output(name_list = name_list, file_name=nc_file, parameter = "point_zs_" + str(round(vv*100)))
+                #        df["wl_" + str(round(vv*100))]=tmp[station.name]
+                #        df["wl_" + str(round(vv*100))]= df["wl_" + str(round(vv*100))]+ station.water_level_correction
 
                 file_name = os.path.join(post_path,
                                          "waterlevel." + station.name + ".csv")
@@ -573,8 +643,16 @@ class CoSMoS_SFINCS(Model):
                     make_flood_map_tiles(zsmax, index_path, topo_path, flood_map_path,
                                          water_level_correction=0.0)
 
-                    if cosmos.scenario.track_ensemble and self.ensemble:
-                        pass
+                    # if cosmos.scenario.track_ensemble and self.ensemble:
+                    #     zsmax_file = os.path.join(output_path, "sfincs_map_ensemble.nc")
+                    #     # Full simulation        
+                    #     flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+                    #                                 "flood_map", 
+                    #                                 pathstr[-1] + "_95")                    
+                    #     zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file,
+                    #                                 time_range=[t0 + dt1, t1 + dt1], parameter = 'zsmax_95')
+                    #     make_flood_map_tiles(zsmax, index_path, topo_path, flood_map_path,
+                    #                         water_level_correction=0.0)
                 except:
                     print("An error occured while making flood map tiles")
 
