@@ -240,6 +240,13 @@ class MainLoop:
                         model.wave_nested = model2
                         model2.nested_wave_models.append(model)
                         break
+            if model.bw_nested_name:
+                # Look up model from which it gets it boundary conditions
+                for model2 in cosmos.scenario.model:
+                    if model2.name == model.bw_nested_name:
+                        model.bw_nested = model2
+                        model2.nested_bw_models.append(model)
+                        break
 
         # Get list of models that have already finished
         finished_list = os.listdir(cosmos.scenario.cycle_job_list_path)
