@@ -127,7 +127,11 @@ class CoSMoS_BEWARE(Model):
 
         if cosmos.scenario.track_ensemble and self.ensemble:
             profsfile = self.domain.input.profsfile
-            r2matchfile = self.domain.input.r2matchfile
+            if self.domain.input.r2matchfile is not None:
+                r2matchfile = self.domain.input.r2matchfile
+
+            if self.domain.input.flmatchfile is not None:
+                flmatchfile = self.domain.input.flmatchfile
 
             for member_name in cosmos.scenario.member_names:
 
@@ -183,7 +187,10 @@ class CoSMoS_BEWARE(Model):
                 # Copy inp & run.bat files to member folder
                 fo.copy_file(os.path.join(self.job_path, 'run.bat'), member_path)
                 self.domain.input.profsfile = r"..\\" + os.path.basename(self.domain.path) + r"\\" + profsfile
-                self.domain.input.r2matchfile = r"..\\" + os.path.basename(self.domain.path) + r"\\" + r2matchfile
+                if self.domain.input.r2matchfile is not None:
+                    self.domain.input.r2matchfile = r"..\\" + os.path.basename(self.domain.path) + r"\\" + r2matchfile
+                if self.domain.input.flmatchfile is not None:
+                    self.domain.input.flmatchfile = r"..\\" + os.path.basename(self.domain.path) + r"\\" + flmatchfile
                 self.domain.write_input_file(input_file= os.path.join(member_path, "beware.inp"))
 
         # Set the path back to the one in cosmos\models\etc.
@@ -233,7 +240,7 @@ class CoSMoS_BEWARE(Model):
             # Make probabilistic runup timeseries
             file_list= fo.list_files(os.path.join(output_path, "beware_his_*"))
             prcs= [0.05, 0.5, 0.95] #np.concatenate((np.arange(0, 0.9, 0.1), np.arange(0.9, 1, 0.01)))
-            vars= ["R2_tot", "R2_set", "R2_wl"]
+            vars= ["R2_tot", "R2_set", "WL"]
             output_file_name = os.path.join(output_path, "beware_his_ensemble.nc")
             pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
 
