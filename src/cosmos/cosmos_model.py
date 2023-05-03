@@ -31,10 +31,13 @@ class Model:
 #        self.wave_nested        = False
         self.flow_nested        = None
         self.wave_nested        = None
+        self.bw_nested        = None
         self.flow_nested_name   = None
         self.wave_nested_name   = None
+        self.bw_nested_name   = None
         self.nested_flow_models = []
         self.nested_wave_models = []
+        self.nested_bw_models = []
         self.flow_spinup_time   = 0.0
         self.wave_spinup_time   = 0.0
         self.xlim               = None
@@ -85,6 +88,10 @@ class Model:
             if not xml_obj.wavenested[0].value == "none":
 #                self.wave_nested = True
                 self.wave_nested_name = xml_obj.wavenested[0].value
+        if hasattr(xml_obj, "bwnested"):
+            if not xml_obj.bwnested[0].value == "none":
+#                self.wave_nested = True
+                self.bw_nested_name = xml_obj.bwnested[0].value
         coordsys     = xml_obj.coordsys[0].value
         self.crs = CRS(coordsys)        
         if hasattr(xml_obj, "xlim1") and hasattr(xml_obj, "xlim2") and hasattr(xml_obj, "ylim1")  and hasattr(xml_obj, "ylim2"):
