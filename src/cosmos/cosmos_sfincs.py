@@ -315,7 +315,8 @@ class CoSMoS_SFINCS(Model):
                 # Job path for this ensemble member
                 member_path = self.job_path + "_" + member_name
                 fo.mkdir(member_path)
-                    
+                self.domain.path = member_path
+
                 # Boundary conditions     
                 if self.flow_nested:
         
@@ -333,16 +334,7 @@ class CoSMoS_SFINCS(Model):
                         elif self.flow_nested.type == "sfincs":
                             output_file = "sfincs_his_" + member_name + '.nc'
                     else:
-                        output_file= None
-
-
-                        #if not self.flow_nested.domain.observation_point:
-                        #    obs_file = os.path.join(self.flow_nested.results_path,
-                        #                            "archive",
-                        #                            cosmos.cycle_string,
-                        #                            "input",
-                        #                            "sfincs.obs")
-                        #    self.flow_nested.domain.read_observation_points(file_name=obs_file)                    
+                        output_file= None                 
                     
                     nest2(self.flow_nested.domain,
                         self.domain,
@@ -351,41 +343,12 @@ class CoSMoS_SFINCS(Model):
                         boundary_water_level_correction=zcor,
                         option="flow")                        
 
-                    if self.domain.input.corfile:
-                
-                        # Add astronomic correction to time series (should really do this in nesting.py)
-                        
-                        # Read cor file
-                        corfile = os.path.join(self.domain.path, self.domain.input.corfile)
-                        d = IniStruct(filename=corfile)
-                        astro = d.section[0].data
-
-                        times = self.domain.flow_boundary_point[0].data.index
-                        names = []
-                        amp   = []
-                        phi   = []
-                        
-                        for icmp, cmp in enumerate(astro.index):                
-                            names.append(cmp)
-                            amp.append(astro[1][icmp])
-                            phi.append(astro[2][icmp])
-                        
-                        df = pd.DataFrame()
-                        df["component"] = pd.Series(names) 
-                        df["amplitude"] = pd.Series(amp) 
-                        df["phase"]     = pd.Series(phi) 
-                        df = df.set_index("component")
-                        vv = predict(df, times)
-
-                        for pnt in self.domain.flow_boundary_point:
-                            pnt.data += vv
-
                     self.domain.input.bzsfile = "sfincs.bzs"
                     self.domain.write_flow_boundary_conditions(file_name= os.path.join(member_path, self.domain.input.bzsfile))
 
                 elif self.domain.input.bcafile:
-                    self.domain.input.bcafile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.bca"
-                    self.domain.input.bzsfile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.bzs"
+                    self.domain.input.bcafile = r"..\\" + os.path.basename(self.job_path) + r"\\sfincs.bca"
+                    self.domain.input.bzsfile = r"..\\" + os.path.basename(self.job_path) + r"\\sfincs.bzs"
 
                 if self.wave_nested:
                     if self.wave_nested.ensemble:
@@ -408,7 +371,7 @@ class CoSMoS_SFINCS(Model):
                         self.domain.input.wtifile = "sfincs.wti"
                         self.domain.input.wstfile = "sfincs.wst"
 
-                        self.domain.input.wfpfile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.wfp"
+                        self.domain.input.wfpfile = r"..\\" + os.path.basename(self.job_path) + r"\\sfincs.wfp"
                         self.domain.write_whi_file(file_name = os.path.join(member_path, self.domain.input.whifile))
                         self.domain.write_wti_file(file_name = os.path.join(member_path, self.domain.input.wtifile))
                         self.domain.write_wst_file(file_name = os.path.join(member_path, self.domain.input.wstfile))
@@ -439,7 +402,7 @@ class CoSMoS_SFINCS(Model):
                     self.domain.input.whifile = "sfincs.whi"
                     self.domain.input.wtifile = "sfincs.wti"
 
-                    self.domain.input.wfpfile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.wfp"
+                    self.domain.input.wfpfile = r"..\\" + os.path.basename(self.job_path) + r"\\sfincs.wfp"
                     self.domain.write_whi_file(file_name = os.path.join(member_path, self.domain.input.whifile))
                     self.domain.write_wti_file(file_name = os.path.join(member_path, self.domain.input.wtifile))
                     
@@ -459,23 +422,23 @@ class CoSMoS_SFINCS(Model):
                 self.domain.input.ampfile = None
                 self.domain.input.amprfile = None
                 if self.domain.input.depfile is not None:
-                    self.domain.input.depfile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.dep"
-                self.domain.input.mskfile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.msk"
+                    self.domain.input.depfile = r"..\\" + os.path.basename(self.job_path) + r"\\sfincs.dep"
+                self.domain.input.mskfile = r"..\\" + os.path.basename(self.job_path) + r"\\sfincs.msk"
                 if self.domain.input.indexfile is not None:
-                    self.domain.input.indexfile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.ind"
-                self.domain.input.bndfile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.bnd"
+                    self.domain.input.indexfile = r"..\\" + os.path.basename(self.job_path) + r"\\sfincs.ind"
+                self.domain.input.bndfile = r"..\\" + os.path.basename(self.job_path) + r"\\sfincs.bnd"
                 if self.domain.input.sbgfile is not None:
-                    self.domain.input.sbgfile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.sbg"
+                    self.domain.input.sbgfile = r"..\\" + os.path.basename(self.job_path) + r"\\sfincs.sbg"
                 if self.domain.input.obsfile is not None:    
-                    self.domain.input.obsfile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.obs"
+                    self.domain.input.obsfile = r"..\\" + os.path.basename(self.job_path) + r"\\sfincs.obs"
                 try:
                     if self.domain.input.qtrfile is not None:
-                        self.domain.input.qtrfile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.qtr"
+                        self.domain.input.qtrfile = r"..\\" + os.path.basename(self.job_path) + r"\\sfincs.qtr"
                 except:
                     pass
                 try:
                     if self.domain.input.scsfile is not None:
-                        self.domain.input.scsfile = r"..\\" + os.path.basename(self.domain.path) + r"\\sfincs.scs"
+                        self.domain.input.scsfile = r"..\\" + os.path.basename(self.job_path) + r"\\sfincs.scs"
                 except:
                     pass
 
