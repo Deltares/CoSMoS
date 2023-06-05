@@ -22,8 +22,18 @@ from cht.nesting.nest1 import nest1
 from cht.nesting.nest2 import nest2
 
 class Model:
-    
+    """Read generic model data from xml file, prepare model run paths, and submit jobs.
+
+    """
     def __init__(self):
+        """Initialize model attributes described in xml file.
+
+        See Also
+        --------
+        cosmos.cosmos_scenario
+
+        """
+
         self.flow               = False
         self.wave               = False
         self.priority           = 10    
@@ -70,7 +80,14 @@ class Model:
         self.zb_deshoal         = None
 
     def read_generic(self):
-        
+        """Read model attributes from xml file.
+
+        See Also
+        --------
+        cosmos.cosmos_scenario
+        cht.misc.xmlkit
+
+        """
         try:
             xml_obj = xml.xml2obj(self.file_name)
         except:
@@ -154,7 +171,13 @@ class Model:
                 
         
     def prepare(self):
-        
+        """Set model paths (input, output, figures, restart, job).
+
+        See Also
+        --------
+        cosmos.cosmos_main_loop
+
+        """        
         # First model and restart folders if necessary
 
         cycle_path      = cosmos.scenario.cycle_path

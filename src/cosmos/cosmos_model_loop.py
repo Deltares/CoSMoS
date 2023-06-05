@@ -13,13 +13,41 @@ from .cosmos_cluster import cluster_dict as cluster
 from .cosmos_postprocess import post_process
 import cht.misc.fileops as fo
 
-class ModelLoop:
+class ModelLoop():
+    
+    """Pre-process, submit, move, and post-process all models and initialize webviewer once all models are finished.
 
+    Parameters
+    ----------
+    start : func
+        Start running model loop with scheduler
+    run : func
+        Run model loop
+    stop : func
+        Stop model loop
+
+    See Also
+    -------
+    cosmos.cosmos_main_loop: invokes current class
+    cosmos.cosmos_model: function call
+    cosmos.cosmos_beware: function call
+    cosmos.cosmos_delft3dfm: function call
+    cosmos.cosmos_hurrywave: function call
+    cosmos.cosmos_sfincs: function call
+    cosmos.cosmos_xbeach: function call
+
+    """
     def __init__(self):
         pass
         
     def start(self):
-        
+        """Start cosmos_model_loop.run with scheduler.
+
+        See Also
+        -------
+        cosmos.cosmos_model_loop.start: function call
+        """
+
         self.status = "running"
         while self.status == "running":        
             # This will be repeated until the status of the model loop changes to "done" 
@@ -29,10 +57,26 @@ class ModelLoop:
             self.scheduler.run()
 
     def stop(self):
-
+        """Stop cosmos_model_loop
+        """
         self.scheduler.cancel()
 
     def run(self):
+        """ Run all cosmos models defined in the scenario file
+
+        Step 1: Check for finished simulations and move them to scenario folder
+        Step 2: Make waiting list, preprocess and submit these models
+        Step 3: Post process models from Step 1
+        Step 4: Check if all models are finished. If true: make webviewer 
+
+        See Also
+        -------
+        cosmos.cosmos_sfincs.move: function call
+        cosmos.cosmos_sfincs.pre_process: function call
+        cosmos.cosmos_model.submit_job: function call
+        cosmos.cosmos_sfincs.post_process: function call
+        
+        """
 
         # First check for finished simulations
         finished_list = check_for_finished_simulations()

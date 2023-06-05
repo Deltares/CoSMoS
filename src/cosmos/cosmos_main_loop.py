@@ -24,15 +24,44 @@ import cht.misc.xmlkit as xml
 #from cht.tiling.tiling import TileLayer
 
 class MainLoop:
+    """Read the xml scenario file, determine cycle times, and run cosmos model loop. 
     
+    Parameters
+    ----------
+    start : func
+        Start cosmos scenario
+    run : func
+        Run main loop
+
+    See Also
+    -------
+    cosmos.cosmos_main: invokes current class
+    cosmos.cosmos_scenario: function call
+    cosmos.cosmos_model_loop: function call
+    cosmos.cosmos_model: function call
+    """
+
     def __init__(self):
         # Try to kill all instances of main loop and model loop
         self.just_initialize = False
         self.run_models      = True
         self.clean_up        = True
     
-    def start(self, cycle_time=None):
-        
+    def start(self, cycle_time=None): 
+        """Read the xml scenario file, determine cycle times, and start cosmos_main_loop.run with scheduler. 
+
+        Parameters
+        ----------
+        cycle_time : int
+            Unknown
+
+        See Also
+        -------
+        cosmos.cosmos_configuration.read_config_file: function call
+        cosmos.cosmos_main_loop.start: function call
+
+        """
+            
         # Determines cycle time and runs main loop
 
         cosmos.log("Starting main loop ...")
@@ -118,7 +147,28 @@ class MainLoop:
         self.scheduler.run()
 
     def run(self):
-        
+        """Run main loop: 
+        - Read configuration file, stations, meteo sources, super regions, scenario.
+        - Initialize models
+        - Remove old cycles
+        - Get list of nested models
+        - Check if models are finished
+        - Get start and stop times
+        - Download and collect meteo
+        - Start model loop
+
+        See Also
+        -------
+        cosmos.cosmos_configuration.read_config_file: function call
+        cosmos.cosmos_stations: function call
+        cosmos.cosmos_meteo.read_meteo_sources: function call
+        cosmos.cosmos_scenario: function call
+        cosmos.cosmos_scenario.read: function call
+        cosmos.cosmos_model.prepare: function call
+        cosmos.cosmos_meteo.download_and_collect_meteo: function call
+        cosmos.cosmos_model_loop.start: function call
+        """
+
         # Start by reading all available models, stations, etc.
         cosmos.log("Starting cycle ...")    
  
