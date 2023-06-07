@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Getting started &mdash; CoSMoS 0.1 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="User manual" href="manual.html" />
+    <link rel="prev" title="Welcome to CoSMoS documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            CoSMoS
+          </a>
+              <div class="version">
+                0.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-to-path">Adding to path</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-a-simulation">Running a simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="manual.html">User manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">Functions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CoSMoS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Getting started</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/usage.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="getting-started">
+<h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>To use CoSMoS, first make a check-out with, for example, TortoiseSNVN, of the CoSMoS and other related code. Scripts are hosted on the Deltares’ repository called Open Earth Tools.</p>
+<p>You will need the following folders:</p>
+<ol class="arabic simple">
+<li><p>For CoSMoS <a class="reference external" href="https://svn.oss.deltares.nl/repos/openearthtools/trunk/python/applications/cosmos">https://svn.oss.deltares.nl/repos/openearthtools/trunk/python/applications/cosmos</a>.</p></li>
+<li><p>For Deltashell <a class="reference external" href="https://svn.oss.deltares.nl/repos/openearthtools/trunk/python/applications/DeltaShell">https://svn.oss.deltares.nl/repos/openearthtools/trunk/python/applications/DeltaShell</a>.</p></li>
+<li><p>For Tropical Cyclones <a class="reference external" href="https://svn.oss.deltares.nl/repos/openearthtools/trunk/python/applications/tropical_cyclones">https://svn.oss.deltares.nl/repos/openearthtools/trunk/python/applications/tropical_cyclones</a>.</p></li>
+<li><p>For XBeach <a class="reference external" href="https://svn.oss.deltares.nl/repos/openearthtools/trunk/python/applications/xbeach">https://svn.oss.deltares.nl/repos/openearthtools/trunk/python/applications/xbeach</a>.</p></li>
+</ol>
+<p>Secondly, make an Python environment in, for example, Anaconda such that the Python interpreter, libraries and scripts installed into it are isolated from the rest. Use the provided YAML file, <code class="docutils literal notranslate"><span class="pre">environment_cosmos.yml</span></code>, to let Python install all the relevant libaries.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda env create -f d:\checkouts\Python\OpenEarthTools\cosmos\environment_cosmos.yml
+</pre></div>
+</div>
+</section>
+<section id="adding-to-path">
+<h2>Adding to path<a class="headerlink" href="#adding-to-path" title="Permalink to this headline">¶</a></h2>
+<p>Before you can run CoSmoS, you will have to add it your path. You can alter the <code class="docutils literal notranslate"><span class="pre">cosmos_add_paths()</span></code> function. See also an example code below:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Import relevant libraries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">os</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Paths needs from cosmos</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mainpath</span>    <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;d:</span><span class="se">\\</span><span class="s1">checkouts</span><span class="se">\\</span><span class="s1">Python</span><span class="se">\\</span><span class="s1">OpenEarthTools</span><span class="se">\\</span><span class="s1">cosmos</span><span class="se">\\</span><span class="s1">&#39;</span>     <span class="c1"># change this one</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">variations</span>  <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;cosmos&quot;</span><span class="p">,</span> <span class="s2">&quot;delftdashboard&quot;</span><span class="p">,</span> <span class="s2">&quot;bathymetry_database&quot;</span><span class="p">,</span><span class="s2">&quot;gui_toolbox&quot;</span><span class="p">,</span> <span class="s2">&quot;misc&quot;</span><span class="p">,</span> <span class="s2">&quot;meteo&quot;</span><span class="p">,</span> <span class="s2">&quot;delft3dfm&quot;</span><span class="p">,</span> <span class="s2">&quot;hurrywave&quot;</span><span class="p">,</span> <span class="s2">&quot;tiling&quot;</span><span class="p">,</span> <span class="s2">&quot;sfincs&quot;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mainpath</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">variation</span> <span class="ow">in</span> <span class="n">variations</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">path_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">mainpath</span><span class="p">,</span> <span class="n">variation</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="c1">#print(os.stat(path_file))</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path_file</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path_file</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">else</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;path not found - &#39;</span> <span class="o">+</span> <span class="n">path_file</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Other (extra) paths needed</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">path_file</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;d:</span><span class="se">\\</span><span class="s1">checkouts</span><span class="se">\\</span><span class="s1">Python</span><span class="se">\\</span><span class="s1">OpenEarthTools</span><span class="se">\\</span><span class="s1">deltashell</span><span class="se">\\</span><span class="s1">applications</span><span class="se">\\</span><span class="s1">CoDeS</span><span class="se">\\</span><span class="s1">CoDeS_2.0</span><span class="se">\\</span><span class="s1">Tide</span><span class="se">\\</span><span class="s1">pytides</span><span class="se">\\</span><span class="s1">&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path_file</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path_file</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">else</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;path not found - &#39;</span> <span class="o">+</span> <span class="n">path_file</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="running-a-simulation">
+<h2>Running a simulation<a class="headerlink" href="#running-a-simulation" title="Permalink to this headline">¶</a></h2>
+<p>Once CoSMoS is installed and added to your path, you can start a simulation! You can alter the <code class="docutils literal notranslate"><span class="pre">run_cosmos()</span></code> function. See also an example code below:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">cosmos</span> <span class="kn">import</span> <span class="n">cosmos</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Run cosmos_addpaths.py before executing run_cosmos.py</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">main_path</span>       <span class="o">=</span> <span class="s2">&quot;d:</span><span class="se">\\</span><span class="s2">cosmos&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">scenario_name</span>   <span class="o">=</span> <span class="s2">&quot;hurricane_michael_gfs_spw&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cosmos</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">main_path</span><span class="p">,</span> <span class="n">scenario_name</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Run cosmos</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cosmos</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;single_shot&quot;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>          <span class="n">run_models</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>          <span class="n">make_flood_maps</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>          <span class="n">make_wave_maps</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>          <span class="n">get_meteo</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>          <span class="n">upload_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>          <span class="n">make_figures</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>          <span class="n">hurrywave_exe_path</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;d:\checkouts\Hurrywave\trunk\hurrywave\x64\Release&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>          <span class="n">sfincs_exe_path</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;d:\checkouts\SFINCS\branches\subgrid_openacc_11\sfincs\x64\Release&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>          <span class="n">ensemble</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to CoSMoS documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="manual.html" class="btn btn-neutral float-right" title="User manual" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Deltares.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

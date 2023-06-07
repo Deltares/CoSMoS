@@ -31,13 +31,13 @@ class CoSMoS:
 
     See Also
     -------
-    cosmos.cosmos_main_loop: invokes current class
-    cosmos.cosmos_model: function call
-    cosmos.cosmos_beware: function call
-    cosmos.cosmos_delft3dfm: function call
-    cosmos.cosmos_hurrywave: function call
-    cosmos.cosmos_sfincs: function call
-    cosmos.cosmos_xbeach: function call
+    cosmos.cosmos_main_loop.MainLoop
+    cosmos.cosmos_model.Model
+    cosmos.cosmos_beware.CoSMoS_BEWARE
+    cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM
+    cosmos.cosmos_hurrywave.CoSMoS_HurryWave
+    cosmos.cosmos_sfincs.CoSMoS_SFINCS
+    cosmos.cosmos_xbeach.CoSMoS_XBeach
 
     """
     
@@ -51,10 +51,12 @@ class CoSMoS:
         
     def initialize(self, main_path):        
         """Set the path of the CoSMoS main folder.
+
         Parameters
         ----------
         main_path : str
             Path of CoSMoS main folder.
+
         """
         
         self.config.main_path = main_path
@@ -78,7 +80,7 @@ class CoSMoS:
             just_initialize:bool=False,
             clean_up:bool=False,
             cycle=None):     
-        """Run a CoSMoS scenario.
+        """Run a CoSMoS scenario:
 
         - Save input to self.config
         - Change settings for cosmos_main_loop
@@ -120,9 +122,9 @@ class CoSMoS:
 
         See Also
         -------
-        cosmos.cosmos_main_loop: function call
-        cosmos.cosmos_model_loop: function call
-        cosmos.cosmos_webviewer: function call
+        cosmos.cosmos_main_loop.MainLoop
+        cosmos.cosmos_model_loop.ModelLoop
+        cosmos.cosmos_webviewer.WebViewer
 
         """
            
@@ -173,6 +175,7 @@ class CoSMoS:
 
     def log(self, message:str):  
         """Write log message to cosmos.log
+
         Parameters
         ----------
         message : str
@@ -203,9 +206,9 @@ class CoSMoS:
         
         See Also
         -------
-        cosmos.cosmos_main_loop: function call
-        cosmos.cosmos_model_loop: function call
-        cosmos.cosmos_webviewer: function call
+        cosmos.cosmos_main_loop.MainLoop
+        cosmos.cosmos_model_loop.ModelLoop
+        cosmos.cosmos_webviewer.WebViewer
 
         """
         
@@ -242,8 +245,9 @@ class CoSMoS:
     
         See Also
         -------
-        cosmos.cosmos_main_loop: function call
-        cosmos.cosmos_model_loop: function call               
+        cosmos.cosmos_main_loop.MainLoop
+        cosmos.cosmos_model_loop.ModelLoop
+
         """
                 
         if not cosmos.config.main_path:

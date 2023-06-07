@@ -84,8 +84,7 @@ class Model:
 
         See Also
         --------
-        cosmos.cosmos_scenario
-        cht.misc.xmlkit
+        cosmos.cosmos_scenario.Scenario
 
         """
         try:
@@ -175,7 +174,7 @@ class Model:
 
         See Also
         --------
-        cosmos.cosmos_main_loop
+        cosmos.cosmos_main_loop.MainLoop
 
         """        
         # First model and restart folders if necessary
@@ -276,7 +275,8 @@ class Model:
 #        self.job_path = job_path      
 
     def submit_job(self):
-
+        """Submit model.
+        """
         if cosmos.scenario.track_ensemble and self.ensemble:
             
             # Make run batch file
@@ -311,6 +311,8 @@ class Model:
 #        os.remove('tmp.bat')
 
     def get_all_nested_models(self, tp, all_nested_models=None):
+        """Return a list of all models nested in this model.
+        """        
         # def get_all_nested_models(self, tp, all_nested_models=[]):
         # don't define empty list as default ! (https://nikos7am.com/posts/mutable-default-arguments/)
         # Return a list of all models nested in this model
@@ -335,7 +337,8 @@ class Model:
         return all_nested_models
         
     def add_stations(self, name):
-
+        """Add stations that are located in this model.
+        """
         wgs84 = CRS.from_epsg(4326)
         transformer = Transformer.from_crs(wgs84, self.crs, always_xy=True)
         
@@ -379,7 +382,8 @@ class Model:
             self.station.append(station)
             
     def get_peak_boundary_conditions(self):
-        
+            """Get boundary conditions from overall model and define peak.
+            """      
             # Water level boundary conditions
 
             # Get boundary conditions from overall model (Nesting 2)

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cosmos.cosmos_beware.CoSMoS_BEWARE.post_process &mdash; CoSMoS 0.1 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="cosmos.cosmos_sfincs.CoSMoS_SFINCS.read_model_specific" href="cosmos.cosmos_sfincs.CoSMoS_SFINCS.read_model_specific.html" />
+    <link rel="prev" title="cosmos.cosmos_beware.CoSMoS_BEWARE.move" href="cosmos.cosmos_beware.CoSMoS_BEWARE.move.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            CoSMoS
+          </a>
+              <div class="version">
+                0.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual.html">User manual</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../functions.html">Functions</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../functions.html#main-classes">Main classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../functions.html#model-classes">Model classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../functions.html#additional-classes">Additional classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../functions.html#cosmos-functions">CoSMoS functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../functions.html#mainloop-and-modelloop-functions">MainLoop and ModelLoop functions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../functions.html#model-functions">Model functions</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_beware.CoSMoS_BEWARE.read_model_specific.html">cosmos.cosmos_beware.CoSMoS_BEWARE.read_model_specific</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_beware.CoSMoS_BEWARE.pre_process.html">cosmos.cosmos_beware.CoSMoS_BEWARE.pre_process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_beware.CoSMoS_BEWARE.move.html">cosmos.cosmos_beware.CoSMoS_BEWARE.move</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">cosmos.cosmos_beware.CoSMoS_BEWARE.post_process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_sfincs.CoSMoS_SFINCS.read_model_specific.html">cosmos.cosmos_sfincs.CoSMoS_SFINCS.read_model_specific</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_sfincs.CoSMoS_SFINCS.pre_process.html">cosmos.cosmos_sfincs.CoSMoS_SFINCS.pre_process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_sfincs.CoSMoS_SFINCS.move.html">cosmos.cosmos_sfincs.CoSMoS_SFINCS.move</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_sfincs.CoSMoS_SFINCS.post_process.html">cosmos.cosmos_sfincs.CoSMoS_SFINCS.post_process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.read_model_specific.html">cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.read_model_specific</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.pre_process.html">cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.pre_process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.move.html">cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.move</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.post_process.html">cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.post_process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_hurrywave.CoSMoS_HurryWave.read_model_specific.html">cosmos.cosmos_hurrywave.CoSMoS_HurryWave.read_model_specific</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_hurrywave.CoSMoS_HurryWave.pre_process.html">cosmos.cosmos_hurrywave.CoSMoS_HurryWave.pre_process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_hurrywave.CoSMoS_HurryWave.move.html">cosmos.cosmos_hurrywave.CoSMoS_HurryWave.move</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_hurrywave.CoSMoS_HurryWave.post_process.html">cosmos.cosmos_hurrywave.CoSMoS_HurryWave.post_process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_xbeach.CoSMoS_XBeach.read_model_specific.html">cosmos.cosmos_xbeach.CoSMoS_XBeach.read_model_specific</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_xbeach.CoSMoS_XBeach.pre_process.html">cosmos.cosmos_xbeach.CoSMoS_XBeach.pre_process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_xbeach.CoSMoS_XBeach.move.html">cosmos.cosmos_xbeach.CoSMoS_XBeach.move</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_xbeach.CoSMoS_XBeach.post_process.html">cosmos.cosmos_xbeach.CoSMoS_XBeach.post_process</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CoSMoS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../functions.html">Functions</a></li>
+      <li class="breadcrumb-item active">cosmos.cosmos_beware.CoSMoS_BEWARE.post_process</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_generated/cosmos.cosmos_beware.CoSMoS_BEWARE.post_process.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="cosmos-cosmos-beware-cosmos-beware-post-process">
+<h1>cosmos.cosmos_beware.CoSMoS_BEWARE.post_process<a class="headerlink" href="#cosmos-cosmos-beware-cosmos-beware-post-process" title="Permalink to this headline">¶</a></h1>
+<dl class="py method">
+<dt id="cosmos.cosmos_beware.CoSMoS_BEWARE.post_process">
+<code class="sig-prename descclassname">CoSMoS_BEWARE.</code><code class="sig-name descname">post_process</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmos/cosmos_beware.html#CoSMoS_BEWARE.post_process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cosmos.cosmos_beware.CoSMoS_BEWARE.post_process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Post-process BEWARE output</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">cht.misc.prob_maps()</span></code></p>
+</aside>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cosmos.cosmos_beware.CoSMoS_BEWARE.move.html" class="btn btn-neutral float-left" title="cosmos.cosmos_beware.CoSMoS_BEWARE.move" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cosmos.cosmos_sfincs.CoSMoS_SFINCS.read_model_specific.html" class="btn btn-neutral float-right" title="cosmos.cosmos_sfincs.CoSMoS_SFINCS.read_model_specific" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Deltares.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

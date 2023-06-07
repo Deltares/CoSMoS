@@ -15,9 +15,15 @@ extensions = [
     'sphinx.ext.duration',
     'sphinx.ext.doctest',
     'sphinx.ext.autodoc',
+     "sphinx.ext.viewcode",
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
+    'sphinx.ext.napoleon',
 ]
+
+autosummary_generate = True
+
+remove_from_toctrees = ["_generated/*"]
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
