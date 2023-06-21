@@ -284,5 +284,6 @@ class Config:
     def __init__(self):        
         self.main_path = None
         self.run_mode  = "serial"
+        #self.run_mode = "cloud"
                         
 cosmos = CoSMoS()

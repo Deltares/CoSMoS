@@ -10,6 +10,7 @@ import os
 
 from .cosmos_main import cosmos
 from .cosmos_cluster import cluster_dict as cluster
+from .cosmos_argo import Argo
 from .cosmos_postprocess import post_process
 import cht.misc.fileops as fo
 
@@ -144,6 +145,9 @@ class ModelLoop():
                         fid = open(file_name, "w")
                         fid.write("Model is ready to run")
                         fid.close()
+            elif cosmos.config.run_mode == "cloud":
+                cosmos.log("Ready to submit to Argo" + model.long_name + " ...")
+                model.cloud_job = Argo.submit_single_job(model)
 
             model.status = "running"
 
@@ -221,10 +225,15 @@ def check_for_finished_simulations():
     
     for model in cosmos.scenario.model:
         if model.status == "running":
-            file_name = os.path.join(model.job_path,
-                                     "finished.txt")
-            if os.path.exists(file_name):
-                finished_list.append(model)
+            if cosmos.config.run_mode == "serial":
+                file_name = os.path.join(model.job_path,
+                                        "finished.txt")
+                if os.path.exists(file_name):
+                    finished_list.append(model)
+            elif cosmos.config.run_mode == "cloud":
+                if Argo.get_task_status(model.cloud_job):
+                    finished_list.append(model)
+
                               
     return finished_list
 

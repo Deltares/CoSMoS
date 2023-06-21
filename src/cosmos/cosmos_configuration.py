@@ -37,6 +37,7 @@ def read_config_file():
     cosmos.config.run_mode           = "serial"
     cosmos.config.forecast           = False
     cosmos.config.remove_old_cycles  = 0
+    cosmos.config.no_coamps          = False
 
     # Read xml config file
     xml_obj = xml.xml2obj(config_file)
@@ -69,6 +70,8 @@ def read_config_file():
         cosmos.config.run_mode = xml_obj.run_mode[0].value
     if hasattr(xml_obj, "remove_old_cycles"):
         cosmos.config.remove_old_cycles = xml_obj.remove_old_cycles[0].value
+    if hasattr(xml_obj, "no_coamps"):
+        cosmos.config.no_coamps = xml_obj.no_coamps[0].value
 
     # Map contours
     contour_file = os.path.join(config_path, "map_contours.xml")

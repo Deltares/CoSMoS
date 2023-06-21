@@ -8,6 +8,7 @@ import os
 from pyproj import CRS
 import numpy as np
 import datetime
+import sys
 
 from .cosmos_main import cosmos
 from cht.meteo.meteo import MeteoSource
@@ -121,7 +122,7 @@ def read_meteo_sources():
     # for data_path in data_list:
     #     data_names.append(os.path.basename(data_path))
      
-def download_and_collect_meteo():
+def download_and_collect_meteo(no_coamps=False):
     """Download meteo sources listed in meteo_subsets.xml using cht.meteo.
     """    
     # Loop through all available meteo subsets
@@ -138,11 +139,16 @@ def download_and_collect_meteo():
 #                         if model.flow:
                      t0 = min(t0, model.flow_start_time)
                      t1 = max(t1, model.flow_stop_time)
+        cosmos.log("Download: " + str(download))
         if download:
             # Download the data
             if cosmos.config.get_meteo:
-                cosmos.log("Downloading meteo data : " + meteo_subset.name)
-                meteo_subset.download([t0, t1])
+                cosmos.log("Downloading meteo data : " + meteo_subset.name)               
+                dataset = meteo_subset.download([t0, t1], no_coamps=no_coamps)
+
+                if no_coamps:
+                    cosmos.log(dataset)
+                    sys.exit(0)
             # Collect the data from netcdf files    
             cosmos.log("Collecting meteo data : " + meteo_subset.name)
             meteo_subset.collect([t0, t1],

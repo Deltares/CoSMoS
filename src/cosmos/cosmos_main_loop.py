@@ -10,6 +10,7 @@ import datetime
 import sched
 import os
 import numpy as np
+import sys
 
 from .cosmos_main import cosmos
 from .cosmos_meteo import read_meteo_sources
@@ -359,9 +360,12 @@ class MainLoop:
         # tile_layer["flood_map"] = TileLayer("flood_map")
 
         if not self.just_initialize:
-            
             # Get meteo data
-            download_and_collect_meteo()
+            download_and_collect_meteo(cosmos.config.no_coamps)
+            
+            # if cosmos.config.no_coamps:
+            #     cosmos.log("exiting")
+            #     sys.exit(0)
             
             if self.run_models:        
                 # And now start the model loop

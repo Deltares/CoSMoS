@@ -52,6 +52,8 @@ class CoSMoS_SFINCS(Model):
         
         
     def pre_process(self):
+
+        #cosmos.log("flow_nested: " + self.flow_nested)
                        
         # Set path temporarily to job path
         pth = self.domain.path
@@ -119,7 +121,9 @@ class CoSMoS_SFINCS(Model):
             # Correct boundary water levels. Assuming that output from overall
             # model is in MSL !!!
             zcor = self.boundary_water_level_correction - self.vertical_reference_level_difference_with_msl
-            
+            cosmos.log("flow nested")
+            cosmos.log("model: " + cosmos.scenario.model)
+            cosmos.log("flow_nested: " + self.flow_nested.type)
             if cosmos.scenario.model:
                 if self.flow_nested.type == "sfincs":    
                     nest2(self.flow_nested.domain,
@@ -273,6 +277,7 @@ class CoSMoS_SFINCS(Model):
 
             elif cosmos.scenario.track_ensemble:
                 self.domain.input.spwfile = "sfincs.spw"   
+                cosmos.scenario.best_track_file = "sfincs.spw"
                 fo.copy_file(cosmos.scenario.best_track_file, os.path.join(self.job_path, "sfincs.spw"))
             
             self.domain.input.baro    = 1
@@ -513,7 +518,7 @@ class CoSMoS_SFINCS(Model):
                 prcs=  [0.05, 0.5, 0.95]
                 vars= ["point_zs"]
                 output_file_name = os.path.join(output_path, "sfincs_his_ensemble.nc")
-                pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
+                # pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
 
             if self.domain.input.outputformat=="bin":
                 nc_file = os.path.join(output_path, "zst.txt")
@@ -555,7 +560,7 @@ class CoSMoS_SFINCS(Model):
                 prcs= [0.05, 0.5, 0.95]#np.concatenate((np.arange(0, 0.9, 0.05), np.arange(0.9, 1, 0.01)))            
                 vars= ["zs", "zsmax"]
                 output_file_name = os.path.join(output_path, "sfincs_map_ensemble.nc")
-                pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
+                # pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
 
             flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
                                           "flood_map")
