@@ -16,6 +16,8 @@ import cht.misc.xmlkit as xml
 import cht.misc.fileops as fo
 
 def read_meteo_sources():
+    """Read meteo sources from ../meteo/meteo_subsets.xml.
+    """    
     
     # Read meteo sources
     cosmos.meteo_source = []
@@ -120,6 +122,8 @@ def read_meteo_sources():
     #     data_names.append(os.path.basename(data_path))
      
 def download_and_collect_meteo():
+    """Download meteo sources listed in meteo_subsets.xml using cht.meteo.
+    """    
     # Loop through all available meteo subsets
     # Determine if the need to be downloaded
     # Get start and stop times for meteo data

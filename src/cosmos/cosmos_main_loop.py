@@ -25,15 +25,45 @@ import cht.misc.fileops as fo
 #from cht.tiling.tiling import TileLayer
 
 class MainLoop:
+    """Read the xml scenario file, determine cycle times, and run cosmos model loop. 
     
+    Parameters
+    ----------
+    start : func
+        Start cosmos scenario
+    run : func
+        Run main loop
+
+    See Also
+    -------
+    cosmos.cosmos_main.CoSMoS
+    cosmos.cosmos_scenario.Scenario
+    cosmos.cosmos_model_loop.ModelLoop
+    cosmos.cosmos_model.Model
+    """
+
     def __init__(self):
         # Try to kill all instances of main loop and model loop
         self.just_initialize = False
         self.run_models      = True
         self.clean_up        = True
     
-    def start(self, cycle=None):        
-        # Updates config, determines cycle time and runs main loop
+    def start(self, cycle_time=None): 
+        """Read the xml scenario file, determine cycle times, and start cosmos_main_loop.run with scheduler. 
+
+        Parameters
+        ----------
+        cycle_time : int
+            Datestring of cycle time
+
+        See Also
+        -------
+        cosmos.cosmos_configuration.read_config_file
+        cosmos.cosmos_main_loop.MainLoop.start
+
+        """
+            
+        # Determines cycle time and runs main loop
 
         cosmos.log("Starting main loop ...")
 
@@ -98,7 +128,30 @@ class MainLoop:
         self.scheduler.run()
 
     def run(self):
-        
+        """Run main loop: 
+
+        - Read configuration file, stations, meteo sources, super regions, scenario.
+        - Initialize models
+        - Remove old cycles
+        - Get list of nested models
+        - Check if models are finished
+        - Get start and stop times
+        - Download and collect meteo
+        - Start model loop
+
+        See Also
+        -------
+        cosmos.cosmos_configuration.read_config_file
+        cosmos.cosmos_stations.Stations
+        cosmos.cosmos_meteo.read_meteo_sources
+        cosmos.cosmos_scenario.Scenario
+        cosmos.cosmos_scenario.Scenario.read
+        cosmos.cosmos_model.Model.prepare
+        cosmos.cosmos_meteo.Meteo.download_and_collect_meteo
+        cosmos.cosmos_model_loop.ModelLoop.start
+
+        """
+
         # Start by reading all available models, stations, etc.
         cosmos.log("Starting cycle ...")    
          
@@ -159,6 +212,13 @@ class MainLoop:
                     if model2.name == model.wave_nested:
                         model.wave_nested = model2
                         model2.nested_wave_models.append(model)
+                        break
+            if model.bw_nested_name:
+                # Look up model from which it gets it boundary conditions
+                for model2 in cosmos.scenario.model:
+                    if model2.name == model.bw_nested_name:
+                        model.bw_nested = model2
+                        model2.nested_bw_models.append(model)
                         break
 
         # Get list of models that have already finished
@@ -229,6 +289,8 @@ class MainLoop:
             cosmos.model_loop.start()
 
 def get_start_and_stop_times():
+    """Get cycle start and stop times
+    """    
         
     y = cosmos.cycle.year
     cosmos.reference_time = datetime.datetime(y, 1, 1)
@@ -355,7 +417,8 @@ def get_start_and_stop_times():
                 model.flow_stop_time = model.wave_stop_time
 
 def check_for_wave_restart_files(model):
-    
+    """Check if there are wave restart files
+    """    
     restart_time = None
     restart_file = None
     
@@ -384,7 +447,8 @@ def check_for_wave_restart_files(model):
     return restart_time, restart_file
 
 def check_for_flow_restart_files(model):
-    
+    """Check if there are flow restart files
+    """   
     restart_time = None
     restart_file = None
     

@@ -69,7 +69,7 @@ class Stations():
 
                 self.station.append(station) 
 
-    def find_by_name(self, name):
+    def find_by_name(self, name):      
         
         for station in self.station:
             if station.name.lower() == name:

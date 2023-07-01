@@ -13,13 +13,41 @@ from .cosmos_cluster import cluster_dict as cluster
 from .cosmos_postprocess import post_process
 import cht.misc.fileops as fo
 
-class ModelLoop:
+class ModelLoop():
+    
+    """Pre-process, submit, move, and post-process all models and initialize webviewer once all models are finished.
 
+    Parameters
+    ----------
+    start : func
+        Start running model loop with scheduler
+    run : func
+        Run model loop
+    stop : func
+        Stop model loop
+
+    See Also
+    -------
+    cosmos.cosmos_main_loop.MainLoop
+    cosmos.cosmos_model.Model
+    cosmos.cosmos_beware.CoSMoS_BEWARE
+    cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM
+    cosmos.cosmos_hurrywave.CoSMoS_HurryWave
+    cosmos.cosmos_sfincs.CoSMoS_SFINCS
+    cosmos.cosmos_xbeach.CoSMoS_XBeach
+
+    """
     def __init__(self):
         pass
         
     def start(self):
-        
+        """Start cosmos_model_loop.run with scheduler.
+
+        See Also
+        -------
+        cosmos.cosmos_model_loop.ModelLoop.run
+        """
+
         self.status = "running"
         while self.status == "running":        
             # This will be repeated until the status of the model loop changes to "done" 
@@ -29,10 +57,26 @@ class ModelLoop:
             self.scheduler.run()
 
     def stop(self):
-
+        """Stop cosmos_model_loop
+        """
         self.scheduler.cancel()
 
     def run(self):
+        """ Run all cosmos models defined in the scenario file
+
+        - Check for finished simulations and move them to scenario folder
+        - Make waiting list, preprocess and submit these models
+        - Post process models from Step 1
+        - Check if all models are finished. If true: make webviewer 
+
+        See Also
+        -------
+        cosmos.cosmos_sfincs.CoSMoS_SFINCS.move
+        cosmos.cosmos_sfincs.CoSMoS_SFINCS.pre_process
+        cosmos.cosmos_model.Model.submit_job
+        cosmos.cosmos_sfincs.CoSMoS_SFINCS.post_process
+        
+        """
 
         # First check for finished simulations
         finished_list = check_for_finished_simulations()
@@ -89,7 +133,18 @@ class ModelLoop:
                 fid = open(file_name, "w")
                 fid.write("Model is ready to run")
                 fid.close()
-            
+                
+                if cosmos.scenario.track_ensemble and model.ensemble:
+                     for member_name in cosmos.scenario.member_names:
+                        # Write ready file            
+                        file_name = os.path.join(cosmos.config.job_path,
+                                                cosmos.scenario.name,
+                                                model.name + "_" + member_name,
+                                                "ready.txt")
+                        fid = open(file_name, "w")
+                        fid.write("Model is ready to run")
+                        fid.close()
+
             model.status = "running"
 
         # Now do post-processing on simulations that were finished
@@ -160,7 +215,8 @@ class ModelLoop:
             pass
 
 def check_for_finished_simulations():
-    
+    """Check if there finished simulations to be post-processed.
+    """    
     finished_list = []
     
     for model in cosmos.scenario.model:
@@ -173,7 +229,8 @@ def check_for_finished_simulations():
     return finished_list
 
 def update_waiting_list():
-
+    """Check which models can be run next according to their status and prioritization level.
+    """
     # Check which models need to run next
     
     waiting_list = []

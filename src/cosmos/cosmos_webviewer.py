@@ -131,12 +131,17 @@ class WebViewer:
             all_nested_models = model.get_all_nested_models("wave")
             if all_nested_models:
                 all_nested_stations = []
+                if all_nested_models[0].type == 'beware':
+                    all_nested_models= [model]
+                    bw=1
+                else:
+                    bw=0
                 for mdl in all_nested_models:
                     for st in mdl.station:
                         all_nested_stations.append(st.name)
                 for station in model.station:
                     if station.type == "wave_buoy":
-                        if station.name in all_nested_stations:
+                        if station.name in all_nested_stations and bw==0:
                             station.upload = False 
         
         # Tide stations
@@ -169,7 +174,9 @@ class WebViewer:
                                                             "mllw":station.mllw,
                                                             "model_name":model.name,
                                                             "model_type":model.type,
-                                                            "obs_file":obs_file}))
+                                                            "cycle": cosmos.cycle_string,
+                                                            "obs_file":obs_file,
+                                                            "obs_folder": cosmos.scenario.observations_path}))
                         
                         # Merge time series from previous cycles
                         # Go two days back
@@ -220,12 +227,27 @@ class WebViewer:
                             name = station.long_name + " (" + station.ndbc_id + ")"
                         else:
                             name = station.long_name
+
+                        # Check if there is a file in the observations that matches this station
+                        obs_file = None
+                        if cosmos.scenario.observations_path and station.id:
+                            obs_pth = os.path.join(cosmos.config.main_path,
+                                               "observations",
+                                               cosmos.scenario.observations_path,
+                                               "waves")                        
+                            fname = "waves." + station.id + ".observed.csv.js"
+                            if os.path.exists(os.path.join(obs_pth, fname)):
+                                obs_file = fname
+
                         features.append(Feature(geometry=point,
                                                 properties={"name":station.name,
                                                             "long_name":name,
                                                             "id": station.ndbc_id,
                                                             "model_name":model.name,
-                                                            "model_type":model.type}))
+                                                            "model_type":model.type,
+                                                            "cycle": cosmos.cycle_string,
+                                                             "obs_file":obs_file,
+                                                             "obs_folder": cosmos.scenario.observations_path}))
     
                         path = cosmos.scenario.timeseries_path
                         t0 = cosmos.cycle - datetime.timedelta(hours=48)
@@ -308,6 +330,10 @@ class WebViewer:
             hrstr = str(int(td.days * 24 + td.seconds/3600))
             namestr.append("Combined " + hrstr + "-hour forecast")
 
+            if os.path.exists(os.path.join(flood_map_path, "combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ") + "_95")):
+                pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ") + "_95")
+                namestr.append("Combined " + hrstr + "-hour forecast 95 %")
+
             wvpath = os.path.join(scenario_path)
             fo.copy_file(flood_map_path, wvpath)
             dct={}
@@ -387,10 +413,14 @@ class WebViewer:
             td = t1 - t0
             hrstr = str(int(td.days * 24 + td.seconds/3600))
             namestr.append("Combined " + hrstr + "-hour forecast")
-                        
+
             # Check if wave maps are available
             wave_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
                                           "hm0")
+            if os.path.exists(os.path.join(wave_map_path, "combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ") + "_95")):
+                pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ") + "_95")
+                namestr.append("Combined " + hrstr + "-hour forecast 95 %")          
+
             
             wvpath = os.path.join(scenario_path)
             fo.copy_file(wave_map_path, wvpath)
@@ -868,7 +898,7 @@ class WebViewer:
                 try:
 
                     model.domain.read_data(os.path.join(model.cycle_output_path,
-                                                        "BW_output.nc"))                
+                                                        "beware_his.nc"))                
     
                     features = []
                     transformer = Transformer.from_crs(model.crs,
@@ -903,8 +933,8 @@ class WebViewer:
     
                     dct={}
                     dct["name"]        = "extreme_runup_height"
-                    dct["long_name"]   = "Extreme run-up"
-                    dct["description"] = "These are the predicted extreme run-up heights"
+                    dct["long_name"]   = "Total water levels"
+                    dct["description"] = "These are the predicted total water levels"
                     dct["format"]      = "geojson"
     
     
@@ -929,6 +959,71 @@ class WebViewer:
         
                     self.map_variables.append(dct)
     
+                    # Probabilistic runup
+
+                    if os.path.exists(os.path.join(model.cycle_output_path,
+                                                            "beware_his_ensemble.nc")):
+                        model.domain.read_data(os.path.join(model.cycle_output_path,
+                                                            "beware_his_ensemble.nc"), prcs= [0.05, 0.5, 0.95])                
+        
+                        features = []
+                        transformer = Transformer.from_crs(model.crs,
+                                                        'WGS 84',
+                                                        always_xy=True)
+                        
+                        for ip in range(len(model.domain.filename)):
+                            x, y = transformer.transform(model.domain.xp[ip],
+                                                        model.domain.yp[ip])
+                            point = Point((x, y))
+                            name = 'Loc nr: ' +  str(model.domain.filename[ip])
+                                        
+                            id = np.argmax(model.domain.R2p[ip,:])                                                                       
+                            features.append(Feature(geometry=point,
+                                                    properties={"model_name":model.name,
+                                                                "LocNr":int(model.domain.filename[ip]),
+                                                                "Lon":x,
+                                                                "Lat":y,                                                
+                                                                "Setup":round(model.domain.setup_prc["95"][ip, id],2),
+                                                                "Swash":round(model.domain.swash[ip, id],2),
+                                                                "TWL":round(model.domain.R2p_prc["95"][ip, id],2)}))
+                        
+                        feature_collection = FeatureCollection(features)
+                        
+                        if features:
+                            feature_collection = FeatureCollection(features)
+                            output_path_runup =  os.path.join(output_path, 'extreme_runup_height_prc95\\')
+                            fo.mkdir(output_path_runup)
+                            file_name = os.path.join(output_path_runup,
+                                                    "extreme_runup_height_prc95.geojson.js")
+                            cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var runup_prc95 =")
+        
+                        dct={}
+                        dct["name"]        = "extreme_runup_height_prc95"
+                        dct["long_name"]   = "Total water levels 95 %"
+                        dct["description"] = "These are the predicted extreme run-up heights"
+                        dct["format"]      = "geojson"
+        
+                        mp = next((x for x in cosmos.config.map_contours if x["name"] == "run_up"), None)                    
+        
+                        lgn = {}
+                        lgn["text"] = mp["string"]
+            
+                        cntrs = mp["contours"]
+            
+                        contours = []
+                        
+                        for cntr in cntrs:
+                            contour = {}
+                            contour["text"]  = cntr["string"]
+                            contour["color"] = "#" + cntr["hex"]
+                            contours.append(contour)
+                
+                        lgn["contours"] = contours
+                        dct["legend"]   = lgn
+        
+            
+                        self.map_variables.append(dct)
+
                     # Horizontal runup
 
                     features = []
@@ -972,7 +1067,7 @@ class WebViewer:
 
                     dct={}
                     dct["name"]        = "extreme_horizontal_runup_height"
-                    dct["long_name"]   = "Extreme Horizontal Runup"
+                    dct["long_name"]   = "Horizontal projection of TWL"
                     dct["description"] = "This is the extreme horizontal runup."
                     dct["format"]      = "geojson"
                     # dct["legend"]      = {"text": "Offshore WL", "contours": [{"text": " 0.0&nbsp-&nbsp;0.33&#8201;m", "color": "#CCFFFF"}, {"text": " 0.33&nbsp;-&nbsp;1.0&#8201;m", "color": "#40E0D0"}, {"text": " 1.0&nbsp-&nbsp;2.0&#8201;m", "color": "#00BFFF"}, {"text": "&gt; 2.0&#8201;m", "color": "#0909FF"}]}
@@ -1028,7 +1123,7 @@ class WebViewer:
 
                     dct={}
                     dct["name"]        = "extreme_sea_level_and_wave_height"
-                    dct["long_name"]   = "Extreme SWL and Hs"
+                    dct["long_name"]   = "Offshore SWL and Hs"
                     dct["description"] = "This is the total offshore water level (tide + surge) and wave conditions."
                     dct["format"]      = "geojson"
                     dct["legend"]      = {"text": "Offshore WL", "contours": [{"text": " 0.0&nbsp-&nbsp;0.33&#8201;m", "color": "#CCFFFF"}, {"text": " 0.33&nbsp;-&nbsp;1.0&#8201;m", "color": "#40E0D0"}, {"text": " 1.0&nbsp-&nbsp;2.0&#8201;m", "color": "#00BFFF"}, {"text": "&gt; 2.0&#8201;m", "color": "#0909FF"}]}
@@ -1039,8 +1134,14 @@ class WebViewer:
                     # Time series 
                         
                     for ip in range(len(model.domain.filename)):
-            
-                        d= {'WL': model.domain.WL[ip,:],'Setup': model.domain.setup[ip,:], 'Swash': model.domain.swash[ip,:], 'Runup': model.domain.R2p[ip,:]}       
+                        
+                        if os.path.exists(os.path.join(model.cycle_output_path,
+                                                            "beware_his_ensemble.nc")):  
+                            d= {'WL': model.domain.WL[ip,:],'Setup': model.domain.setup[ip,:], 'Swash': model.domain.swash[ip,:], 'Runup': model.domain.R2p[ip,:],
+                                'Setup_5': model.domain.setup_prc["5"][ip,:],'Setup_50': model.domain.setup_prc["50"][ip,:],'Setup_95': model.domain.setup_prc["95"][ip,:],
+                                'Runup_5': model.domain.R2p_prc["5"][ip,:],'Runup_50': model.domain.R2p_prc["50"][ip,:],'Runup_95': model.domain.R2p_prc["95"][ip,:],}       
+                        else:
+                            d= {'WL': model.domain.WL[ip,:],'Setup': model.domain.setup[ip,:], 'Swash': model.domain.swash[ip,:], 'Runup': model.domain.R2p[ip,:]}       
             
                         v= pd.DataFrame(data=d, index =  pd.date_range(model.domain.input.tstart, periods=len(model.domain.swash[ip,:]), freq= '0.5H'))
                         obs_file = "extreme_runup_height." + model.domain.runid + "." +str(model.domain.filename[ip]) + ".csv.js"
@@ -1050,9 +1151,12 @@ class WebViewer:
                         s= v.to_csv(path_or_buf=None,
                                      date_format='%Y-%m-%dT%H:%M:%S',
                                      float_format='%.3f',
-                                     header= False, index_label= 'datetime')        
-                        
-                        cht.misc.misc_tools.write_csv_js(local_file_path, s, "var csv = `date_time,wl,setup,swash,runup")
+                                     header= False, index_label= 'datetime') 
+                               
+                        if os.path.exists(os.path.join(model.cycle_output_path, "beware_his_ensemble.nc")):
+                            cht.misc.misc_tools.write_csv_js(local_file_path, s, "var csv = `date_time,wl,setup,swash,runup, setup_5, setup_50, setup_95, runup_5, runup_50, runup_95")
+                        else:
+                            cht.misc.misc_tools.write_csv_js(local_file_path, s, "var csv = `date_time,wl,setup,swash,runup")
 
                 except:
                     cosmos.log("An error occurred when making BEWARE webviewer !")

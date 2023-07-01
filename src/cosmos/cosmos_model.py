@@ -23,17 +23,30 @@ from cht.nesting.nest1 import nest1
 from cht.nesting.nest2 import nest2
 
 class Model:
-    
+    """Read generic model data from xml file, prepare model run paths, and submit jobs.
+
+    """
     def __init__(self):
+        """Initialize model attributes described in xml file.
+
+        See Also
+        --------
+        cosmos.cosmos_scenario
+
+        """
+
         self.flow               = False
         self.wave               = False
         self.priority           = 10    
         self.flow_nested        = None
         self.wave_nested        = None
+        self.bw_nested        = None
         self.flow_nested_name   = None
         self.wave_nested_name   = None
+        self.bw_nested_name   = None
         self.nested_flow_models = []
         self.nested_wave_models = []
+        self.nested_bw_models = []
         self.flow_spinup_time   = 0.0
         self.wave_spinup_time   = 0.0
         self.xlim               = None
@@ -149,6 +162,13 @@ class Model:
         
     def set_paths(self):
         
+        """Set model paths (input, output, figures, restart, job).
+
+        See Also
+        --------
+        cosmos.cosmos_main_loop.MainLoop
+
+        """        
         # First model and restart folders if necessary
 
         cycle_path      = cosmos.scenario.cycle_path
@@ -247,16 +267,18 @@ class Model:
 #        self.job_path = job_path      
 
     def submit_job(self):
-
-        if cosmos.scenario.track_ensemble and cosmos.config.run_ensemble:
+        """Submit model.
+        """
+        if cosmos.scenario.track_ensemble and self.ensemble:
             
             # Make run batch file
             fid = open("tmp.bat", "w")
-            
+            fid.write(self.job_path[0:2] + "\n")     
+
             for member_name in cosmos.scenario.member_names:
             
                 # Job path for this ensemble member
-                pth = self.job_path + "_" + member_name           
+                pth = self.job_path + "_" + member_name      
                 fid.write("cd " + pth + "\n")
                 fid.write("call run.bat\n")
 
@@ -281,6 +303,8 @@ class Model:
 #        os.remove('tmp.bat')
 
     def get_all_nested_models(self, tp, all_nested_models=None):
+        """Return a list of all models nested in this model.
+        """        
         # def get_all_nested_models(self, tp, all_nested_models=[]):
         # don't define empty list as default ! (https://nikos7am.com/posts/mutable-default-arguments/)
         # Return a list of all models nested in this model
@@ -305,7 +329,8 @@ class Model:
         return all_nested_models
         
     def add_stations(self, name):
-
+        """Add stations that are located in this model.
+        """
         wgs84 = CRS.from_epsg(4326)
         transformer = Transformer.from_crs(wgs84, self.crs, always_xy=True)
         
@@ -349,7 +374,8 @@ class Model:
             self.station.append(station)
             
     def get_peak_boundary_conditions(self):
-        
+            """Get boundary conditions from overall model and define peak.
+            """      
             # Water level boundary conditions
 
             # Get boundary conditions from overall model (Nesting 2)
