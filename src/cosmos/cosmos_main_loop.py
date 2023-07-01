@@ -15,6 +15,7 @@ import numpy as np
 from .cosmos import cosmos
 #from .cosmos_meteo import read_meteo_sources
 from .cosmos_meteo import download_and_collect_meteo
+from .cosmos_track_ensemble import setup_track_ensemble
 #from .cosmos_stations import Stations
 from .cosmos_scenario import Scenario
 #from .cosmos_tiling import tile_layer
@@ -210,15 +211,22 @@ class MainLoop:
         # tile_layer              = {}
         # tile_layer["flood_map"] = TileLayer("flood_map")
 
-        if not self.just_initialize:
+        if self.just_initialize:
+            # No need to do anything else here 
+            return
             
-            # Get meteo data
-            download_and_collect_meteo()
-            
-            if self.run_models:        
-                # And now start the model loop
-                cosmos.log("Starting model loop ...")
-                cosmos.model_loop.start()
+        # Get meteo data (in case of forcing with track file, this is also where the spiderweb is generated)
+        download_and_collect_meteo()
+
+        # If ensemble
+        if cosmos.scenario.track_ensemble_nr_realizations > 0:
+            setup_track_ensemble()
+
+        
+        if self.run_models:
+            # And now start the model loop
+            cosmos.log("Starting model loop ...")
+            cosmos.model_loop.start()
 
 def get_start_and_stop_times():
         

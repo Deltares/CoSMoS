@@ -32,11 +32,13 @@ class Scenario:
         self.restart_path  = None
         self.last_cycle    = None 
         self.track_ensemble             = None 
+        self.track_ensemble_nr_realizations = 0 
         self.meteo_dataset              = None
         self.meteo_spiderweb            = None
         self.meteo_wind                 = True
         self.meteo_atmospheric_pressure = True
         self.meteo_precipitation        = True
+        self.meteo_track                = None
         self.observations_path = ""
         
     def read(self):
