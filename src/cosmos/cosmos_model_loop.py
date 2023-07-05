@@ -116,7 +116,12 @@ class ModelLoop():
             fo.mkdir(model.cycle_post_path)
             fo.mkdir(model.restart_flow_path)
             fo.mkdir(model.restart_wave_path)
-                                        
+
+            # Make folders for ensemble members
+            if model.ensemble:
+                for iens in range(cosmos.scenario.track_ensemble_nr_realizations):
+                    fo.mkdir(os.path.join(model.job_path, cosmos.scenario.ensemble_names[iens]))
+
             model.pre_process()  # Adjust model input (nesting etc.)
 
 #            if cosmos.config.run_mode == "serial":
@@ -134,8 +139,8 @@ class ModelLoop():
                 fid.write("Model is ready to run")
                 fid.close()
                 
-                if cosmos.scenario.track_ensemble and model.ensemble:
-                     for member_name in cosmos.scenario.member_names:
+                if model.ensemble:
+                     for member_name in cosmos.scenario.ensemble_names:
                         # Write ready file            
                         file_name = os.path.join(cosmos.config.job_path,
                                                 cosmos.scenario.name,

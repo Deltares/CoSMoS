@@ -8,6 +8,8 @@ import os
 from pyproj import CRS
 import numpy as np
 import datetime
+import shapely
+import copy
 
 from .cosmos import cosmos
 from cht.tropical_cyclone.tropical_cyclone import TropicalCycloneEnsemble
@@ -54,5 +56,43 @@ def setup_track_ensemble():
     cosmos.scenario.track_ensemble.tend    = datetime.strptime(t1str, "%Y%m%d %H%M%S")
     cosmos.scenario.track_ensemble.compute_ensemble(number_of_realizations=cosmos.scenario.track_ensemble_nr_realizations)    
 
+    # Write to files
+    cosmos.scenario.track_ensemble.to_cyc(cosmos.scenario.cycle_track_ensemble_cyc_path)
+    cosmos.scenario.track_ensemble.to_spiderweb(cosmos.scenario.cycle_track_ensemble_spw_path)
+
     # Get outline of ensemble
-    gdf = cosmos.track_ensemble.get_outline(buffer=300000.0)
+    cone = cosmos.scenario.track_ensemble.get_outline(buffer=300000.0)
+
+    # Loop through all models and check if they fall within cone
+    models_to_add = []
+    for model in cosmos.scenario.model:
+        if shapely.intersects(cone.loc[0]["geometry"], model.outline.loc[0]["geometry"]):
+            # Add model
+            ensemble_model = copy.deepcopy(model)
+            ensemble_model.name = model.name + "_ensemble"
+            ensemble_model.ensemble = True
+            if ensemble_model.flow_nested_name:
+                ensemble_model.flow_nested_name += "_ensemble"
+            if ensemble_model.wave_nested_name:
+                ensemble_model.wave_nested_name += "_ensemble"
+            if ensemble_model.bw_nested_name:
+                ensemble_model.bw_nested_name += "_ensemble"
+            models_to_add.append(ensemble_model)
+
+    cosmos.scenario.model = cosmos.scenario.model  + models_to_add
+
+    for model in models_to_add:
+        model.get_nested_models()
+        model.set_paths()
+    
+    cosmos.config.cycle.only_run_ensembles = True
+
+    if cosmos.config.cycle.only_run_ensembles:
+        # Remove all models that are not ensembles       
+        cosmos.scenario.model = [model for model in cosmos.scenario.model if model.ensemble]
+
+    # Set ensemble names
+    cosmos.scenario.ensemble_names = []
+    for iens in range(cosmos.scenario.track_ensemble_nr_realizations):
+        cosmos.scenario.ensemble_names.append(str(iens).zfill(5))
+

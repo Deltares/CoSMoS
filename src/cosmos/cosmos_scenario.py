@@ -57,32 +57,11 @@ class Scenario:
 #                for key, value in sc_dict[key].items():
                 setattr(self, key, value)
         
-        # ### Ensemble
-
-        # if hasattr(xml_obj, "track_ensemble"):
-        #     self.track_ensemble = xml_obj.track_ensemble[0].value
-        #     cosmos.scenario.member_names = []
-        #     ensemble_path = os.path.join(cosmos.config.main_path,
-        #                                  "meteo",
-        #                                  self.track_ensemble)
-        #     file_names = fo.list_files(os.path.join(ensemble_path, "*.spw"))
-        #     # Loop through file names
-        #     for file_name in file_names:                
-        #         if file_name[-13:-4]=="besttrack":
-        #             cosmos.scenario.best_track_file = os.path.join(ensemble_path,
-        #                                                            file_name)
-        #         else:
-        #             cosmos.scenario.member_names.append(os.path.split(file_name)[1][0:-4])
-            
-        # else:
-        #     self.track_ensemble = None
             
         # First find all the models and store in dict models_in_scenario
         models_in_scenario = {}
-        for mdl in sc_dict["model"]:
-                        
-            # Add the models in this scenario 
-                    
+        for mdl in sc_dict["model"]:                        
+            # Add the models in this scenario                     
             if "name" in mdl:
                 # Individual model
                 name = mdl["name"].lower()
@@ -203,11 +182,11 @@ class Scenario:
 
             model.tide = True
 
-            # Read in model generic data (from xml file)
+            # Read in model generic data (from toml file)
             model.read_generic()
 
-            # # Read in model specific data (input files)
-            # # Should move this bit to pre-processing of model
+            # Read in model specific data (input files)
+            # Should move this bit to pre-processing of model
             model.read_model_specific()
             
             # Find matching meteo subset
@@ -289,6 +268,9 @@ class Scenario:
         self.cycle_models_path     = os.path.join(self.path, cosmos.cycle_string, "models")
         self.cycle_tiles_path      = os.path.join(self.path, cosmos.cycle_string, "tiles")
         self.cycle_job_list_path   = os.path.join(self.path, cosmos.cycle_string, "job_list")
+        self.cycle_track_ensemble_path    = os.path.join(self.path, cosmos.cycle_string, "track_ensemble")
+        self.cycle_track_ensemble_cyc_path    = os.path.join(self.path, cosmos.cycle_string, "track_ensemble", "cyc")
+        self.cycle_track_ensemble_spw_path    = os.path.join(self.path, cosmos.cycle_string, "track_ensemble", "spw")
         self.restart_path          = os.path.join(self.path, "restart")
         self.timeseries_path       = os.path.join(self.path, "timeseries")
         self.cycle_timeseries_path = os.path.join(self.path, "timeseries", cosmos.cycle_string)

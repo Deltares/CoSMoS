@@ -14,6 +14,8 @@ import pandas as pd
 from scipy import interpolate
 import numpy as np
 import toml
+import geopandas as gpd
+import shapely
 
 from .cosmos import cosmos
 from .cosmos_cluster import cluster_dict as cluster
@@ -34,16 +36,16 @@ class Model:
         cosmos.cosmos_scenario
 
         """
-
+ 
         self.flow               = False
         self.wave               = False
         self.priority           = 10    
         self.flow_nested        = None
         self.wave_nested        = None
-        self.bw_nested        = None
+        self.bw_nested          = None
         self.flow_nested_name   = None
         self.wave_nested_name   = None
-        self.bw_nested_name   = None
+        self.bw_nested_name     = None
         self.nested_flow_models = []
         self.nested_wave_models = []
         self.nested_bw_models = []
@@ -77,6 +79,7 @@ class Model:
         self.peak_boundary_twl     = None
         self.peak_boundary_time    = None
         self.zb_deshoal         = None
+        self.ensemble           = False
 
     def read_generic(self):
 
@@ -85,6 +88,10 @@ class Model:
         # Turn into object        
         for key, value in mdl_dict.items():
             setattr(self, key, value)
+
+        self.flow_nested_name = self.flow_nested    
+        self.wave_nested_name = self.wave_nested    
+        self.bw_nested_name   = self.bw_nested    
 
         self.crs = CRS(self.crs)
         
@@ -149,6 +156,9 @@ class Model:
                              self.polygon.vertices.max(axis=0)[0]]
                 self.ylim = [self.polygon.vertices.min(axis=0)[1],
                              self.polygon.vertices.max(axis=0)[1]]
+            # Make gdf with outline 
+            geom = shapely.geometry.Polygon(np.squeeze(xy))
+            self.outline = gpd.GeoDataFrame({"geometry": [geom]}).set_crs(self.crs).to_crs(4326)   
            
         # Stations
         if self.station:
@@ -266,27 +276,55 @@ class Model:
                 
 #        self.job_path = job_path      
 
+#            model.set_paths()            
+    def get_nested_models(self):
+        if self.flow_nested_name:
+            # Look up model from which it gets it boundary conditions
+            for model2 in cosmos.scenario.model:
+                if model2.name == self.flow_nested_name:
+                    self.flow_nested = model2
+                    model2.nested_flow_models.append(self)
+                    break
+        if self.wave_nested_name:
+            # Look up model from which it gets it boundary conditions
+            for model2 in cosmos.scenario.model:
+                if model2.name == self.wave_nested_name:
+                    self.wave_nested = model2
+                    model2.nested_wave_models.append(self)
+                    break
+        if self.bw_nested_name:
+            # Look up model from which it gets it boundary conditions
+            for model2 in cosmos.scenario.model:
+                if model2.name == self.bw_nested_name:
+                    self.bw_nested = model2
+                    model2.nested_bw_models.append(self)
+                    break
+
     def submit_job(self):
         """Submit model.
         """
-        if cosmos.scenario.track_ensemble and self.ensemble:
-            
+        if self.ensemble:            
             # Make run batch file
             fid = open("tmp.bat", "w")
-            fid.write(self.job_path[0:2] + "\n")     
-
-            for member_name in cosmos.scenario.member_names:
-            
+#            fid.write(self.job_path[0:2] + "\n")     
+            fid.write("cd " + self.job_path + "\n")
+            for member_name in cosmos.scenario.ensemble_names:
                 # Job path for this ensemble member
-                pth = self.job_path + "_" + member_name      
+                pth = member_name
+                # Copy base files to member path
+                fid.write("copy *.* " + pth + "\n")
                 fid.write("cd " + pth + "\n")
                 fid.write("call run.bat\n")
+                fid.write("cd ..\n")
 
-            fid.write("cd " + self.job_path + "\n")
-            fid.write("call run.bat\n")
+            # All is done, so now do the merging of the outputs
+
+
+            fid.write("DATE /T > finished.txt\n")
             fid.write("exit\n")
 
             fid.close()
+            pass
 
         else:
 

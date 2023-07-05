@@ -48,7 +48,7 @@ class MainLoop:
         self.run_models      = True
         self.clean_up        = True
     
-    def start(self, cycle_time=None): 
+    def start(self, cycle=None): 
         """Read the xml scenario file, determine cycle times, and start cosmos_main_loop.run with scheduler. 
 
         Parameters
@@ -195,48 +195,22 @@ class MainLoop:
         fo.mkdir(cosmos.scenario.cycle_tiles_path)
         fo.mkdir(cosmos.scenario.cycle_job_list_path)
 
-        # Prepare models and determine which models are nested in which
-        cosmos.log("Preparing models ...")
-        for model in cosmos.scenario.model:
-            model.set_paths()            
-            if model.flow_nested:
-                # Look up model from which it gets it boundary conditions
-                for model2 in cosmos.scenario.model:
-                    if model2.name == model.flow_nested:
-                        model.flow_nested = model2
-                        model2.nested_flow_models.append(model)
-                        break
-            if model.wave_nested:
-                # Look up model from which it gets it boundary conditions
-                for model2 in cosmos.scenario.model:
-                    if model2.name == model.wave_nested:
-                        model.wave_nested = model2
-                        model2.nested_wave_models.append(model)
-                        break
-            if model.bw_nested_name:
-                # Look up model from which it gets it boundary conditions
-                for model2 in cosmos.scenario.model:
-                    if model2.name == model.bw_nested_name:
-                        model.bw_nested = model2
-                        model2.nested_bw_models.append(model)
-                        break
-
         # Get list of models that have already finished
         finished_list = os.listdir(cosmos.scenario.cycle_job_list_path)
 
-        # Set initial durations and what needs to be done for each model
+        # Prepare some stuff for each model
         for model in cosmos.scenario.model:
-
+            model.get_nested_models()
+            model.set_paths()
+            # Set model status
             model.status = "waiting"
-
             # Check finished models
             for file_name in finished_list:
                 model_name = file_name.split('.')[0]
                 if model.name.lower() == model_name.lower():
                     model.status = "finished"
                     model.run_simulation = False
-                    break
-            
+                    break            
             if model.priority == 0:
                 model.run_simulation = False
 
@@ -278,10 +252,9 @@ class MainLoop:
         # Get meteo data (in case of forcing with track file, this is also where the spiderweb is generated)
         download_and_collect_meteo()
 
-        # If ensemble
+        # Make track ensemble (this also add 'new' ensemble models that fall within the cone)
         if cosmos.scenario.track_ensemble_nr_realizations > 0:
             setup_track_ensemble()
-
         
         if self.run_models:
             # And now start the model loop

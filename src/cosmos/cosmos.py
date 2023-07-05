@@ -43,90 +43,57 @@ class CoSMoS:
     """
     
     def __init__(self):
-        
-        self.config          = Config()
-        self.cycle_time      = None        
-        self.cycle_stop_time = None  
-        self.storm_flag      = False
-        self.storm_keeplist  = []
-        
-    def set_main_path(self, main_path):
-        """Set the path of the CoSMoS main folder.
 
-        Parameters
-        ----------
-        main_path : str
-            Path of CoSMoS main folder.
+        os.environ['HDF5_DISABLE_VERSION_CHECK'] = '2'
+        
+#        self.config          = Config()
+        # self.cycle_time      = None        
+        # self.cycle_stop_time = None  
+        # self.storm_flag      = False
+        # self.storm_keeplist  = []
+
+    def initialize(self, main_path, **kwargs):
+
+        from .cosmos_configuration import Configuration
+
+        self.config          = Configuration()
+
+        # Set main path        
+        self.config.path.main = main_path
+
+        self.config.file_name = "default.toml"
+        for key, value in kwargs.items():
+            if key == "config_file":
+                self.config.file_name = value       
+                break
+
+        # Read in configuration
+        self.config.set(**kwargs)
+
+    # def set_main_path(self, main_path):
+    #     """Set the path of the CoSMoS main folder.
+
+    #     Parameters
+    #     ----------
+    #     main_path : str
+    #         Path of CoSMoS main folder.
+
+    #     """
+        
+    #     self.config.main_path = main_path
+        
+    #     os.environ['HDF5_DISABLE_VERSION_CHECK'] = '2'
+
+    def run(self, *args):
 
         """
-        
-        self.config.main_path = main_path
-        
-        os.environ['HDF5_DISABLE_VERSION_CHECK'] = '2'
-
-    def run(self,
-            scenario_name:str,
-            main_path:str=None,
-            config_file:str="default.xml",
-            mode:str="single",
-#            forecast=False,
-            run_models:bool=True,
-            make_flood_maps:bool=True,
-            make_wave_maps:bool=True,
-            get_meteo:bool=True,
-            make_figures:bool=True,
-            upload:bool=False,
-            ensemble:bool=False,
-            webviewer:str=None,
-            just_initialize:bool=False,
-            clean_up:bool=False,
-            cycle=None):     
-        """Run a CoSMoS scenario:
-
-        - Save input to self.config
-        - Change settings for cosmos_main_loop
-        - Initialize cosmos_main_loop and cosmos_model_loop
-        - Start cosmos_main_loop
-
-        Parameters
-        ----------
-        scenario_name : str
-            Name of the scenario to be run.
-        main_path : str, optional
-            Overrides *main_path* specified in ``cosmos.initialize()``., by default None
-        config_file : str, optional
-            Configuration file in folder 'configurations', by default "default.xml"
-        mode : str, optional
-            _description_, by default "single"
-        run_models : bool, optional
-            Option to run models, by default True
-        make_flood_maps : bool, optional
-            Option to make flood maps, by default True
-        make_wave_maps : bool, optional
-            Option to make wave maps, by default True
-        get_meteo : bool, optional
-            Option to upload results, by default True
-        make_figures : bool, optional
-            Option to make figures, by default True
-        upload : bool, optional
-            Option to upload results, by default False
-        ensemble : bool, optional
-            Option to run in ensemble mode, by default False
-        webviewer : str, optional
-            Webviewer version, by default None
-        just_initialize : bool, optional
-            Only initialize cosmos models, by default False
-        clean_up : bool, optional
-            Option to clean up job folder, by default False
-        cycle : _type_, optional
-            _description_, by default None
-
-        See Also
-        -------
-        cosmos.cosmos_main_loop.MainLoop
-        cosmos.cosmos_model_loop.ModelLoop
-        cosmos.cosmos_webviewer.WebViewer
-
+        Runs a CoSMoS scenario.
+    
+        :param scenario_name: name of the scenario to be run.
+        :param main_path: overrides *main_path* specified in ``cosmos.initialize()``.
+        :type scenario_name: str
+        :type main_path: str
+    
         """
 
         # Determine which cycle is needs to be run
@@ -156,6 +123,99 @@ class CoSMoS:
         # self.main_loop.clean_up        = self.config.cycle.clean_up
         
         self.main_loop.start(cycle=cycle)
+
+#     def run(self,
+#             scenario_name:str,
+#             main_path:str=None,
+#             config_file:str="default.xml",
+#             mode:str="single",
+# #            forecast=False,
+#             run_models:bool=True,
+#             make_flood_maps:bool=True,
+#             make_wave_maps:bool=True,
+#             get_meteo:bool=True,
+#             make_figures:bool=True,
+#             upload:bool=False,
+#             ensemble:bool=False,
+#             webviewer:str=None,
+#             just_initialize:bool=False,
+#             clean_up:bool=False,
+#             cycle=None):     
+#         """Run a CoSMoS scenario:
+
+#         - Save input to self.config
+#         - Change settings for cosmos_main_loop
+#         - Initialize cosmos_main_loop and cosmos_model_loop
+#         - Start cosmos_main_loop
+
+#         Parameters
+#         ----------
+#         scenario_name : str
+#             Name of the scenario to be run.
+#         main_path : str, optional
+#             Overrides *main_path* specified in ``cosmos.initialize()``., by default None
+#         config_file : str, optional
+#             Configuration file in folder 'configurations', by default "default.xml"
+#         mode : str, optional
+#             _description_, by default "single"
+#         run_models : bool, optional
+#             Option to run models, by default True
+#         make_flood_maps : bool, optional
+#             Option to make flood maps, by default True
+#         make_wave_maps : bool, optional
+#             Option to make wave maps, by default True
+#         get_meteo : bool, optional
+#             Option to upload results, by default True
+#         make_figures : bool, optional
+#             Option to make figures, by default True
+#         upload : bool, optional
+#             Option to upload results, by default False
+#         ensemble : bool, optional
+#             Option to run in ensemble mode, by default False
+#         webviewer : str, optional
+#             Webviewer version, by default None
+#         just_initialize : bool, optional
+#             Only initialize cosmos models, by default False
+#         clean_up : bool, optional
+#             Option to clean up job folder, by default False
+#         cycle : _type_, optional
+#             _description_, by default None
+
+#         See Also
+#         -------
+#         cosmos.cosmos_main_loop.MainLoop
+#         cosmos.cosmos_model_loop.ModelLoop
+#         cosmos.cosmos_webviewer.WebViewer
+
+#         """
+
+#         # Determine which cycle is needs to be run
+#         # If no cycle is given, then it will be determined later on        
+#         cycle = None
+#         self.scenario_name = args[0]
+#         if len(args)>1:
+#             cycle = args[1]
+
+#         if cycle:
+#             cycle = datetime.datetime.strptime(cycle, "%Y%m%d_%HZ").replace(tzinfo=datetime.timezone.utc)        
+#         else:
+#             cycle = None
+
+        
+#         if not self.config.path.main:
+#             cosmos.log("Error: CoSMoS main path not set! Do this by running cosmos.initialize(main_path) or passing main_path as input argument to cosmos.run().")
+#             return
+
+#         from .cosmos_main_loop import MainLoop
+#         from .cosmos_model_loop import ModelLoop
+#         self.main_loop  = MainLoop()
+#         self.model_loop = ModelLoop()
+
+#         # self.main_loop.just_initialize = self.config.cycle.just_initialize
+#         # self.main_loop.run_models      = self.config.cycle.run_models
+#         # self.main_loop.clean_up        = self.config.cycle.clean_up
+        
+#         self.main_loop.start(cycle=cycle)
 
     def stop(self): 
         """Stop main loop and model loop.
