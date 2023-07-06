@@ -1,9 +1,10 @@
 Overview model components and folder structure
 ------------
 
-CoSMoS (Coastal Storm Modelling System) is a Python-based model workflow engine for forecasting and hindcasting coastal hazards (storm surge, waves, coastal (compound) flooding and erosion). 
-The CoSMoS system automatically nests models, downloads meteorological and observational data, post-processes model results and uploads them to a webviewer. 
-Figure 1 shows a conceptual overview of the CoSMoS system. 
+**CoSMoS** (Coastal Storm Modelling System) is a Python-based model workflow engine for forecasting and hindcasting coastal hazards (storm surge, waves, coastal (compound) flooding and erosion). 
+The CoSMoS system automatically nests models, downloads the necessary meteorological and observational data, post-processes model results and uploads them to a webviewer. 
+Figure 1 shows a conceptual overview of the CoSMoS system. In principle, CoSMoS runs continuously through two different loops; a Main Loop, which is initated every
+forecast cycle (or once when running in hindcast mode) by the main CoSMoS class, and a Model Loop that runs through all the model domains until they are completed. 
 
 .. figure:: pngs/conceptual_workflow.png
   :width: 800
@@ -39,7 +40,7 @@ This class saves input settings to *self.config*, which can be accessed by other
 
 **Main Loop**
 
-In the main loop (blue box in Figure 2, :py:class:`cosmos.cosmos_main_loop.MainLoop`), the scenario file is read, cycle times are determined, meteo is downloaded, 
+In the main loop (blue box in Figure 2, :py:class:`cosmos.cosmos_main_loop.MainLoop`), the scenario file is read, cycle times are determined, meteo is downloaded and collected, 
 and the cosmos model loop (:py:class:`cosmos.cosmos_model_loop.ModelLoop`) is initiated with a scheduler. 
 This scheduler starts the cosmos model loop based on the user-defined cycle time interval (forecast mode), 
 or just once if ran in hindcast mode. 
@@ -48,7 +49,7 @@ or just once if ran in hindcast mode.
 
 In the model loop (red box in Figure 2, :py:class:`cosmos.cosmos_model_loop.ModelLoop`), all models are pre-processed, submitted, and post-processed. The model loop initiates itself every second, executing the following tasks:
 
-- Step 1: Checking for finished simulations. If there are finished simulations, they are moved to the scenario output folder (see :ref:`Output <output>`), by a model-specific class (see :ref:`Model components<modelclasses>`).
+- Step 1: Checking for finished simulations. If there are finished simulations, they are moved to the scenario :ref:`output folder <output>`, by a model-specific class (see :ref:`Model components<modelclasses>`).
 - Step 2: Making a waiting list of models to be executed. The first model on the list is preprocessed and submitted by the (:py:class:`cosmos.cosmos_model.Model`) class and model-specific classes.
 - Step 3: The finished model (from Step 1) is post-processed by model-specific classes. 
 - Step 4: Checking if all models are finished. If all models are finished, the webviewer is initialized.
@@ -58,7 +59,7 @@ In the model loop (red box in Figure 2, :py:class:`cosmos.cosmos_model_loop.Mode
 CoSMoS model components
 ^^^^^^^^^^^^
 The three main classes described above use generic and specific model classes to determine how to pre- and post-process the individual models. 
-The (:py:class:`cosmos.cosmos_model.Model`) reads generic input data from the model xml files (see :ref:`Models <models>`), prepares model paths and submits jobs. 
+The (:py:class:`cosmos.cosmos_model.Model`) reads generic input data from the :ref:` model xml files <models>`, prepares model paths and submits jobs. 
 
 The following classes read, write, and move model-specific data:
 
@@ -73,7 +74,7 @@ These model-specific classes execute the following tasks:
 - Read the model input file.
 - Extract wave and/or water level conditions from the model it is nested in, and write the forcing file for the current model.
 - Write the model input file and meteo forcing.
-- Add observation points for nested models and observation stations.
+- Add observation points for nested models and :ref:`observation stations <stations>`.
 - Move the files from the job folder (where the model runs) to the scenario folder (see :ref:`Folder structure <folder_structure>`).
 - Post-process model results: make (probabilistic) flood / wave map tiles and write (probabilistic) timeseries to csv files.
 
@@ -104,16 +105,15 @@ The CoSMoS run folder is organized as follows:
 .. include:: examples/cosmos_folder.txt
        :literal: 
 
-- configurations\\default.xml contains the paths to the model executables.
-- exe\\ can contain your model executables listed in default.xml.
-- jobs\\ is the folder where models run.
-- meteo\\meteo_subsets.xml contains the meteo sources (see :ref:`Meteo <meteo>`). 
-- models\\ contains the individual model input files and xml description (see :ref:`Models <models>`).
-- scenarios\\ contains the model scenario input file and folders where all model results are stored (see :ref:`Scenario <scenario>`).
-- stations\\ contains the station xml files with observation station locations (see :ref:`Observation stations <stations>`).
-- super_regions\\ contains super region files in which models can be grouped (see :ref:`Super regions <super_regions>`).
-- templates\\ contains webviewer templates that can be used for viewing CoSMoS model outputs (see :ref:`Webviewer <webviewer>`).
-- run_cosmos.py contains an example of how to run CoSMoS (see :ref:`Running CoSMoS <running>`).
+- *configuration/config.toml* contains the paths to the model executables and model database folder.
+- *configuration/stations* contains the station xml files with observation station locations (see :ref:`Observation stations <stations>`).
+- *configuration/super_regions* contains super region files in which models can be grouped (see :ref:`Super regions <super_regions>`).
+- *configuration/webviewer_templates* contains webviewer templates that can be used for viewing CoSMoS model outputs (see :ref:`Webviewer <webviewer>`).
+- *jobs* is the folder where models run.
+- *meteo/meteo_subsets.xml* contains the meteo sources (see :ref:`Meteo <meteo>`). 
+- *scenarios* contains the model scenario folders with scenario input files and model results (see :ref:`Scenario <scenario>`).
+- *model_database* contains the individual model input files and model description (see :ref:`Models <models>`).
+- *run_cosmos.py* contains an example of how to run CoSMoS (see :ref:`Running CoSMoS <running>`).
 
 .. .. The following table provides an overview of all cosmos system components:
 

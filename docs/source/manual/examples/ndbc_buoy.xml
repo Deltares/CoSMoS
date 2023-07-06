@@ -1,5 +1,15 @@
 <root>
   <station>
+    <name>8775870</name>
+    <coops_id>8775870</coops_id>
+    <longname>Bob Hall Pier, Corpus Christi, TX</longname>
+    <longitude type="float">-97.2167</longitude>
+    <latitude type="float">27.5800</latitude>
+    <type>tide_gauge</type>
+    <mllw type="float">-0.284</mllw>
+    <water_level_correction type="float">0.0</water_level_correction>
+  </station>
+  <station>
     <name>42060</name>
     <ndbc_id>42060</ndbc_id>
     <longname>Caribbean Valley - 63 NM WSW of Montserrat</longname>

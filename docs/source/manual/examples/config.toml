@@ -1,0 +1,27 @@
+[model_database]
+path = "c:\\work\\cosmos\\model_database"
+
+[executables]
+delft3dfm_path = "c:\\Program Files (x86)\\Deltares\\Delft3D Flexible Mesh Suite HMWQ (2021.02)\\plugins\\DeltaShell.Dimr\\kernels"
+sfincs_path    = "c:\\work\\checkouts\\git\\sfincs\\source\\sfincs\\x64\\Release"
+hurrywave_path = "c:\\work\\checkouts\\git\\hurrywave\\source\\hurrywave\\x64\\Release"
+xbeach_path    = "yourxbeachpath"
+
+[webserver]
+hostname = "c-oet0074.directory.intra"
+path     = "../../opt/websites/static/deltares/cosmos"
+username = "example"
+password = "example"
+
+[webviewer]
+name    = "nopp_event_viewer"
+version = "version02"
+
+[cycle]
+mode            = "single_shot"
+interval        = 6
+clean_up        = false
+make_flood_maps = true
+make_wave_maps  = true
+upload          = true
+get_meteo       = true

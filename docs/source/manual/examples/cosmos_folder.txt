@@ -1,7 +1,8 @@
 cosmos
-	cosmos_run_folder
+
+	run_folder
 	├── configuration
-		└── default.toml
+		└── config.toml
 		├── stations
 			└── [station_name.xml]
 		├── super_regions
@@ -14,8 +15,8 @@ cosmos
 	├── scenarios
 		├── [scenario_name]
 			└── scenario.toml
-
-	model
+			
+	model_database
 	├── [region]
 		├── [model_type]
 			├── [model_name]
@@ -24,5 +25,5 @@ cosmos
 				├── setup
 				├── tiling				
 				└── model.toml
-				
+					
 	└── run_cosmos.py

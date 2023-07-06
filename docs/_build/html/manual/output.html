@@ -47,8 +47,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../usage.html">Getting started</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../manual.html">User manual</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="modelcomponents.html">Overview model components and folder structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html">Quickstart CoSMoS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="addingmodels.html">Adding models to the database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html">Setting up your configuration file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="scenario.html">Setting up a scenario</a></li>
-<li class="toctree-l2"><a class="reference internal" href="addingmodels.html">Add models to the database</a></li>
 <li class="toctree-l2"><a class="reference internal" href="stations.html">Observation stations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="superregions.html">Defining super regions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="meteo.html">Meteo collection</a></li>
@@ -96,7 +98,7 @@
 An example of an output folder structure is shown below for a scenario called <em>hurricane_irma</em> with a cycle that starts on 4 September 2017.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>scenarios
 ├── hurricane_irma
-    └── hurricane_irma.xml
+    └── scenario.toml
     ├── 20170904_00z
         ├── job_list
         ├── models
@@ -108,16 +110,16 @@ An example of an output folder structure is shown below for a scenario called <e
 </div>
 <p>In the <em>job_list</em> folder, you can find an overview of completed models.
 When rerunning a scenario, any models that are marked as finished in the <em>job_list</em> folder will not be executed again.
-To rerun specific models or the entire selection for a particular scenario, it is necessary to delete these finished files.</p>
+To rerun specific models or the entire selection for a particular scenario, it is necessary to delete these <em>finished</em> files.</p>
 <p>The <em>models</em> folder contains all model input and output.
 The <em>tiles</em> folder contains all tiles for the webviewer.
 The <em>restart</em> folder contains restart files for all models.
-The <em>timeseries</em> folder contains timeseries csv files with model output for observation locations defined in the &lt;station&gt; file (see <a class="reference internal" href="stations.html#stations"><span class="std std-ref">Observation stations</span></a>).</p>
+The <em>timeseries</em> folder contains timeseries csv files with model output for observation locations defined in the <em>station</em> file (see <a class="reference internal" href="stations.html#stations"><span class="std std-ref">Observation stations</span></a>).</p>
 </section>
 <section id="webviewer-1">
 <span id="webviewer"></span><h2>Webviewer<a class="headerlink" href="#webviewer-1" title="Permalink to this headline">¶</a></h2>
 <p>CoSMoS output is presented in a webviewer which provides an interactive method of viewing the results for the different scenarios and model output.
-The webviewer can be found under webviewers/webviewer_name and is structured as follows:</p>
+The webviewer can be found under <em>webviewers/webviewer_name</em> and is structured as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[webviewer_name]
 └── index.html
 ├── css

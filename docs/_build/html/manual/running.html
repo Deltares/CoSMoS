@@ -47,8 +47,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../usage.html">Getting started</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../manual.html">User manual</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="modelcomponents.html">Overview model components and folder structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html">Quickstart CoSMoS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="addingmodels.html">Adding models to the database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html">Setting up your configuration file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="scenario.html">Setting up a scenario</a></li>
-<li class="toctree-l2"><a class="reference internal" href="addingmodels.html">Add models to the database</a></li>
 <li class="toctree-l2"><a class="reference internal" href="stations.html">Observation stations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="superregions.html">Defining super regions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="meteo.html">Meteo collection</a></li>
@@ -93,36 +95,22 @@
 
 <span class="sd">@author: ormondt</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">cosmos.cosmos</span> <span class="kn">import</span> <span class="n">cosmos</span>
 
-<span class="kn">from</span> <span class="nn">cosmos.cosmos_main</span> <span class="kn">import</span> <span class="n">cosmos</span>
+<span class="n">main_path</span> <span class="o">=</span> <span class="s2">&quot;c:</span><span class="se">\\</span><span class="s2">work</span><span class="se">\\</span><span class="s2">cosmos</span><span class="se">\\</span><span class="s2">run_folder&quot;</span>
 
-<span class="n">main_path</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;c:\cosmos&quot;</span>
+<span class="c1"># Initialize CoSMoS configuration</span>
+<span class="n">cosmos</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">main_path</span><span class="p">,</span>
+                  <span class="n">config_file</span><span class="o">=</span><span class="s2">&quot;config_mvo.toml&quot;</span><span class="p">,</span>
+                  <span class="n">make_wave_maps</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-<span class="n">scenario_name</span> <span class="o">=</span> <span class="s2">&quot;hurricane_irma_gfs&quot;</span>
-
-<span class="n">cosmos</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">main_path</span><span class="p">)</span>
-
-<span class="n">cosmos</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">scenario_name</span><span class="p">,</span>
-           <span class="n">config_file</span><span class="o">=</span><span class="s2">&quot;default.xml&quot;</span><span class="p">,</span>
-           <span class="n">clean_up</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-           <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;single_shot&quot;</span><span class="p">,</span>
-           <span class="n">make_flood_maps</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-           <span class="n">make_wave_maps</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-           <span class="n">upload</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-           <span class="n">make_figures</span><span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-           <span class="n">webviewer</span><span class="o">=</span><span class="s2">&quot;version02&quot;</span><span class="p">,</span>
-           <span class="n">ensemble</span><span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-           <span class="n">get_meteo</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-
-<span class="c1"># cosmos.post_process(scenario_name, model = &#39;all&#39;)</span>
-<span class="c1"># cosmos.make_webviewer(scenario_name, &quot;version02&quot;)</span>
-
-
+<span class="n">cosmos</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;hurricane_laura&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>This <em>run_cosmos.py</em> script requires a <em>scenario_name</em> as input (here: <em>hurricane_irma_gfs</em>). The corresponding scenario file should be located in the folder:
-<em>scenarios/hurricane_irma_gfs/hurricane_irma_gfs.xml</em></p>
-<p>Other input settings are described in <a class="reference internal" href="../_generated/cosmos.cosmos_main.CoSMoS.html#cosmos.cosmos_main.CoSMoS" title="cosmos.cosmos_main.CoSMoS"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_main.CoSMoS</span></code></a>.</p>
+<p>This <em>run_cosmos.py</em> script requires a <em>scenario_name</em> as input (here: <em>hurricane_laura</em>). The corresponding scenario file should be located in the folder:
+<em>scenarios/hurricane_laura/scenario.toml</em>.</p>
+<p>Input settings to the <em>initialize</em> function of CoSMoS will overwrite <a class="reference internal" href="configuration.html#configuration"><span class="std std-ref">*cycle* input settings defined in the configuration file</span></a>.
+All input settings are described in <a class="reference internal" href="../_generated/cosmos.cosmos_main.CoSMoS.html#cosmos.cosmos_main.CoSMoS" title="cosmos.cosmos_main.CoSMoS"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_main.CoSMoS</span></code></a>.</p>
 </section>
 
 

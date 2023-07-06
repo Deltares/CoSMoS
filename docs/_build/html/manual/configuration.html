@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Setting up your configuration file &mdash; CoSMoS 0.1 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Setting up a scenario" href="scenario.html" />
+    <link rel="prev" title="Adding models to the database" href="addingmodels.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            CoSMoS
+          </a>
+              <div class="version">
+                0.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../manual.html">User manual</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="modelcomponents.html">Overview model components and folder structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html">Quickstart CoSMoS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="addingmodels.html">Adding models to the database</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Setting up your configuration file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scenario.html">Setting up a scenario</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stations.html">Observation stations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="superregions.html">Defining super regions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meteo.html">Meteo collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="running.html">Running CoSMoS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html">CoSMoS output</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../functions.html">Functions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CoSMoS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../manual.html">User manual</a></li>
+      <li class="breadcrumb-item active">Setting up your configuration file</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/manual/configuration.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="setting-up-your-configuration-file">
+<span id="configuration"></span><h1>Setting up your configuration file<a class="headerlink" href="#setting-up-your-configuration-file" title="Permalink to this headline">¶</a></h1>
+<p>The CoSMoS configuration file specifies the model database path, the model executable paths, and the webserver, webviewer, and cycle settings:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">model_database</span><span class="p">]</span>
+<span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;c:</span><span class="se">\\</span><span class="s2">work</span><span class="se">\\</span><span class="s2">cosmos</span><span class="se">\\</span><span class="s2">model_database&quot;</span>
+
+<span class="p">[</span><span class="n">executables</span><span class="p">]</span>
+<span class="n">delft3dfm_path</span> <span class="o">=</span> <span class="s2">&quot;c:</span><span class="se">\\</span><span class="s2">Program Files (x86)</span><span class="se">\\</span><span class="s2">Deltares</span><span class="se">\\</span><span class="s2">Delft3D Flexible Mesh Suite HMWQ (2021.02)</span><span class="se">\\</span><span class="s2">plugins</span><span class="se">\\</span><span class="s2">DeltaShell.Dimr</span><span class="se">\\</span><span class="s2">kernels&quot;</span>
+<span class="n">sfincs_path</span>    <span class="o">=</span> <span class="s2">&quot;c:</span><span class="se">\\</span><span class="s2">work</span><span class="se">\\</span><span class="s2">checkouts</span><span class="se">\\</span><span class="s2">git</span><span class="se">\\</span><span class="s2">sfincs</span><span class="se">\\</span><span class="s2">source</span><span class="se">\\</span><span class="s2">sfincs</span><span class="se">\\</span><span class="s2">x64</span><span class="se">\\</span><span class="s2">Release&quot;</span>
+<span class="n">hurrywave_path</span> <span class="o">=</span> <span class="s2">&quot;c:</span><span class="se">\\</span><span class="s2">work</span><span class="se">\\</span><span class="s2">checkouts</span><span class="se">\\</span><span class="s2">git</span><span class="se">\\</span><span class="s2">hurrywave</span><span class="se">\\</span><span class="s2">source</span><span class="se">\\</span><span class="s2">hurrywave</span><span class="se">\\</span><span class="s2">x64</span><span class="se">\\</span><span class="s2">Release&quot;</span>
+<span class="n">xbeach_path</span>    <span class="o">=</span> <span class="s2">&quot;yourxbeachpath&quot;</span>
+
+<span class="p">[</span><span class="n">webserver</span><span class="p">]</span>
+<span class="n">hostname</span> <span class="o">=</span> <span class="s2">&quot;c-oet0074.directory.intra&quot;</span>
+<span class="n">path</span>     <span class="o">=</span> <span class="s2">&quot;../../opt/websites/static/deltares/cosmos&quot;</span>
+<span class="n">username</span> <span class="o">=</span> <span class="s2">&quot;example&quot;</span>
+<span class="n">password</span> <span class="o">=</span> <span class="s2">&quot;example&quot;</span>
+
+<span class="p">[</span><span class="n">webviewer</span><span class="p">]</span>
+<span class="n">name</span>    <span class="o">=</span> <span class="s2">&quot;nopp_event_viewer&quot;</span>
+<span class="n">version</span> <span class="o">=</span> <span class="s2">&quot;version02&quot;</span>
+
+<span class="p">[</span><span class="n">cycle</span><span class="p">]</span>
+<span class="n">mode</span>            <span class="o">=</span> <span class="s2">&quot;single_shot&quot;</span>
+<span class="n">interval</span>        <span class="o">=</span> <span class="mi">6</span>
+<span class="n">clean_up</span>        <span class="o">=</span> <span class="n">false</span>
+<span class="n">make_flood_maps</span> <span class="o">=</span> <span class="n">true</span>
+<span class="n">make_wave_maps</span>  <span class="o">=</span> <span class="n">true</span>
+<span class="n">upload</span>          <span class="o">=</span> <span class="n">true</span>
+<span class="n">get_meteo</span>       <span class="o">=</span> <span class="n">true</span>
+</pre></div>
+</div>
+<p>The following webviewer and cycle settings can be included in the configuration file. The cycle configurations can be overwritten when <a class="reference internal" href="running.html#running"><span class="std std-ref">initialing CoSMoS</span></a>.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 70%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>webviewer settings</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>name</p></td>
+<td><p>Choose your own webviewer name.</p></td>
+</tr>
+<tr class="row-odd"><td><p>version</p></td>
+<td><p>A webviewer template from the folder <em>configuration/webviewer_templates</em>.</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>cycle settings</strong></p></td>
+<td><p><strong>Description</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>mode</p></td>
+<td><p>Run mode. Options: single_shot ??</p></td>
+</tr>
+<tr class="row-even"><td><p>interval</p></td>
+<td><p>Cycle time interval (hours)</p></td>
+</tr>
+<tr class="row-odd"><td><p>clean_up</p></td>
+<td><p>Clean up folders after each cycle.</p></td>
+</tr>
+<tr class="row-even"><td><p>make_flood_maps</p></td>
+<td><p>Make flood map tiles for webviewer.</p></td>
+</tr>
+<tr class="row-odd"><td><p>make_wave_maps</p></td>
+<td><p>Make wave map tiles for webviewer.</p></td>
+</tr>
+<tr class="row-even"><td><p>upload</p></td>
+<td><p>Upload results to webviewer.</p></td>
+</tr>
+<tr class="row-odd"><td><p>get_meteo</p></td>
+<td><p>Download meteo from webserver.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="addingmodels.html" class="btn btn-neutral float-left" title="Adding models to the database" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="scenario.html" class="btn btn-neutral float-right" title="Setting up a scenario" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Deltares.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

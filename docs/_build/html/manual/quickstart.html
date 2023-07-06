@@ -17,7 +17,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Add models to the database" href="addingmodels.html" />
+    <link rel="next" title="Adding models to the database" href="addingmodels.html" />
     <link rel="prev" title="Overview model components and folder structure" href="modelcomponents.html" /> 
 </head>
 
@@ -51,7 +51,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#advanced-cosmos-configurations">Advanced CoSMoS configurations:</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="addingmodels.html">Add models to the database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="addingmodels.html">Adding models to the database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html">Setting up your configuration file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="scenario.html">Setting up a scenario</a></li>
 <li class="toctree-l2"><a class="reference internal" href="stations.html">Observation stations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="superregions.html">Defining super regions</a></li>
@@ -90,32 +91,33 @@
              
   <section id="quickstart-cosmos">
 <span id="quickstart"></span><h1>Quickstart CoSMoS<a class="headerlink" href="#quickstart-cosmos" title="Permalink to this headline">¶</a></h1>
-<p>To setup CoSMoS for your area of interest, you can broadly follow these steps:</p>
+<p>To setup CoSMoS for your area of interest, you can generally follow these steps:</p>
 <p><strong>Step 1: Install CoSMoS</strong></p>
-<p>Install CoSMoS on your device (<span class="xref std std-ref">Getting started</span>).</p>
+<p><a class="reference internal" href="../usage.html#getting-started"><span class="std std-ref">Install CoSMoS</span></a> on your device.</p>
 <p><strong>Step 2: Make a local copy the CoSMoS run folder.</strong></p>
-<p>Copy the default CoSMoS run folder (<em>cosmos_run_folder</em> in your CoSMoS installation folder) to the folder where you intend to run CoSMoS.</p>
+<p>Copy the default folders <em>cosmos_run_folder</em> and <em>model_database</em> from your CoSMoS installation folder to the folder where you want to run CoSMoS.</p>
 <p><strong>Step 3: Add models to the model database.</strong></p>
-<p>Add wave and/or flow models for your domain of interest (<span class="xref std std-ref">Adding models</span>).</p>
+<p><a class="reference internal" href="addingmodels.html#models"><span class="std std-ref">Add wave and/or flow models</span></a> for your domain of interest.</p>
 <p><strong>Step 4: Adjust your model executable paths.</strong></p>
-<p>In the <em>configurations</em> folder, you can find the file <em>default.xml</em>.
-Adjust the model executable paths (for the models that you want to be running) to your local installations.</p>
+<p>In the <em>configuration</em> folder, you can find the file <a class="reference internal" href="configuration.html#configuration"><span class="std std-ref">*config.toml*</span></a>.
+Adjust the model executable paths (for the models that you want to be running) to your local installations.
+Also, make sure to link to the correct <em>model_database</em> folder.</p>
 <p><strong>Step 5: Setup a scenario file.</strong></p>
-<p>Setup a scenario file (see <a class="reference internal" href="scenario.html#scenario"><span class="std std-ref">Scenario</span></a>), in which you describe which models of your model database you want to run,
+<p><a class="reference internal" href="scenario.html#scenario"><span class="std std-ref">Setup a scenario file</span></a> in which you describe which models of your model database you want to run,
 for which period, and with which metereological data.
 For a first CoSMoS run, choose one of the meteoreological data options listed in the default <em>meteo_subsets</em> file (see <a class="reference internal" href="meteo.html#meteo"><span class="std std-ref">Meteo</span></a>).
 You can also add the NOAA-COOPS tide station file (see <a class="reference internal" href="stations.html#stations"><span class="std std-ref">Observation stations</span></a>) to your scenario file to compare observed and computed water levels.</p>
 <p><strong>Step 6: Run CoSMoS.</strong></p>
-<p>Once you have completed Step 1 to 5, you can execute a first CoSMoS run (see <a class="reference internal" href="running.html#running"><span class="std std-ref">Running CoSMoS</span></a>).
-The output is stored in the scenario file, and you can view the results of your run in the  webviewer (see <a class="reference internal" href="output.html#output"><span class="std std-ref">Output</span></a>)</p>
+<p>Once you have completed Step 1 to 5, you can <a class="reference internal" href="running.html#running"><span class="std std-ref">execute a first CoSMoS run</span></a>.
+The output is stored in the scenario folder, and you can view the results of your run in the  webviewer (see <a class="reference internal" href="output.html#output"><span class="std std-ref">Output</span></a>)</p>
 <section id="advanced-cosmos-configurations">
 <h2>Advanced CoSMoS configurations:<a class="headerlink" href="#advanced-cosmos-configurations" title="Permalink to this headline">¶</a></h2>
 <p><strong>Step 7: Add observation data.</strong></p>
 <p>In addition to the regular NOAA-COOPS tide stations, for which water level data is downloaded automatically from a server,
-you can manually add observation station locations and data (see <a class="reference internal" href="stations.html#stations"><span class="std std-ref">Observation stations</span></a>).</p>
+you can <a class="reference internal" href="stations.html#stations"><span class="std std-ref">manually add observation station locations and data</span></a>.</p>
 <p><strong>Step 8: Add meteoreological data.</strong></p>
 <p>There are several options to manually include meteorological data to force your model(s) (see <a class="reference internal" href="meteo.html#meteo"><span class="std std-ref">Meteo</span></a>).
-You can generate your own evenly gridded meteorological forcing or include a spiderweb file.
+You can generate your own regularly gridded meteorological forcing or include a spiderweb file.
 Alternatively, you can create an ensemble of cyclone tracks to obtain a probabilistic hazard prediction.</p>
 <p><strong>Step 9: Organize your models in a super region file.</strong></p>
 <p>If you have created a large database of models and want to include them efficiently in your scenario file,
@@ -129,7 +131,7 @@ you can organize the models in a <em>super region</em> file (see <a class="refer
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="modelcomponents.html" class="btn btn-neutral float-left" title="Overview model components and folder structure" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="addingmodels.html" class="btn btn-neutral float-right" title="Add models to the database" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="addingmodels.html" class="btn btn-neutral float-right" title="Adding models to the database" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

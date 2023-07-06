@@ -10,7 +10,7 @@ An example of a scenario file is given below:
 .. include:: examples/scenario.toml
        :literal: 
 
-The scenario file must always be named *scenario.toml*. CoSMoS assigns the scenario *name* based on the folder name. 
+The scenario file must always be named *scenario.toml*. CoSMoS assigns the scenario *name* based on the folder name 
 (see also :ref:`Folder structure <folder_structure>`).
 
 The following settings can be included in the scenario file:

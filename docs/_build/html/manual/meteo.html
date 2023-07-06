@@ -49,6 +49,7 @@
 <li class="toctree-l2"><a class="reference internal" href="modelcomponents.html">Overview model components and folder structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="quickstart.html">Quickstart CoSMoS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="addingmodels.html">Adding models to the database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html">Setting up your configuration file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="scenario.html">Setting up a scenario</a></li>
 <li class="toctree-l2"><a class="reference internal" href="stations.html">Observation stations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="superregions.html">Defining super regions</a></li>
@@ -92,8 +93,8 @@
              
   <section id="meteo-collection">
 <span id="meteo"></span><h1>Meteo collection<a class="headerlink" href="#meteo-collection" title="Permalink to this headline">¶</a></h1>
-<p>CoSMoS automatically downloads, collects and writes meteorological data for each model based on user-defined settings in the scenario file (see <a class="reference internal" href="scenario.html#scenario"><span class="std std-ref">Scenario</span></a>).
-Meteorological forcing data can be found in the <em>meteo</em> folder, for example:</p>
+<p>CoSMoS automatically downloads, collects and writes meteorological data for each model based on user-defined settings in the <a class="reference internal" href="scenario.html#scenario"><span class="std std-ref">scenario file</span></a>.
+Meteorological forcing data can be found in the <em>meteo</em> folder. An example of a meteo folder structure is given below:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>meteo
 └── meteo_subsets.xml
 ├── gfs_forecast_0p25_north_atlantic
@@ -109,11 +110,11 @@ Meteorological forcing data can be found in the <em>meteo</em> folder, for examp
     └── irma.cyc
 </pre></div>
 </div>
-<p>There are three types of meteo data, which are elaborated in the sections below:</p>
+<p>This example meteo folders shows the three main types of meteo data:</p>
 <ul class="simple">
-<li><p><strong>Regularly gridded meteo data</strong> (keyword: <em>&lt;meteo_dataset&gt;</em> in scenario file). The <em>gfs_forecast_0p25_north_atlantic</em> and <em>gfs_anl_0p50_north_atlantic</em> folders are examples of regularly gridded meteo data.</p></li>
-<li><p><strong>Spiderweb grid meteo data</strong> (keyword: <em>&lt;meteo_spiderweb&gt;</em> in scenario file). The <em>irma.spw</em> file in the folder <em>spiderwebs</em> is an example of spiderweb forcing.</p></li>
-<li><p><strong>Ensemble of tracks</strong> (keywword: <em>&lt;track_ensemble&gt;</em> in scenario file). The <em>hurricane_irma</em> folder is an example of an ensemble of tracks (tracks are generated based on the <em>.cyc</em> file).</p></li>
+<li><p><strong>Regularly gridded meteo data</strong> (keyword: <em>meteo_dataset</em> in scenario file). The <em>gfs_forecast_0p25_north_atlantic</em> and <em>gfs_anl_0p50_north_atlantic</em> folders are examples of regularly gridded meteo data.</p></li>
+<li><p><strong>Spiderweb grid meteo data</strong> (keyword: <em>meteo_spiderweb</em> in scenario file). The <em>irma.spw</em> file in the folder <em>spiderwebs</em> is an example of spiderweb forcing.</p></li>
+<li><p><strong>Ensemble of tracks</strong> (keyword: <em>track_ensemble</em> in scenario file). The <em>hurricane_irma</em> folder is an example of an ensemble of tracks (tracks are generated based on the <em>.cyc</em> file).</p></li>
 </ul>
 <p>Metadata for the <em>meteo_datasets</em> and <em>spiderweb</em> files are contained in the <em>meteo_subsets.xml</em> file:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&lt;?xml version=&quot;1.0&quot;?&gt;
@@ -150,7 +151,7 @@ Meteorological forcing data can be found in the <em>meteo</em> folder, for examp
 &lt;/root&gt;
 </pre></div>
 </div>
-<p>This file has the following attributes:</p>
+<p>The following attributes can be included in the meteo subsets:</p>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 30%" />
@@ -167,7 +168,7 @@ Meteorological forcing data can be found in the <em>meteo</em> folder, for examp
 <td><p>Optional: X and Y range for which meteo data needs to be downloaded / collected.</p></td>
 </tr>
 <tr class="row-even"><td><p>xystride</p></td>
-<td><p>Optional:</p></td>
+<td><p>Optional: ??</p></td>
 </tr>
 </tbody>
 </table>
@@ -221,15 +222,15 @@ If this folder only contains a <em>.cyc</em> file, this file is converted into a
 <h2>Track ensemble<a class="headerlink" href="#track-ensemble" title="Permalink to this headline">¶</a></h2>
 <p>To include track uncertainties in cyclone forecasting, CoSMoS can also generate an ensemble of tracks.
 In this way, we can obtain a probabilistic estimate of nearshore water levels, waves, and inundation.
-The cyclone tracks are generated based on De Maria et al. (2009), taking into account along-track (AT) and cross-track (CT), and maximum wind speed (VE) errors.
+The cyclone tracks are generated based on De Maria et al. (2009), taking into account along-track (AT), cross-track (CT), and maximum wind speed (VE) errors.
 For more information, see the <a class="reference external" href="https://publicwiki.deltares.nl/display/DDB/Advanced+Tropical+Cyclone">Advanced Tropical Cyclone Toolbox</a>.</p>
 <p>To run a scenario in ensemble mode, set the keyword <em>ensemble</em> to True (see <a class="reference internal" href="running.html#running"><span class="std std-ref">Running CoSMoS</span></a> and <a class="reference internal" href="../_generated/cosmos.cosmos_main.CoSMoS.html#cosmos.cosmos_main.CoSMoS" title="cosmos.cosmos_main.CoSMoS"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_main.CoSMoS</span></code></a>).
-The keyword <em>&lt;track_ensemble&gt;</em> in the scenario file must refer to a folder in the <em>meteo</em> folder that contains a <em>.cyc</em> file.
+The keyword <em>track_ensemble</em> in the scenario file must refer to a folder in the <em>meteo</em> folder that contains a <em>.cyc</em> file.
 This meteo dataset does not need to be described in the <em>meteo_subsets.xml</em> file.
-The keyword <em>&lt;ensemble_nrtracks&gt;</em> in the scenario file prescribes the number of tracks that need to be generated.
-If this keyword is not defined, CoSMoS uses the tracks that are already present in the <em>&lt;track_ensemble&gt;</em> folder.
+The keyword <em>track_ensemble_nr_realizations</em> in the scenario file specifies the number of tracks that need to be generated.
+If this keyword is not defined, CoSMoS uses the tracks that are already present in the <em>track_ensemble</em> folder.
 For each model, region, or super region, you can define whether it needs to be run for the entire set of tracks
-(keyword <em>&lt;ensemble&gt;</em> is <em>yes</em> in the scenario file), or whether it needs to be run for the best track estimation ( <em>&lt;ensemble&gt;</em> is <em>no</em>).</p>
+(keyword <em>ensemble</em> is <em>yes</em> in the scenario file), or whether it needs to be run for the best track estimation (<em>ensemble</em> is <em>no</em>).</p>
 </section>
 </section>
 

@@ -47,8 +47,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../usage.html">Getting started</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../manual.html">User manual</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="modelcomponents.html">Overview model components and folder structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html">Quickstart CoSMoS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="addingmodels.html">Adding models to the database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html">Setting up your configuration file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="scenario.html">Setting up a scenario</a></li>
-<li class="toctree-l2"><a class="reference internal" href="addingmodels.html">Add models to the database</a></li>
 <li class="toctree-l2"><a class="reference internal" href="stations.html">Observation stations</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Defining super regions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="meteo.html">Meteo collection</a></li>
@@ -87,13 +89,10 @@
   <section id="defining-super-regions">
 <span id="super-regions"></span><h1>Defining super regions<a class="headerlink" href="#defining-super-regions" title="Permalink to this headline">¶</a></h1>
 <p>For large scale storm forecasting, it is often necessary to run multiple models.
-These models can be referenced individually in the scenario file or per region.
-You can also combine different regions into a super_region file.
-These models can be called individually in the scenario file, or per region.
-However, you can also aggregrate different regions in a super region file, located in the <em>super_regions</em> folder.
-You can then refer to this super_region in your scenario file with the keyword &lt;super_region&gt;.
-By using a super region file, you can simplify the structure of your scenario file.
-An example of a super_region file is given below.</p>
+These models can be referenced individually in the scenario file, or per region.
+However, you can also combine different regions into a super region file, located in the <em>super_regions</em> folder.
+You can then refer to this super_region in your scenario file with the keyword <em>super_region</em>, simplifying the structure of your scenario file.
+An example of a super_region file is given below:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&lt;?xml version=&quot;1.0&quot;?&gt;
 &lt;!-- Written on 11-Oct-2011 18:21:28 using the XML Toolbox for Matlab --&gt;
 &lt;root&gt;

@@ -14,12 +14,12 @@ An example of an output folder structure is shown below for a scenario called *h
 
 In the *job_list* folder, you can find an overview of completed models. 
 When rerunning a scenario, any models that are marked as finished in the *job_list* folder will not be executed again. 
-To rerun specific models or the entire selection for a particular scenario, it is necessary to delete these finished files.
+To rerun specific models or the entire selection for a particular scenario, it is necessary to delete these *finished* files.
 
 The *models* folder contains all model input and output.
 The *tiles* folder contains all tiles for the webviewer.
 The *restart* folder contains restart files for all models.
-The *timeseries* folder contains timeseries csv files with model output for observation locations defined in the <station> file (see :ref:`Observation stations <stations>`).
+The *timeseries* folder contains timeseries csv files with model output for observation locations defined in the *station* file (see :ref:`Observation stations <stations>`).
 
 .. _webviewer:
 
@@ -27,7 +27,7 @@ Webviewer
 ^^^^^^^^^^^^
 
 CoSMoS output is presented in a webviewer which provides an interactive method of viewing the results for the different scenarios and model output. 
-The webviewer can be found under webviewers/webviewer_name and is structured as follows:
+The webviewer can be found under *webviewers/webviewer_name* and is structured as follows:
 
 .. include:: examples/webviewer_folder.txt
        :literal: 

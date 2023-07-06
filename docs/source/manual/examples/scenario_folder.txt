@@ -1,6 +1,6 @@
 scenarios
 ├── hurricane_irma
-    └── hurricane_irma.xml
+    └── scenario.toml
     ├── 20170904_00z
         ├── job_list
         ├── models

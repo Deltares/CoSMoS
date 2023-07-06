@@ -18,7 +18,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Defining super regions" href="superregions.html" />
-    <link rel="prev" title="Add models to the database" href="addingmodels.html" /> 
+    <link rel="prev" title="Setting up a scenario" href="scenario.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -47,8 +47,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../usage.html">Getting started</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../manual.html">User manual</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="modelcomponents.html">Overview model components and folder structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html">Quickstart CoSMoS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="addingmodels.html">Adding models to the database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html">Setting up your configuration file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="scenario.html">Setting up a scenario</a></li>
-<li class="toctree-l2"><a class="reference internal" href="addingmodels.html">Add models to the database</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Observation stations</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#station-locations">Station locations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#observation-data">Observation data</a></li>
@@ -91,13 +93,23 @@
   <section id="observation-stations">
 <span id="stations"></span><h1>Observation stations<a class="headerlink" href="#observation-stations" title="Permalink to this headline">¶</a></h1>
 <p>To compare model results (water levels and wave conditions) with observations, station locations and observation data can be added to the CoSMoS database.
-Station locations can be referenced in the model xml files, while observation data can be referenced in the scenario xml file.</p>
+Station locations can be referenced in the <em>model.toml</em> files, while observation data can be referenced in the <em>scenario.toml</em> file.</p>
 <section id="station-locations">
 <h2>Station locations<a class="headerlink" href="#station-locations" title="Permalink to this headline">¶</a></h2>
-<p>To add observation points to a specific model, station locations files can be used.
+<p>To add observation points in models, stations must be referenced in a station file located in <em>configuration/stations</em>.
 An example of a station file is given below:</p>
 <blockquote>
 <div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">root</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">station</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="mi">8775870</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">coops_id</span><span class="o">&gt;</span><span class="mi">8775870</span><span class="o">&lt;/</span><span class="n">coops_id</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">longname</span><span class="o">&gt;</span><span class="n">Bob</span> <span class="n">Hall</span> <span class="n">Pier</span><span class="p">,</span> <span class="n">Corpus</span> <span class="n">Christi</span><span class="p">,</span> <span class="n">TX</span><span class="o">&lt;/</span><span class="n">longname</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">longitude</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="o">&gt;-</span><span class="mf">97.2167</span><span class="o">&lt;/</span><span class="n">longitude</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">latitude</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="o">&gt;</span><span class="mf">27.5800</span><span class="o">&lt;/</span><span class="n">latitude</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nb">type</span><span class="o">&gt;</span><span class="n">tide_gauge</span><span class="o">&lt;/</span><span class="nb">type</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">mllw</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="o">&gt;-</span><span class="mf">0.284</span><span class="o">&lt;/</span><span class="n">mllw</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">water_level_correction</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="o">&gt;</span><span class="mf">0.0</span><span class="o">&lt;/</span><span class="n">water_level_correction</span><span class="o">&gt;</span>
+  <span class="o">&lt;/</span><span class="n">station</span><span class="o">&gt;</span>
   <span class="o">&lt;</span><span class="n">station</span><span class="o">&gt;</span>
     <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="mi">42060</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
     <span class="o">&lt;</span><span class="n">ndbc_id</span><span class="o">&gt;</span><span class="mi">42060</span><span class="o">&lt;/</span><span class="n">ndbc_id</span><span class="o">&gt;</span>
@@ -110,16 +122,48 @@ An example of a station file is given below:</p>
 </pre></div>
 </div>
 </div></blockquote>
-<p>The station location files must be added to the <em>stations</em> folder. In the model xml file (see <a class="reference internal" href="addingmodels.html#models"><span class="std std-ref">Models</span></a>) you can refer to one
-or more station files using the keyword &lt;station&gt;.</p>
+<p>In the <a class="reference internal" href="addingmodels.html#models"><span class="std std-ref">*model.toml*</span></a> file you can refer to one or more station files using the keyword <em>station</em>.
+The following attributes can be described in the station file:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 70%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>name</p></td>
+<td><p>Name of the observation station.</p></td>
+</tr>
+<tr class="row-even"><td><p>long_name</p></td>
+<td><p>Long name of the observation station.</p></td>
+</tr>
+<tr class="row-odd"><td><p>longitude, latitude</p></td>
+<td><p>Coordinates of the observation station.</p></td>
+</tr>
+<tr class="row-even"><td><p>type</p></td>
+<td><p>Type: wave_buoy or tide_gauge</p></td>
+</tr>
+<tr class="row-odd"><td><p>coops_id</p></td>
+<td><p>Optional: NOAA CO-OPS tide gauge id.</p></td>
+</tr>
+<tr class="row-even"><td><p>ndbc_id</p></td>
+<td><p>Optional: NDBC wave buoy id.</p></td>
+</tr>
+<tr class="row-odd"><td><p>mllw</p></td>
+<td><p>Optional: Mean lower low water level.</p></td>
+</tr>
+<tr class="row-even"><td><p>water_level_correction</p></td>
+<td><p>Optional: Water level correction.</p></td>
+</tr>
+</tbody>
+</table>
 <p>The default cosmos_run_folder contains xml files with locations of the NDBC wave buoys and the NOAA CO-OPS water level stations.
-Other observation locations can also be added manually.</p>
+Other observation locations can be added manually.</p>
 </section>
 <section id="observation-data">
 <h2>Observation data<a class="headerlink" href="#observation-data" title="Permalink to this headline">¶</a></h2>
 <p>Observation data for the station locations defined in the <em>stations</em> folder are either automatically extracted by CoSMoS
 or can be manually added to the observations folder.
-For the NOAA-COOPS water level stations, water levels are automatically extracted from the NOAA-COOPS server.
+For the NOAA CO-OPS water level stations, water levels are automatically extracted from the NOAA CO-OPS server.
 For the NDBC wave buoys, the wave buoy data must be manually extracted from the NDBC website (<a class="reference external" href="https://www.ndbc.noaa.gov/">https://www.ndbc.noaa.gov/</a>),
 where you can find historical wave buoy data. The following script converts the NDBC text files to csv files that can be used by CoSMoS:</p>
 <blockquote>
@@ -180,7 +224,7 @@ where you can find historical wave buoy data. The following script converts the 
 </pre></div>
 </div>
 </div></blockquote>
-<p>In the scenario file, you must refer to the [observations_path] (see <a class="reference internal" href="scenario.html#scenario"><span class="std std-ref">Scenario</span></a>) to include these observations in the webviewer.</p>
+<p>In the <a class="reference internal" href="scenario.html#scenario"><span class="std std-ref">scenario file</span></a>, you must refer to the <em>observations_path</em> to include these observations in the webviewer.</p>
 </section>
 </section>
 
@@ -188,7 +232,7 @@ where you can find historical wave buoy data. The following script converts the 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="addingmodels.html" class="btn btn-neutral float-left" title="Add models to the database" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="scenario.html" class="btn btn-neutral float-left" title="Setting up a scenario" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="superregions.html" class="btn btn-neutral float-right" title="Defining super regions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
