@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Add models &mdash; CoSMoS 0.1 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>Adding models to the database &mdash; CoSMoS 0.1 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -17,8 +17,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Scenario" href="scenario.html" />
-    <link rel="prev" title="Model components and methods" href="modelcomponents.html" /> 
+    <link rel="next" title="Setting up a scenario" href="scenario.html" />
+    <link rel="prev" title="Quickstart CoSMoS" href="quickstart.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -46,13 +46,15 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../usage.html">Getting started</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../manual.html">User manual</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="modelcomponents.html">Model components and methods</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Add models</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#model-components-1">Model components</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="scenario.html">Scenario</a></li>
-<li class="toctree-l2"><a class="reference internal" href="running.html">Running</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modelcomponents.html">Overview model components and folder structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html">Quickstart CoSMoS</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Adding models to the database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scenario.html">Setting up a scenario</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stations.html">Observation stations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="superregions.html">Defining super regions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meteo.html">Meteo collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="running.html">Running CoSMoS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html">CoSMoS output</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../functions.html">Functions</a></li>
@@ -73,7 +75,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../manual.html">User manual</a></li>
-      <li class="breadcrumb-item active">Add models</li>
+      <li class="breadcrumb-item active">Adding models to the database</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/manual/addingmodels.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -83,21 +85,87 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="add-models">
-<h1>Add models<a class="headerlink" href="#add-models" title="Permalink to this headline">¶</a></h1>
-<p>When add</p>
-<section id="model-components-1">
-<span id="model-components"></span><h2>Model components<a class="headerlink" href="#model-components-1" title="Permalink to this headline">¶</a></h2>
-<p>The following table provides an overview:</p>
-</section>
+  <section id="adding-models-to-the-database">
+<span id="models"></span><h1>Adding models to the database<a class="headerlink" href="#adding-models-to-the-database" title="Permalink to this headline">¶</a></h1>
+<p>The CoSMoS model database contains all model input files.
+CoSMoS automatically nests the models and collects the required meteorological data. Therefore, the model folders contain only the grid and input files for the individual models.
+A separate xml file describes, among other things, in which model it is nested and which meteo sources and observation stations are to be used:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">long_name</span> <span class="o">=</span> <span class="s2">&quot;HurryWave North Atlantic&quot;</span>
+<span class="nb">type</span> <span class="o">=</span> <span class="s2">&quot;hurrywave&quot;</span>
+<span class="n">crs</span> <span class="o">=</span> <span class="s2">&quot;WGS 84&quot;</span>
+<span class="n">flow_spinup_time</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">wave_spinup_time</span> <span class="o">=</span> <span class="mf">24.0</span>
+<span class="n">station</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;ndbc_buoys_all.xml&quot;</span><span class="p">,]</span>
+<span class="n">make_wave_map</span> <span class="o">=</span> <span class="n">true</span>
+</pre></div>
+</div>
+<p>Within CoSMoS, the name of your model is equal to the folder name in which the <em>model.toml</em> file is located
+(see also <a class="reference internal" href="modelcomponents.html#folder-structure"><span class="std std-ref">Folder structure</span></a>).</p>
+<p>The following settings can be included in the model file:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 70%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>longname</p></td>
+<td><p>Model long name</p></td>
+</tr>
+<tr class="row-even"><td><p>runid</p></td>
+<td><p>Model id used in CoSMoS</p></td>
+</tr>
+<tr class="row-odd"><td><p>type</p></td>
+<td><p>Model type (options: beware, delft3dfm, hurrywave, sfincs, xbeach)</p></td>
+</tr>
+<tr class="row-even"><td><p>coordsys</p></td>
+<td><p>Coordinate system</p></td>
+</tr>
+<tr class="row-odd"><td><p>coordsystype</p></td>
+<td><p>projected or geographic</p></td>
+</tr>
+<tr class="row-even"><td><p>priority</p></td>
+<td><p>Optional to define order in which models are run.</p></td>
+</tr>
+<tr class="row-odd"><td><p>wavenested</p></td>
+<td><p>Name of model in which current model is nested (waves)</p></td>
+</tr>
+<tr class="row-even"><td><p>flownested</p></td>
+<td><p>Name of model in which current model is nested (flow)</p></td>
+</tr>
+<tr class="row-odd"><td><p>wavespinup</p></td>
+<td><p>Spinup time (hours) (waves)</p></td>
+</tr>
+<tr class="row-even"><td><p>flowspinup</p></td>
+<td><p>Spinup time (hours) (flow)</p></td>
+</tr>
+<tr class="row-odd"><td><p>vertical_reference_level_name</p></td>
+<td><p>Name of vertical reference level</p></td>
+</tr>
+<tr class="row-even"><td><p>vertical_reference_level_difference_with_msl</p></td>
+<td><p>Difference of vertical reference level with MSL (m)</p></td>
+</tr>
+<tr class="row-odd"><td><p>station</p></td>
+<td><p>Station xml file (located in cosmos//stations) added as observation points in model.</p></td>
+</tr>
+<tr class="row-even"><td><p>make_wave_map</p></td>
+<td><p>Yes or no to make wave maps</p></td>
+</tr>
+<tr class="row-odd"><td><p>make_flood_map</p></td>
+<td><p>Yes or no to make flood maps</p></td>
+</tr>
+<tr class="row-even"><td><p>make_sedero_map</p></td>
+<td><p>Yes or no to make sedimentation/erosion maps</p></td>
+</tr>
+</tbody>
+</table>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="modelcomponents.html" class="btn btn-neutral float-left" title="Model components and methods" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="scenario.html" class="btn btn-neutral float-right" title="Scenario" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="quickstart.html" class="btn btn-neutral float-left" title="Quickstart CoSMoS" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="scenario.html" class="btn btn-neutral float-right" title="Setting up a scenario" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

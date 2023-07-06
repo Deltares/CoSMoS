@@ -85,6 +85,7 @@ class Model:
         See Also
         --------
         cosmos.cosmos_scenario.Scenario
+        cosmos.cosmos_model.ModelLoop
 
         """
         try:
@@ -337,7 +338,7 @@ class Model:
         return all_nested_models
         
     def add_stations(self, name):
-        """Add stations that are located in this model.
+        """Add stations that are located within this model.
         """
         wgs84 = CRS.from_epsg(4326)
         transformer = Transformer.from_crs(wgs84, self.crs, always_xy=True)

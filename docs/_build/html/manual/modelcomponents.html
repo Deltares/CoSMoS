@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Model components and folder structure &mdash; CoSMoS 0.1 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>Overview model components and folder structure &mdash; CoSMoS 0.1 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -17,7 +17,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Add models" href="addingmodels.html" />
+    <link rel="next" title="Quickstart CoSMoS" href="quickstart.html" />
     <link rel="prev" title="User manual" href="../manual.html" /> 
 </head>
 
@@ -46,16 +46,21 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../usage.html">Getting started</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../manual.html">User manual</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Model components and folder structure</a><ul>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Overview model components and folder structure</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#main-cosmos-components">Main CoSMoS components</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#cosmos-model-components">CoSMoS model components</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#additional-cosmos-classes">Additional CoSMoS classes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#cosmos-folder-structure">CoSMoS folder structure</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="addingmodels.html">Add models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="scenario.html">Scenario</a></li>
-<li class="toctree-l2"><a class="reference internal" href="running.html">Running</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html">Quickstart CoSMoS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="addingmodels.html">Adding models to the database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scenario.html">Setting up a scenario</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stations.html">Observation stations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="superregions.html">Defining super regions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meteo.html">Meteo collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="running.html">Running CoSMoS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html">CoSMoS output</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../functions.html">Functions</a></li>
@@ -76,7 +81,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../manual.html">User manual</a></li>
-      <li class="breadcrumb-item active">Model components and folder structure</li>
+      <li class="breadcrumb-item active">Overview model components and folder structure</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/manual/modelcomponents.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -86,89 +91,138 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="model-components-and-folder-structure">
-<h1>Model components and folder structure<a class="headerlink" href="#model-components-and-folder-structure" title="Permalink to this headline">¶</a></h1>
-<p>Figure 1 shows an overview of the main cosmos workflow. The main components of this workflow are elaborated below.</p>
+  <section id="overview-model-components-and-folder-structure">
+<h1>Overview model components and folder structure<a class="headerlink" href="#overview-model-components-and-folder-structure" title="Permalink to this headline">¶</a></h1>
+<p>CoSMoS (Coastal Storm Modelling System) is a Python-based model workflow engine for forecasting and hindcasting coastal hazards (storm surge, waves, coastal (compound) flooding and erosion).
+The CoSMoS system automatically nests models, downloads meteorological and observational data, post-processes model results and uploads them to a webviewer.
+Figure 1 shows a conceptual overview of the CoSMoS system.</p>
 <figure class="align-default" id="figure-1">
-<a class="reference internal image-reference" href="../_images/cosmos_workflow.png"><img alt="Alternative text" src="../_images/cosmos_workflow.png" style="width: 400px;" /></a>
+<a class="reference internal image-reference" href="../_images/conceptual_workflow.png"><img alt="Alternative text" src="../_images/conceptual_workflow.png" style="width: 800px;" /></a>
 <figcaption>
 <p><span class="caption-text">Figure 1: CoSMoS workflow</span><a class="headerlink" href="#figure-1" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>Figure 1 provides a detailed technical overview of the main CoSMoS workflow.
+It illustrates the interaction and execution sequence of the various CoSMoS scripts at a sub-function level.
+The diagram serves as resource for CoSMoS users and developers, providing insight into the specific functions executed in each script.
+The main model components are explained in the following sections.</p>
+<figure class="align-default" id="figure-2">
+<a class="reference internal image-reference" href="../_images/cosmos_workflow.png"><img alt="Alternative text" src="../_images/cosmos_workflow.png" style="width: 800px;" /></a>
+<figcaption>
+<p><span class="caption-text">Figure 2: CoSMoS workflow</span><a class="headerlink" href="#figure-2" title="Permalink to this image">¶</a></p>
 </figcaption>
 </figure>
 <section id="main-cosmos-components">
 <h2>Main CoSMoS components<a class="headerlink" href="#main-cosmos-components" title="Permalink to this headline">¶</a></h2>
 <p>The CoSMoS system consists of three main classes:</p>
 <p><strong>CoSMoS class</strong></p>
-<p>When CoSMoS is initialized with the (run_cosmos) script, input settings are passed to the CoSMoS class (<a class="reference internal" href="../_generated/cosmos.cosmos_main.CoSMoS.html#cosmos.cosmos_main.CoSMoS" title="cosmos.cosmos_main.CoSMoS"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_main.CoSMoS</span></code></a>).
-This class saves input settings to self.config, which can be accessed by other CoSMoS classes.
-The CoSMoS class starts the <a class="reference internal" href="../_generated/cosmos.cosmos_main_loop.MainLoop.html#cosmos.cosmos_main_loop.MainLoop" title="cosmos.cosmos_main_loop.MainLoop"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_main_loop.MainLoop</span></code></a>.</p>
+<p>CoSMoS is initialized with the <em>run_cosmos</em> (see <a class="reference internal" href="running.html#running"><span class="std std-ref">Running CoSMoS</span></a>) script, calling the main CoSMoS class (<a class="reference internal" href="../_generated/cosmos.cosmos_main.CoSMoS.html#cosmos.cosmos_main.CoSMoS" title="cosmos.cosmos_main.CoSMoS"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_main.CoSMoS</span></code></a>).
+This class saves input settings to <em>self.config</em>, which can be accessed by other CoSMoS classes. The CoSMoS class has three main options:</p>
+<ol class="arabic simple">
+<li><p>run (<a class="reference internal" href="../_generated/cosmos.cosmos_main.CoSMoS.run.html#cosmos.cosmos_main.CoSMoS.run" title="cosmos.cosmos_main.CoSMoS.run"><code class="xref py py-func docutils literal notranslate"><span class="pre">cosmos.cosmos_main.CoSMoS.run()</span></code></a>): The CoSMoS class starts the <a class="reference internal" href="../_generated/cosmos.cosmos_main_loop.MainLoop.html#cosmos.cosmos_main_loop.MainLoop" title="cosmos.cosmos_main_loop.MainLoop"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_main_loop.MainLoop</span></code></a>.</p></li>
+<li><p>post-process (<a class="reference internal" href="../_generated/cosmos.cosmos_main.CoSMoS.post_process.html#cosmos.cosmos_main.CoSMoS.post_process" title="cosmos.cosmos_main.CoSMoS.post_process"><code class="xref py py-func docutils literal notranslate"><span class="pre">cosmos.cosmos_main.CoSMoS.post_process()</span></code></a>): The CoSMoS class only starts post-processing (a selection of) finished models.</p></li>
+<li><p>make webviewer (<a class="reference internal" href="../_generated/cosmos.cosmos_main.CoSMoS.make_webviewer.html#cosmos.cosmos_main.CoSMoS.make_webviewer" title="cosmos.cosmos_main.CoSMoS.make_webviewer"><code class="xref py py-func docutils literal notranslate"><span class="pre">cosmos.cosmos_main.CoSMoS.make_webviewer()</span></code></a>): The CoSMoS class only makes the webviewer based on finished and post-processed models.</p></li>
+</ol>
 <p><strong>Main Loop</strong></p>
-<p>In the main loop (blue box in Figure 1, <a class="reference internal" href="../_generated/cosmos.cosmos_main_loop.MainLoop.html#cosmos.cosmos_main_loop.MainLoop" title="cosmos.cosmos_main_loop.MainLoop"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_main_loop.MainLoop</span></code></a>), the xml scenario file is read, cycle times are determined, meteo is downloaded,
-and the cosmos model loop (<a class="reference internal" href="../_generated/cosmos.cosmos_model_loop.ModelLoop.html#cosmos.cosmos_model_loop.ModelLoop" title="cosmos.cosmos_model_loop.ModelLoop"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_model_loop.ModelLoop</span></code></a>) is initiated with a scheduler. This scheduler starts the cosmos model loop based on the cycle time interval (forecast mode),
+<p>In the main loop (blue box in Figure 2, <a class="reference internal" href="../_generated/cosmos.cosmos_main_loop.MainLoop.html#cosmos.cosmos_main_loop.MainLoop" title="cosmos.cosmos_main_loop.MainLoop"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_main_loop.MainLoop</span></code></a>), the scenario file is read, cycle times are determined, meteo is downloaded,
+and the cosmos model loop (<a class="reference internal" href="../_generated/cosmos.cosmos_model_loop.ModelLoop.html#cosmos.cosmos_model_loop.ModelLoop" title="cosmos.cosmos_model_loop.ModelLoop"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_model_loop.ModelLoop</span></code></a>) is initiated with a scheduler.
+This scheduler starts the cosmos model loop based on the user-defined cycle time interval (forecast mode),
 or just once if ran in hindcast mode.</p>
 <p><strong>Model Loop</strong></p>
-<dl class="simple">
-<dt>In the model loop, all models are pre-processed, submitted, and post-processed. The model loop initiates itself every second, executing the following tasks:</dt><dd><ul class="simple">
-<li><p>Checking for finished simulations. If there are finished simulations, they are moved to the scenario folder.</p></li>
-<li><p>Making a waiting list of models to be run. The first model on the list is preprocessed and submitted.</p></li>
-<li><p>The finished model is post-processed.</p></li>
-<li><p>Checking if all models are finished. If all models are finished, the webviewer is initialized.</p></li>
+<p>In the model loop (red box in Figure 2, <a class="reference internal" href="../_generated/cosmos.cosmos_model_loop.ModelLoop.html#cosmos.cosmos_model_loop.ModelLoop" title="cosmos.cosmos_model_loop.ModelLoop"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_model_loop.ModelLoop</span></code></a>), all models are pre-processed, submitted, and post-processed. The model loop initiates itself every second, executing the following tasks:</p>
+<ul class="simple">
+<li><p>Step 1: Checking for finished simulations. If there are finished simulations, they are moved to the scenario output folder (see <a class="reference internal" href="output.html#output"><span class="std std-ref">Output</span></a>), by a model-specific class (see <a class="reference internal" href="#modelclasses"><span class="std std-ref">Model components</span></a>).</p></li>
+<li><p>Step 2: Making a waiting list of models to be executed. The first model on the list is preprocessed and submitted by the (<a class="reference internal" href="../_generated/cosmos.cosmos_model.Model.html#cosmos.cosmos_model.Model" title="cosmos.cosmos_model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_model.Model</span></code></a>) class and model-specific classes.</p></li>
+<li><p>Step 3: The finished model (from Step 1) is post-processed by model-specific classes.</p></li>
+<li><p>Step 4: Checking if all models are finished. If all models are finished, the webviewer is initialized.</p></li>
 </ul>
-</dd>
-</dl>
 </section>
 <section id="cosmos-model-components">
-<h2>CoSMoS model components<a class="headerlink" href="#cosmos-model-components" title="Permalink to this headline">¶</a></h2>
-<p>The three main classes described above use CoSMoS model classes to determine how to pre- and post-process the individual models.
-The (<a class="reference internal" href="../_generated/cosmos.cosmos_model.Model.html#cosmos.cosmos_model.Model" title="cosmos.cosmos_model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_model.Model</span></code></a>) reads generic input data from the model xml files, prepares model paths and submits jobs.
-The following classes read, write, and move model-specific data:
--   <a class="reference internal" href="../_generated/cosmos.cosmos_beware.CoSMoS_BEWARE.html#cosmos.cosmos_beware.CoSMoS_BEWARE" title="cosmos.cosmos_beware.CoSMoS_BEWARE"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_beware.CoSMoS_BEWARE</span></code></a>
--   <a class="reference internal" href="../_generated/cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.html#cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM" title="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM</span></code></a>
--   <a class="reference internal" href="../_generated/cosmos.cosmos_hurrywave.CoSMoS_HurryWave.html#cosmos.cosmos_hurrywave.CoSMoS_HurryWave" title="cosmos.cosmos_hurrywave.CoSMoS_HurryWave"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_hurrywave.CoSMoS_HurryWave</span></code></a>
--   <a class="reference internal" href="../_generated/cosmos.cosmos_sfincs.CoSMoS_SFINCS.html#cosmos.cosmos_sfincs.CoSMoS_SFINCS" title="cosmos.cosmos_sfincs.CoSMoS_SFINCS"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_sfincs.CoSMoS_SFINCS</span></code></a>
--   <a class="reference internal" href="../_generated/cosmos.cosmos_xbeach.CoSMoS_XBeach.html#cosmos.cosmos_xbeach.CoSMoS_XBeach" title="cosmos.cosmos_xbeach.CoSMoS_XBeach"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_xbeach.CoSMoS_XBeach</span></code></a></p>
+<span id="modelclasses"></span><h2>CoSMoS model components<a class="headerlink" href="#cosmos-model-components" title="Permalink to this headline">¶</a></h2>
+<p>The three main classes described above use generic and specific model classes to determine how to pre- and post-process the individual models.
+The (<a class="reference internal" href="../_generated/cosmos.cosmos_model.Model.html#cosmos.cosmos_model.Model" title="cosmos.cosmos_model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_model.Model</span></code></a>) reads generic input data from the model xml files (see <a class="reference internal" href="addingmodels.html#models"><span class="std std-ref">Models</span></a>), prepares model paths and submits jobs.</p>
+<p>The following classes read, write, and move model-specific data:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../_generated/cosmos.cosmos_beware.CoSMoS_BEWARE.html#cosmos.cosmos_beware.CoSMoS_BEWARE" title="cosmos.cosmos_beware.CoSMoS_BEWARE"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_beware.CoSMoS_BEWARE</span></code></a></p></li>
+<li><p><a class="reference internal" href="../_generated/cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.html#cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM" title="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM</span></code></a></p></li>
+<li><p><a class="reference internal" href="../_generated/cosmos.cosmos_hurrywave.CoSMoS_HurryWave.html#cosmos.cosmos_hurrywave.CoSMoS_HurryWave" title="cosmos.cosmos_hurrywave.CoSMoS_HurryWave"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_hurrywave.CoSMoS_HurryWave</span></code></a></p></li>
+<li><p><a class="reference internal" href="../_generated/cosmos.cosmos_sfincs.CoSMoS_SFINCS.html#cosmos.cosmos_sfincs.CoSMoS_SFINCS" title="cosmos.cosmos_sfincs.CoSMoS_SFINCS"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_sfincs.CoSMoS_SFINCS</span></code></a></p></li>
+<li><p><a class="reference internal" href="../_generated/cosmos.cosmos_xbeach.CoSMoS_XBeach.html#cosmos.cosmos_xbeach.CoSMoS_XBeach" title="cosmos.cosmos_xbeach.CoSMoS_XBeach"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_xbeach.CoSMoS_XBeach</span></code></a></p></li>
+</ul>
+<p>These model-specific classes execute the following tasks:</p>
+<ul class="simple">
+<li><p>Read the model input file.</p></li>
+<li><p>Extract wave and/or water level conditions from the model it is nested in, and write the forcing file for the current model.</p></li>
+<li><p>Write the model input file and meteo forcing.</p></li>
+<li><p>Add observation points for nested models and observation stations.</p></li>
+<li><p>Move the files from the job folder (where the model runs) to the scenario folder (see <a class="reference internal" href="#folder-structure"><span class="std std-ref">Folder structure</span></a>).</p></li>
+<li><p>Post-process model results: make (probabilistic) flood / wave map tiles and write (probabilistic) timeseries to csv files.</p></li>
+</ul>
 </section>
 <section id="additional-cosmos-classes">
 <h2>Additional CoSMoS classes<a class="headerlink" href="#additional-cosmos-classes" title="Permalink to this headline">¶</a></h2>
 <p>The following additional classes are used during the CoSMoS cycle:</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="../_generated/cosmos.cosmos_scenario.Scenario.html#cosmos.cosmos_scenario.Scenario" title="cosmos.cosmos_scenario.Scenario"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_scenario.Scenario</span></code></a></p></li>
-<li><p><a class="reference internal" href="../_generated/cosmos.cosmos_webviewer.WebViewer.html#cosmos.cosmos_webviewer.WebViewer" title="cosmos.cosmos_webviewer.WebViewer"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_webviewer.WebViewer</span></code></a></p></li>
-<li><p><a class="reference internal" href="../_generated/cosmos.cosmos_stations.Stations.html#cosmos.cosmos_stations.Stations" title="cosmos.cosmos_stations.Stations"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_stations.Stations</span></code></a></p></li>
-<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_meteo.Meteo</span></code></p></li>
-</ul>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 70%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/cosmos.cosmos_scenario.Scenario.html#cosmos.cosmos_scenario.Scenario" title="cosmos.cosmos_scenario.Scenario"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_scenario.Scenario</span></code></a></p></td>
+<td><p>Reads the scenario xml file and initializes the models.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/cosmos.cosmos_webviewer.WebViewer.html#cosmos.cosmos_webviewer.WebViewer" title="cosmos.cosmos_webviewer.WebViewer"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_webviewer.WebViewer</span></code></a></p></td>
+<td><p>Generates the webviewer</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/cosmos.cosmos_stations.Stations.html#cosmos.cosmos_stations.Stations" title="cosmos.cosmos_stations.Stations"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_stations.Stations</span></code></a></p></td>
+<td><p>Reads the observation stations.</p></td>
+</tr>
+</tbody>
+</table>
 </section>
 <section id="cosmos-folder-structure">
-<h2>CoSMoS folder structure<a class="headerlink" href="#cosmos-folder-structure" title="Permalink to this headline">¶</a></h2>
-<p>Example of cosmos folder structure (link to cosmos_run_folder)?</p>
-<div class="line-block">
-<div class="line">cosmos_run_folder</div>
-<div class="line">├── configurations</div>
-<div class="line">│   └── default.xml</div>
-<div class="line">├── exe</div>
-<div class="line">├── meteo</div>
-<div class="line">│   └── meteo_subsets.xml</div>
-<div class="line">├── models</div>
-<div class="line">│   ├── [region]</div>
-<div class="line">│       ├── [model_type]</div>
-<div class="line">│           ├── [model_name]</div>
-<div class="line">│               ├── input</div>
-<div class="line">│               ├── misc</div>
-<div class="line">│               └── [model_name.xml]</div>
-<div class="line">└── scenarios</div>
-<div class="line">│   ├── [scenario_name]</div>
-<div class="line">│       └── [scenario_name.xml]</div>
-<div class="line">└── stations</div>
-<div class="line">│   └── [station_name.xml]</div>
-<div class="line">└── super_regions</div>
-<div class="line">│   └── [superregion_name.xml]</div>
-<div class="line">└── templates</div>
-<div class="line">│   ├── webviewers</div>
-<div class="line">│       ├── [version_name]</div>
-<div class="line">└── run_cosmos.py</div>
-<div class="line"><br /></div>
-<div class="line"><br /></div>
-</div>
+<span id="folder-structure"></span><h2>CoSMoS folder structure<a class="headerlink" href="#cosmos-folder-structure" title="Permalink to this headline">¶</a></h2>
+<p>The CoSMoS run folder is organized as follows:</p>
+<pre class="literal-block">cosmos
+        cosmos_run_folder
+        ├── configuration
+                └── default.toml
+                ├── stations
+                        └── [station_name.xml]
+                ├── super_regions
+                        └── [superregion_name.xml]
+                ├── webviewer_templates
+        ├── jobs
+        ├── meteo
+                └── meteo_subsets.xml
+        ├── observations
+        ├── scenarios
+                ├── [scenario_name]
+                        └── scenario.toml
+
+        model
+        ├── [region]
+                ├── [model_type]
+                        ├── [model_name]
+                                ├── input
+                                ├── misc
+                                ├── setup
+                                ├── tiling                              
+                                └── model.toml
+                                
+        └── run_cosmos.py</pre>
+<ul class="simple">
+<li><p>configurations\default.xml contains the paths to the model executables.</p></li>
+<li><p>exe\ can contain your model executables listed in default.xml.</p></li>
+<li><p>jobs\ is the folder where models run.</p></li>
+<li><p>meteo\meteo_subsets.xml contains the meteo sources (see <a class="reference internal" href="meteo.html#meteo"><span class="std std-ref">Meteo</span></a>).</p></li>
+<li><p>models\ contains the individual model input files and xml description (see <a class="reference internal" href="addingmodels.html#models"><span class="std std-ref">Models</span></a>).</p></li>
+<li><p>scenarios\ contains the model scenario input file and folders where all model results are stored (see <a class="reference internal" href="scenario.html#scenario"><span class="std std-ref">Scenario</span></a>).</p></li>
+<li><p>stations\ contains the station xml files with observation station locations (see <a class="reference internal" href="stations.html#stations"><span class="std std-ref">Observation stations</span></a>).</p></li>
+<li><p>super_regions\ contains super region files in which models can be grouped (see <a class="reference internal" href="superregions.html#super-regions"><span class="std std-ref">Super regions</span></a>).</p></li>
+<li><p>templates\ contains webviewer templates that can be used for viewing CoSMoS model outputs (see <a class="reference internal" href="output.html#webviewer"><span class="std std-ref">Webviewer</span></a>).</p></li>
+<li><p>run_cosmos.py contains an example of how to run CoSMoS (see <a class="reference internal" href="running.html#running"><span class="std std-ref">Running CoSMoS</span></a>).</p></li>
+</ul>
 </section>
 </section>
 
@@ -177,7 +231,7 @@ The following classes read, write, and move model-specific data:
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../manual.html" class="btn btn-neutral float-left" title="User manual" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="addingmodels.html" class="btn btn-neutral float-right" title="Add models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="quickstart.html" class="btn btn-neutral float-right" title="Quickstart CoSMoS" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

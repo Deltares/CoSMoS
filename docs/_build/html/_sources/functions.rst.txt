@@ -33,11 +33,8 @@ Classes for pre-processing, running, and post-processing.
    :toctree: _generated/  
 
    cosmos.cosmos_cluster.Cluster
-   cosmos.cosmos_meteo.Meteo
-   cosmos.cosmos_run_parallel.CosmosRunParallel
    cosmos.cosmos_stations.Stations
    cosmos.cosmos_webviewer.WebViewer
-   cosmos.cosmos_ww3.CoSMoS_WW3
 
 CoSMoS functions
 ^^^^^^^^^^^^
@@ -87,3 +84,4 @@ Model functions
    cosmos.cosmos_xbeach.CoSMoS_XBeach.pre_process
    cosmos.cosmos_xbeach.CoSMoS_XBeach.move
    cosmos.cosmos_xbeach.CoSMoS_XBeach.post_process
+

@@ -29,6 +29,8 @@ class CoSMoS_BEWARE(Model):
 
     BEWARE is a meta-model based on XBeach for predicting nearshore wave heights and total water levels at reef-lined coasts.
 
+    This cosmos class reads BEWARE model data, pre-processes, moves and post-processes BEWARE models.
+
     Parameters
     ----------
     Model : class
@@ -36,11 +38,12 @@ class CoSMoS_BEWARE(Model):
 
     See Also
     ----------
-    cosmos.cosmos_model_loop: invokes current class
-    cosmos.cosmos_model: function call
+    cosmos.cosmos_scenario.Scenario
+    cosmos.cosmos_model_loop.ModelLoop
+    cosmos.cosmos_model.Model
     """    
     def read_model_specific(self):
-        """Read BEWARE specific model attributes
+        """Read BEWARE specific model attributes.
 
         See Also
         ----------
@@ -60,14 +63,17 @@ class CoSMoS_BEWARE(Model):
         self.domain.runid = self.runid
 
     def pre_process(self):
-        """Preprocess BEWARE model: write wave and water level conditions, input file, run.bat
+        """Preprocess BEWARE model.
+        - Extract and write wave and water level conditions.
+        - Write input file. 
+        - Optional: make ensemble of models.
+
 
         See Also
         ----------
         cht.nesting.nest2
         
         """   
-        # First generate input that is identical for all members
         
         # Set path temporarily to job path
         pth = self.domain.path
@@ -119,18 +125,6 @@ class CoSMoS_BEWARE(Model):
         # Now write input file (sfincs.inp)
         self.domain.write_input_file()
 
-        # Make inp file
-        #inp_file = os.path.join(self.job_path, "beware.inp")
-        #with open(inp_file,'w') as fid:
-#       #     fid.write(f'folder   = {self.job_path} \n')
-        #    fid.write(f'tref     = {self.domain.input.tref.strftime("%Y%m%d %H%M%S")} \n')
-        #    fid.write(f'tstart   = {self.domain.input.tstart.strftime("%Y%m%d %H%M%S")} \n')
-        #    fid.write(f'tstop    = {self.domain.input.tstop.strftime("%Y%m%d %H%M%S")} \n')
-        #    fid.write(f'dT       = {self.domain.input.dT} \n')
-        #    fid.write(f'runup    = {self.domain.input.runup} \n')
-        #    fid.write(f'flooding = {self.domain.input.flooding} \n')
-        #fid.close()
-
         # Make run batch file
         src = os.path.join(cosmos.config.beware_exe_path, "run_bw.bas")
         batch_file = os.path.join(self.job_path, "run.bat")
@@ -138,17 +132,6 @@ class CoSMoS_BEWARE(Model):
         shutil.copyfile(src, batch_file)
         # findreplace(batch_file, "DISKKEY", 'P')
         findreplace(batch_file, "EXEPATHKEY", cosmos.config.beware_exe_path)
-#        findreplace(batch_file, "RUNPATHKEY", self.job_path)
-#         fid = open(batch_file, "w")
-#         fid.write("@ echo off\n")
-#         fid.write("DATE /T > running.txt\n")
-#         exe_path = os.path.join(cosmos.config.beware_exe_path, "run_beware.py")
-#         fid.write(exe_path + "\n")
-# #        fid.write("d:\\checkouts\\SFINCS\\branches\\subgrid_openacc_12_wavemaker\\sfincs\\x64\\Release\\sfincs.exe\n")
-#         fid.write("move " + os.path.join(cosmos.config.beware_exe_path, "beware.inp") + " " +  os.path.join(self.domain.path, "beware.inp") + " \n")
-#         fid.write("move running.txt finished.txt\n")
-# #        fid.write("exit\n")
-#         fid.close()
 
         if cosmos.scenario.track_ensemble and self.ensemble:
             profsfile = self.domain.input.profsfile
@@ -223,7 +206,7 @@ class CoSMoS_BEWARE(Model):
 
         
     def move(self):
-        """Move BEWARE model input and output files
+        """Move BEWARE model input and output files.
         """        
         # Move files from job folder to archive folder
         
@@ -254,7 +237,7 @@ class CoSMoS_BEWARE(Model):
                     pass
 
     def post_process(self):
-        """Post-process BEWARE output
+        """Post-process BEWARE output: generate (probabilistic) runup timeseries.
         
         See Also
         ----------
@@ -272,7 +255,7 @@ class CoSMoS_BEWARE(Model):
             
             # Make probabilistic runup timeseries
             file_list= fo.list_files(os.path.join(output_path, "beware_his_*"))
-            prcs= [0.05, 0.5, 0.95] #np.concatenate((np.arange(0, 0.9, 0.1), np.arange(0.9, 1, 0.01)))
+            prcs= [5, 50, 95]
             vars= ["R2_tot", "R2_set", "WL"]
             output_file_name = os.path.join(output_path, "beware_his_ensemble.nc")
             pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)

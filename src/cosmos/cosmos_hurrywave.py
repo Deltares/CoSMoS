@@ -20,9 +20,33 @@ import cht.misc.fileops as fo
 import cht.nesting.nesting as nesting
 
 class CoSMoS_HurryWave(Model):
+    """Cosmos class for HurryWave model.
+
+    HurryWave is a computationally efficient third generation spectral wave model, with physics similar to 
+    those of SWAN and WAVEWATCH III.
+
+    This cosmos class reads HurryWave model data, pre-processes, moves and post-processes HurryWave models.
+
+    Parameters
+    ----------
+    Model : class
+        Generic cosmos model attributes
+
+    See Also
+    ----------
+    cosmos.cosmos_scenario.Scenario
+    cosmos.cosmos_model_loop.ModelLoop
+    cosmos.cosmos_model.Model
+    """    
     
     def read_model_specific(self):
-        
+        """Read HurryWave specific model attributes.
+
+        See Also
+        ----------
+        cht.hurrywave.hurrywave
+
+        """ 
         # Read in the HurryWave model
         
         # Now read in the domain data
@@ -35,7 +59,18 @@ class CoSMoS_HurryWave(Model):
         self.domain.runid = self.runid        
         
     def pre_process(self):
+        """Preprocess HurryWave model.
+        - Extract and write wave conditions.
+        - Write input file. 
+        - Write meteo forcing.
+        - Add observation points for nested models and observation stations.
+        - Optional: make ensemble of models.
+
+        See Also
+        ----------
+        cht.nesting.nest2
         
+        """
         # Set path temporarily to job path
         pth = self.domain.path
         self.domain.path = self.job_path
@@ -222,7 +257,8 @@ class CoSMoS_HurryWave(Model):
         self.domain.path = pth
 
     def move(self):
-        
+        """Move HurryWave model input, output, and restart files.
+        """   
         # Move files from job folder to archive folder
         
         # First clear archive folder      
@@ -274,6 +310,8 @@ class CoSMoS_HurryWave(Model):
 
 
     def post_process(self):
+        """Post-process HurryWave output: generate (probabilistic) wave timeseries and maps.        
+        """      
         import xarray as xr
         import numpy as np
         import cht.misc.prob_maps as pm
@@ -292,17 +330,16 @@ class CoSMoS_HurryWave(Model):
             
             # Make probabilistic flood maps
             file_list= fo.list_files(os.path.join(output_path, "hurrywave_map_*"))
-            prcs= np.concatenate((np.arange(0, 0.9, 0.05), np.arange(0.9, 1, 0.01)))
+            prcs= [5, 50, 95] 
             vars= ["hm0", "tp"]
             output_file_name = os.path.join(output_path, "hurrywave_map_ensemble.nc")
-            #pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
+            # pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
 
             # Make probabilistic wave timeseries
             file_list= fo.list_files(os.path.join(output_path, "hurrywave_his_*"))
-            prcs= [0.05, 0.5, 0.95]#np.concatenate((np.arange(0, 0.9, 0.05), np.arange(0.9, 1, 0.01)))
             vars= ["point_hm0", "point_tp"]
             output_file_name = os.path.join(output_path, "hurrywave_his_ensemble.nc")
-            pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
+            # pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
 
         if self.station:
 
@@ -318,14 +355,15 @@ class CoSMoS_HurryWave(Model):
                 df["Hm0"]=vhm0[station.name]
                 df["Tp"]=vtp[station.name]
 
-                if cosmos.scenario.track_ensemble and self.ensemble:
+                nc_file= os.path.join(output_path, "hurrywave_his_ensemble.nc")
+                if cosmos.scenario.track_ensemble and self.ensemble and os.path.isfile(nc_file):
                     for i,v in enumerate(prcs):
                         vhm0 = self.domain.read_timeseries_output(path=output_path,
                                             file_name= "hurrywave_his_ensemble.nc",
-                                            parameter= "hm0_" + str(round(v*100)))
+                                            parameter= "hm0_" + str(round(v)))
                         vtp  = self.domain.read_timeseries_output(path=output_path,
                                             file_name= "hurrywave_his_ensemble.nc",
-                                            parameter="tp_"+ str(round(v*100)))
+                                            parameter="tp_"+ str(round(v)))
                         df["Hm0_" + str(round(v*100))]=vhm0[station.name]
                         df["Tp_" + str(round(v*100))]=vtp[station.name]
 
@@ -376,19 +414,19 @@ class CoSMoS_HurryWave(Model):
                 # Wave map over dt-hour increments                    
                 for it, t in enumerate(requested_times):
                     hm0max = self.domain.read_hm0max(hm0max_file=file_name,
-                                                      time_range=[t - dt + dt1, t + dt1])                        
+                                                      time_range=[t - dt + dt1, t + dt1])         
                     hm0_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
                                                 "hm0",
                                                 pathstr[it])                        
-                    make_wave_map_tiles(hm0max, index_path, hm0_map_path, contour_set)
+                    make_wave_map_tiles(np.transpose(hm0max), index_path, hm0_map_path, contour_set)
 
                 # Full simulation        
                 hm0_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
                                             "hm0",
                                             pathstr[-1])                    
                 hm0max = self.domain.read_hm0max(hm0max_file=file_name,
-                                                  time_range=[t0, t1 + dt1])        
-                make_wave_map_tiles(hm0max, index_path, hm0_map_path, contour_set)
+                                                  time_range=[t0, t1 + dt1])       
+                make_wave_map_tiles(np.transpose(hm0max), index_path, hm0_map_path, contour_set)
 
 
 

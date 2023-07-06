@@ -158,6 +158,7 @@
 <span class="sd">        See Also</span>
 <span class="sd">        --------</span>
 <span class="sd">        cosmos.cosmos_scenario.Scenario</span>
+<span class="sd">        cosmos.cosmos_model.ModelLoop</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
@@ -410,7 +411,7 @@
         <span class="k">return</span> <span class="n">all_nested_models</span>
         
     <span class="k">def</span> <span class="nf">add_stations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Add stations that are located in this model.</span>
+        <span class="sd">&quot;&quot;&quot;Add stations that are located within this model.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">wgs84</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_epsg</span><span class="p">(</span><span class="mi">4326</span><span class="p">)</span>
         <span class="n">transformer</span> <span class="o">=</span> <span class="n">Transformer</span><span class="o">.</span><span class="n">from_crs</span><span class="p">(</span><span class="n">wgs84</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">always_xy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>

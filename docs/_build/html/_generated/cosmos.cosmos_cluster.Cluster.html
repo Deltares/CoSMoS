@@ -17,7 +17,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="cosmos.cosmos_run_parallel.CosmosRunParallel" href="cosmos.cosmos_run_parallel.CosmosRunParallel.html" />
+    <link rel="next" title="cosmos.cosmos_stations.Stations" href="cosmos.cosmos_stations.Stations.html" />
     <link rel="prev" title="cosmos.cosmos_xbeach.CoSMoS_XBeach" href="cosmos.cosmos_xbeach.CoSMoS_XBeach.html" /> 
 </head>
 
@@ -51,10 +51,8 @@
 <li class="toctree-l2"><a class="reference internal" href="../functions.html#model-classes">Model classes</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../functions.html#additional-classes">Additional classes</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">cosmos.cosmos_cluster.Cluster</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_run_parallel.CosmosRunParallel.html">cosmos.cosmos_run_parallel.CosmosRunParallel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_stations.Stations.html">cosmos.cosmos_stations.Stations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_webviewer.WebViewer.html">cosmos.cosmos_webviewer.WebViewer</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_ww3.CoSMoS_WW3.html">cosmos.cosmos_ww3.CoSMoS_WW3</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../functions.html#cosmos-functions">CoSMoS functions</a></li>
@@ -94,20 +92,25 @@
 <dl class="py class">
 <dt id="cosmos.cosmos_cluster.Cluster">
 <em class="property">class </em><code class="sig-prename descclassname">cosmos.cosmos_cluster.</code><code class="sig-name descname">Cluster</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmos/cosmos_cluster.html#Cluster"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cosmos.cosmos_cluster.Cluster" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
+<dd><p>Conditionally run models.</p>
+<p>Conditions:
+1. topn: sort models by boundary total water level and only simulate the Top N (keyword: topn) models.
+2. threshold: only run model if boundary total water level exceeds a threshold (keyword: boundary_twl_treshold).
+3. ensemble_threshold : always run model for “best track”, but ensemble only if boundary threshold (keyword: boundary_twl_treshold) is exceeded.</p>
+<dl class="py method">
 <dt id="cosmos.cosmos_cluster.Cluster.__init__">
 <code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmos/cosmos_cluster.html#Cluster.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cosmos.cosmos_cluster.Cluster.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+<dd><p>Initialize cluster class.</p>
 </dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#cosmos.cosmos_cluster.Cluster.__init__" title="cosmos.cosmos_cluster.Cluster.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(name)</p></td>
-<td><p>Initialize self.</p></td>
+<td><p>Initialize cluster class.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_model</span></code>(model)</p></td>
-<td><p></p></td>
+<td><p>Add model to cluster.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_ready_to_run</span></code>()</p></td>
 <td><p></p></td>
@@ -123,7 +126,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="cosmos.cosmos_xbeach.CoSMoS_XBeach.html" class="btn btn-neutral float-left" title="cosmos.cosmos_xbeach.CoSMoS_XBeach" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="cosmos.cosmos_run_parallel.CosmosRunParallel.html" class="btn btn-neutral float-right" title="cosmos.cosmos_run_parallel.CosmosRunParallel" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="cosmos.cosmos_stations.Stations.html" class="btn btn-neutral float-right" title="cosmos.cosmos_stations.Stations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

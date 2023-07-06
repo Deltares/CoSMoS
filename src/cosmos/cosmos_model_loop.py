@@ -57,12 +57,12 @@ class ModelLoop():
             self.scheduler.run()
 
     def stop(self):
-        """Stop cosmos_model_loop
+        """Stop cosmos_model_loop.
         """
         self.scheduler.cancel()
 
     def run(self):
-        """ Run all cosmos models defined in the scenario file
+        """ Run all cosmos models defined in the scenario file.
 
         - Check for finished simulations and move them to scenario folder
         - Make waiting list, preprocess and submit these models

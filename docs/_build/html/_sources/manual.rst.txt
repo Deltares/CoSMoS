@@ -12,9 +12,14 @@ With the **CoSMoS** system, users can automatically integrate, pre-process, run,
    :hidden:
 
    manual/modelcomponents.rst
+   manual/quickstart.rst
    manual/addingmodels.rst
    manual/scenario.rst
+   manual/stations.rst
+   manual/superregions.rst
+   manual/meteo.rst
    manual/running.rst
+   manual/output.rst
 
 .. First section
 .. ------------

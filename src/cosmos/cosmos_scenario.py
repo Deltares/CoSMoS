@@ -14,8 +14,23 @@ from cht.misc import fileops as fo
 from cht.misc import xmlkit as xml
 
 class Scenario:
-    
+    """Scenario class to read scenario file and initialize models. 
+
+    See Also
+    ----------
+    cosmos.cosmos_main_loop.MainLoop
+    cosmos.cosmos_model_loop.ModelLoop
+    cosmos.cosmos_model.Model
+
+    """  
     def __init__(self, name):
+        """Initialize cosmos scenario.
+
+        Parameters
+        ----------
+        name : str
+            Name of scenario to be executed.
+        """        
 
         self.name          = name
         self.model         = []
@@ -31,7 +46,9 @@ class Scenario:
         self.restart_path  = None
         
     def read(self):
-        
+        """Read scenario file, set model paths and settings, initialize and read model data. Potentially cluster models and
+        generate cyclone (ensemble) tracks.
+        """        
         # Set paths
         self.cycle_path            = os.path.join(self.path, cosmos.cycle_string)
         self.cycle_models_path     = os.path.join(self.path, cosmos.cycle_string, "models")
@@ -441,7 +458,23 @@ class Scenario:
                         cl.add_model(model)
                     
                 cluster_dict[name] = cl                
-         
+
+        ## Spiderweb generation
+        if scn_meteo_spiderweb:
+            spwfile = os.path.join(cosmos.config.main_path,
+                                            "meteo",
+                                            "spiderwebs",
+                                            scn_meteo_spiderweb)
+            if not os.path.isfile(spwfile):
+                from cht.tropical_cyclone.tropical_cyclone import TropicalCyclone
+                tc= TropicalCyclone()
+                try:
+                    tc.from_ddb_cyc(spwfile.split('.')[0] + '.cyc')
+                    tc.include_rainfall = True
+                    tc.to_spiderweb(filename = spwfile)
+                except:
+                    pass
+
         ### Ensemble
 
         if hasattr(xml_obj, "track_ensemble"):

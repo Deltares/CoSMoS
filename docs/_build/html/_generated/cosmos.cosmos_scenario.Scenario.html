@@ -94,20 +94,30 @@
 <dl class="py class">
 <dt id="cosmos.cosmos_scenario.Scenario">
 <em class="property">class </em><code class="sig-prename descclassname">cosmos.cosmos_scenario.</code><code class="sig-name descname">Scenario</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmos/cosmos_scenario.html#Scenario"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cosmos.cosmos_scenario.Scenario" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
+<dd><p>Scenario class to read scenario file and initialize models.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="cosmos.cosmos_main_loop.MainLoop.html#cosmos.cosmos_main_loop.MainLoop" title="cosmos.cosmos_main_loop.MainLoop"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_main_loop.MainLoop</span></code></a>, <a class="reference internal" href="cosmos.cosmos_model_loop.ModelLoop.html#cosmos.cosmos_model_loop.ModelLoop" title="cosmos.cosmos_model_loop.ModelLoop"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_model_loop.ModelLoop</span></code></a>, <a class="reference internal" href="cosmos.cosmos_model.Model.html#cosmos.cosmos_model.Model" title="cosmos.cosmos_model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_model.Model</span></code></a></p>
+</aside>
+<dl class="py method">
 <dt id="cosmos.cosmos_scenario.Scenario.__init__">
 <code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmos/cosmos_scenario.html#Scenario.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cosmos.cosmos_scenario.Scenario.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+<dd><p>Initialize cosmos scenario.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – Name of scenario to be executed.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#cosmos.cosmos_scenario.Scenario.__init__" title="cosmos.cosmos_scenario.Scenario.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(name)</p></td>
-<td><p>Initialize self.</p></td>
+<td><p>Initialize cosmos scenario.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code>()</p></td>
-<td><p></p></td>
+<td><p>Read scenario file, set model paths and settings, initialize and read model data.</p></td>
 </tr>
 </tbody>
 </table>

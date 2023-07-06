@@ -28,9 +28,32 @@ from cht.nesting.nest2 import nest2
 
 
 class CoSMoS_SFINCS(Model):
-    
+    """Cosmos class for SFINCS model.
+
+    SFINCS (Super-Fast Inundation of CoastS) is a reduced-complexity model capable of simulating compound flooding 
+    with a high computational efficiency balanced with an adequate accuracy (see also https://sfincs.readthedocs.io/en/latest/).
+
+    This cosmos class reads SFINCS  model data, pre-processes, moves and post-processes SFINCS models.
+
+    Parameters
+    ----------
+    Model : class
+        Generic cosmos model attributes
+
+    See Also
+    ----------
+    cosmos.cosmos_scenario.Scenario
+    cosmos.cosmos_model_loop.ModelLoop
+    cosmos.cosmos_model.Model
+    """        
     def read_model_specific(self):
-        
+        """Read SFINCS specific model attributes.
+
+        See Also
+        ----------
+        cht.sfincs.sfincs
+
+        """         
         # Read in the SFINCS model
         
         # First set some defaults
@@ -52,7 +75,18 @@ class CoSMoS_SFINCS(Model):
         
         
     def pre_process(self):
-                       
+        """Preprocess SFINCS model.
+        - Extract and write water level and wave conditions.
+        - Write input file. 
+        - Write meteo forcing.
+        - Add observation points for nested models and observation stations.
+        - Optional: make ensemble of models.
+
+        See Also
+        ----------
+        cht.nesting.nest2
+        
+        """
         # Set path temporarily to job path
         pth = self.domain.path
         self.domain.path = self.job_path
@@ -454,7 +488,8 @@ class CoSMoS_SFINCS(Model):
         self.domain.path = pth
 
     def move(self):
-        
+        """Move SFINCS model input, output, and restart files.
+        """   
         # output_path = self.cycle_output_path
         # input_path  = self.cycle_input_path
         
@@ -496,6 +531,8 @@ class CoSMoS_SFINCS(Model):
                     pass
         
     def post_process(self):
+        """Post-process SFINCS output: generate (probabilistic) water level timeseries and flood maps.        
+        """
         import cht.misc.prob_maps as pm
 
         # Extract water levels
@@ -510,10 +547,10 @@ class CoSMoS_SFINCS(Model):
             if cosmos.scenario.track_ensemble and self.ensemble:
                 # Make probabilistic water level timeseries
                 file_list= fo.list_files(os.path.join(output_path, "sfincs_his_*"))
-                prcs=  [0.05, 0.5, 0.95]
+                prcs= [5, 50, 95] 
                 vars= ["point_zs"]
                 output_file_name = os.path.join(output_path, "sfincs_his_ensemble.nc")
-                pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
+                # pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
 
             if self.domain.input.outputformat=="bin":
                 nc_file = os.path.join(output_path, "zst.txt")
@@ -532,8 +569,8 @@ class CoSMoS_SFINCS(Model):
                 df['wl']= v[station.name]                          
                 df['wl'] = df['wl'] + station.water_level_correction
 
-                if cosmos.scenario.track_ensemble and self.ensemble:
-                   nc_file = os.path.join(output_path, "sfincs_his_ensemble.nc")
+                nc_file = os.path.join(output_path, "sfincs_his_ensemble.nc")
+                if cosmos.scenario.track_ensemble and self.ensemble and os.path.isfile(nc_file):
                    for ii,vv in enumerate(prcs):
                        tmp = self.domain.read_timeseries_output(name_list = name_list, file_name=nc_file, parameter = "point_zs_" + str(round(vv*100)))
                        df["wl_" + str(round(vv*100))]=tmp[station.name]
@@ -552,10 +589,10 @@ class CoSMoS_SFINCS(Model):
             if cosmos.scenario.track_ensemble and self.ensemble:
                 # Make probabilistic flood maps
                 file_list= fo.list_files(os.path.join(output_path, "sfincs_map_*"))
-                prcs= [0.05, 0.5, 0.95]#np.concatenate((np.arange(0, 0.9, 0.05), np.arange(0.9, 1, 0.01)))            
+                prcs= [5, 50, 95]#np.concatenate((np.arange(0, 0.9, 0.05), np.arange(0.9, 1, 0.01)))            
                 vars= ["zs", "zsmax"]
                 output_file_name = os.path.join(output_path, "sfincs_map_ensemble.nc")
-                pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
+                # pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
 
             flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
                                           "flood_map")
@@ -611,8 +648,8 @@ class CoSMoS_SFINCS(Model):
                     make_flood_map_tiles(zsmax, index_path, topo_path, flood_map_path,
                                          water_level_correction=0.0)
 
-                    if cosmos.scenario.track_ensemble and self.ensemble:
-                        zsmax_file = os.path.join(output_path, "sfincs_map_ensemble.nc")
+                    zsmax_file = os.path.join(output_path, "sfincs_map_ensemble.nc")
+                    if cosmos.scenario.track_ensemble and self.ensemble and os.path.isfile(zsmax_file):
                         # Full simulation        
                         flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
                                                     "flood_map", 

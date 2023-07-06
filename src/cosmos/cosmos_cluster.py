@@ -14,14 +14,23 @@ from .cosmos_main import cosmos
 import cht.nesting.nesting as nesting
 
 class Cluster:
+    """Conditionally run models.
+
+    Conditions:
+    1. topn: sort models by boundary total water level and only simulate the Top N (keyword: topn) models.
+    2. threshold: only run model if boundary total water level exceeds a threshold (keyword: boundary_twl_treshold).
+    3. ensemble_threshold : always run model for "best track", but ensemble only if boundary threshold (keyword: boundary_twl_treshold) is exceeded.
+
+    """    
     # Run condition can be "topn", "threshold", and "ensemble_threshold"    
     # 3 run condition options:
-    # 1) topn      : sort models by boundary twl and only simulate Top N    
+    # 1) topn      : sort models by boundary twl and only simulate Top N 
     # 2) threshold : only run model is boundary twl exceeds threshold
-    # 3) ensemble_threshold : always run model for "best track", but ensemble only if boundary threshold is exceeded
+    # 3) ensemble_threshold: always run model for "best track", but ensemble only if boundary threshold is exceeded
 
     def __init__(self, name):
-        
+        """Initialize cluster class.
+        """        
         self.name                = name
         self.topn                = 10
         self.hm0fac              = 0.2
@@ -31,7 +40,14 @@ class Cluster:
         self.model               = {}
         self.ready               = True
         
-    def add_model(self, model):        
+    def add_model(self, model):       
+        """Add model to cluster.
+
+        Parameters
+        ----------
+        model : CoSMoS model class
+            Model to be added to cluster.
+        """         
         self.model[model.name] = model
         model.cluster = self.name
         

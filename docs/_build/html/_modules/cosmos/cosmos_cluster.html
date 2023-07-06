@@ -87,14 +87,23 @@
 <span class="kn">import</span> <span class="nn">cht.nesting.nesting</span> <span class="k">as</span> <span class="nn">nesting</span>
 
 <div class="viewcode-block" id="Cluster"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_cluster.Cluster.html#cosmos.cosmos_cluster.Cluster">[docs]</a><span class="k">class</span> <span class="nc">Cluster</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Conditionally run models.</span>
+
+<span class="sd">    Conditions:</span>
+<span class="sd">    1. topn: sort models by boundary total water level and only simulate the Top N (keyword: topn) models.</span>
+<span class="sd">    2. threshold: only run model if boundary total water level exceeds a threshold (keyword: boundary_twl_treshold).</span>
+<span class="sd">    3. ensemble_threshold : always run model for &quot;best track&quot;, but ensemble only if boundary threshold (keyword: boundary_twl_treshold) is exceeded.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>    
     <span class="c1"># Run condition can be &quot;topn&quot;, &quot;threshold&quot;, and &quot;ensemble_threshold&quot;    </span>
     <span class="c1"># 3 run condition options:</span>
-    <span class="c1"># 1) topn      : sort models by boundary twl and only simulate Top N    </span>
+    <span class="c1"># 1) topn      : sort models by boundary twl and only simulate Top N </span>
     <span class="c1"># 2) threshold : only run model is boundary twl exceeds threshold</span>
-    <span class="c1"># 3) ensemble_threshold : always run model for &quot;best track&quot;, but ensemble only if boundary threshold is exceeded</span>
+    <span class="c1"># 3) ensemble_threshold: always run model for &quot;best track&quot;, but ensemble only if boundary threshold is exceeded</span>
 
 <div class="viewcode-block" id="Cluster.__init__"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_cluster.Cluster.html#cosmos.cosmos_cluster.Cluster.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        
+        <span class="sd">&quot;&quot;&quot;Initialize cluster class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span>                <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">topn</span>                <span class="o">=</span> <span class="mi">10</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hm0fac</span>              <span class="o">=</span> <span class="mf">0.2</span>
@@ -104,7 +113,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span>               <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ready</span>               <span class="o">=</span> <span class="kc">True</span></div>
         
-    <span class="k">def</span> <span class="nf">add_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>        
+    <span class="k">def</span> <span class="nf">add_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>       
+        <span class="sd">&quot;&quot;&quot;Add model to cluster.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : CoSMoS model class</span>
+<span class="sd">            Model to be added to cluster.</span>
+<span class="sd">        &quot;&quot;&quot;</span>         
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span>
         <span class="n">model</span><span class="o">.</span><span class="n">cluster</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
         

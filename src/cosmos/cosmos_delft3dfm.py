@@ -23,9 +23,33 @@ import cosmos.cosmos_meteo as meteo
 from cht.misc.misc_tools import findreplace
 
 class CoSMoS_Delft3DFM(Model):
+    """Cosmos class for Delft3d FM model.
+
+    Delft3D FM is a hydrodynamic and morphodynamic numerical model used for simulating and predicting water flow, sediment transport, 
+    and morphological changes in rivers, estuaries, coasts, and oceans (see also https://oss.deltares.nl/web/delft3dfm).
+
+    This cosmos class reads Delft3D FM model data, pre-processes, moves and post-processes Delft3D FM models.
+
+    Parameters
+    ----------
+    Model : class
+        Generic cosmos model attributes
+
+    See Also
+    ----------
+    cosmos.cosmos_scenario.Scenario
+    cosmos.cosmos_model_loop.ModelLoop
+    cosmos.cosmos_model.Model
+    """    
     
     def read_model_specific(self):
-        
+        """Read Delft3D FM specific model attributes.
+
+        See Also
+        ----------
+        cht.delft3dfm.delft3dfm
+
+        """   
         # First set some defaults
 #        self.flow_spinup_time = 0.0
         
@@ -51,7 +75,17 @@ class CoSMoS_Delft3DFM(Model):
         self.domain.runid = self.runid        
         
     def pre_process(self):
+        """Preprocess Delft3D FM model.
+        - Extract and write wave and water level conditions.
+        - Write input file. 
+        - Write meteo forcing.
+        - Add observation points for nested models and observation stations.
+
+        See Also
+        ----------
+        cht.nesting.nest2
         
+        """   
         # Set path temporarily to job path
 #        pth = self.domain.path
         
@@ -196,7 +230,8 @@ class CoSMoS_Delft3DFM(Model):
 #        self.domain.path = pth
 
     def move(self):
-        
+        """Move Delft3D FM model input, output, and restart files.
+        """     
         # Move files from job folder to archive folder
         
         # First clear archive folder      
@@ -255,7 +290,8 @@ class CoSMoS_Delft3DFM(Model):
         fo.move_file(os.path.join(joboutpath, "*.*"), input_path)
 
     def post_process(self):
-        
+        """Post-process Delft3D FM output: generate wave and water level timeseries.        
+        """         
         # Extract water levels
 
         output_path = self.cycle_output_path

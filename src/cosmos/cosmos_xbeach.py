@@ -23,9 +23,33 @@ from cht.xbeach.xbeach import XBeach
 import cht.nesting.nesting as nesting
 
 class CoSMoS_XBeach(Model):
-    
+    """Cosmos class for XBeach model.
+
+    XBeach (XB) is a physics-based nearshore model that solves the horizontal equations for flow, 
+    wave propagation, sediment transport, and changes in bathymetry (see also https://xbeach.readthedocs.io/en/latest/).
+
+    This cosmos class reads XBeach model data, pre-processes, moves and post-processes XBeach models.
+
+    Parameters
+    ----------
+    Model : class
+        Generic cosmos model attributes
+
+    See Also
+    ----------
+    cosmos.cosmos_scenario.Scenario
+    cosmos.cosmos_model_loop.ModelLoop
+    cosmos.cosmos_model.Model
+    """ 
     def read_model_specific(self):
-        
+        """Read SFINCS specific model attributes.
+
+        See Also
+        ----------
+        cht.xbeach.xbeach
+
+        """
+
         # Read in the XBeach model
         
         # First set some defaults
@@ -91,6 +115,16 @@ class CoSMoS_XBeach(Model):
         
         
     def pre_process(self):
+        """Preprocess XBeach model.
+        - Extract and write water level and wave conditions.
+        - Optional: only run XBeach for peak conditions.
+        - Write input file. 
+
+        See Also
+        ----------
+        cht.nesting.nest2
+        
+        """
         
         # First generate input that is identical for all members
                 
@@ -180,7 +214,8 @@ class CoSMoS_XBeach(Model):
         self.domain.path = pth
 
     def move(self):
-        
+        """Move XBeach model input and output files.
+        """   
         # Move files from job folder to archive folder
         
         # First clear archive folder      
@@ -197,6 +232,8 @@ class CoSMoS_XBeach(Model):
         fo.move_file(os.path.join(job_path, "*.*"), input_path)
 
     def post_process(self):
+        """Post-process XBeach output: generate sedimentation/erosion maps.        
+        """
         
         output_path = self.cycle_output_path
         sedero_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,

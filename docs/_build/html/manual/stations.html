@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Observation stations &mdash; CoSMoS 0.1 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Defining super regions" href="superregions.html" />
+    <link rel="prev" title="Add models to the database" href="addingmodels.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            CoSMoS
+          </a>
+              <div class="version">
+                0.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../manual.html">User manual</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="modelcomponents.html">Overview model components and folder structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scenario.html">Setting up a scenario</a></li>
+<li class="toctree-l2"><a class="reference internal" href="addingmodels.html">Add models to the database</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Observation stations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#station-locations">Station locations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#observation-data">Observation data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="superregions.html">Defining super regions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meteo.html">Meteo collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="running.html">Running CoSMoS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html">CoSMoS output</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../functions.html">Functions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CoSMoS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../manual.html">User manual</a></li>
+      <li class="breadcrumb-item active">Observation stations</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/manual/stations.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="observation-stations">
+<span id="stations"></span><h1>Observation stations<a class="headerlink" href="#observation-stations" title="Permalink to this headline">¶</a></h1>
+<p>To compare model results (water levels and wave conditions) with observations, station locations and observation data can be added to the CoSMoS database.
+Station locations can be referenced in the model xml files, while observation data can be referenced in the scenario xml file.</p>
+<section id="station-locations">
+<h2>Station locations<a class="headerlink" href="#station-locations" title="Permalink to this headline">¶</a></h2>
+<p>To add observation points to a specific model, station locations files can be used.
+An example of a station file is given below:</p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">root</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">station</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="mi">42060</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">ndbc_id</span><span class="o">&gt;</span><span class="mi">42060</span><span class="o">&lt;/</span><span class="n">ndbc_id</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">longname</span><span class="o">&gt;</span><span class="n">Caribbean</span> <span class="n">Valley</span> <span class="o">-</span> <span class="mi">63</span> <span class="n">NM</span> <span class="n">WSW</span> <span class="n">of</span> <span class="n">Montserrat</span><span class="o">&lt;/</span><span class="n">longname</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">longitude</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="o">&gt;-</span><span class="mf">63.331</span><span class="o">&lt;/</span><span class="n">longitude</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">latitude</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="o">&gt;</span><span class="mf">16.433</span><span class="o">&lt;/</span><span class="n">latitude</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nb">type</span><span class="o">&gt;</span><span class="n">wave_buoy</span><span class="o">&lt;/</span><span class="nb">type</span><span class="o">&gt;</span>
+  <span class="o">&lt;/</span><span class="n">station</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">root</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>The station location files must be added to the <em>stations</em> folder. In the model xml file (see <a class="reference internal" href="addingmodels.html#models"><span class="std std-ref">Models</span></a>) you can refer to one
+or more station files using the keyword &lt;station&gt;.</p>
+<p>The default cosmos_run_folder contains xml files with locations of the NDBC wave buoys and the NOAA CO-OPS water level stations.
+Other observation locations can also be added manually.</p>
+</section>
+<section id="observation-data">
+<h2>Observation data<a class="headerlink" href="#observation-data" title="Permalink to this headline">¶</a></h2>
+<p>Observation data for the station locations defined in the <em>stations</em> folder are either automatically extracted by CoSMoS
+or can be manually added to the observations folder.
+For the NOAA-COOPS water level stations, water levels are automatically extracted from the NOAA-COOPS server.
+For the NDBC wave buoys, the wave buoy data must be manually extracted from the NDBC website (<a class="reference external" href="https://www.ndbc.noaa.gov/">https://www.ndbc.noaa.gov/</a>),
+where you can find historical wave buoy data. The following script converts the NDBC text files to csv files that can be used by CoSMoS:</p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">cht.misc.misc_tools</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">stations</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;41043&#39;</span><span class="p">,</span> <span class="s1">&#39;41044&#39;</span><span class="p">,</span> <span class="s1">&#39;41046&#39;</span><span class="p">,</span> <span class="s1">&#39;41047&#39;</span><span class="p">,</span> <span class="s1">&#39;41049&#39;</span><span class="p">,</span> <span class="s1">&#39;41052&#39;</span><span class="p">,</span> <span class="s1">&#39;42059&#39;</span><span class="p">,</span> <span class="s1">&#39;42060&#39;</span><span class="p">,</span> <span class="s1">&#39;42085&#39;</span><span class="p">]</span>
+
+<span class="n">path</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\cosmos\observations\hurricane_fiona\waves&quot;</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">stations</span><span class="p">):</span>
+
+        <span class="n">files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">v</span> <span class="o">+</span> <span class="s2">&quot;*&quot;</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">vv</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">files</span><span class="p">):</span>
+
+                <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">vv</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">index_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">delim_whitespace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> 
+
+                <span class="n">Hs</span><span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">WVHT</span><span class="o">.</span><span class="n">values</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">Tp</span><span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">DPD</span><span class="o">.</span><span class="n">values</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">MWD</span><span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">MWD</span><span class="o">.</span><span class="n">values</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="n">ind</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">Hs</span><span class="o">!=</span><span class="mi">99</span><span class="p">)[:,</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">df2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;year&#39;</span><span class="p">:</span> <span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;month&#39;</span><span class="p">:</span>  <span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;day&#39;</span><span class="p">:</span>  <span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="s1">&#39;hour&#39;</span><span class="p">:</span>  <span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span> <span class="s1">&#39;minute&#39;</span><span class="p">:</span>  <span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span><span class="mi">4</span><span class="p">]})</span>
+                <span class="n">dates</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df2</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">ii</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                        <span class="n">df4</span><span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;date&#39;</span><span class="p">:</span> <span class="n">dates</span><span class="p">,</span> <span class="s1">&#39;hs&#39;</span><span class="p">:</span>  <span class="n">Hs</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="s1">&#39;tp&#39;</span><span class="p">:</span>  <span class="n">Tp</span><span class="p">[</span><span class="n">ind</span><span class="p">]},</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                        <span class="n">df4</span><span class="o">=</span> <span class="n">df4</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;date&#39;</span><span class="p">:</span> <span class="n">dates</span><span class="p">,</span> <span class="s1">&#39;hs&#39;</span><span class="p">:</span>  <span class="n">Hs</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="s1">&#39;tp&#39;</span><span class="p">:</span>  <span class="n">Tp</span><span class="p">[</span><span class="n">ind</span><span class="p">]},</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">),</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df4</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="n">inplace</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">df4</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">date_format</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S&#39;</span><span class="p">,</span>
+                                                <span class="n">float_format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.3f</span><span class="s1">&#39;</span><span class="p">,</span>
+                                                <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">line_terminator</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\r\n</span><span class="s1">&#39;</span><span class="p">)</span>            
+
+
+        <span class="n">csv_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;waves.&quot;</span> <span class="o">+</span> <span class="n">stations</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.observed.csv.js&quot;</span><span class="p">)</span>
+        <span class="n">cht</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">misc_tools</span><span class="o">.</span><span class="n">write_csv_js</span><span class="p">(</span><span class="n">csv_file</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="s2">&quot;var csv = `date_time,hm0,tp&quot;</span><span class="p">)</span>
+    
+</pre></div>
+</div>
+</div></blockquote>
+<p>Note: this script requires the Coastalhazardstoolkit.</p>
+<p>The csv-files must be stored under:
+<em>observations//[observations_path]//waves//waves.[stationid].observed.csv</em></p>
+<p>Similarly, other water level or wave data can be added to the observation folder, using the format given below. Note that water level data must be stored using the following format:
+<em>observations//[observations_path]//waterlevels//waterlevels.[stationid].observed.csv</em></p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span>var csv = `date_time,hm0,tp
+2017-03-15T19:40:00,1.400,10.000
+2017-03-15T20:40:00,1.410,10.000
+2017-03-15T21:40:00,1.460,9.090
+2017-03-15T22:40:00,1.590,6.250
+`;
+</pre></div>
+</div>
+</div></blockquote>
+<p>In the scenario file, you must refer to the [observations_path] (see <a class="reference internal" href="scenario.html#scenario"><span class="std std-ref">Scenario</span></a>) to include these observations in the webviewer.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="addingmodels.html" class="btn btn-neutral float-left" title="Add models to the database" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="superregions.html" class="btn btn-neutral float-right" title="Defining super regions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Deltares.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

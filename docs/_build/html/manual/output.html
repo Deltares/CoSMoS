@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CoSMoS output &mdash; CoSMoS 0.1 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Functions" href="../functions.html" />
+    <link rel="prev" title="Running CoSMoS" href="running.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            CoSMoS
+          </a>
+              <div class="version">
+                0.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../manual.html">User manual</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="modelcomponents.html">Overview model components and folder structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scenario.html">Setting up a scenario</a></li>
+<li class="toctree-l2"><a class="reference internal" href="addingmodels.html">Add models to the database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stations.html">Observation stations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="superregions.html">Defining super regions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meteo.html">Meteo collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="running.html">Running CoSMoS</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">CoSMoS output</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scenario-output">Scenario output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#webviewer-1">Webviewer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../functions.html">Functions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CoSMoS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../manual.html">User manual</a></li>
+      <li class="breadcrumb-item active">CoSMoS output</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/manual/output.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="cosmos-output">
+<span id="output"></span><h1>CoSMoS output<a class="headerlink" href="#cosmos-output" title="Permalink to this headline">¶</a></h1>
+<section id="scenario-output">
+<h2>Scenario output<a class="headerlink" href="#scenario-output" title="Permalink to this headline">¶</a></h2>
+<p>After running a CoSMoS scenario, the output is stored in the <em>scenarios</em> folder. For each new cycle time, a new cycle folder is created.
+An example of an output folder structure is shown below for a scenario called <em>hurricane_irma</em> with a cycle that starts on 4 September 2017.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>scenarios
+├── hurricane_irma
+    └── hurricane_irma.xml
+    ├── 20170904_00z
+        ├── job_list
+        ├── models
+        ├── tiles
+    ├── restart
+    ├── timeseries
+        ├── 20170904_00z
+</pre></div>
+</div>
+<p>In the <em>job_list</em> folder, you can find an overview of completed models.
+When rerunning a scenario, any models that are marked as finished in the <em>job_list</em> folder will not be executed again.
+To rerun specific models or the entire selection for a particular scenario, it is necessary to delete these finished files.</p>
+<p>The <em>models</em> folder contains all model input and output.
+The <em>tiles</em> folder contains all tiles for the webviewer.
+The <em>restart</em> folder contains restart files for all models.
+The <em>timeseries</em> folder contains timeseries csv files with model output for observation locations defined in the &lt;station&gt; file (see <a class="reference internal" href="stations.html#stations"><span class="std std-ref">Observation stations</span></a>).</p>
+</section>
+<section id="webviewer-1">
+<span id="webviewer"></span><h2>Webviewer<a class="headerlink" href="#webviewer-1" title="Permalink to this headline">¶</a></h2>
+<p>CoSMoS output is presented in a webviewer which provides an interactive method of viewing the results for the different scenarios and model output.
+The webviewer can be found under webviewers/webviewer_name and is structured as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[webviewer_name]
+└── index.html
+├── css
+├── data
+    └── scenarios.js
+    ├── hurricane_irma
+        └── variables.js
+        └── stations.js
+        └── wavebuoys.js
+        ├── timeseries
+        ├── floodmap
+        ├── hm0
+        ├── precipitation
+├── html
+├── img
+├── js
+</pre></div>
+</div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 70%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Webviewer file or folder</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>index.html</p></td>
+<td><p>Open this file to view webviewer.</p></td>
+</tr>
+<tr class="row-odd"><td><p>css</p></td>
+<td><p>Main plotting and layout settings</p></td>
+</tr>
+<tr class="row-even"><td><p>data</p></td>
+<td><p>Model output data</p></td>
+</tr>
+<tr class="row-odd"><td><p>data/scenarios.js</p></td>
+<td><p>Settings for all scenarios (names, locations, zoom levels) included in the webviewer.</p></td>
+</tr>
+<tr class="row-even"><td><p>data/[scenario_name]/variables.js</p></td>
+<td><p>Variables to include for a certain scenario (e.g., wave heights, water levels, runup)</p></td>
+</tr>
+<tr class="row-odd"><td><p>data/[scenario_name]/stations.js</p></td>
+<td><p>Water level station features (names, locations, link to observation data, link to model output data).</p></td>
+</tr>
+<tr class="row-even"><td><p>data/[scenario_name]/wavebuoys.js</p></td>
+<td><p>Wave buoy station features (names, locations, link to observation data, link to model output data).</p></td>
+</tr>
+<tr class="row-odd"><td><p>data/[scenario_name]/timeseries</p></td>
+<td><p>Folder with model output and observation timeseries.</p></td>
+</tr>
+<tr class="row-even"><td><p>data/[scenario_name]/floodmap hm0 precipitation</p></td>
+<td><p>Folders with model map output data (tiles)</p></td>
+</tr>
+<tr class="row-odd"><td><p>html</p></td>
+<td><p>Html codes to plot water level, wave height, and runup timeseries in webviewer.</p></td>
+</tr>
+<tr class="row-even"><td><p>img</p></td>
+<td><p>Pngs used in the webviewer.</p></td>
+</tr>
+<tr class="row-odd"><td><p>js</p></td>
+<td><p>Main code to generate webviewer.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="running.html" class="btn btn-neutral float-left" title="Running CoSMoS" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../functions.html" class="btn btn-neutral float-right" title="Functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Deltares.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

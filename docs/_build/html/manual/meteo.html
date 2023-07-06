@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meteo collection &mdash; CoSMoS 0.1 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Running CoSMoS" href="running.html" />
+    <link rel="prev" title="Defining super regions" href="superregions.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            CoSMoS
+          </a>
+              <div class="version">
+                0.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../manual.html">User manual</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="modelcomponents.html">Overview model components and folder structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html">Quickstart CoSMoS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="addingmodels.html">Adding models to the database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scenario.html">Setting up a scenario</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stations.html">Observation stations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="superregions.html">Defining super regions</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Meteo collection</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#regularly-gridded-meteo-data">Regularly gridded meteo data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#spiderweb-forcing">Spiderweb forcing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#track-ensemble">Track ensemble</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="running.html">Running CoSMoS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html">CoSMoS output</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../functions.html">Functions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CoSMoS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../manual.html">User manual</a></li>
+      <li class="breadcrumb-item active">Meteo collection</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/manual/meteo.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="meteo-collection">
+<span id="meteo"></span><h1>Meteo collection<a class="headerlink" href="#meteo-collection" title="Permalink to this headline">¶</a></h1>
+<p>CoSMoS automatically downloads, collects and writes meteorological data for each model based on user-defined settings in the scenario file (see <a class="reference internal" href="scenario.html#scenario"><span class="std std-ref">Scenario</span></a>).
+Meteorological forcing data can be found in the <em>meteo</em> folder, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>meteo
+└── meteo_subsets.xml
+├── gfs_forecast_0p25_north_atlantic
+    ├── 20170704_00z
+        └── gfs_forecast_0p25_north_atlantic.20170704_0000.nc
+        └── gfs_forecast_0p25_north_atlantic.20170704_0300.nc
+├── gfs_anl_0p50_north_atlantic
+    └── gfs_anl_0p50_north_atlantic.20170704_0000.nc
+    └── gfs_anl_0p50_north_atlantic.20170704_0300.nc
+├── spiderwebs
+    └── irma.spw/cyc
+├── hurricane_irma
+    └── irma.cyc
+</pre></div>
+</div>
+<p>There are three types of meteo data, which are elaborated in the sections below:</p>
+<ul class="simple">
+<li><p><strong>Regularly gridded meteo data</strong> (keyword: <em>&lt;meteo_dataset&gt;</em> in scenario file). The <em>gfs_forecast_0p25_north_atlantic</em> and <em>gfs_anl_0p50_north_atlantic</em> folders are examples of regularly gridded meteo data.</p></li>
+<li><p><strong>Spiderweb grid meteo data</strong> (keyword: <em>&lt;meteo_spiderweb&gt;</em> in scenario file). The <em>irma.spw</em> file in the folder <em>spiderwebs</em> is an example of spiderweb forcing.</p></li>
+<li><p><strong>Ensemble of tracks</strong> (keywword: <em>&lt;track_ensemble&gt;</em> in scenario file). The <em>hurricane_irma</em> folder is an example of an ensemble of tracks (tracks are generated based on the <em>.cyc</em> file).</p></li>
+</ul>
+<p>Metadata for the <em>meteo_datasets</em> and <em>spiderweb</em> files are contained in the <em>meteo_subsets.xml</em> file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;!-- Written on 11-Oct-2011 19:14:31 using the XML Toolbox for Matlab --&gt;
+&lt;root&gt;
+  &lt;meteo_subset&gt;
+    &lt;name&gt;gfs_forecast_0p25_conus&lt;/name&gt;
+    &lt;source&gt;gfs_forecast_0p25&lt;/source&gt;
+    &lt;x_range type=&quot;float&quot;&gt;-110.0,-50.0&lt;/x_range&gt;
+    &lt;y_range type=&quot;float&quot;&gt;23.0,50.0&lt;/y_range&gt;
+  &lt;/meteo_subset&gt;
+  &lt;meteo_subset&gt;
+    &lt;name&gt;gfs_forecast_0p25_us_east_gom&lt;/name&gt;
+    &lt;source&gt;gfs_forecast_0p25&lt;/source&gt;
+    &lt;x_range type=&quot;float&quot;&gt;-99.0,-50.0&lt;/x_range&gt;
+    &lt;y_range type=&quot;float&quot;&gt;17.0,50.0&lt;/y_range&gt;
+  &lt;/meteo_subset&gt;
+  &lt;meteo_subset&gt;
+    &lt;name&gt;gfs_anl_0p50_us_east_gom&lt;/name&gt;
+    &lt;source&gt;gfs_anl_0p50&lt;/source&gt;
+    &lt;x_range type=&quot;float&quot;&gt;-99.0,-50.0&lt;/x_range&gt;
+    &lt;y_range type=&quot;float&quot;&gt;17.0,50.0&lt;/y_range&gt;
+  &lt;/meteo_subset&gt;
+  &lt;meteo_subset&gt;
+    &lt;name&gt;gfs_anl_0p50_conus&lt;/name&gt;
+    &lt;source&gt;gfs_anl_0p50&lt;/source&gt;
+    &lt;x_range type=&quot;float&quot;&gt;-110.0,-50.0&lt;/x_range&gt;
+    &lt;y_range type=&quot;float&quot;&gt;23.0,50.0&lt;/y_range&gt;
+  &lt;/meteo_subset&gt;
+  &lt;meteo_subset&gt;
+    &lt;name&gt;spiderwebs&lt;/name&gt;
+    &lt;source&gt;jtwc&lt;/source&gt;
+  &lt;/meteo_subset&gt;
+&lt;/root&gt;
+</pre></div>
+</div>
+<p>This file has the following attributes:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 70%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>name</p></td>
+<td><p>Name of the meteo dataset</p></td>
+</tr>
+<tr class="row-even"><td><p>source</p></td>
+<td><p>Source of meteo dataset. Options: gfs_anl_0p50, gfs_forecast_0p25, coamps_analysis, coamps_tc_hindcast, coamps_tc_forecast, alternative</p></td>
+</tr>
+<tr class="row-odd"><td><p>x_range, y_range</p></td>
+<td><p>Optional: X and Y range for which meteo data needs to be downloaded / collected.</p></td>
+</tr>
+<tr class="row-even"><td><p>xystride</p></td>
+<td><p>Optional:</p></td>
+</tr>
+</tbody>
+</table>
+<section id="regularly-gridded-meteo-data">
+<h2>Regularly gridded meteo data<a class="headerlink" href="#regularly-gridded-meteo-data" title="Permalink to this headline">¶</a></h2>
+<p>Regularly gridded meteorological datasets contain <em>netcdf</em> files with the following information:</p>
+<ul class="simple">
+<li><p>lon</p></li>
+<li><p>lat</p></li>
+<li><p>wind_u</p></li>
+<li><p>wind_v</p></li>
+<li><p>barometric_pressure</p></li>
+<li><p>precipitation (optional)</p></li>
+</ul>
+<p>The netcdf files must be named as follows:</p>
+<p>&lt;dataset_name&gt;.&lt;yyyymmdd_hhmm&gt;.nc.</p>
+<p>For forecasts, the netcdf files are contained in a folder with the cycle time name (see meteo folder structure above).</p>
+<p>CoSMoS gets the meteo data in two steps:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Download</dt><dd><p>If the keyword <em>get_meteo</em> is set to True (see <a class="reference internal" href="../_generated/cosmos.cosmos_main.CoSMoS.html#cosmos.cosmos_main.CoSMoS" title="cosmos.cosmos_main.CoSMoS"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_main.CoSMoS</span></code></a>), meteo data are downloaded from a webserver. The following datasets can be downloaded automatically:</p>
+<ul>
+<li><p>gfs_anl_0p50</p></li>
+<li><p>gfs_forecast_0p25</p></li>
+<li><p>coamps_analysis</p></li>
+<li><p>coamps_tc_hindcast</p></li>
+<li><p>coamps_tc_forecast</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Collect</dt><dd><p>CoSMoS loops through the <em>meteo_subset.xml</em> data and finds subsets that match the <em>meteo_dataset</em> specified in the scenario file.
+For each <em>meteo_subset</em>, CoSMoS collects the data from the netcdf files that are located in the specific meteo folder.
+The individual CoSMoS model classes (see <a class="reference internal" href="modelcomponents.html#modelclasses"><span class="std std-ref">Model classes</span></a>) then write the meteo input files.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+<section id="spiderweb-forcing">
+<h2>Spiderweb forcing<a class="headerlink" href="#spiderweb-forcing" title="Permalink to this headline">¶</a></h2>
+<p>For cyclone forecasting, spiderweb grids are commonly used.
+Spiderwebs are circular grids, for which each time in the time series of space varying wind and pressure (and potentially precipitation)
+the position of the cyclone eye must be given. For more information, see also the <a class="reference external" href="https://publicwiki.deltares.nl/display/DDB/Tropical+Cyclone">Tropical Cyclone Toolbox</a> and the Delft3D-FLOW manual.</p>
+<p>When using a single spiderweb as forcing, use the keyword: <em>&lt;meteo_spiderweb&gt;</em> in the scenario file,
+indicating the name of the spiderweb (without extension) that is located in the <em>meteo/spiderwebs/</em> folder.
+If this folder only contains a <em>.cyc</em> file, this file is converted into a spiderweb by CoSMoS.</p>
+</section>
+<section id="track-ensemble">
+<h2>Track ensemble<a class="headerlink" href="#track-ensemble" title="Permalink to this headline">¶</a></h2>
+<p>To include track uncertainties in cyclone forecasting, CoSMoS can also generate an ensemble of tracks.
+In this way, we can obtain a probabilistic estimate of nearshore water levels, waves, and inundation.
+The cyclone tracks are generated based on De Maria et al. (2009), taking into account along-track (AT) and cross-track (CT), and maximum wind speed (VE) errors.
+For more information, see the <a class="reference external" href="https://publicwiki.deltares.nl/display/DDB/Advanced+Tropical+Cyclone">Advanced Tropical Cyclone Toolbox</a>.</p>
+<p>To run a scenario in ensemble mode, set the keyword <em>ensemble</em> to True (see <a class="reference internal" href="running.html#running"><span class="std std-ref">Running CoSMoS</span></a> and <a class="reference internal" href="../_generated/cosmos.cosmos_main.CoSMoS.html#cosmos.cosmos_main.CoSMoS" title="cosmos.cosmos_main.CoSMoS"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_main.CoSMoS</span></code></a>).
+The keyword <em>&lt;track_ensemble&gt;</em> in the scenario file must refer to a folder in the <em>meteo</em> folder that contains a <em>.cyc</em> file.
+This meteo dataset does not need to be described in the <em>meteo_subsets.xml</em> file.
+The keyword <em>&lt;ensemble_nrtracks&gt;</em> in the scenario file prescribes the number of tracks that need to be generated.
+If this keyword is not defined, CoSMoS uses the tracks that are already present in the <em>&lt;track_ensemble&gt;</em> folder.
+For each model, region, or super region, you can define whether it needs to be run for the entire set of tracks
+(keyword <em>&lt;ensemble&gt;</em> is <em>yes</em> in the scenario file), or whether it needs to be run for the best track estimation ( <em>&lt;ensemble&gt;</em> is <em>no</em>).</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="superregions.html" class="btn btn-neutral float-left" title="Defining super regions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="running.html" class="btn btn-neutral float-right" title="Running CoSMoS" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Deltares.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

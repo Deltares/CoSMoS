@@ -1,0 +1,10 @@
+<root>
+  <station>
+    <name>42060</name>
+    <ndbc_id>42060</ndbc_id>
+    <longname>Caribbean Valley - 63 NM WSW of Montserrat</longname>
+    <longitude type="float">-63.331</longitude>
+    <latitude type="float">16.433</latitude>
+    <type>wave_buoy</type>
+  </station>
+</root>

@@ -22,9 +22,17 @@ import cht.misc.fileops as fo
 import cht.misc.misc_tools
 
 class WebViewer:
-    
-    def __init__(self, name):
+    """Cosmos webviewer class
+    """    
 
+    def __init__(self, name):
+        """Initialize webviewer. 
+
+        Parameters
+        ----------
+        name : str
+            Name of webviewer.
+        """
         self.name    = name
         self.path    = os.path.join(cosmos.config.main_path, "webviewers", name)
         self.version = cosmos.config.webviewer_version
@@ -34,7 +42,12 @@ class WebViewer:
             self.exists = False
     
     def make(self):
-        
+        """Make webviewer. 
+        - Makes local copy of the webviewer from a template. If such a copy already exists, data will be copied to the existing webviewer.
+        - Updating the scenario.js with the current scenario.
+        - Make a variable file defining the variables that are mapped for the current scenario.
+
+        """        
         # Makes local copy of the web viewer
         # If such a copy already exists, data will be copied to the existing web viewer
 
@@ -84,10 +97,10 @@ class WebViewer:
         self.copy_timeseries()
         self.copy_floodmap()        
         self.copy_wave_maps()
-        self.copy_sederomap()
+        # self.copy_sederomap()
         # self.copy_bedlevelmaps()
         self.make_runup_map()
-        # self.make_meteo_maps()
+        self.make_meteo_maps()
         mv_file = os.path.join(scenario_path,
                                "variables.js")
         
@@ -95,7 +108,8 @@ class WebViewer:
 
 
     def copy_timeseries(self):
-
+        """Copy available wave, water level, and runup timeseries to webviewer folder.
+        """        
         scenario_path = os.path.join(self.path,
                                      "data",
                                      cosmos.scenario.name)
@@ -290,6 +304,8 @@ class WebViewer:
         #         model.domain.write_to_csv(scenario_path, cosmos.scenario.name)
 
     def copy_floodmap(self):
+        """Copy available flood map tiles to webviewer folder.
+        """        
 
         cosmos.log("Copying flood map tiles ...")
 
@@ -342,6 +358,8 @@ class WebViewer:
             dct["description"] = "This is a flood map. It can tell if you will drown."
             dct["format"]      = "xyz_tile_layer"
             dct["max_native_zoom"]  = 13
+            dct["infographic"] = "empty"
+
 
             tms = []            
             for it, pth in enumerate(pathstr):
@@ -372,7 +390,8 @@ class WebViewer:
             self.map_variables.append(dct)
 
     def copy_wave_maps(self):
-            
+        """Copy available wave map tiles to webviewer folder.
+        """   
         # Wave maps
         scenario_path = os.path.join(self.path,
                                      "data",
@@ -430,6 +449,7 @@ class WebViewer:
             dct["description"] = "These are Hm0 wave heights."
             dct["format"]      = "xyz_tile_layer"
             dct["max_native_zoom"] = 9
+            dct["infographic"] = "empty"
             
             tms = []            
             for it, pth in enumerate(pathstr):
@@ -463,7 +483,8 @@ class WebViewer:
 
                 
     def copy_sederomap(self):
-
+        """Copy available sedimentation/erosion map tiles to webviewer folder.
+        """   
         cosmos.log("Copying sedimentation/erosion map tiles ...")
         
         scenario_path = os.path.join(self.path,
@@ -484,6 +505,7 @@ class WebViewer:
             dct["description"] = "This is a sedimentation/erosion map. It can tell if your house will wash away."
             dct["format"]      = "xyz_tile_layer"
             dct["max_native_zoom"]  = 16
+            dct["infographic"] = "empty"
 
             mp = next((x for x in cosmos.config.map_contours if x["name"] == "sedero"), None)    
             
@@ -537,7 +559,8 @@ class WebViewer:
             cht.misc.misc_tools.write_json_js(stations_file, feature_collection, "var xb_markers =")
             
     def make_meteo_maps(self):
-        
+        """Make wind and precipitation tiles for webviewer.
+        """   
         from cht.misc import xmlkit as xml
 
         cosmos.log("Making meteo map tiles ...")
@@ -551,239 +574,291 @@ class WebViewer:
         if hasattr(xml_obj, "meteo_dataset"):
             meteo_dataset = xml_obj.meteo_dataset[0].value
 
-        for meteo_subset in cosmos.meteo_subset:
-            if meteo_dataset == meteo_subset.name:
-                
-                # TODO these ranges 
-                xlim = [-99.0, -55.0]
-                ylim = [8.0, 45.0]
-                
-                if meteo_subset.x is not None:
-                                        
-                    subset = meteo_subset.subset(xlim=xlim,
-                                                 ylim=ylim,
-                                                 time_range=[],
-                                                 stride=2)
-                    # Get maximum wind speed
-                    u = subset.quantity[0].u
-                    v = subset.quantity[0].v
-                    vmag = np.sqrt(u*u + v*v)
-                    wndmx = np.max(vmag)
+            for meteo_subset in cosmos.meteo_subset:
+                if meteo_dataset == meteo_subset.name:
                     
-                    file_name = os.path.join(scenario_path, "wind.json.js")
-                    subset.write_wind_to_json(file_name, time_range=None, js=True)
+                    # TODO these ranges 
+                    xlim = [-99.0, -55.0]
+                    ylim = [8.0, 45.0]
                     
-                    # Add wind to map variables
-    
-                    if wndmx<=20.0:
-                        contour_set = "wnd20"
-                        wndmx=20.0                
-                    elif wndmx<=40.0:   
-                        contour_set = "wnd40"
-                        wndmx=40.0                
-                    else:   
-                        contour_set = "wnd60"
-                        wndmx=60.0                
-            
-                    dct={}
-                    dct["name"]        = "wind"
-                    dct["long_name"]   = "Wind"
-                    dct["description"] = "This is a wind map. It can tell if your house will blow away."
-                    dct["format"]      = "vector_field"
-                    dct["max"]         = wndmx
-        
-                    mp = next((x for x in cosmos.config.map_contours if x["name"] == contour_set), None)    
-                    
-                    lgn = {}
-                    lgn["text"] = mp["string"]
+                    if meteo_subset.x is not None:
+                                            
+                        subset = meteo_subset.subset(xlim=xlim,
+                                                    ylim=ylim,
+                                                    time_range=[],
+                                                    stride=2)
+                        # Get maximum wind speed
+                        u = subset.quantity[0].u
+                        v = subset.quantity[0].v
+                        vmag = np.sqrt(u*u + v*v)
+                        wndmx = np.max(vmag)
                         
-                    cntrs = mp["contours"]
+                        file_name = os.path.join(scenario_path, "wind.json.js")
+                        subset.write_wind_to_json(file_name, time_range=None, js=True)
+                        
+                        # Add wind to map variables
         
-                    contours = []
-                    
-                    for cntr in cntrs:    
-                        contour = {}
-                        contour["text"]  = cntr["string"]
-                        contour["color"] = "#" + cntr["hex"]
-                        contours.append(contour)
+                        if wndmx<=20.0:
+                            contour_set = "wnd20"
+                            wndmx=20.0                
+                        elif wndmx<=40.0:   
+                            contour_set = "wnd40"
+                            wndmx=40.0                
+                        else:   
+                            contour_set = "wnd60"
+                            wndmx=60.0                
+                
+                        dct={}
+                        dct["name"]        = "wind"
+                        dct["long_name"]   = "Wind"
+                        dct["description"] = "This is a wind map. It can tell if your house will blow away."
+                        dct["format"]      = "vector_field"
+                        dct["max"]         = wndmx
+                        dct["infographic"] = "empty"
             
-                    lgn["contours"] = contours
-                    dct["legend"]   = lgn
-                    
-                    self.map_variables.append(dct)
-                    
-                    # Cyclone track(s)
-
-                    # subset = meteo_subset.subset(time_range=[],
-                    #                              stride=1,
-                    #                              tstride=tstride)
-    
-                    tracks = meteo_subset.find_cyclone_tracks(xlim=[-110.0,-30.0],
-                                                              ylim=[5.0, 45.0],
-                                                              pcyc=99500.0,
-                                                              dt=6)
-                    
-                    if tracks:
-                        features = []
-                        for track in tracks:
+                        mp = next((x for x in cosmos.config.map_contours if x["name"] == contour_set), None)    
+                        
+                        lgn = {}
+                        lgn["text"] = mp["string"]
                             
-                            points=[]
+                        cntrs = mp["contours"]
+            
+                        contours = []
                         
-                            for ip in range(np.size(track.lon)):
-                                point = Point((track.lon[ip], track.lat[ip]))               
-                                if track.vmax[ip]<64.0:
-                                    cat = "TS"
-                                elif track.vmax[ip]<83.0:
-                                    cat = "1"
-                                elif track.vmax[ip]<96.0:    
-                                    cat = "2"
-                                elif track.vmax[ip]<113.0:    
-                                    cat = "3"
-                                elif track.vmax[ip]<137.0:    
-                                    cat = "4"
-                                else:    
-                                    cat = "5"
-                                features.append(Feature(geometry=point,
-                                                        properties={"time":track.time[ip].strftime("%Y/%m/%d %H:%M") + " UTC",
-                                                                    "lon":track.lon[ip],
-                                                                    "lat":track.lat[ip],
-                                                                    "vmax":track.vmax[ip],
-                                                                    "pc":track.pc[ip],
-                                                                    "category":cat}))
-                                
-                                points.append([track.lon[ip], track.lat[ip]])
-                            
-                            trk = LineString(coordinates=points)
-                            features.append(Feature(geometry=trk,
-                                                    properties={"name":"No name"}))
-                        
-                        feature_collection = FeatureCollection(features)
-                        file_name = os.path.join(scenario_path, "track.geojson.js")
-                        cht.misc.misc_tools.write_json_js(file_name,
-                                                          feature_collection,
-                                                          "var track_data =")
-                                
-        
-        # Cumulative rainfall
-        
-        # Rainfall map for the entire simulation
-        dt1 = datetime.timedelta(hours=1)
-#        dt6 = datetime.timedelta(hours=6)
-        dt24 = datetime.timedelta(hours=24)
-        t0 = cosmos.cycle_time.replace(tzinfo=None)    
-        t1 = cosmos.stop_time
-        
-        # First determine max precip for all simulations 
-        pmx = 0.0
-        okay  = False
-        for model in cosmos.scenario.model:
-            if model.type=="sfincs":
-                index_path = os.path.join(model.path, "tiling", "indices")
-#                if model.make_precip_map and os.path.exists(index_path):            
-                if os.path.exists(index_path):            
-                    file_name = os.path.join(model.cycle_output_path, "sfincs_map.nc")
-                    # p0max = model.domain.read_cumulative_precipitation(file_name=file_name,
-                    #                                                    time_range=[t0 + dt1, t1 + dt1])
-                    # pmx = max(pmx, np.nanmax(p0max))
-                    okay = True
-
-        if okay:
-
-            cosmos.log("Making precipitation tiles ...")                
+                        for cntr in cntrs:    
+                            contour = {}
+                            contour["text"]  = cntr["string"]
+                            contour["color"] = "#" + cntr["hex"]
+                            contours.append(contour)
                 
-            print("Maximum precipitation : " + '%6.2f'%pmx + " mm")                         
-
-            contour_set = "precip_log"    
-
-            pathstr = []
-            namestr = []
-            
-            # 24-hour increments
-            requested_times = pd.date_range(start=t0 + dt24,
-                                            end=t1,
-                                            freq='24H').to_pydatetime().tolist()
-
-            for it, t in enumerate(requested_times):
-                pathstr.append((t - dt24).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
-                namestr.append((t - dt24).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC")
-
-            pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
-            td = t1 - t0
-            hrstr = str(int(td.days * 24 + td.seconds/3600))
-            namestr.append("Combined " + hrstr + "-hour forecast")
-
-            for model in cosmos.scenario.model:
-                if model.type=="sfincs" and model.meteo_precipitation:
-                    index_path = os.path.join(model.path, "tiling", "indices")            
-#                    if model.make_wave_map and os.path.exists(index_path):                            
-                    if os.path.exists(index_path):                            
+                        lgn["contours"] = contours
+                        dct["legend"]   = lgn
                         
-                        cosmos.log("Making precip tiles for model " + model.long_name + " ...")                
-    
-                        file_name = os.path.join(model.cycle_output_path, "sfincs_map.nc")
+                        self.map_variables.append(dct)
                         
-                        # Precip map over 24-hour increments                    
-                        for it, t in enumerate(requested_times):
-                            p = model.domain.read_cumulative_precipitation(file_name=file_name,
-                                                                           time_range=[t - dt24 + dt1, t + dt1])                        
-                            p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-                                                        "precipitation",
-                                                        pathstr[it])                        
-                            make_precipitation_tiles(p, index_path, p_map_path, contour_set)
+                        # Cyclone track(s)
+
+                        # subset = meteo_subset.subset(time_range=[],
+                        #                              stride=1,
+                        #                              tstride=tstride)
+        
+                        tracks = meteo_subset.find_cyclone_tracks(xlim=[-110.0,-30.0],
+                                                                ylim=[5.0, 45.0],
+                                                                pcyc=99500.0,
+                                                                dt=6)
+                        
+                        if tracks:
+                            features = []
+                            for track in tracks:
+                                
+                                points=[]
+                            
+                                for ip in range(np.size(track.lon)):
+                                    point = Point((track.lon[ip], track.lat[ip]))               
+                                    if track.vmax[ip]<64.0:
+                                        cat = "TS"
+                                    elif track.vmax[ip]<83.0:
+                                        cat = "1"
+                                    elif track.vmax[ip]<96.0:    
+                                        cat = "2"
+                                    elif track.vmax[ip]<113.0:    
+                                        cat = "3"
+                                    elif track.vmax[ip]<137.0:    
+                                        cat = "4"
+                                    else:    
+                                        cat = "5"
+                                    features.append(Feature(geometry=point,
+                                                            properties={"time":track.time[ip].strftime("%Y/%m/%d %H:%M") + " UTC",
+                                                                        "lon":track.lon[ip],
+                                                                        "lat":track.lat[ip],
+                                                                        "vmax":track.vmax[ip],
+                                                                        "pc":track.pc[ip],
+                                                                        "category":cat}))
+                                    
+                                    points.append([track.lon[ip], track.lat[ip]])
+                                
+                                trk = LineString(coordinates=points)
+                                features.append(Feature(geometry=trk,
+                                                        properties={"name":"No name"}))
+                            
+                            feature_collection = FeatureCollection(features)
+                            file_name = os.path.join(scenario_path, "track.geojson.js")
+                            cht.misc.misc_tools.write_json_js(file_name,
+                                                            feature_collection,
+                                                            "var track_data =")
+
+        # Spiderweb tracks
+        if hasattr(xml_obj, "meteo_spiderweb") or cosmos.scenario.track_ensemble:
+            from cht.tropical_cyclone.tropical_cyclone import to_geojson
+            if  hasattr(xml_obj, "meteo_spiderweb"):
+                spwfile = os.path.join(cosmos.config.main_path,
+                                                "meteo",
+                                                "spiderwebs",
+                                                xml_obj.meteo_spiderweb[0].value)
+                cycfile = spwfile.split('.')[0] + '.cyc'
+            elif cosmos.scenario.track_ensemble:
+                cycfile = fo.list_files(os.path.join(cosmos.config.main_path,
+                                        "meteo",
+                                        xml_obj.track_ensemble[0].value,
+                                        "*.cyc"))[0]
+            try:
+                file_name = os.path.join(scenario_path, "track.geojson.js")
+                to_geojson(cycfile, file_name)
+            except:
+                pass
 
 
-                        # Full simulation       
-                        p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-                                                  "precipitation",
-                                                   pathstr[-1])                        
-                        p = model.domain.read_cumulative_precipitation(file_name=file_name,
-                                                                       time_range=[t0 + dt1, t1 + dt1])                        
-                        make_precipitation_tiles(p, index_path, p_map_path, contour_set)
-            
-            # Check if wave maps are available
-            p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-                                          "precipitation")
-            
-            ppath = os.path.join(scenario_path)
-            fo.copy_file(p_map_path, ppath)
+        # Ensemble tracks
+        if cosmos.scenario.track_ensemble:
+            import geopandas as gpd
+
+            shpfile = os.path.join(cosmos.config.main_path,
+                                            "meteo",
+                                             xml_obj.track_ensemble[0].value,
+                                             'ensemble_members', 'ensemble_members.shp')
+            gdf = gpd.read_file(shpfile)
+
+            # Convert to GeoJSON
+            file_name = os.path.join(scenario_path, "ensemble.geojson.js")
+            gdf.to_file(file_name, driver='GeoJSON')
+
+            modified_content = 'var track_ens = \n' + open(file_name, 'r').read()
+            with open(file_name, 'w') as file:
+                file.write(modified_content)
+
             dct={}
-            dct["name"]        = "precipitation" 
-            dct["long_name"]   = "Cumulative rainfall"
-            dct["description"] = "These are cumulative precipitations."
-            dct["format"]      = "xyz_tile_layer"
-            dct["max_native_zoom"]  = 10
-            
-            tms = []            
-            for it, pth in enumerate(pathstr):
-                tm = {}
-                tm["name"]   = pth
-                tm["string"] = namestr[it]
-                tms.append(tm)
-
-            dct["times"]        = tms  
-            
-            mp = next((x for x in cosmos.config.map_contours if x["name"] == contour_set), None)    
-            
-            lgn = {}
-            lgn["text"] = mp["string"]
-
-            cntrs = mp["contours"]
-
-            contours = []
-            
-            for cntr in cntrs:
-                contour = {}
-                contour["text"]  = cntr["string"]
-                contour["color"] = "#" + cntr["hex"]
-                contours.append(contour)
-    
-            lgn["contours"] = contours
-            dct["legend"]   = lgn
+            dct["name"]        = "track_ensemble"
+            dct["long_name"]   = "Track ensemble"
+            dct["description"] = "This the track ensemble."
+            dct["format"]      = "geojson"
+            dct["max"]         = 0
+            dct["legend"]   = {}
+            dct["infographic"] = "ensemble"
             
             self.map_variables.append(dct)
 
-    def copy_bedlevelmaps(self):
 
+        # Cumulative rainfall
+        
+#         # Rainfall map for the entire simulation
+#         dt1 = datetime.timedelta(hours=1)
+# #        dt6 = datetime.timedelta(hours=6)
+#         dt24 = datetime.timedelta(hours=24)
+#         t0 = cosmos.cycle_time.replace(tzinfo=None)    
+#         t1 = cosmos.stop_time
+        
+#         # First determine max precip for all simulations 
+#         pmx = 0.0
+#         okay  = False
+#         for model in cosmos.scenario.model:
+#             if model.type=="sfincs":
+#                 index_path = os.path.join(model.path, "tiling", "indices")
+# #                if model.make_precip_map and os.path.exists(index_path):            
+#                 if os.path.exists(index_path):            
+#                     file_name = os.path.join(model.cycle_output_path, "sfincs_map.nc")
+#                     # p0max = model.domain.read_cumulative_precipitation(file_name=file_name,
+#                     #                                                    time_range=[t0 + dt1, t1 + dt1])
+#                     # pmx = max(pmx, np.nanmax(p0max))
+#                     okay = True
+
+#         if okay:
+
+#             cosmos.log("Making precipitation tiles ...")                
+                
+#             print("Maximum precipitation : " + '%6.2f'%pmx + " mm")                         
+
+#             contour_set = "precip_log"    
+
+#             pathstr = []
+#             namestr = []
+            
+#             # 24-hour increments
+#             requested_times = pd.date_range(start=t0 + dt24,
+#                                             end=t1,
+#                                             freq='24H').to_pydatetime().tolist()
+
+#             for it, t in enumerate(requested_times):
+#                 pathstr.append((t - dt24).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
+#                 namestr.append((t - dt24).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC")
+
+#             pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
+#             td = t1 - t0
+#             hrstr = str(int(td.days * 24 + td.seconds/3600))
+#             namestr.append("Combined " + hrstr + "-hour forecast")
+
+#             for model in cosmos.scenario.model:
+#                 if model.type=="sfincs" and model.meteo_precipitation:
+#                     index_path = os.path.join(model.path, "tiling", "indices")            
+# #                    if model.make_wave_map and os.path.exists(index_path):                            
+#                     if os.path.exists(index_path):                            
+                        
+#                         cosmos.log("Making precip tiles for model " + model.long_name + " ...")                
+    
+#                         file_name = os.path.join(model.cycle_output_path, "sfincs_map.nc")
+                        
+#                         # Precip map over 24-hour increments                    
+#                         for it, t in enumerate(requested_times):
+#                             p = model.domain.read_cumulative_precipitation(file_name=file_name,
+#                                                                            time_range=[t - dt24 + dt1, t + dt1])                        
+#                             p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+#                                                         "precipitation",
+#                                                         pathstr[it])                        
+#                             make_precipitation_tiles(p, index_path, p_map_path, contour_set)
+
+
+#                         # Full simulation       
+#                         p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+#                                                   "precipitation",
+#                                                    pathstr[-1])                        
+#                         p = model.domain.read_cumulative_precipitation(file_name=file_name,
+#                                                                        time_range=[t0 + dt1, t1 + dt1])                        
+#                         make_precipitation_tiles(p, index_path, p_map_path, contour_set)
+            
+#             # Check if wave maps are available
+#             p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+#                                           "precipitation")
+            
+#             ppath = os.path.join(scenario_path)
+#             fo.copy_file(p_map_path, ppath)
+#             dct={}
+#             dct["name"]        = "precipitation" 
+#             dct["long_name"]   = "Cumulative rainfall"
+#             dct["description"] = "These are cumulative precipitations."
+#             dct["format"]      = "xyz_tile_layer"
+#             dct["max_native_zoom"]  = 10
+            
+#             tms = []            
+#             for it, pth in enumerate(pathstr):
+#                 tm = {}
+#                 tm["name"]   = pth
+#                 tm["string"] = namestr[it]
+#                 tms.append(tm)
+
+#             dct["times"]        = tms  
+            
+#             mp = next((x for x in cosmos.config.map_contours if x["name"] == contour_set), None)    
+            
+#             lgn = {}
+#             lgn["text"] = mp["string"]
+
+#             cntrs = mp["contours"]
+
+#             contours = []
+            
+#             for cntr in cntrs:
+#                 contour = {}
+#                 contour["text"]  = cntr["string"]
+#                 contour["color"] = "#" + cntr["hex"]
+#                 contours.append(contour)
+    
+#             lgn["contours"] = contours
+#             dct["legend"]   = lgn
+            
+#             self.map_variables.append(dct)
+
+    def copy_bedlevelmaps(self):
+        """Copy available bedlevel map tiles to webviewer folder.
+        """   
         cosmos.log("Copying bed level map tiles ...")
         
         scenario_path = os.path.join(self.path,
@@ -805,6 +880,7 @@ class WebViewer:
             dct["long_name"]   = "Pre-storm bed level"
             dct["description"] = "These were the bed levels prior to the storm"
             dct["format"]      = "xyz_tile_layer"
+            dct["infographic"] = "empty"
 
             mp = next((x for x in cosmos.config.map_contours if x["name"] == "bed_levels"), None)    
             
@@ -846,6 +922,7 @@ class WebViewer:
             dct["long_name"]   = "Post-storm bed level"
             dct["description"] = "These are the predicted bed levels after the storm"
             dct["format"]      = "xyz_tile_layer"
+            dct["infographic"] = "empty"
 
             mp = next((x for x in cosmos.config.map_contours if x["name"] == "bed_levels"), None)    
             
@@ -885,7 +962,8 @@ class WebViewer:
             
 
     def make_runup_map(self):        
-
+        """Make runup markers and timeseries for webviewer.
+        """   
         output_path = os.path.join(self.path,
                                      "data",
                                      cosmos.scenario.name)
@@ -933,9 +1011,10 @@ class WebViewer:
     
                     dct={}
                     dct["name"]        = "extreme_runup_height"
-                    dct["long_name"]   = "Total water levels"
+                    dct["long_name"]   = "Maximum Total Water Level (best track)"
                     dct["description"] = "These are the predicted total water levels"
                     dct["format"]      = "geojson"
+                    dct["infographic"] = "twl"
     
     
                     mp = next((x for x in cosmos.config.map_contours if x["name"] == "run_up"), None)                    
@@ -999,9 +1078,10 @@ class WebViewer:
         
                         dct={}
                         dct["name"]        = "extreme_runup_height_prc95"
-                        dct["long_name"]   = "Total water levels 95 %"
+                        dct["long_name"]   = "Maximum Total Water Level (95 % of ensemble)"
                         dct["description"] = "These are the predicted extreme run-up heights"
                         dct["format"]      = "geojson"
+                        dct["infographic"]   = "twl"
         
                         mp = next((x for x in cosmos.config.map_contours if x["name"] == "run_up"), None)                    
         
@@ -1067,9 +1147,10 @@ class WebViewer:
 
                     dct={}
                     dct["name"]        = "extreme_horizontal_runup_height"
-                    dct["long_name"]   = "Horizontal projection of TWL"
+                    dct["long_name"]   = "Horizontal extent of Total Water Level"
                     dct["description"] = "This is the extreme horizontal runup."
                     dct["format"]      = "geojson"
+                    dct["infographic"]   = "twl"
                     # dct["legend"]      = {"text": "Offshore WL", "contours": [{"text": " 0.0&nbsp-&nbsp;0.33&#8201;m", "color": "#CCFFFF"}, {"text": " 0.33&nbsp;-&nbsp;1.0&#8201;m", "color": "#40E0D0"}, {"text": " 1.0&nbsp-&nbsp;2.0&#8201;m", "color": "#00BFFF"}, {"text": "&gt; 2.0&#8201;m", "color": "#0909FF"}]}
                     
                     mp = next((x for x in cosmos.config.map_contours if x["name"] == "run_up"), None)                    
@@ -1123,11 +1204,12 @@ class WebViewer:
 
                     dct={}
                     dct["name"]        = "extreme_sea_level_and_wave_height"
-                    dct["long_name"]   = "Offshore SWL and Hs"
+                    dct["long_name"]   = "Offshore WL and Hs"
                     dct["description"] = "This is the total offshore water level (tide + surge) and wave conditions."
                     dct["format"]      = "geojson"
                     dct["legend"]      = {"text": "Offshore WL", "contours": [{"text": " 0.0&nbsp-&nbsp;0.33&#8201;m", "color": "#CCFFFF"}, {"text": " 0.33&nbsp;-&nbsp;1.0&#8201;m", "color": "#40E0D0"}, {"text": " 1.0&nbsp-&nbsp;2.0&#8201;m", "color": "#00BFFF"}, {"text": "&gt; 2.0&#8201;m", "color": "#0909FF"}]}
-                    
+                    dct["infographic"]   = "empty"
+
                     self.map_variables.append(dct)
                 
 
@@ -1163,7 +1245,8 @@ class WebViewer:
 
 
     def upload(self):        
-
+        """Upload local webviewer to server.
+        """
         from cht.misc.sftp import SSHSession
         
         cosmos.log("Uploading web viewer ...")

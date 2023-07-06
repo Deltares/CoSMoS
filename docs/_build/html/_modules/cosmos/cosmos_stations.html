@@ -85,7 +85,8 @@
 <span class="kn">from</span> <span class="nn">cht.misc</span> <span class="kn">import</span> <span class="n">fileops</span> <span class="k">as</span> <span class="n">fo</span>
 
 <span class="k">class</span> <span class="nc">Station</span><span class="p">():</span>
-    
+    <span class="sd">&quot;&quot;&quot;Initialize single observation station.</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span>      <span class="o">=</span> <span class="kc">None</span>
@@ -102,13 +103,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">upload</span>    <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="Stations"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_stations.Stations.html#cosmos.cosmos_stations.Stations">[docs]</a><span class="k">class</span> <span class="nc">Stations</span><span class="p">():</span>
-
+    <span class="sd">&quot;&quot;&quot;Cosmos observation stations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="Stations.__init__"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_stations.Stations.html#cosmos.cosmos_stations.Stations.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">station</span> <span class="o">=</span> <span class="p">[]</span>                 </div>
 
     <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
+        <span class="sd">&quot;&quot;&quot;Read cosmos observation stations from observation station xml file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">file_list</span> <span class="o">=</span> <span class="n">fo</span><span class="o">.</span><span class="n">list_files</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">stations_path</span><span class="p">,</span>
                                                <span class="s2">&quot;*.xml&quot;</span><span class="p">))</span>
         
@@ -142,7 +145,8 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">station</span><span class="p">)</span> 
 
     <span class="k">def</span> <span class="nf">find_by_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>      
-        
+        <span class="sd">&quot;&quot;&quot;Find station name in station list.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">station</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">station</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">station</span>
@@ -150,7 +154,9 @@
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">find_by_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        
+        <span class="sd">&quot;&quot;&quot;Find station filename.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">station_list</span> <span class="o">=</span> <span class="p">[]</span>
         
         <span class="k">for</span> <span class="n">station</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="p">:</span>

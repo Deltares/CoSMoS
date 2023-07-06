@@ -96,9 +96,33 @@
 <span class="kn">import</span> <span class="nn">cht.nesting.nesting</span> <span class="k">as</span> <span class="nn">nesting</span>
 
 <div class="viewcode-block" id="CoSMoS_XBeach"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_xbeach.CoSMoS_XBeach.html#cosmos.cosmos_xbeach.CoSMoS_XBeach">[docs]</a><span class="k">class</span> <span class="nc">CoSMoS_XBeach</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
-    
+    <span class="sd">&quot;&quot;&quot;Cosmos class for XBeach model.</span>
+
+<span class="sd">    XBeach (XB) is a physics-based nearshore model that solves the horizontal equations for flow, </span>
+<span class="sd">    wave propagation, sediment transport, and changes in bathymetry (see also https://xbeach.readthedocs.io/en/latest/).</span>
+
+<span class="sd">    This cosmos class reads XBeach model data, pre-processes, moves and post-processes XBeach models.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Model : class</span>
+<span class="sd">        Generic cosmos model attributes</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cosmos.cosmos_scenario.Scenario</span>
+<span class="sd">    cosmos.cosmos_model_loop.ModelLoop</span>
+<span class="sd">    cosmos.cosmos_model.Model</span>
+<span class="sd">    &quot;&quot;&quot;</span> 
 <div class="viewcode-block" id="CoSMoS_XBeach.read_model_specific"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_xbeach.CoSMoS_XBeach.read_model_specific.html#cosmos.cosmos_xbeach.CoSMoS_XBeach.read_model_specific">[docs]</a>    <span class="k">def</span> <span class="nf">read_model_specific</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        
+        <span class="sd">&quot;&quot;&quot;Read SFINCS specific model attributes.</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        ----------</span>
+<span class="sd">        cht.xbeach.xbeach</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="c1"># Read in the XBeach model</span>
         
         <span class="c1"># First set some defaults</span>
@@ -164,6 +188,16 @@
         
         
 <div class="viewcode-block" id="CoSMoS_XBeach.pre_process"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_xbeach.CoSMoS_XBeach.pre_process.html#cosmos.cosmos_xbeach.CoSMoS_XBeach.pre_process">[docs]</a>    <span class="k">def</span> <span class="nf">pre_process</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Preprocess XBeach model.</span>
+<span class="sd">        - Extract and write water level and wave conditions.</span>
+<span class="sd">        - Optional: only run XBeach for peak conditions.</span>
+<span class="sd">        - Write input file. </span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        ----------</span>
+<span class="sd">        cht.nesting.nest2</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="c1"># First generate input that is identical for all members</span>
                 
@@ -253,7 +287,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">pth</span></div>
 
 <div class="viewcode-block" id="CoSMoS_XBeach.move"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_xbeach.CoSMoS_XBeach.move.html#cosmos.cosmos_xbeach.CoSMoS_XBeach.move">[docs]</a>    <span class="k">def</span> <span class="nf">move</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        
+        <span class="sd">&quot;&quot;&quot;Move XBeach model input and output files.</span>
+<span class="sd">        &quot;&quot;&quot;</span>   
         <span class="c1"># Move files from job folder to archive folder</span>
         
         <span class="c1"># First clear archive folder      </span>
@@ -270,6 +305,8 @@
         <span class="n">fo</span><span class="o">.</span><span class="n">move_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">job_path</span><span class="p">,</span> <span class="s2">&quot;*.*&quot;</span><span class="p">),</span> <span class="n">input_path</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CoSMoS_XBeach.post_process"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_xbeach.CoSMoS_XBeach.post_process.html#cosmos.cosmos_xbeach.CoSMoS_XBeach.post_process">[docs]</a>    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Post-process XBeach output: generate sedimentation/erosion maps.        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="n">output_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cycle_output_path</span>
         <span class="n">sedero_map_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">cycle_tiles_path</span><span class="p">,</span>

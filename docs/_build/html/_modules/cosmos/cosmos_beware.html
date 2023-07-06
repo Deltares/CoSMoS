@@ -102,6 +102,8 @@
 
 <span class="sd">    BEWARE is a meta-model based on XBeach for predicting nearshore wave heights and total water levels at reef-lined coasts.</span>
 
+<span class="sd">    This cosmos class reads BEWARE model data, pre-processes, moves and post-processes BEWARE models.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    Model : class</span>
@@ -109,11 +111,12 @@
 
 <span class="sd">    See Also</span>
 <span class="sd">    ----------</span>
-<span class="sd">    cosmos.cosmos_model_loop: invokes current class</span>
-<span class="sd">    cosmos.cosmos_model: function call</span>
+<span class="sd">    cosmos.cosmos_scenario.Scenario</span>
+<span class="sd">    cosmos.cosmos_model_loop.ModelLoop</span>
+<span class="sd">    cosmos.cosmos_model.Model</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
 <div class="viewcode-block" id="CoSMoS_BEWARE.read_model_specific"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_beware.CoSMoS_BEWARE.read_model_specific.html#cosmos.cosmos_beware.CoSMoS_BEWARE.read_model_specific">[docs]</a>    <span class="k">def</span> <span class="nf">read_model_specific</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Read BEWARE specific model attributes</span>
+        <span class="sd">&quot;&quot;&quot;Read BEWARE specific model attributes.</span>
 
 <span class="sd">        See Also</span>
 <span class="sd">        ----------</span>
@@ -133,14 +136,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">runid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">runid</span></div>
 
 <div class="viewcode-block" id="CoSMoS_BEWARE.pre_process"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_beware.CoSMoS_BEWARE.pre_process.html#cosmos.cosmos_beware.CoSMoS_BEWARE.pre_process">[docs]</a>    <span class="k">def</span> <span class="nf">pre_process</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Preprocess BEWARE model: write wave and water level conditions, input file, run.bat</span>
+        <span class="sd">&quot;&quot;&quot;Preprocess BEWARE model.</span>
+<span class="sd">        - Extract and write wave and water level conditions.</span>
+<span class="sd">        - Write input file. </span>
+<span class="sd">        - Optional: make ensemble of models.</span>
+
 
 <span class="sd">        See Also</span>
 <span class="sd">        ----------</span>
 <span class="sd">        cht.nesting.nest2</span>
 <span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>   
-        <span class="c1"># First generate input that is identical for all members</span>
         
         <span class="c1"># Set path temporarily to job path</span>
         <span class="n">pth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">path</span>
@@ -192,18 +198,6 @@
         <span class="c1"># Now write input file (sfincs.inp)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">write_input_file</span><span class="p">()</span>
 
-        <span class="c1"># Make inp file</span>
-        <span class="c1">#inp_file = os.path.join(self.job_path, &quot;beware.inp&quot;)</span>
-        <span class="c1">#with open(inp_file,&#39;w&#39;) as fid:</span>
-<span class="c1">#       #     fid.write(f&#39;folder   = {self.job_path} \n&#39;)</span>
-        <span class="c1">#    fid.write(f&#39;tref     = {self.domain.input.tref.strftime(&quot;%Y%m%d %H%M%S&quot;)} \n&#39;)</span>
-        <span class="c1">#    fid.write(f&#39;tstart   = {self.domain.input.tstart.strftime(&quot;%Y%m%d %H%M%S&quot;)} \n&#39;)</span>
-        <span class="c1">#    fid.write(f&#39;tstop    = {self.domain.input.tstop.strftime(&quot;%Y%m%d %H%M%S&quot;)} \n&#39;)</span>
-        <span class="c1">#    fid.write(f&#39;dT       = {self.domain.input.dT} \n&#39;)</span>
-        <span class="c1">#    fid.write(f&#39;runup    = {self.domain.input.runup} \n&#39;)</span>
-        <span class="c1">#    fid.write(f&#39;flooding = {self.domain.input.flooding} \n&#39;)</span>
-        <span class="c1">#fid.close()</span>
-
         <span class="c1"># Make run batch file</span>
         <span class="n">src</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">beware_exe_path</span><span class="p">,</span> <span class="s2">&quot;run_bw.bas&quot;</span><span class="p">)</span>
         <span class="n">batch_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">,</span> <span class="s2">&quot;run.bat&quot;</span><span class="p">)</span>
@@ -211,17 +205,6 @@
         <span class="n">shutil</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">batch_file</span><span class="p">)</span>
         <span class="c1"># findreplace(batch_file, &quot;DISKKEY&quot;, &#39;P&#39;)</span>
         <span class="n">findreplace</span><span class="p">(</span><span class="n">batch_file</span><span class="p">,</span> <span class="s2">&quot;EXEPATHKEY&quot;</span><span class="p">,</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">beware_exe_path</span><span class="p">)</span>
-<span class="c1">#        findreplace(batch_file, &quot;RUNPATHKEY&quot;, self.job_path)</span>
-<span class="c1">#         fid = open(batch_file, &quot;w&quot;)</span>
-<span class="c1">#         fid.write(&quot;@ echo off\n&quot;)</span>
-<span class="c1">#         fid.write(&quot;DATE /T &gt; running.txt\n&quot;)</span>
-<span class="c1">#         exe_path = os.path.join(cosmos.config.beware_exe_path, &quot;run_beware.py&quot;)</span>
-<span class="c1">#         fid.write(exe_path + &quot;\n&quot;)</span>
-<span class="c1"># #        fid.write(&quot;d:\\checkouts\\SFINCS\\branches\\subgrid_openacc_12_wavemaker\\sfincs\\x64\\Release\\sfincs.exe\n&quot;)</span>
-<span class="c1">#         fid.write(&quot;move &quot; + os.path.join(cosmos.config.beware_exe_path, &quot;beware.inp&quot;) + &quot; &quot; +  os.path.join(self.domain.path, &quot;beware.inp&quot;) + &quot; \n&quot;)</span>
-<span class="c1">#         fid.write(&quot;move running.txt finished.txt\n&quot;)</span>
-<span class="c1"># #        fid.write(&quot;exit\n&quot;)</span>
-<span class="c1">#         fid.close()</span>
 
         <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">track_ensemble</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="p">:</span>
             <span class="n">profsfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">profsfile</span>
@@ -296,7 +279,7 @@
 
         
 <div class="viewcode-block" id="CoSMoS_BEWARE.move"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_beware.CoSMoS_BEWARE.move.html#cosmos.cosmos_beware.CoSMoS_BEWARE.move">[docs]</a>    <span class="k">def</span> <span class="nf">move</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Move BEWARE model input and output files</span>
+        <span class="sd">&quot;&quot;&quot;Move BEWARE model input and output files.</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
         <span class="c1"># Move files from job folder to archive folder</span>
         
@@ -327,7 +310,7 @@
                     <span class="k">pass</span></div>
 
 <div class="viewcode-block" id="CoSMoS_BEWARE.post_process"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_beware.CoSMoS_BEWARE.post_process.html#cosmos.cosmos_beware.CoSMoS_BEWARE.post_process">[docs]</a>    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Post-process BEWARE output</span>
+        <span class="sd">&quot;&quot;&quot;Post-process BEWARE output: generate (probabilistic) runup timeseries.</span>
 <span class="sd">        </span>
 <span class="sd">        See Also</span>
 <span class="sd">        ----------</span>
@@ -345,7 +328,7 @@
             
             <span class="c1"># Make probabilistic runup timeseries</span>
             <span class="n">file_list</span><span class="o">=</span> <span class="n">fo</span><span class="o">.</span><span class="n">list_files</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s2">&quot;beware_his_*&quot;</span><span class="p">))</span>
-            <span class="n">prcs</span><span class="o">=</span> <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">]</span> <span class="c1">#np.concatenate((np.arange(0, 0.9, 0.1), np.arange(0.9, 1, 0.01)))</span>
+            <span class="n">prcs</span><span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">95</span><span class="p">]</span>
             <span class="nb">vars</span><span class="o">=</span> <span class="p">[</span><span class="s2">&quot;R2_tot&quot;</span><span class="p">,</span> <span class="s2">&quot;R2_set&quot;</span><span class="p">,</span> <span class="s2">&quot;WL&quot;</span><span class="p">]</span>
             <span class="n">output_file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s2">&quot;beware_his_ensemble.nc&quot;</span><span class="p">)</span>
             <span class="n">pm</span><span class="o">.</span><span class="n">prob_floodmaps</span><span class="p">(</span><span class="n">file_list</span><span class="o">=</span><span class="n">file_list</span><span class="p">,</span> <span class="n">variables</span><span class="o">=</span><span class="nb">vars</span><span class="p">,</span> <span class="n">prcs</span><span class="o">=</span><span class="n">prcs</span><span class="p">,</span> <span class="n">delete</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">output_file_name</span><span class="o">=</span><span class="n">output_file_name</span><span class="p">)</span></div></div>

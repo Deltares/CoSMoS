@@ -95,9 +95,17 @@
 <span class="kn">import</span> <span class="nn">cht.misc.misc_tools</span>
 
 <div class="viewcode-block" id="WebViewer"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_webviewer.WebViewer.html#cosmos.cosmos_webviewer.WebViewer">[docs]</a><span class="k">class</span> <span class="nc">WebViewer</span><span class="p">:</span>
-    
-<div class="viewcode-block" id="WebViewer.__init__"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_webviewer.WebViewer.html#cosmos.cosmos_webviewer.WebViewer.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Cosmos webviewer class</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
 
+<div class="viewcode-block" id="WebViewer.__init__"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_webviewer.WebViewer.html#cosmos.cosmos_webviewer.WebViewer.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize webviewer. </span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        name : str</span>
+<span class="sd">            Name of webviewer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span>    <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path</span>    <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">main_path</span><span class="p">,</span> <span class="s2">&quot;webviewers&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">webviewer_version</span>
@@ -107,7 +115,12 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">exists</span> <span class="o">=</span> <span class="kc">False</span></div>
     
     <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        
+        <span class="sd">&quot;&quot;&quot;Make webviewer. </span>
+<span class="sd">        - Makes local copy of the webviewer from a template. If such a copy already exists, data will be copied to the existing webviewer.</span>
+<span class="sd">        - Updating the scenario.js with the current scenario.</span>
+<span class="sd">        - Make a variable file defining the variables that are mapped for the current scenario.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>        
         <span class="c1"># Makes local copy of the web viewer</span>
         <span class="c1"># If such a copy already exists, data will be copied to the existing web viewer</span>
 
@@ -157,10 +170,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">copy_timeseries</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">copy_floodmap</span><span class="p">()</span>        
         <span class="bp">self</span><span class="o">.</span><span class="n">copy_wave_maps</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">copy_sederomap</span><span class="p">()</span>
+        <span class="c1"># self.copy_sederomap()</span>
         <span class="c1"># self.copy_bedlevelmaps()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">make_runup_map</span><span class="p">()</span>
-        <span class="c1"># self.make_meteo_maps()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">make_meteo_maps</span><span class="p">()</span>
         <span class="n">mv_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">scenario_path</span><span class="p">,</span>
                                <span class="s2">&quot;variables.js&quot;</span><span class="p">)</span>
         
@@ -168,7 +181,8 @@
 
 
     <span class="k">def</span> <span class="nf">copy_timeseries</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
+        <span class="sd">&quot;&quot;&quot;Copy available wave, water level, and runup timeseries to webviewer folder.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
         <span class="n">scenario_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
                                      <span class="s2">&quot;data&quot;</span><span class="p">,</span>
                                      <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -363,6 +377,8 @@
         <span class="c1">#         model.domain.write_to_csv(scenario_path, cosmos.scenario.name)</span>
 
     <span class="k">def</span> <span class="nf">copy_floodmap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Copy available flood map tiles to webviewer folder.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
 
         <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Copying flood map tiles ...&quot;</span><span class="p">)</span>
 
@@ -415,6 +431,8 @@
             <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;This is a flood map. It can tell if you will drown.&quot;</span>
             <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span>      <span class="o">=</span> <span class="s2">&quot;xyz_tile_layer&quot;</span>
             <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;max_native_zoom&quot;</span><span class="p">]</span>  <span class="o">=</span> <span class="mi">13</span>
+            <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;infographic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;empty&quot;</span>
+
 
             <span class="n">tms</span> <span class="o">=</span> <span class="p">[]</span>            
             <span class="k">for</span> <span class="n">it</span><span class="p">,</span> <span class="n">pth</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pathstr</span><span class="p">):</span>
@@ -445,7 +463,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">map_variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dct</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">copy_wave_maps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            
+        <span class="sd">&quot;&quot;&quot;Copy available wave map tiles to webviewer folder.</span>
+<span class="sd">        &quot;&quot;&quot;</span>   
         <span class="c1"># Wave maps</span>
         <span class="n">scenario_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
                                      <span class="s2">&quot;data&quot;</span><span class="p">,</span>
@@ -503,6 +522,7 @@
             <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;These are Hm0 wave heights.&quot;</span>
             <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span>      <span class="o">=</span> <span class="s2">&quot;xyz_tile_layer&quot;</span>
             <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;max_native_zoom&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">9</span>
+            <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;infographic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;empty&quot;</span>
             
             <span class="n">tms</span> <span class="o">=</span> <span class="p">[]</span>            
             <span class="k">for</span> <span class="n">it</span><span class="p">,</span> <span class="n">pth</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pathstr</span><span class="p">):</span>
@@ -536,7 +556,8 @@
 
                 
     <span class="k">def</span> <span class="nf">copy_sederomap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
+        <span class="sd">&quot;&quot;&quot;Copy available sedimentation/erosion map tiles to webviewer folder.</span>
+<span class="sd">        &quot;&quot;&quot;</span>   
         <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Copying sedimentation/erosion map tiles ...&quot;</span><span class="p">)</span>
         
         <span class="n">scenario_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
@@ -557,6 +578,7 @@
             <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;This is a sedimentation/erosion map. It can tell if your house will wash away.&quot;</span>
             <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span>      <span class="o">=</span> <span class="s2">&quot;xyz_tile_layer&quot;</span>
             <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;max_native_zoom&quot;</span><span class="p">]</span>  <span class="o">=</span> <span class="mi">16</span>
+            <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;infographic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;empty&quot;</span>
 
             <span class="n">mp</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">map_contours</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;sedero&quot;</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>    
             
@@ -610,7 +632,8 @@
             <span class="n">cht</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">misc_tools</span><span class="o">.</span><span class="n">write_json_js</span><span class="p">(</span><span class="n">stations_file</span><span class="p">,</span> <span class="n">feature_collection</span><span class="p">,</span> <span class="s2">&quot;var xb_markers =&quot;</span><span class="p">)</span>
             
     <span class="k">def</span> <span class="nf">make_meteo_maps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        
+        <span class="sd">&quot;&quot;&quot;Make wind and precipitation tiles for webviewer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>   
         <span class="kn">from</span> <span class="nn">cht.misc</span> <span class="kn">import</span> <span class="n">xmlkit</span> <span class="k">as</span> <span class="n">xml</span>
 
         <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Making meteo map tiles ...&quot;</span><span class="p">)</span>
@@ -624,239 +647,291 @@
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_obj</span><span class="p">,</span> <span class="s2">&quot;meteo_dataset&quot;</span><span class="p">):</span>
             <span class="n">meteo_dataset</span> <span class="o">=</span> <span class="n">xml_obj</span><span class="o">.</span><span class="n">meteo_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
 
-        <span class="k">for</span> <span class="n">meteo_subset</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">meteo_subset</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">meteo_dataset</span> <span class="o">==</span> <span class="n">meteo_subset</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
-                
-                <span class="c1"># TODO these ranges </span>
-                <span class="n">xlim</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">99.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">55.0</span><span class="p">]</span>
-                <span class="n">ylim</span> <span class="o">=</span> <span class="p">[</span><span class="mf">8.0</span><span class="p">,</span> <span class="mf">45.0</span><span class="p">]</span>
-                
-                <span class="k">if</span> <span class="n">meteo_subset</span><span class="o">.</span><span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                                        
-                    <span class="n">subset</span> <span class="o">=</span> <span class="n">meteo_subset</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="n">xlim</span><span class="p">,</span>
-                                                 <span class="n">ylim</span><span class="o">=</span><span class="n">ylim</span><span class="p">,</span>
-                                                 <span class="n">time_range</span><span class="o">=</span><span class="p">[],</span>
-                                                 <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-                    <span class="c1"># Get maximum wind speed</span>
-                    <span class="n">u</span> <span class="o">=</span> <span class="n">subset</span><span class="o">.</span><span class="n">quantity</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">u</span>
-                    <span class="n">v</span> <span class="o">=</span> <span class="n">subset</span><span class="o">.</span><span class="n">quantity</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">v</span>
-                    <span class="n">vmag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">u</span><span class="o">*</span><span class="n">u</span> <span class="o">+</span> <span class="n">v</span><span class="o">*</span><span class="n">v</span><span class="p">)</span>
-                    <span class="n">wndmx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">vmag</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">meteo_subset</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">meteo_subset</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">meteo_dataset</span> <span class="o">==</span> <span class="n">meteo_subset</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
                     
-                    <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">scenario_path</span><span class="p">,</span> <span class="s2">&quot;wind.json.js&quot;</span><span class="p">)</span>
-                    <span class="n">subset</span><span class="o">.</span><span class="n">write_wind_to_json</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">time_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">js</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="c1"># TODO these ranges </span>
+                    <span class="n">xlim</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">99.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">55.0</span><span class="p">]</span>
+                    <span class="n">ylim</span> <span class="o">=</span> <span class="p">[</span><span class="mf">8.0</span><span class="p">,</span> <span class="mf">45.0</span><span class="p">]</span>
                     
-                    <span class="c1"># Add wind to map variables</span>
-    
-                    <span class="k">if</span> <span class="n">wndmx</span><span class="o">&lt;=</span><span class="mf">20.0</span><span class="p">:</span>
-                        <span class="n">contour_set</span> <span class="o">=</span> <span class="s2">&quot;wnd20&quot;</span>
-                        <span class="n">wndmx</span><span class="o">=</span><span class="mf">20.0</span>                
-                    <span class="k">elif</span> <span class="n">wndmx</span><span class="o">&lt;=</span><span class="mf">40.0</span><span class="p">:</span>   
-                        <span class="n">contour_set</span> <span class="o">=</span> <span class="s2">&quot;wnd40&quot;</span>
-                        <span class="n">wndmx</span><span class="o">=</span><span class="mf">40.0</span>                
-                    <span class="k">else</span><span class="p">:</span>   
-                        <span class="n">contour_set</span> <span class="o">=</span> <span class="s2">&quot;wnd60&quot;</span>
-                        <span class="n">wndmx</span><span class="o">=</span><span class="mf">60.0</span>                
-            
-                    <span class="n">dct</span><span class="o">=</span><span class="p">{}</span>
-                    <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>        <span class="o">=</span> <span class="s2">&quot;wind&quot;</span>
-                    <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span>   <span class="o">=</span> <span class="s2">&quot;Wind&quot;</span>
-                    <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;This is a wind map. It can tell if your house will blow away.&quot;</span>
-                    <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span>      <span class="o">=</span> <span class="s2">&quot;vector_field&quot;</span>
-                    <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;max&quot;</span><span class="p">]</span>         <span class="o">=</span> <span class="n">wndmx</span>
-        
-                    <span class="n">mp</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">map_contours</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">contour_set</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>    
-                    
-                    <span class="n">lgn</span> <span class="o">=</span> <span class="p">{}</span>
-                    <span class="n">lgn</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mp</span><span class="p">[</span><span class="s2">&quot;string&quot;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">meteo_subset</span><span class="o">.</span><span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                                            
+                        <span class="n">subset</span> <span class="o">=</span> <span class="n">meteo_subset</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="n">xlim</span><span class="p">,</span>
+                                                    <span class="n">ylim</span><span class="o">=</span><span class="n">ylim</span><span class="p">,</span>
+                                                    <span class="n">time_range</span><span class="o">=</span><span class="p">[],</span>
+                                                    <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                        <span class="c1"># Get maximum wind speed</span>
+                        <span class="n">u</span> <span class="o">=</span> <span class="n">subset</span><span class="o">.</span><span class="n">quantity</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">u</span>
+                        <span class="n">v</span> <span class="o">=</span> <span class="n">subset</span><span class="o">.</span><span class="n">quantity</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">v</span>
+                        <span class="n">vmag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">u</span><span class="o">*</span><span class="n">u</span> <span class="o">+</span> <span class="n">v</span><span class="o">*</span><span class="n">v</span><span class="p">)</span>
+                        <span class="n">wndmx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">vmag</span><span class="p">)</span>
                         
-                    <span class="n">cntrs</span> <span class="o">=</span> <span class="n">mp</span><span class="p">[</span><span class="s2">&quot;contours&quot;</span><span class="p">]</span>
+                        <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">scenario_path</span><span class="p">,</span> <span class="s2">&quot;wind.json.js&quot;</span><span class="p">)</span>
+                        <span class="n">subset</span><span class="o">.</span><span class="n">write_wind_to_json</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">time_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">js</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        
+                        <span class="c1"># Add wind to map variables</span>
         
-                    <span class="n">contours</span> <span class="o">=</span> <span class="p">[]</span>
-                    
-                    <span class="k">for</span> <span class="n">cntr</span> <span class="ow">in</span> <span class="n">cntrs</span><span class="p">:</span>    
-                        <span class="n">contour</span> <span class="o">=</span> <span class="p">{}</span>
-                        <span class="n">contour</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">cntr</span><span class="p">[</span><span class="s2">&quot;string&quot;</span><span class="p">]</span>
-                        <span class="n">contour</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;#&quot;</span> <span class="o">+</span> <span class="n">cntr</span><span class="p">[</span><span class="s2">&quot;hex&quot;</span><span class="p">]</span>
-                        <span class="n">contours</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">contour</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">wndmx</span><span class="o">&lt;=</span><span class="mf">20.0</span><span class="p">:</span>
+                            <span class="n">contour_set</span> <span class="o">=</span> <span class="s2">&quot;wnd20&quot;</span>
+                            <span class="n">wndmx</span><span class="o">=</span><span class="mf">20.0</span>                
+                        <span class="k">elif</span> <span class="n">wndmx</span><span class="o">&lt;=</span><span class="mf">40.0</span><span class="p">:</span>   
+                            <span class="n">contour_set</span> <span class="o">=</span> <span class="s2">&quot;wnd40&quot;</span>
+                            <span class="n">wndmx</span><span class="o">=</span><span class="mf">40.0</span>                
+                        <span class="k">else</span><span class="p">:</span>   
+                            <span class="n">contour_set</span> <span class="o">=</span> <span class="s2">&quot;wnd60&quot;</span>
+                            <span class="n">wndmx</span><span class="o">=</span><span class="mf">60.0</span>                
+                
+                        <span class="n">dct</span><span class="o">=</span><span class="p">{}</span>
+                        <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>        <span class="o">=</span> <span class="s2">&quot;wind&quot;</span>
+                        <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span>   <span class="o">=</span> <span class="s2">&quot;Wind&quot;</span>
+                        <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;This is a wind map. It can tell if your house will blow away.&quot;</span>
+                        <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span>      <span class="o">=</span> <span class="s2">&quot;vector_field&quot;</span>
+                        <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;max&quot;</span><span class="p">]</span>         <span class="o">=</span> <span class="n">wndmx</span>
+                        <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;infographic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;empty&quot;</span>
             
-                    <span class="n">lgn</span><span class="p">[</span><span class="s2">&quot;contours&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">contours</span>
-                    <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;legend&quot;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">lgn</span>
-                    
-                    <span class="bp">self</span><span class="o">.</span><span class="n">map_variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dct</span><span class="p">)</span>
-                    
-                    <span class="c1"># Cyclone track(s)</span>
-
-                    <span class="c1"># subset = meteo_subset.subset(time_range=[],</span>
-                    <span class="c1">#                              stride=1,</span>
-                    <span class="c1">#                              tstride=tstride)</span>
-    
-                    <span class="n">tracks</span> <span class="o">=</span> <span class="n">meteo_subset</span><span class="o">.</span><span class="n">find_cyclone_tracks</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">110.0</span><span class="p">,</span><span class="o">-</span><span class="mf">30.0</span><span class="p">],</span>
-                                                              <span class="n">ylim</span><span class="o">=</span><span class="p">[</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">45.0</span><span class="p">],</span>
-                                                              <span class="n">pcyc</span><span class="o">=</span><span class="mf">99500.0</span><span class="p">,</span>
-                                                              <span class="n">dt</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
-                    
-                    <span class="k">if</span> <span class="n">tracks</span><span class="p">:</span>
-                        <span class="n">features</span> <span class="o">=</span> <span class="p">[]</span>
-                        <span class="k">for</span> <span class="n">track</span> <span class="ow">in</span> <span class="n">tracks</span><span class="p">:</span>
+                        <span class="n">mp</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">map_contours</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">contour_set</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>    
+                        
+                        <span class="n">lgn</span> <span class="o">=</span> <span class="p">{}</span>
+                        <span class="n">lgn</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mp</span><span class="p">[</span><span class="s2">&quot;string&quot;</span><span class="p">]</span>
                             
-                            <span class="n">points</span><span class="o">=</span><span class="p">[]</span>
+                        <span class="n">cntrs</span> <span class="o">=</span> <span class="n">mp</span><span class="p">[</span><span class="s2">&quot;contours&quot;</span><span class="p">]</span>
+            
+                        <span class="n">contours</span> <span class="o">=</span> <span class="p">[]</span>
                         
-                            <span class="k">for</span> <span class="n">ip</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">lon</span><span class="p">)):</span>
-                                <span class="n">point</span> <span class="o">=</span> <span class="n">Point</span><span class="p">((</span><span class="n">track</span><span class="o">.</span><span class="n">lon</span><span class="p">[</span><span class="n">ip</span><span class="p">],</span> <span class="n">track</span><span class="o">.</span><span class="n">lat</span><span class="p">[</span><span class="n">ip</span><span class="p">]))</span>               
-                                <span class="k">if</span> <span class="n">track</span><span class="o">.</span><span class="n">vmax</span><span class="p">[</span><span class="n">ip</span><span class="p">]</span><span class="o">&lt;</span><span class="mf">64.0</span><span class="p">:</span>
-                                    <span class="n">cat</span> <span class="o">=</span> <span class="s2">&quot;TS&quot;</span>
-                                <span class="k">elif</span> <span class="n">track</span><span class="o">.</span><span class="n">vmax</span><span class="p">[</span><span class="n">ip</span><span class="p">]</span><span class="o">&lt;</span><span class="mf">83.0</span><span class="p">:</span>
-                                    <span class="n">cat</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
-                                <span class="k">elif</span> <span class="n">track</span><span class="o">.</span><span class="n">vmax</span><span class="p">[</span><span class="n">ip</span><span class="p">]</span><span class="o">&lt;</span><span class="mf">96.0</span><span class="p">:</span>    
-                                    <span class="n">cat</span> <span class="o">=</span> <span class="s2">&quot;2&quot;</span>
-                                <span class="k">elif</span> <span class="n">track</span><span class="o">.</span><span class="n">vmax</span><span class="p">[</span><span class="n">ip</span><span class="p">]</span><span class="o">&lt;</span><span class="mf">113.0</span><span class="p">:</span>    
-                                    <span class="n">cat</span> <span class="o">=</span> <span class="s2">&quot;3&quot;</span>
-                                <span class="k">elif</span> <span class="n">track</span><span class="o">.</span><span class="n">vmax</span><span class="p">[</span><span class="n">ip</span><span class="p">]</span><span class="o">&lt;</span><span class="mf">137.0</span><span class="p">:</span>    
-                                    <span class="n">cat</span> <span class="o">=</span> <span class="s2">&quot;4&quot;</span>
-                                <span class="k">else</span><span class="p">:</span>    
-                                    <span class="n">cat</span> <span class="o">=</span> <span class="s2">&quot;5&quot;</span>
-                                <span class="n">features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Feature</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="n">point</span><span class="p">,</span>
-                                                        <span class="n">properties</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;time&quot;</span><span class="p">:</span><span class="n">track</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="n">ip</span><span class="p">]</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y/%m/</span><span class="si">%d</span><span class="s2"> %H:%M&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; UTC&quot;</span><span class="p">,</span>
-                                                                    <span class="s2">&quot;lon&quot;</span><span class="p">:</span><span class="n">track</span><span class="o">.</span><span class="n">lon</span><span class="p">[</span><span class="n">ip</span><span class="p">],</span>
-                                                                    <span class="s2">&quot;lat&quot;</span><span class="p">:</span><span class="n">track</span><span class="o">.</span><span class="n">lat</span><span class="p">[</span><span class="n">ip</span><span class="p">],</span>
-                                                                    <span class="s2">&quot;vmax&quot;</span><span class="p">:</span><span class="n">track</span><span class="o">.</span><span class="n">vmax</span><span class="p">[</span><span class="n">ip</span><span class="p">],</span>
-                                                                    <span class="s2">&quot;pc&quot;</span><span class="p">:</span><span class="n">track</span><span class="o">.</span><span class="n">pc</span><span class="p">[</span><span class="n">ip</span><span class="p">],</span>
-                                                                    <span class="s2">&quot;category&quot;</span><span class="p">:</span><span class="n">cat</span><span class="p">}))</span>
-                                
-                                <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">track</span><span class="o">.</span><span class="n">lon</span><span class="p">[</span><span class="n">ip</span><span class="p">],</span> <span class="n">track</span><span class="o">.</span><span class="n">lat</span><span class="p">[</span><span class="n">ip</span><span class="p">]])</span>
-                            
-                            <span class="n">trk</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">(</span><span class="n">coordinates</span><span class="o">=</span><span class="n">points</span><span class="p">)</span>
-                            <span class="n">features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Feature</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="n">trk</span><span class="p">,</span>
-                                                    <span class="n">properties</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;No name&quot;</span><span class="p">}))</span>
-                        
-                        <span class="n">feature_collection</span> <span class="o">=</span> <span class="n">FeatureCollection</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
-                        <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">scenario_path</span><span class="p">,</span> <span class="s2">&quot;track.geojson.js&quot;</span><span class="p">)</span>
-                        <span class="n">cht</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">misc_tools</span><span class="o">.</span><span class="n">write_json_js</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span>
-                                                          <span class="n">feature_collection</span><span class="p">,</span>
-                                                          <span class="s2">&quot;var track_data =&quot;</span><span class="p">)</span>
-                                
-        
-        <span class="c1"># Cumulative rainfall</span>
-        
-        <span class="c1"># Rainfall map for the entire simulation</span>
-        <span class="n">dt1</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="c1">#        dt6 = datetime.timedelta(hours=6)</span>
-        <span class="n">dt24</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
-        <span class="n">t0</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>    
-        <span class="n">t1</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">stop_time</span>
-        
-        <span class="c1"># First determine max precip for all simulations </span>
-        <span class="n">pmx</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="n">okay</span>  <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">type</span><span class="o">==</span><span class="s2">&quot;sfincs&quot;</span><span class="p">:</span>
-                <span class="n">index_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;tiling&quot;</span><span class="p">,</span> <span class="s2">&quot;indices&quot;</span><span class="p">)</span>
-<span class="c1">#                if model.make_precip_map and os.path.exists(index_path):            </span>
-                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">index_path</span><span class="p">):</span>            
-                    <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">cycle_output_path</span><span class="p">,</span> <span class="s2">&quot;sfincs_map.nc&quot;</span><span class="p">)</span>
-                    <span class="c1"># p0max = model.domain.read_cumulative_precipitation(file_name=file_name,</span>
-                    <span class="c1">#                                                    time_range=[t0 + dt1, t1 + dt1])</span>
-                    <span class="c1"># pmx = max(pmx, np.nanmax(p0max))</span>
-                    <span class="n">okay</span> <span class="o">=</span> <span class="kc">True</span>
-
-        <span class="k">if</span> <span class="n">okay</span><span class="p">:</span>
-
-            <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Making precipitation tiles ...&quot;</span><span class="p">)</span>                
+                        <span class="k">for</span> <span class="n">cntr</span> <span class="ow">in</span> <span class="n">cntrs</span><span class="p">:</span>    
+                            <span class="n">contour</span> <span class="o">=</span> <span class="p">{}</span>
+                            <span class="n">contour</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">cntr</span><span class="p">[</span><span class="s2">&quot;string&quot;</span><span class="p">]</span>
+                            <span class="n">contour</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;#&quot;</span> <span class="o">+</span> <span class="n">cntr</span><span class="p">[</span><span class="s2">&quot;hex&quot;</span><span class="p">]</span>
+                            <span class="n">contours</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">contour</span><span class="p">)</span>
                 
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Maximum precipitation : &quot;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="si">%6.2f</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">pmx</span> <span class="o">+</span> <span class="s2">&quot; mm&quot;</span><span class="p">)</span>                         
-
-            <span class="n">contour_set</span> <span class="o">=</span> <span class="s2">&quot;precip_log&quot;</span>    
-
-            <span class="n">pathstr</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">namestr</span> <span class="o">=</span> <span class="p">[]</span>
-            
-            <span class="c1"># 24-hour increments</span>
-            <span class="n">requested_times</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">t0</span> <span class="o">+</span> <span class="n">dt24</span><span class="p">,</span>
-                                            <span class="n">end</span><span class="o">=</span><span class="n">t1</span><span class="p">,</span>
-                                            <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;24H&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_pydatetime</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-
-            <span class="k">for</span> <span class="n">it</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">requested_times</span><span class="p">):</span>
-                <span class="n">pathstr</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">t</span> <span class="o">-</span> <span class="n">dt24</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%HZ&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%HZ&quot;</span><span class="p">))</span>
-                <span class="n">namestr</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">t</span> <span class="o">-</span> <span class="n">dt24</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; UTC&quot;</span><span class="p">)</span>
-
-            <span class="n">pathstr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;combined_&quot;</span> <span class="o">+</span> <span class="p">(</span><span class="n">t0</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%HZ&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="p">(</span><span class="n">t1</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%HZ&quot;</span><span class="p">))</span>
-            <span class="n">td</span> <span class="o">=</span> <span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span>
-            <span class="n">hrstr</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">td</span><span class="o">.</span><span class="n">days</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">+</span> <span class="n">td</span><span class="o">.</span><span class="n">seconds</span><span class="o">/</span><span class="mi">3600</span><span class="p">))</span>
-            <span class="n">namestr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Combined &quot;</span> <span class="o">+</span> <span class="n">hrstr</span> <span class="o">+</span> <span class="s2">&quot;-hour forecast&quot;</span><span class="p">)</span>
-
-            <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">type</span><span class="o">==</span><span class="s2">&quot;sfincs&quot;</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">meteo_precipitation</span><span class="p">:</span>
-                    <span class="n">index_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;tiling&quot;</span><span class="p">,</span> <span class="s2">&quot;indices&quot;</span><span class="p">)</span>            
-<span class="c1">#                    if model.make_wave_map and os.path.exists(index_path):                            </span>
-                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">index_path</span><span class="p">):</span>                            
+                        <span class="n">lgn</span><span class="p">[</span><span class="s2">&quot;contours&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">contours</span>
+                        <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;legend&quot;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">lgn</span>
                         
-                        <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Making precip tiles for model &quot;</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">long_name</span> <span class="o">+</span> <span class="s2">&quot; ...&quot;</span><span class="p">)</span>                
-    
-                        <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">cycle_output_path</span><span class="p">,</span> <span class="s2">&quot;sfincs_map.nc&quot;</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">map_variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dct</span><span class="p">)</span>
                         
-                        <span class="c1"># Precip map over 24-hour increments                    </span>
-                        <span class="k">for</span> <span class="n">it</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">requested_times</span><span class="p">):</span>
-                            <span class="n">p</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">read_cumulative_precipitation</span><span class="p">(</span><span class="n">file_name</span><span class="o">=</span><span class="n">file_name</span><span class="p">,</span>
-                                                                           <span class="n">time_range</span><span class="o">=</span><span class="p">[</span><span class="n">t</span> <span class="o">-</span> <span class="n">dt24</span> <span class="o">+</span> <span class="n">dt1</span><span class="p">,</span> <span class="n">t</span> <span class="o">+</span> <span class="n">dt1</span><span class="p">])</span>                        
-                            <span class="n">p_map_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">cycle_tiles_path</span><span class="p">,</span>
-                                                        <span class="s2">&quot;precipitation&quot;</span><span class="p">,</span>
-                                                        <span class="n">pathstr</span><span class="p">[</span><span class="n">it</span><span class="p">])</span>                        
-                            <span class="n">make_precipitation_tiles</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">index_path</span><span class="p">,</span> <span class="n">p_map_path</span><span class="p">,</span> <span class="n">contour_set</span><span class="p">)</span>
+                        <span class="c1"># Cyclone track(s)</span>
+
+                        <span class="c1"># subset = meteo_subset.subset(time_range=[],</span>
+                        <span class="c1">#                              stride=1,</span>
+                        <span class="c1">#                              tstride=tstride)</span>
+        
+                        <span class="n">tracks</span> <span class="o">=</span> <span class="n">meteo_subset</span><span class="o">.</span><span class="n">find_cyclone_tracks</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">110.0</span><span class="p">,</span><span class="o">-</span><span class="mf">30.0</span><span class="p">],</span>
+                                                                <span class="n">ylim</span><span class="o">=</span><span class="p">[</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">45.0</span><span class="p">],</span>
+                                                                <span class="n">pcyc</span><span class="o">=</span><span class="mf">99500.0</span><span class="p">,</span>
+                                                                <span class="n">dt</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+                        
+                        <span class="k">if</span> <span class="n">tracks</span><span class="p">:</span>
+                            <span class="n">features</span> <span class="o">=</span> <span class="p">[]</span>
+                            <span class="k">for</span> <span class="n">track</span> <span class="ow">in</span> <span class="n">tracks</span><span class="p">:</span>
+                                
+                                <span class="n">points</span><span class="o">=</span><span class="p">[]</span>
+                            
+                                <span class="k">for</span> <span class="n">ip</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">lon</span><span class="p">)):</span>
+                                    <span class="n">point</span> <span class="o">=</span> <span class="n">Point</span><span class="p">((</span><span class="n">track</span><span class="o">.</span><span class="n">lon</span><span class="p">[</span><span class="n">ip</span><span class="p">],</span> <span class="n">track</span><span class="o">.</span><span class="n">lat</span><span class="p">[</span><span class="n">ip</span><span class="p">]))</span>               
+                                    <span class="k">if</span> <span class="n">track</span><span class="o">.</span><span class="n">vmax</span><span class="p">[</span><span class="n">ip</span><span class="p">]</span><span class="o">&lt;</span><span class="mf">64.0</span><span class="p">:</span>
+                                        <span class="n">cat</span> <span class="o">=</span> <span class="s2">&quot;TS&quot;</span>
+                                    <span class="k">elif</span> <span class="n">track</span><span class="o">.</span><span class="n">vmax</span><span class="p">[</span><span class="n">ip</span><span class="p">]</span><span class="o">&lt;</span><span class="mf">83.0</span><span class="p">:</span>
+                                        <span class="n">cat</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
+                                    <span class="k">elif</span> <span class="n">track</span><span class="o">.</span><span class="n">vmax</span><span class="p">[</span><span class="n">ip</span><span class="p">]</span><span class="o">&lt;</span><span class="mf">96.0</span><span class="p">:</span>    
+                                        <span class="n">cat</span> <span class="o">=</span> <span class="s2">&quot;2&quot;</span>
+                                    <span class="k">elif</span> <span class="n">track</span><span class="o">.</span><span class="n">vmax</span><span class="p">[</span><span class="n">ip</span><span class="p">]</span><span class="o">&lt;</span><span class="mf">113.0</span><span class="p">:</span>    
+                                        <span class="n">cat</span> <span class="o">=</span> <span class="s2">&quot;3&quot;</span>
+                                    <span class="k">elif</span> <span class="n">track</span><span class="o">.</span><span class="n">vmax</span><span class="p">[</span><span class="n">ip</span><span class="p">]</span><span class="o">&lt;</span><span class="mf">137.0</span><span class="p">:</span>    
+                                        <span class="n">cat</span> <span class="o">=</span> <span class="s2">&quot;4&quot;</span>
+                                    <span class="k">else</span><span class="p">:</span>    
+                                        <span class="n">cat</span> <span class="o">=</span> <span class="s2">&quot;5&quot;</span>
+                                    <span class="n">features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Feature</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="n">point</span><span class="p">,</span>
+                                                            <span class="n">properties</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;time&quot;</span><span class="p">:</span><span class="n">track</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="n">ip</span><span class="p">]</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y/%m/</span><span class="si">%d</span><span class="s2"> %H:%M&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; UTC&quot;</span><span class="p">,</span>
+                                                                        <span class="s2">&quot;lon&quot;</span><span class="p">:</span><span class="n">track</span><span class="o">.</span><span class="n">lon</span><span class="p">[</span><span class="n">ip</span><span class="p">],</span>
+                                                                        <span class="s2">&quot;lat&quot;</span><span class="p">:</span><span class="n">track</span><span class="o">.</span><span class="n">lat</span><span class="p">[</span><span class="n">ip</span><span class="p">],</span>
+                                                                        <span class="s2">&quot;vmax&quot;</span><span class="p">:</span><span class="n">track</span><span class="o">.</span><span class="n">vmax</span><span class="p">[</span><span class="n">ip</span><span class="p">],</span>
+                                                                        <span class="s2">&quot;pc&quot;</span><span class="p">:</span><span class="n">track</span><span class="o">.</span><span class="n">pc</span><span class="p">[</span><span class="n">ip</span><span class="p">],</span>
+                                                                        <span class="s2">&quot;category&quot;</span><span class="p">:</span><span class="n">cat</span><span class="p">}))</span>
+                                    
+                                    <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">track</span><span class="o">.</span><span class="n">lon</span><span class="p">[</span><span class="n">ip</span><span class="p">],</span> <span class="n">track</span><span class="o">.</span><span class="n">lat</span><span class="p">[</span><span class="n">ip</span><span class="p">]])</span>
+                                
+                                <span class="n">trk</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">(</span><span class="n">coordinates</span><span class="o">=</span><span class="n">points</span><span class="p">)</span>
+                                <span class="n">features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Feature</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="n">trk</span><span class="p">,</span>
+                                                        <span class="n">properties</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;No name&quot;</span><span class="p">}))</span>
+                            
+                            <span class="n">feature_collection</span> <span class="o">=</span> <span class="n">FeatureCollection</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+                            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">scenario_path</span><span class="p">,</span> <span class="s2">&quot;track.geojson.js&quot;</span><span class="p">)</span>
+                            <span class="n">cht</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">misc_tools</span><span class="o">.</span><span class="n">write_json_js</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span>
+                                                            <span class="n">feature_collection</span><span class="p">,</span>
+                                                            <span class="s2">&quot;var track_data =&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Spiderweb tracks</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_obj</span><span class="p">,</span> <span class="s2">&quot;meteo_spiderweb&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">track_ensemble</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">cht.tropical_cyclone.tropical_cyclone</span> <span class="kn">import</span> <span class="n">to_geojson</span>
+            <span class="k">if</span>  <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_obj</span><span class="p">,</span> <span class="s2">&quot;meteo_spiderweb&quot;</span><span class="p">):</span>
+                <span class="n">spwfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">main_path</span><span class="p">,</span>
+                                                <span class="s2">&quot;meteo&quot;</span><span class="p">,</span>
+                                                <span class="s2">&quot;spiderwebs&quot;</span><span class="p">,</span>
+                                                <span class="n">xml_obj</span><span class="o">.</span><span class="n">meteo_spiderweb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="n">cycfile</span> <span class="o">=</span> <span class="n">spwfile</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.cyc&#39;</span>
+            <span class="k">elif</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">track_ensemble</span><span class="p">:</span>
+                <span class="n">cycfile</span> <span class="o">=</span> <span class="n">fo</span><span class="o">.</span><span class="n">list_files</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">main_path</span><span class="p">,</span>
+                                        <span class="s2">&quot;meteo&quot;</span><span class="p">,</span>
+                                        <span class="n">xml_obj</span><span class="o">.</span><span class="n">track_ensemble</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                                        <span class="s2">&quot;*.cyc&quot;</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">scenario_path</span><span class="p">,</span> <span class="s2">&quot;track.geojson.js&quot;</span><span class="p">)</span>
+                <span class="n">to_geojson</span><span class="p">(</span><span class="n">cycfile</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
 
 
-                        <span class="c1"># Full simulation       </span>
-                        <span class="n">p_map_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">cycle_tiles_path</span><span class="p">,</span>
-                                                  <span class="s2">&quot;precipitation&quot;</span><span class="p">,</span>
-                                                   <span class="n">pathstr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>                        
-                        <span class="n">p</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">read_cumulative_precipitation</span><span class="p">(</span><span class="n">file_name</span><span class="o">=</span><span class="n">file_name</span><span class="p">,</span>
-                                                                       <span class="n">time_range</span><span class="o">=</span><span class="p">[</span><span class="n">t0</span> <span class="o">+</span> <span class="n">dt1</span><span class="p">,</span> <span class="n">t1</span> <span class="o">+</span> <span class="n">dt1</span><span class="p">])</span>                        
-                        <span class="n">make_precipitation_tiles</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">index_path</span><span class="p">,</span> <span class="n">p_map_path</span><span class="p">,</span> <span class="n">contour_set</span><span class="p">)</span>
-            
-            <span class="c1"># Check if wave maps are available</span>
-            <span class="n">p_map_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">cycle_tiles_path</span><span class="p">,</span>
-                                          <span class="s2">&quot;precipitation&quot;</span><span class="p">)</span>
-            
-            <span class="n">ppath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">scenario_path</span><span class="p">)</span>
-            <span class="n">fo</span><span class="o">.</span><span class="n">copy_file</span><span class="p">(</span><span class="n">p_map_path</span><span class="p">,</span> <span class="n">ppath</span><span class="p">)</span>
+        <span class="c1"># Ensemble tracks</span>
+        <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">track_ensemble</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
+
+            <span class="n">shpfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">main_path</span><span class="p">,</span>
+                                            <span class="s2">&quot;meteo&quot;</span><span class="p">,</span>
+                                             <span class="n">xml_obj</span><span class="o">.</span><span class="n">track_ensemble</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                                             <span class="s1">&#39;ensemble_members&#39;</span><span class="p">,</span> <span class="s1">&#39;ensemble_members.shp&#39;</span><span class="p">)</span>
+            <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">shpfile</span><span class="p">)</span>
+
+            <span class="c1"># Convert to GeoJSON</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">scenario_path</span><span class="p">,</span> <span class="s2">&quot;ensemble.geojson.js&quot;</span><span class="p">)</span>
+            <span class="n">gdf</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s1">&#39;GeoJSON&#39;</span><span class="p">)</span>
+
+            <span class="n">modified_content</span> <span class="o">=</span> <span class="s1">&#39;var track_ens = </span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">modified_content</span><span class="p">)</span>
+
             <span class="n">dct</span><span class="o">=</span><span class="p">{}</span>
-            <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>        <span class="o">=</span> <span class="s2">&quot;precipitation&quot;</span> 
-            <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span>   <span class="o">=</span> <span class="s2">&quot;Cumulative rainfall&quot;</span>
-            <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;These are cumulative precipitations.&quot;</span>
-            <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span>      <span class="o">=</span> <span class="s2">&quot;xyz_tile_layer&quot;</span>
-            <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;max_native_zoom&quot;</span><span class="p">]</span>  <span class="o">=</span> <span class="mi">10</span>
-            
-            <span class="n">tms</span> <span class="o">=</span> <span class="p">[]</span>            
-            <span class="k">for</span> <span class="n">it</span><span class="p">,</span> <span class="n">pth</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pathstr</span><span class="p">):</span>
-                <span class="n">tm</span> <span class="o">=</span> <span class="p">{}</span>
-                <span class="n">tm</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">pth</span>
-                <span class="n">tm</span><span class="p">[</span><span class="s2">&quot;string&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">namestr</span><span class="p">[</span><span class="n">it</span><span class="p">]</span>
-                <span class="n">tms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tm</span><span class="p">)</span>
-
-            <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;times&quot;</span><span class="p">]</span>        <span class="o">=</span> <span class="n">tms</span>  
-            
-            <span class="n">mp</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">map_contours</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">contour_set</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>    
-            
-            <span class="n">lgn</span> <span class="o">=</span> <span class="p">{}</span>
-            <span class="n">lgn</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mp</span><span class="p">[</span><span class="s2">&quot;string&quot;</span><span class="p">]</span>
-
-            <span class="n">cntrs</span> <span class="o">=</span> <span class="n">mp</span><span class="p">[</span><span class="s2">&quot;contours&quot;</span><span class="p">]</span>
-
-            <span class="n">contours</span> <span class="o">=</span> <span class="p">[]</span>
-            
-            <span class="k">for</span> <span class="n">cntr</span> <span class="ow">in</span> <span class="n">cntrs</span><span class="p">:</span>
-                <span class="n">contour</span> <span class="o">=</span> <span class="p">{}</span>
-                <span class="n">contour</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">cntr</span><span class="p">[</span><span class="s2">&quot;string&quot;</span><span class="p">]</span>
-                <span class="n">contour</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;#&quot;</span> <span class="o">+</span> <span class="n">cntr</span><span class="p">[</span><span class="s2">&quot;hex&quot;</span><span class="p">]</span>
-                <span class="n">contours</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">contour</span><span class="p">)</span>
-    
-            <span class="n">lgn</span><span class="p">[</span><span class="s2">&quot;contours&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">contours</span>
-            <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;legend&quot;</span><span class="p">]</span>   <span class="o">=</span> <span class="n">lgn</span>
+            <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>        <span class="o">=</span> <span class="s2">&quot;track_ensemble&quot;</span>
+            <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span>   <span class="o">=</span> <span class="s2">&quot;Track ensemble&quot;</span>
+            <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;This the track ensemble.&quot;</span>
+            <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span>      <span class="o">=</span> <span class="s2">&quot;geojson&quot;</span>
+            <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;max&quot;</span><span class="p">]</span>         <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;legend&quot;</span><span class="p">]</span>   <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;infographic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;ensemble&quot;</span>
             
             <span class="bp">self</span><span class="o">.</span><span class="n">map_variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dct</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">copy_bedlevelmaps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
+        <span class="c1"># Cumulative rainfall</span>
+        
+<span class="c1">#         # Rainfall map for the entire simulation</span>
+<span class="c1">#         dt1 = datetime.timedelta(hours=1)</span>
+<span class="c1"># #        dt6 = datetime.timedelta(hours=6)</span>
+<span class="c1">#         dt24 = datetime.timedelta(hours=24)</span>
+<span class="c1">#         t0 = cosmos.cycle_time.replace(tzinfo=None)    </span>
+<span class="c1">#         t1 = cosmos.stop_time</span>
+        
+<span class="c1">#         # First determine max precip for all simulations </span>
+<span class="c1">#         pmx = 0.0</span>
+<span class="c1">#         okay  = False</span>
+<span class="c1">#         for model in cosmos.scenario.model:</span>
+<span class="c1">#             if model.type==&quot;sfincs&quot;:</span>
+<span class="c1">#                 index_path = os.path.join(model.path, &quot;tiling&quot;, &quot;indices&quot;)</span>
+<span class="c1"># #                if model.make_precip_map and os.path.exists(index_path):            </span>
+<span class="c1">#                 if os.path.exists(index_path):            </span>
+<span class="c1">#                     file_name = os.path.join(model.cycle_output_path, &quot;sfincs_map.nc&quot;)</span>
+<span class="c1">#                     # p0max = model.domain.read_cumulative_precipitation(file_name=file_name,</span>
+<span class="c1">#                     #                                                    time_range=[t0 + dt1, t1 + dt1])</span>
+<span class="c1">#                     # pmx = max(pmx, np.nanmax(p0max))</span>
+<span class="c1">#                     okay = True</span>
+
+<span class="c1">#         if okay:</span>
+
+<span class="c1">#             cosmos.log(&quot;Making precipitation tiles ...&quot;)                </span>
+                
+<span class="c1">#             print(&quot;Maximum precipitation : &quot; + &#39;%6.2f&#39;%pmx + &quot; mm&quot;)                         </span>
+
+<span class="c1">#             contour_set = &quot;precip_log&quot;    </span>
+
+<span class="c1">#             pathstr = []</span>
+<span class="c1">#             namestr = []</span>
+            
+<span class="c1">#             # 24-hour increments</span>
+<span class="c1">#             requested_times = pd.date_range(start=t0 + dt24,</span>
+<span class="c1">#                                             end=t1,</span>
+<span class="c1">#                                             freq=&#39;24H&#39;).to_pydatetime().tolist()</span>
+
+<span class="c1">#             for it, t in enumerate(requested_times):</span>
+<span class="c1">#                 pathstr.append((t - dt24).strftime(&quot;%Y%m%d_%HZ&quot;) + &quot;_&quot; + (t).strftime(&quot;%Y%m%d_%HZ&quot;))</span>
+<span class="c1">#                 namestr.append((t - dt24).strftime(&quot;%Y-%m-%d %H:%M&quot;) + &quot; - &quot; + (t).strftime(&quot;%Y-%m-%d %H:%M&quot;) + &quot; UTC&quot;)</span>
+
+<span class="c1">#             pathstr.append(&quot;combined_&quot; + (t0).strftime(&quot;%Y%m%d_%HZ&quot;) + &quot;_&quot; + (t1).strftime(&quot;%Y%m%d_%HZ&quot;))</span>
+<span class="c1">#             td = t1 - t0</span>
+<span class="c1">#             hrstr = str(int(td.days * 24 + td.seconds/3600))</span>
+<span class="c1">#             namestr.append(&quot;Combined &quot; + hrstr + &quot;-hour forecast&quot;)</span>
+
+<span class="c1">#             for model in cosmos.scenario.model:</span>
+<span class="c1">#                 if model.type==&quot;sfincs&quot; and model.meteo_precipitation:</span>
+<span class="c1">#                     index_path = os.path.join(model.path, &quot;tiling&quot;, &quot;indices&quot;)            </span>
+<span class="c1"># #                    if model.make_wave_map and os.path.exists(index_path):                            </span>
+<span class="c1">#                     if os.path.exists(index_path):                            </span>
+                        
+<span class="c1">#                         cosmos.log(&quot;Making precip tiles for model &quot; + model.long_name + &quot; ...&quot;)                </span>
+    
+<span class="c1">#                         file_name = os.path.join(model.cycle_output_path, &quot;sfincs_map.nc&quot;)</span>
+                        
+<span class="c1">#                         # Precip map over 24-hour increments                    </span>
+<span class="c1">#                         for it, t in enumerate(requested_times):</span>
+<span class="c1">#                             p = model.domain.read_cumulative_precipitation(file_name=file_name,</span>
+<span class="c1">#                                                                            time_range=[t - dt24 + dt1, t + dt1])                        </span>
+<span class="c1">#                             p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,</span>
+<span class="c1">#                                                         &quot;precipitation&quot;,</span>
+<span class="c1">#                                                         pathstr[it])                        </span>
+<span class="c1">#                             make_precipitation_tiles(p, index_path, p_map_path, contour_set)</span>
+
+
+<span class="c1">#                         # Full simulation       </span>
+<span class="c1">#                         p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,</span>
+<span class="c1">#                                                   &quot;precipitation&quot;,</span>
+<span class="c1">#                                                    pathstr[-1])                        </span>
+<span class="c1">#                         p = model.domain.read_cumulative_precipitation(file_name=file_name,</span>
+<span class="c1">#                                                                        time_range=[t0 + dt1, t1 + dt1])                        </span>
+<span class="c1">#                         make_precipitation_tiles(p, index_path, p_map_path, contour_set)</span>
+            
+<span class="c1">#             # Check if wave maps are available</span>
+<span class="c1">#             p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,</span>
+<span class="c1">#                                           &quot;precipitation&quot;)</span>
+            
+<span class="c1">#             ppath = os.path.join(scenario_path)</span>
+<span class="c1">#             fo.copy_file(p_map_path, ppath)</span>
+<span class="c1">#             dct={}</span>
+<span class="c1">#             dct[&quot;name&quot;]        = &quot;precipitation&quot; </span>
+<span class="c1">#             dct[&quot;long_name&quot;]   = &quot;Cumulative rainfall&quot;</span>
+<span class="c1">#             dct[&quot;description&quot;] = &quot;These are cumulative precipitations.&quot;</span>
+<span class="c1">#             dct[&quot;format&quot;]      = &quot;xyz_tile_layer&quot;</span>
+<span class="c1">#             dct[&quot;max_native_zoom&quot;]  = 10</span>
+            
+<span class="c1">#             tms = []            </span>
+<span class="c1">#             for it, pth in enumerate(pathstr):</span>
+<span class="c1">#                 tm = {}</span>
+<span class="c1">#                 tm[&quot;name&quot;]   = pth</span>
+<span class="c1">#                 tm[&quot;string&quot;] = namestr[it]</span>
+<span class="c1">#                 tms.append(tm)</span>
+
+<span class="c1">#             dct[&quot;times&quot;]        = tms  </span>
+            
+<span class="c1">#             mp = next((x for x in cosmos.config.map_contours if x[&quot;name&quot;] == contour_set), None)    </span>
+            
+<span class="c1">#             lgn = {}</span>
+<span class="c1">#             lgn[&quot;text&quot;] = mp[&quot;string&quot;]</span>
+
+<span class="c1">#             cntrs = mp[&quot;contours&quot;]</span>
+
+<span class="c1">#             contours = []</span>
+            
+<span class="c1">#             for cntr in cntrs:</span>
+<span class="c1">#                 contour = {}</span>
+<span class="c1">#                 contour[&quot;text&quot;]  = cntr[&quot;string&quot;]</span>
+<span class="c1">#                 contour[&quot;color&quot;] = &quot;#&quot; + cntr[&quot;hex&quot;]</span>
+<span class="c1">#                 contours.append(contour)</span>
+    
+<span class="c1">#             lgn[&quot;contours&quot;] = contours</span>
+<span class="c1">#             dct[&quot;legend&quot;]   = lgn</span>
+            
+<span class="c1">#             self.map_variables.append(dct)</span>
+
+    <span class="k">def</span> <span class="nf">copy_bedlevelmaps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Copy available bedlevel map tiles to webviewer folder.</span>
+<span class="sd">        &quot;&quot;&quot;</span>   
         <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Copying bed level map tiles ...&quot;</span><span class="p">)</span>
         
         <span class="n">scenario_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
@@ -878,6 +953,7 @@
             <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span>   <span class="o">=</span> <span class="s2">&quot;Pre-storm bed level&quot;</span>
             <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;These were the bed levels prior to the storm&quot;</span>
             <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span>      <span class="o">=</span> <span class="s2">&quot;xyz_tile_layer&quot;</span>
+            <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;infographic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;empty&quot;</span>
 
             <span class="n">mp</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">map_contours</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;bed_levels&quot;</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>    
             
@@ -919,6 +995,7 @@
             <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span>   <span class="o">=</span> <span class="s2">&quot;Post-storm bed level&quot;</span>
             <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;These are the predicted bed levels after the storm&quot;</span>
             <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span>      <span class="o">=</span> <span class="s2">&quot;xyz_tile_layer&quot;</span>
+            <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;infographic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;empty&quot;</span>
 
             <span class="n">mp</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">map_contours</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;bed_levels&quot;</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>    
             
@@ -958,7 +1035,8 @@
             
 
     <span class="k">def</span> <span class="nf">make_runup_map</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>        
-
+        <span class="sd">&quot;&quot;&quot;Make runup markers and timeseries for webviewer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>   
         <span class="n">output_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
                                      <span class="s2">&quot;data&quot;</span><span class="p">,</span>
                                      <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -1006,9 +1084,10 @@
     
                     <span class="n">dct</span><span class="o">=</span><span class="p">{}</span>
                     <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>        <span class="o">=</span> <span class="s2">&quot;extreme_runup_height&quot;</span>
-                    <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span>   <span class="o">=</span> <span class="s2">&quot;Total water levels&quot;</span>
+                    <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span>   <span class="o">=</span> <span class="s2">&quot;Maximum Total Water Level (best track)&quot;</span>
                     <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;These are the predicted total water levels&quot;</span>
                     <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span>      <span class="o">=</span> <span class="s2">&quot;geojson&quot;</span>
+                    <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;infographic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;twl&quot;</span>
     
     
                     <span class="n">mp</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">map_contours</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;run_up&quot;</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>                    
@@ -1072,9 +1151,10 @@
         
                         <span class="n">dct</span><span class="o">=</span><span class="p">{}</span>
                         <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>        <span class="o">=</span> <span class="s2">&quot;extreme_runup_height_prc95&quot;</span>
-                        <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span>   <span class="o">=</span> <span class="s2">&quot;Total water levels 95 %&quot;</span>
+                        <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span>   <span class="o">=</span> <span class="s2">&quot;Maximum Total Water Level (95 </span><span class="si">% o</span><span class="s2">f ensemble)&quot;</span>
                         <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;These are the predicted extreme run-up heights&quot;</span>
                         <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span>      <span class="o">=</span> <span class="s2">&quot;geojson&quot;</span>
+                        <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;infographic&quot;</span><span class="p">]</span>   <span class="o">=</span> <span class="s2">&quot;twl&quot;</span>
         
                         <span class="n">mp</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">map_contours</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;run_up&quot;</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>                    
         
@@ -1140,9 +1220,10 @@
 
                     <span class="n">dct</span><span class="o">=</span><span class="p">{}</span>
                     <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>        <span class="o">=</span> <span class="s2">&quot;extreme_horizontal_runup_height&quot;</span>
-                    <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span>   <span class="o">=</span> <span class="s2">&quot;Horizontal projection of TWL&quot;</span>
+                    <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span>   <span class="o">=</span> <span class="s2">&quot;Horizontal extent of Total Water Level&quot;</span>
                     <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;This is the extreme horizontal runup.&quot;</span>
                     <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span>      <span class="o">=</span> <span class="s2">&quot;geojson&quot;</span>
+                    <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;infographic&quot;</span><span class="p">]</span>   <span class="o">=</span> <span class="s2">&quot;twl&quot;</span>
                     <span class="c1"># dct[&quot;legend&quot;]      = {&quot;text&quot;: &quot;Offshore WL&quot;, &quot;contours&quot;: [{&quot;text&quot;: &quot; 0.0&amp;nbsp-&amp;nbsp;0.33&amp;#8201;m&quot;, &quot;color&quot;: &quot;#CCFFFF&quot;}, {&quot;text&quot;: &quot; 0.33&amp;nbsp;-&amp;nbsp;1.0&amp;#8201;m&quot;, &quot;color&quot;: &quot;#40E0D0&quot;}, {&quot;text&quot;: &quot; 1.0&amp;nbsp-&amp;nbsp;2.0&amp;#8201;m&quot;, &quot;color&quot;: &quot;#00BFFF&quot;}, {&quot;text&quot;: &quot;&amp;gt; 2.0&amp;#8201;m&quot;, &quot;color&quot;: &quot;#0909FF&quot;}]}</span>
                     
                     <span class="n">mp</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">map_contours</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;run_up&quot;</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>                    
@@ -1196,11 +1277,12 @@
 
                     <span class="n">dct</span><span class="o">=</span><span class="p">{}</span>
                     <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>        <span class="o">=</span> <span class="s2">&quot;extreme_sea_level_and_wave_height&quot;</span>
-                    <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span>   <span class="o">=</span> <span class="s2">&quot;Offshore SWL and Hs&quot;</span>
+                    <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span>   <span class="o">=</span> <span class="s2">&quot;Offshore WL and Hs&quot;</span>
                     <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;This is the total offshore water level (tide + surge) and wave conditions.&quot;</span>
                     <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span>      <span class="o">=</span> <span class="s2">&quot;geojson&quot;</span>
                     <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;legend&quot;</span><span class="p">]</span>      <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Offshore WL&quot;</span><span class="p">,</span> <span class="s2">&quot;contours&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot; 0.0&amp;nbsp-&amp;nbsp;0.33&amp;#8201;m&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;#CCFFFF&quot;</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot; 0.33&amp;nbsp;-&amp;nbsp;1.0&amp;#8201;m&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;#40E0D0&quot;</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot; 1.0&amp;nbsp-&amp;nbsp;2.0&amp;#8201;m&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;#00BFFF&quot;</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&amp;gt; 2.0&amp;#8201;m&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;#0909FF&quot;</span><span class="p">}]}</span>
-                    
+                    <span class="n">dct</span><span class="p">[</span><span class="s2">&quot;infographic&quot;</span><span class="p">]</span>   <span class="o">=</span> <span class="s2">&quot;empty&quot;</span>
+
                     <span class="bp">self</span><span class="o">.</span><span class="n">map_variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dct</span><span class="p">)</span>
                 
 
@@ -1236,7 +1318,8 @@
 
 
     <span class="k">def</span> <span class="nf">upload</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>        
-
+        <span class="sd">&quot;&quot;&quot;Upload local webviewer to server.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">cht.misc.sftp</span> <span class="kn">import</span> <span class="n">SSHSession</span>
         
         <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Uploading web viewer ...&quot;</span><span class="p">)</span>

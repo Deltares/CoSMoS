@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quickstart CoSMoS &mdash; CoSMoS 0.1 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Add models to the database" href="addingmodels.html" />
+    <link rel="prev" title="Overview model components and folder structure" href="modelcomponents.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            CoSMoS
+          </a>
+              <div class="version">
+                0.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../manual.html">User manual</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="modelcomponents.html">Overview model components and folder structure</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Quickstart CoSMoS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#advanced-cosmos-configurations">Advanced CoSMoS configurations:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="addingmodels.html">Add models to the database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scenario.html">Setting up a scenario</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stations.html">Observation stations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="superregions.html">Defining super regions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meteo.html">Meteo collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="running.html">Running CoSMoS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html">CoSMoS output</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../functions.html">Functions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CoSMoS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../manual.html">User manual</a></li>
+      <li class="breadcrumb-item active">Quickstart CoSMoS</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/manual/quickstart.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="quickstart-cosmos">
+<span id="quickstart"></span><h1>Quickstart CoSMoS<a class="headerlink" href="#quickstart-cosmos" title="Permalink to this headline">¶</a></h1>
+<p>To setup CoSMoS for your area of interest, you can broadly follow these steps:</p>
+<p><strong>Step 1: Install CoSMoS</strong></p>
+<p>Install CoSMoS on your device (<span class="xref std std-ref">Getting started</span>).</p>
+<p><strong>Step 2: Make a local copy the CoSMoS run folder.</strong></p>
+<p>Copy the default CoSMoS run folder (<em>cosmos_run_folder</em> in your CoSMoS installation folder) to the folder where you intend to run CoSMoS.</p>
+<p><strong>Step 3: Add models to the model database.</strong></p>
+<p>Add wave and/or flow models for your domain of interest (<span class="xref std std-ref">Adding models</span>).</p>
+<p><strong>Step 4: Adjust your model executable paths.</strong></p>
+<p>In the <em>configurations</em> folder, you can find the file <em>default.xml</em>.
+Adjust the model executable paths (for the models that you want to be running) to your local installations.</p>
+<p><strong>Step 5: Setup a scenario file.</strong></p>
+<p>Setup a scenario file (see <a class="reference internal" href="scenario.html#scenario"><span class="std std-ref">Scenario</span></a>), in which you describe which models of your model database you want to run,
+for which period, and with which metereological data.
+For a first CoSMoS run, choose one of the meteoreological data options listed in the default <em>meteo_subsets</em> file (see <a class="reference internal" href="meteo.html#meteo"><span class="std std-ref">Meteo</span></a>).
+You can also add the NOAA-COOPS tide station file (see <a class="reference internal" href="stations.html#stations"><span class="std std-ref">Observation stations</span></a>) to your scenario file to compare observed and computed water levels.</p>
+<p><strong>Step 6: Run CoSMoS.</strong></p>
+<p>Once you have completed Step 1 to 5, you can execute a first CoSMoS run (see <a class="reference internal" href="running.html#running"><span class="std std-ref">Running CoSMoS</span></a>).
+The output is stored in the scenario file, and you can view the results of your run in the  webviewer (see <a class="reference internal" href="output.html#output"><span class="std std-ref">Output</span></a>)</p>
+<section id="advanced-cosmos-configurations">
+<h2>Advanced CoSMoS configurations:<a class="headerlink" href="#advanced-cosmos-configurations" title="Permalink to this headline">¶</a></h2>
+<p><strong>Step 7: Add observation data.</strong></p>
+<p>In addition to the regular NOAA-COOPS tide stations, for which water level data is downloaded automatically from a server,
+you can manually add observation station locations and data (see <a class="reference internal" href="stations.html#stations"><span class="std std-ref">Observation stations</span></a>).</p>
+<p><strong>Step 8: Add meteoreological data.</strong></p>
+<p>There are several options to manually include meteorological data to force your model(s) (see <a class="reference internal" href="meteo.html#meteo"><span class="std std-ref">Meteo</span></a>).
+You can generate your own evenly gridded meteorological forcing or include a spiderweb file.
+Alternatively, you can create an ensemble of cyclone tracks to obtain a probabilistic hazard prediction.</p>
+<p><strong>Step 9: Organize your models in a super region file.</strong></p>
+<p>If you have created a large database of models and want to include them efficiently in your scenario file,
+you can organize the models in a <em>super region</em> file (see <a class="reference internal" href="superregions.html#super-regions"><span class="std std-ref">Super regions</span></a>). Instead of calling all models in the scenario file, you now call this
+<em>super region</em> file.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modelcomponents.html" class="btn btn-neutral float-left" title="Overview model components and folder structure" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="addingmodels.html" class="btn btn-neutral float-right" title="Add models to the database" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Deltares.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

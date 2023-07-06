@@ -220,7 +220,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">run</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="MainLoop.run"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_main_loop.MainLoop.run.html#cosmos.cosmos_main_loop.MainLoop.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Run main loop: </span>
+        <span class="sd">&quot;&quot;&quot;Run main loop.</span>
 
 <span class="sd">        - Read configuration file, stations, meteo sources, super regions, scenario.</span>
 <span class="sd">        - Initialize models</span>
@@ -259,7 +259,6 @@
         <span class="c1"># Available meteo sources</span>
         <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Reading meteo sources ...&quot;</span><span class="p">)</span>    
         <span class="n">read_meteo_sources</span><span class="p">()</span>
-
 
         <span class="c1"># Find all available super regions</span>
         <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Reading super regions ...&quot;</span><span class="p">)</span>    
@@ -304,7 +303,7 @@
         <span class="c1"># Read scenario and add models (the models are also initialized here)</span>
         <span class="c1"># This is also where all the scenario and model paths are set</span>
         <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-        
+                
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">clean_up</span><span class="p">:</span>
             <span class="c1"># Don&#39;t allow clean up when just initializing or continuous mode</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">just_initialize</span> <span class="ow">and</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cycle_mode</span> <span class="o">==</span> <span class="s2">&quot;single_shot&quot;</span><span class="p">:</span>           
@@ -442,7 +441,7 @@
                 <span class="n">cosmos</span><span class="o">.</span><span class="n">model_loop</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div></div>
 
 <span class="k">def</span> <span class="nf">get_start_and_stop_times</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;Get cycle start and stop times</span>
+    <span class="sd">&quot;&quot;&quot;Get cycle start and stop times.</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
         
     <span class="n">y</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span><span class="o">.</span><span class="n">year</span>

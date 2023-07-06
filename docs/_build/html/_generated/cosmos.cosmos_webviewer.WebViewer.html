@@ -17,7 +17,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="cosmos.cosmos_ww3.CoSMoS_WW3" href="cosmos.cosmos_ww3.CoSMoS_WW3.html" />
+    <link rel="next" title="cosmos.cosmos_main.CoSMoS.initialize" href="cosmos.cosmos_main.CoSMoS.initialize.html" />
     <link rel="prev" title="cosmos.cosmos_stations.Stations" href="cosmos.cosmos_stations.Stations.html" /> 
 </head>
 
@@ -51,10 +51,8 @@
 <li class="toctree-l2"><a class="reference internal" href="../functions.html#model-classes">Model classes</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../functions.html#additional-classes">Additional classes</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_cluster.Cluster.html">cosmos.cosmos_cluster.Cluster</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_run_parallel.CosmosRunParallel.html">cosmos.cosmos_run_parallel.CosmosRunParallel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_stations.Stations.html">cosmos.cosmos_stations.Stations</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">cosmos.cosmos_webviewer.WebViewer</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_ww3.CoSMoS_WW3.html">cosmos.cosmos_ww3.CoSMoS_WW3</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../functions.html#cosmos-functions">CoSMoS functions</a></li>
@@ -94,44 +92,50 @@
 <dl class="py class">
 <dt id="cosmos.cosmos_webviewer.WebViewer">
 <em class="property">class </em><code class="sig-prename descclassname">cosmos.cosmos_webviewer.</code><code class="sig-name descname">WebViewer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmos/cosmos_webviewer.html#WebViewer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cosmos.cosmos_webviewer.WebViewer" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
+<dd><p>Cosmos webviewer class</p>
+<dl class="py method">
 <dt id="cosmos.cosmos_webviewer.WebViewer.__init__">
 <code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmos/cosmos_webviewer.html#WebViewer.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cosmos.cosmos_webviewer.WebViewer.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+<dd><p>Initialize webviewer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – Name of webviewer.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#cosmos.cosmos_webviewer.WebViewer.__init__" title="cosmos.cosmos_webviewer.WebViewer.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(name)</p></td>
-<td><p>Initialize self.</p></td>
+<td><p>Initialize webviewer.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy_bedlevelmaps</span></code>()</p></td>
-<td><p></p></td>
+<td><p>Copy available bedlevel map tiles to webviewer folder.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy_floodmap</span></code>()</p></td>
-<td><p></p></td>
+<td><p>Copy available flood map tiles to webviewer folder.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy_sederomap</span></code>()</p></td>
-<td><p></p></td>
+<td><p>Copy available sedimentation/erosion map tiles to webviewer folder.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy_timeseries</span></code>()</p></td>
-<td><p></p></td>
+<td><p>Copy available wave, water level, and runup timeseries to webviewer folder.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy_wave_maps</span></code>()</p></td>
-<td><p></p></td>
+<td><p>Copy available wave map tiles to webviewer folder.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">make</span></code>()</p></td>
-<td><p></p></td>
+<td><p>Make webviewer.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_meteo_maps</span></code>()</p></td>
-<td><p></p></td>
+<td><p>Make wind and precipitation tiles for webviewer.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_runup_map</span></code>()</p></td>
-<td><p></p></td>
+<td><p>Make runup markers and timeseries for webviewer.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">upload</span></code>()</p></td>
-<td><p></p></td>
+<td><p>Upload local webviewer to server.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">upload_data</span></code>()</p></td>
 <td><p></p></td>
@@ -147,7 +151,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="cosmos.cosmos_stations.Stations.html" class="btn btn-neutral float-left" title="cosmos.cosmos_stations.Stations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="cosmos.cosmos_ww3.CoSMoS_WW3.html" class="btn btn-neutral float-right" title="cosmos.cosmos_ww3.CoSMoS_WW3" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="cosmos.cosmos_main.CoSMoS.initialize.html" class="btn btn-neutral float-right" title="cosmos.cosmos_main.CoSMoS.initialize" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

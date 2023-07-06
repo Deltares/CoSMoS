@@ -1,11 +1,17 @@
-Running
+.. _running:
+
+Running CoSMoS
 ------------
 
-When running
+The script below gives an example of how CoSMoS can be initialized.
 
-.. _running_forecast:
+.. include:: examples/run_cosmos.py
+       :literal: 
 
-Forecast
-^^^^^^^^^^^^
+This *run_cosmos.py* script requires a *scenario_name* as input (here: *hurricane_irma_gfs*). The corresponding scenario file should be located in the folder:
+*scenarios/hurricane_irma_gfs/hurricane_irma_gfs.xml*
 
-The following table provides an overview:
+Other input settings are described in :py:class:`cosmos.cosmos_main.CoSMoS`.
+
+
+

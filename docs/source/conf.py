@@ -19,9 +19,11 @@ extensions = [
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
+    'sphinx.ext.autosectionlabel',
 ]
 
 autosummary_generate = True
+autosectionlabel_prefix_document = True
 
 remove_from_toctrees = ["_generated/*"]
 

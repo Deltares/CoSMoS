@@ -147,7 +147,7 @@ class MainLoop:
         self.scheduler.run()
 
     def run(self):
-        """Run main loop: 
+        """Run main loop.
 
         - Read configuration file, stations, meteo sources, super regions, scenario.
         - Initialize models
@@ -186,7 +186,6 @@ class MainLoop:
         # Available meteo sources
         cosmos.log("Reading meteo sources ...")    
         read_meteo_sources()
-
 
         # Find all available super regions
         cosmos.log("Reading super regions ...")    
@@ -231,7 +230,7 @@ class MainLoop:
         # Read scenario and add models (the models are also initialized here)
         # This is also where all the scenario and model paths are set
         cosmos.scenario.read()
-        
+                
         if self.clean_up:
             # Don't allow clean up when just initializing or continuous mode
             if not self.just_initialize and cosmos.config.cycle_mode == "single_shot":           
@@ -369,7 +368,7 @@ class MainLoop:
                 cosmos.model_loop.start()
 
 def get_start_and_stop_times():
-    """Get cycle start and stop times
+    """Get cycle start and stop times.
     """    
         
     y = cosmos.cycle_time.year

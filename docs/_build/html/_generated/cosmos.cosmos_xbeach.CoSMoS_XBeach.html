@@ -94,7 +94,20 @@
 <dl class="py class">
 <dt id="cosmos.cosmos_xbeach.CoSMoS_XBeach">
 <em class="property">class </em><code class="sig-prename descclassname">cosmos.cosmos_xbeach.</code><code class="sig-name descname">CoSMoS_XBeach</code><a class="reference internal" href="../_modules/cosmos/cosmos_xbeach.html#CoSMoS_XBeach"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cosmos.cosmos_xbeach.CoSMoS_XBeach" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
+<dd><p>Cosmos class for XBeach model.</p>
+<p>XBeach (XB) is a physics-based nearshore model that solves the horizontal equations for flow,
+wave propagation, sediment transport, and changes in bathymetry (see also <a class="reference external" href="https://xbeach.readthedocs.io/en/latest/">https://xbeach.readthedocs.io/en/latest/</a>).</p>
+<p>This cosmos class reads XBeach model data, pre-processes, moves and post-processes XBeach models.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Model</strong> (<em>class</em>) – Generic cosmos model attributes</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="cosmos.cosmos_scenario.Scenario.html#cosmos.cosmos_scenario.Scenario" title="cosmos.cosmos_scenario.Scenario"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_scenario.Scenario</span></code></a>, <a class="reference internal" href="cosmos.cosmos_model_loop.ModelLoop.html#cosmos.cosmos_model_loop.ModelLoop" title="cosmos.cosmos_model_loop.ModelLoop"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_model_loop.ModelLoop</span></code></a>, <a class="reference internal" href="cosmos.cosmos_model.Model.html#cosmos.cosmos_model.Model" title="cosmos.cosmos_model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_model.Model</span></code></a></p>
+</aside>
+<dl class="py method">
 <dt id="cosmos.cosmos_xbeach.CoSMoS_XBeach.__init__">
 <code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cosmos.cosmos_xbeach.CoSMoS_XBeach.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize model attributes described in xml file.</p>
@@ -111,7 +124,7 @@
 <td><p>Initialize model attributes described in xml file.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_stations</span></code>(name)</p></td>
-<td><p>Add stations that are located in this model.</p></td>
+<td><p>Add stations that are located within this model.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_all_nested_models</span></code>(tp[, all_nested_models])</p></td>
 <td><p>Return a list of all models nested in this model.</p></td>
@@ -120,13 +133,13 @@
 <td><p>Get boundary conditions from overall model and define peak.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="cosmos.cosmos_xbeach.CoSMoS_XBeach.move.html#cosmos.cosmos_xbeach.CoSMoS_XBeach.move" title="cosmos.cosmos_xbeach.CoSMoS_XBeach.move"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move</span></code></a>()</p></td>
-<td><p></p></td>
+<td><p>Move XBeach model input and output files.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="cosmos.cosmos_xbeach.CoSMoS_XBeach.post_process.html#cosmos.cosmos_xbeach.CoSMoS_XBeach.post_process" title="cosmos.cosmos_xbeach.CoSMoS_XBeach.post_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">post_process</span></code></a>()</p></td>
-<td><p></p></td>
+<td><p>Post-process XBeach output: generate sedimentation/erosion maps.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="cosmos.cosmos_xbeach.CoSMoS_XBeach.pre_process.html#cosmos.cosmos_xbeach.CoSMoS_XBeach.pre_process" title="cosmos.cosmos_xbeach.CoSMoS_XBeach.pre_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pre_process</span></code></a>()</p></td>
-<td><p></p></td>
+<td><p>Preprocess XBeach model.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">prepare</span></code>()</p></td>
 <td><p>Set model paths (input, output, figures, restart, job).</p></td>
@@ -135,7 +148,7 @@
 <td><p>Read model attributes from xml file.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="cosmos.cosmos_xbeach.CoSMoS_XBeach.read_model_specific.html#cosmos.cosmos_xbeach.CoSMoS_XBeach.read_model_specific" title="cosmos.cosmos_xbeach.CoSMoS_XBeach.read_model_specific"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_model_specific</span></code></a>()</p></td>
-<td><p></p></td>
+<td><p>Read SFINCS specific model attributes.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">submit_job</span></code>()</p></td>
 <td><p>Submit model.</p></td>

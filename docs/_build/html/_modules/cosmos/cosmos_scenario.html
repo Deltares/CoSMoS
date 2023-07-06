@@ -87,8 +87,23 @@
 <span class="kn">from</span> <span class="nn">cht.misc</span> <span class="kn">import</span> <span class="n">xmlkit</span> <span class="k">as</span> <span class="n">xml</span>
 
 <div class="viewcode-block" id="Scenario"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_scenario.Scenario.html#cosmos.cosmos_scenario.Scenario">[docs]</a><span class="k">class</span> <span class="nc">Scenario</span><span class="p">:</span>
-    
+    <span class="sd">&quot;&quot;&quot;Scenario class to read scenario file and initialize models. </span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cosmos.cosmos_main_loop.MainLoop</span>
+<span class="sd">    cosmos.cosmos_model_loop.ModelLoop</span>
+<span class="sd">    cosmos.cosmos_model.Model</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>  
 <div class="viewcode-block" id="Scenario.__init__"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_scenario.Scenario.html#cosmos.cosmos_scenario.Scenario.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize cosmos scenario.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        name : str</span>
+<span class="sd">            Name of scenario to be executed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
 
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span>          <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span>         <span class="o">=</span> <span class="p">[]</span>
@@ -104,7 +119,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">restart_path</span>  <span class="o">=</span> <span class="kc">None</span></div>
         
     <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        
+        <span class="sd">&quot;&quot;&quot;Read scenario file, set model paths and settings, initialize and read model data. Potentially cluster models and</span>
+<span class="sd">        generate cyclone (ensemble) tracks.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
         <span class="c1"># Set paths</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cycle_path</span>            <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_string</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cycle_models_path</span>     <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_string</span><span class="p">,</span> <span class="s2">&quot;models&quot;</span><span class="p">)</span>
@@ -514,7 +531,23 @@
                         <span class="n">cl</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
                     
                 <span class="n">cluster_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cl</span>                
-         
+
+        <span class="c1">## Spiderweb generation</span>
+        <span class="k">if</span> <span class="n">scn_meteo_spiderweb</span><span class="p">:</span>
+            <span class="n">spwfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">main_path</span><span class="p">,</span>
+                                            <span class="s2">&quot;meteo&quot;</span><span class="p">,</span>
+                                            <span class="s2">&quot;spiderwebs&quot;</span><span class="p">,</span>
+                                            <span class="n">scn_meteo_spiderweb</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">spwfile</span><span class="p">):</span>
+                <span class="kn">from</span> <span class="nn">cht.tropical_cyclone.tropical_cyclone</span> <span class="kn">import</span> <span class="n">TropicalCyclone</span>
+                <span class="n">tc</span><span class="o">=</span> <span class="n">TropicalCyclone</span><span class="p">()</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">tc</span><span class="o">.</span><span class="n">from_ddb_cyc</span><span class="p">(</span><span class="n">spwfile</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.cyc&#39;</span><span class="p">)</span>
+                    <span class="n">tc</span><span class="o">.</span><span class="n">include_rainfall</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">tc</span><span class="o">.</span><span class="n">to_spiderweb</span><span class="p">(</span><span class="n">filename</span> <span class="o">=</span> <span class="n">spwfile</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
         <span class="c1">### Ensemble</span>
 
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_obj</span><span class="p">,</span> <span class="s2">&quot;track_ensemble&quot;</span><span class="p">):</span>
