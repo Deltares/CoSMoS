@@ -7,7 +7,6 @@ Created on Tue May 18 12:00:56 2021
 
 import os
 
-from .cosmos_main import cosmos
 from cht.misc import xmlkit as xml
 from cht.misc import fileops as fo
 
@@ -39,7 +38,9 @@ class Stations():
     def read(self):
         """Read cosmos observation stations from observation station xml file.
         """
-        file_list = fo.list_files(os.path.join(cosmos.config.stations_path,
+        from .cosmos import cosmos
+
+        file_list = fo.list_files(os.path.join(cosmos.config.path.stations,
                                                "*.xml"))
         
         for file_name in file_list:

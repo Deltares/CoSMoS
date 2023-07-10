@@ -178,7 +178,7 @@ class Model:
                 self.add_stations(name)
                 
         
-    def prepare(self):
+    def set_paths(self):
         """Set model paths (input, output, figures, restart, job).
 
         See Also
@@ -214,7 +214,7 @@ class Model:
                                               region, tp, name, "wave")
 
         # Model folder in the jobs folder
-        self.job_path = os.path.join(cosmos.config.job_path,
+        self.job_path = os.path.join(cosmos.config.path.jobs,
                                      cosmos.scenario.name,
                                      self.name)        
 
@@ -283,27 +283,55 @@ class Model:
                 
 #        self.job_path = job_path      
 
+#            model.set_paths()            
+    def get_nested_models(self):
+        if self.flow_nested_name:
+            # Look up model from which it gets it boundary conditions
+            for model2 in cosmos.scenario.model:
+                if model2.name == self.flow_nested_name:
+                    self.flow_nested = model2
+                    model2.nested_flow_models.append(self)
+                    break
+        if self.wave_nested_name:
+            # Look up model from which it gets it boundary conditions
+            for model2 in cosmos.scenario.model:
+                if model2.name == self.wave_nested_name:
+                    self.wave_nested = model2
+                    model2.nested_wave_models.append(self)
+                    break
+        if self.bw_nested_name:
+            # Look up model from which it gets it boundary conditions
+            for model2 in cosmos.scenario.model:
+                if model2.name == self.bw_nested_name:
+                    self.bw_nested = model2
+                    model2.nested_bw_models.append(self)
+                    break
+
     def submit_job(self):
         """Submit model.
         """
-        if cosmos.scenario.track_ensemble and self.ensemble:
-            
+        if self.ensemble:            
             # Make run batch file
             fid = open("tmp.bat", "w")
-            fid.write(self.job_path[0:2] + "\n")     
-
-            for member_name in cosmos.scenario.member_names:
-            
+#            fid.write(self.job_path[0:2] + "\n")     
+            fid.write("cd " + self.job_path + "\n")
+            for member_name in cosmos.scenario.ensemble_names:
                 # Job path for this ensemble member
-                pth = self.job_path + "_" + member_name      
+                pth = member_name
+                # Copy base files to member path
+                fid.write("copy *.* " + pth + "\n")
                 fid.write("cd " + pth + "\n")
                 fid.write("call run.bat\n")
+                fid.write("cd ..\n")
 
-            fid.write("cd " + self.job_path + "\n")
-            fid.write("call run.bat\n")
+            # All is done, so now do the merging of the outputs
+
+
+            fid.write("DATE /T > finished.txt\n")
             fid.write("exit\n")
 
             fid.close()
+            pass
 
         else:
 
@@ -354,7 +382,7 @@ class Model:
         if name[-3:].lower() == "xml":
 
             # Get all stations in file
-            stations = cosmos.stations.find_by_file(name)
+            stations = cosmos.config.stations.find_by_file(name)
 
             for st in stations:
 
@@ -378,7 +406,7 @@ class Model:
                                         
         else:
 
-            station = copy.copy(cosmos.stations.find_by_name(name))
+            station = copy.copy(cosmos.config.stations.find_by_name(name))
 
             station.longitude_model = station.longitude
             station.latitude_model  = station.latitude
