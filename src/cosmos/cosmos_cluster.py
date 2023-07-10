@@ -10,7 +10,7 @@ from scipy import interpolate
 import numpy as np
 import pandas as pd
 
-from .cosmos_main import cosmos
+from .cosmos import cosmos
 import cht.nesting.nesting as nesting
 
 class Cluster:

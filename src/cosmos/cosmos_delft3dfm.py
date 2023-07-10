@@ -11,7 +11,7 @@ import numpy as np
 from pyproj import CRS
 from pyproj import Transformer
 
-from .cosmos_main import cosmos
+from .cosmos import cosmos
 from .cosmos_model import Model
 import cht.misc.xmlkit as xml
 from cht.delft3dfm.delft3dfm import Delft3DFM

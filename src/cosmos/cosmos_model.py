@@ -13,8 +13,11 @@ from matplotlib import path
 import pandas as pd                     
 from scipy import interpolate
 import numpy as np
+import toml
+import geopandas as gpd
+import shapely
 
-from .cosmos_main import cosmos
+from .cosmos import cosmos
 from .cosmos_cluster import cluster_dict as cluster
 
 import cht.misc.xmlkit as xml
@@ -37,14 +40,12 @@ class Model:
         self.flow               = False
         self.wave               = False
         self.priority           = 10    
-#        self.flow_nested        = False
-#        self.wave_nested        = False
         self.flow_nested        = None
         self.wave_nested        = None
-        self.bw_nested        = None
+        self.bw_nested          = None
         self.flow_nested_name   = None
         self.wave_nested_name   = None
-        self.bw_nested_name   = None
+        self.bw_nested_name     = None
         self.nested_flow_models = []
         self.nested_wave_models = []
         self.nested_bw_models = []
@@ -61,9 +62,9 @@ class Model:
         self.meteo_subset       = None
         self.meteo_spiderweb    = None
         self.meteo_dataset      = None
-        self.meteo_wind         = True
+        self.meteo_wind                 = True
         self.meteo_atmospheric_pressure = True
-        self.meteo_precipitation        = False
+        self.meteo_precipitation        = True
         self.runid              = None
         self.polygon            = None
         self.make_flood_map     = False
@@ -78,6 +79,7 @@ class Model:
         self.peak_boundary_twl     = None
         self.peak_boundary_time    = None
         self.zb_deshoal         = None
+        self.ensemble           = False
 
     def read_generic(self):
         """Read model attributes from xml file.
@@ -88,62 +90,66 @@ class Model:
         cosmos.cosmos_model.ModelLoop
 
         """
-        try:
-            xml_obj = xml.xml2obj(self.file_name)
-        except:
-            print("Error reading " + self.file_name + " !")
+
+        mdl_dict = toml.load(self.file_name)
+
+        # Turn into object        
+        for key, value in mdl_dict.items():
+            setattr(self, key, value)
+
+        self.flow_nested_name = self.flow_nested    
+        self.wave_nested_name = self.wave_nested    
+        self.bw_nested_name   = self.bw_nested    
+
+        self.crs = CRS(self.crs)
         
-        self.long_name = xml_obj.longname[0].value
-        self.type      = xml_obj.type[0].value.lower()
-        self.runid     = xml_obj.runid[0].value
+#         self.long_name = xml_obj.longname[0].value
+#         self.type      = xml_obj.type[0].value.lower()
+#         self.runid     = xml_obj.runid[0].value
                 
-        if hasattr(xml_obj, "flownested"):
-            if not xml_obj.flownested[0].value == "none":
-#                self.flow_nested = True
-                self.flow_nested_name = xml_obj.flownested[0].value
-        if hasattr(xml_obj, "wavenested"):
-            if not xml_obj.wavenested[0].value == "none":
-#                self.wave_nested = True
-                self.wave_nested_name = xml_obj.wavenested[0].value
-        if hasattr(xml_obj, "bwnested"):
-            if not xml_obj.bwnested[0].value == "none":
-#                self.wave_nested = True
-                self.bw_nested_name = xml_obj.bwnested[0].value
-        coordsys     = xml_obj.coordsys[0].value
-        self.crs = CRS(coordsys)        
-        if hasattr(xml_obj, "xlim1") and hasattr(xml_obj, "xlim2") and hasattr(xml_obj, "ylim1")  and hasattr(xml_obj, "ylim2"):
-            self.xlim = [xml_obj.xlim1[0].value, xml_obj.xlim2[0].value]
-            self.ylim = [xml_obj.ylim1[0].value, xml_obj.ylim2[0].value]
-        if hasattr(xml_obj, "flowspinup"):
-            self.flow_spinup_time = xml_obj.flowspinup[0].value
-        if hasattr(xml_obj, "wavespinup"):
-            self.wave_spinup_time = xml_obj.wavespinup[0].value
-        if hasattr(xml_obj, "vertical_reference_level_name"):
-            self.vertical_reference_level_name = xml_obj.vertical_reference_level_name[0].value
-        if hasattr(xml_obj, "vertical_reference_level_difference_with_msl"):
-            self.vertical_reference_level_difference_with_msl = xml_obj.vertical_reference_level_difference_with_msl[0].value
-        if hasattr(xml_obj, "boundary_water_level_correction"):
-            self.boundary_water_level_correction = xml_obj.boundary_water_level_correction[0].value
-        if hasattr(xml_obj, "make_flood_map"):
-            if xml_obj.make_flood_map[0].value[0].lower() == "y":
-                self.make_flood_map = True
-        if hasattr(xml_obj, "make_wave_map"):
-            if xml_obj.make_wave_map[0].value[0].lower() == "y":
-                self.make_wave_map = True
-        if hasattr(xml_obj, "make_sedero_map"):
-            if xml_obj.make_sedero_map[0].value[0].lower() == "y":
-                self.make_sedero_map = True
-        if hasattr(xml_obj, "sa_correction"):
-            self.sa_correction = xml_obj.sa_correction[0].value
-        if hasattr(xml_obj, "ssa_correction"):
-            self.ssa_correction = xml_obj.ssa_correction[0].value
-        if hasattr(xml_obj, "wave"):
-            if xml_obj.wave[0].value[0].lower() == "y":
-                self.wave = True
-        if hasattr(xml_obj, "cluster"):
-            self.cluster = xml_obj.cluster[0].value[0].lower()
-        if hasattr(xml_obj, "boundary_twl_treshold"):
-            self.boundary_twl_treshold = xml_obj.boundary_twl_treshold[0].value
+#         if hasattr(xml_obj, "flownested"):
+#             if not xml_obj.flownested[0].value == "none":
+# #                self.flow_nested = True
+#                 self.flow_nested_name = xml_obj.flownested[0].value
+#         if hasattr(xml_obj, "wavenested"):
+#             if not xml_obj.wavenested[0].value == "none":
+# #                self.wave_nested = True
+#                 self.wave_nested_name = xml_obj.wavenested[0].value
+#         coordsys     = xml_obj.coordsys[0].value
+#         self.crs = CRS(coordsys)        
+#         if hasattr(xml_obj, "xlim1") and hasattr(xml_obj, "xlim2") and hasattr(xml_obj, "ylim1")  and hasattr(xml_obj, "ylim2"):
+#             self.xlim = [xml_obj.xlim1[0].value, xml_obj.xlim2[0].value]
+#             self.ylim = [xml_obj.ylim1[0].value, xml_obj.ylim2[0].value]
+#         if hasattr(xml_obj, "flowspinup"):
+#             self.flow_spinup_time = xml_obj.flowspinup[0].value
+#         if hasattr(xml_obj, "wavespinup"):
+#             self.wave_spinup_time = xml_obj.wavespinup[0].value
+#         if hasattr(xml_obj, "vertical_reference_level_name"):
+#             self.vertical_reference_level_name = xml_obj.vertical_reference_level_name[0].value
+#         if hasattr(xml_obj, "vertical_reference_level_difference_with_msl"):
+#             self.vertical_reference_level_difference_with_msl = xml_obj.vertical_reference_level_difference_with_msl[0].value
+#         if hasattr(xml_obj, "boundary_water_level_correction"):
+#             self.boundary_water_level_correction = xml_obj.boundary_water_level_correction[0].value
+#         if hasattr(xml_obj, "make_flood_map"):
+#             if xml_obj.make_flood_map[0].value[0].lower() == "y":
+#                 self.make_flood_map = True
+#         if hasattr(xml_obj, "make_wave_map"):
+#             if xml_obj.make_wave_map[0].value[0].lower() == "y":
+#                 self.make_wave_map = True
+#         if hasattr(xml_obj, "make_sedero_map"):
+#             if xml_obj.make_sedero_map[0].value[0].lower() == "y":
+#                 self.make_sedero_map = True
+#         if hasattr(xml_obj, "sa_correction"):
+#             self.sa_correction = xml_obj.sa_correction[0].value
+#         if hasattr(xml_obj, "ssa_correction"):
+#             self.ssa_correction = xml_obj.ssa_correction[0].value
+#         if hasattr(xml_obj, "wave"):
+#             if xml_obj.wave[0].value[0].lower() == "y":
+#                 self.wave = True
+#         if hasattr(xml_obj, "cluster"):
+#             self.cluster = xml_obj.cluster[0].value[0].lower()
+#         if hasattr(xml_obj, "boundary_twl_treshold"):
+#             self.boundary_twl_treshold = xml_obj.boundary_twl_treshold[0].value
             
                 
         # Read polygon around model
@@ -158,15 +164,17 @@ class Model:
                              self.polygon.vertices.max(axis=0)[0]]
                 self.ylim = [self.polygon.vertices.min(axis=0)[1],
                              self.polygon.vertices.max(axis=0)[1]]
+            # Make gdf with outline 
+            geom = shapely.geometry.Polygon(np.squeeze(xy))
+            self.outline = gpd.GeoDataFrame({"geometry": [geom]}).set_crs(self.crs).to_crs(4326)   
            
         # Stations
-        if hasattr(xml_obj, "station"):
-
-            for istat in range(len(xml_obj.station)):
-                
+        if self.station:
+            station_list = self.station
+            self.station = []
+            for istat in range(len(station_list)):                
                 # Find matching stations from complete stations list
-
-                name = xml_obj.station[istat].value
+                name = station_list[istat]
                 self.add_stations(name)
                 
         
