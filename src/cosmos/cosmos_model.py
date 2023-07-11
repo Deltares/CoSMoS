@@ -25,16 +25,11 @@ from cht.nesting.nest1 import nest1
 from cht.nesting.nest2 import nest2
 
 class Model:
-    """Read generic model data from xml file, prepare model run paths, and submit jobs.
+    """Read generic model data from toml file, prepare model run paths, and submit jobs.
 
     """
     def __init__(self):
-        """Initialize model attributes described in xml file.
-
-        See Also
-        --------
-        cosmos.cosmos_scenario
-
+        """Initialize model attributes described in model.toml file.
         """
 
         self.flow               = False
@@ -82,13 +77,12 @@ class Model:
         self.ensemble           = False
 
     def read_generic(self):
-        """Read model attributes from xml file.
+        """Read model attributes from model.toml file.
 
         See Also
         --------
         cosmos.cosmos_scenario.Scenario
-        cosmos.cosmos_model.ModelLoop
-
+        cosmos.cosmos_model_loop.ModelLoop
         """
 
         mdl_dict = toml.load(self.file_name)
@@ -184,7 +178,6 @@ class Model:
         See Also
         --------
         cosmos.cosmos_main_loop.MainLoop
-
         """        
         # First model and restart folders if necessary
 
@@ -285,6 +278,8 @@ class Model:
 
 #            model.set_paths()            
     def get_nested_models(self):
+        """Get which model the current model is nested in. 
+        """        
         if self.flow_nested_name:
             # Look up model from which it gets it boundary conditions
             for model2 in cosmos.scenario.model:
@@ -375,7 +370,12 @@ class Model:
         
     def add_stations(self, name):
         """Add stations that are located within this model.
-        """
+
+        Parameters
+        ----------
+        name : str
+            station file name or station name
+        """        
         wgs84 = CRS.from_epsg(4326)
         transformer = Transformer.from_crs(wgs84, self.crs, always_xy=True)
         

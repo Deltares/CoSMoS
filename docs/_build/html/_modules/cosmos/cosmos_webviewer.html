@@ -43,7 +43,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../usage.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../manual.html">User manual</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../functions.html">Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../functions.html">API reference</a></li>
 </ul>
 
         </div>
@@ -86,7 +86,7 @@
 <span class="kn">from</span> <span class="nn">pyproj</span> <span class="kn">import</span> <span class="n">CRS</span>
 <span class="kn">from</span> <span class="nn">pyproj</span> <span class="kn">import</span> <span class="n">Transformer</span>
 
-<span class="kn">from</span> <span class="nn">.cosmos_main</span> <span class="kn">import</span> <span class="n">cosmos</span>
+<span class="kn">from</span> <span class="nn">.cosmos</span> <span class="kn">import</span> <span class="n">cosmos</span>
 <span class="kn">from</span> <span class="nn">.cosmos_timeseries</span> <span class="kn">import</span> <span class="n">merge_timeseries</span> <span class="k">as</span> <span class="n">merge</span>
 <span class="kn">from</span> <span class="nn">.cosmos_tiling</span> <span class="kn">import</span> <span class="n">make_wave_map_tiles</span>
 <span class="kn">from</span> <span class="nn">.cosmos_tiling</span> <span class="kn">import</span> <span class="n">make_precipitation_tiles</span>
@@ -107,8 +107,8 @@
 <span class="sd">            Name of webviewer.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span>    <span class="o">=</span> <span class="n">name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">path</span>    <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">main_path</span><span class="p">,</span> <span class="s2">&quot;webviewers&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">webviewer_version</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span>    <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="s2">&quot;webviewers&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">webviewer</span><span class="o">.</span><span class="n">version</span>
         <span class="k">if</span> <span class="n">fo</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">exists</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
@@ -116,10 +116,10 @@
     
     <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Make webviewer. </span>
+
 <span class="sd">        - Makes local copy of the webviewer from a template. If such a copy already exists, data will be copied to the existing webviewer.</span>
 <span class="sd">        - Updating the scenario.js with the current scenario.</span>
 <span class="sd">        - Make a variable file defining the variables that are mapped for the current scenario.</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>        
         <span class="c1"># Makes local copy of the web viewer</span>
         <span class="c1"># If such a copy already exists, data will be copied to the existing web viewer</span>
@@ -135,9 +135,9 @@
 
             <span class="n">fo</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
 
-            <span class="n">template_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">main_path</span><span class="p">,</span>
-                                         <span class="s2">&quot;templates&quot;</span><span class="p">,</span>
-                                         <span class="s2">&quot;webviewers&quot;</span><span class="p">,</span>
+            <span class="n">template_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">main</span><span class="p">,</span>
+                                         <span class="s2">&quot;configuration&quot;</span><span class="p">,</span>
+                                         <span class="s2">&quot;webviewer_templates&quot;</span><span class="p">,</span>
                                          <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
                                          <span class="s2">&quot;*&quot;</span><span class="p">)</span>
             <span class="n">fo</span><span class="o">.</span><span class="n">copy_file</span><span class="p">(</span><span class="n">template_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
@@ -246,7 +246,7 @@
                         <span class="c1"># Check if there is a file in the observations that matches this station</span>
                         <span class="n">obs_file</span> <span class="o">=</span> <span class="kc">None</span>
                         <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">observations_path</span> <span class="ow">and</span> <span class="n">station</span><span class="o">.</span><span class="n">id</span><span class="p">:</span>
-                            <span class="n">obs_pth</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">main_path</span><span class="p">,</span>
+                            <span class="n">obs_pth</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">main</span><span class="p">,</span>
                                                <span class="s2">&quot;observations&quot;</span><span class="p">,</span>
                                                <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">observations_path</span><span class="p">,</span>
                                                <span class="s2">&quot;water_levels&quot;</span><span class="p">)</span>                        
@@ -269,8 +269,8 @@
                         <span class="c1"># Go two days back</span>
                         <span class="n">path</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">timeseries_path</span>
 <span class="c1">#                        path = model.archive_path</span>
-                        <span class="n">t0</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">48</span><span class="p">)</span>
-                        <span class="n">t1</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span>
+                        <span class="n">t0</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">48</span><span class="p">)</span>
+                        <span class="n">t1</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle</span>
                         <span class="n">v</span>  <span class="o">=</span> <span class="n">merge</span><span class="p">(</span><span class="n">path</span><span class="p">,</span>
                                    <span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                                    <span class="n">model</span><span class="o">.</span><span class="n">region</span><span class="p">,</span>
@@ -337,8 +337,8 @@
                                                              <span class="s2">&quot;obs_folder&quot;</span><span class="p">:</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">observations_path</span><span class="p">}))</span>
     
                         <span class="n">path</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">timeseries_path</span>
-                        <span class="n">t0</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">48</span><span class="p">)</span>
-                        <span class="n">t1</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span>
+                        <span class="n">t0</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">48</span><span class="p">)</span>
+                        <span class="n">t1</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle</span>
                         
                         <span class="c1"># Hm0</span>
                         <span class="n">v</span>  <span class="o">=</span> <span class="n">merge</span><span class="p">(</span><span class="n">path</span><span class="p">,</span>
@@ -399,7 +399,7 @@
     
             <span class="c1"># Wave map for the entire simulation</span>
             <span class="n">dt</span>  <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="n">dtinc</span><span class="p">)</span>
-            <span class="n">t0</span>  <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>    
+            <span class="n">t0</span>  <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>    
             <span class="n">t1</span>  <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">stop_time</span>
 
             <span class="n">pathstr</span> <span class="o">=</span> <span class="p">[]</span>
@@ -475,7 +475,7 @@
 
         <span class="c1"># Wave map for the entire simulation</span>
         <span class="n">dt</span>  <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="n">dtinc</span><span class="p">)</span>
-        <span class="n">t0</span>  <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>    
+        <span class="n">t0</span>  <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>    
         <span class="n">t1</span>  <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">stop_time</span>
         
         <span class="n">okay</span>  <span class="o">=</span> <span class="kc">False</span>
@@ -817,7 +817,7 @@
 <span class="c1">#         dt1 = datetime.timedelta(hours=1)</span>
 <span class="c1"># #        dt6 = datetime.timedelta(hours=6)</span>
 <span class="c1">#         dt24 = datetime.timedelta(hours=24)</span>
-<span class="c1">#         t0 = cosmos.cycle_time.replace(tzinfo=None)    </span>
+<span class="c1">#         t0 = cosmos.cycle.replace(tzinfo=None)    </span>
 <span class="c1">#         t1 = cosmos.stop_time</span>
         
 <span class="c1">#         # First determine max precip for all simulations </span>
@@ -1417,8 +1417,8 @@
     <span class="n">newsc</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">]</span>         <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">lon</span>    
     <span class="n">newsc</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">]</span>         <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">lat</span>
     <span class="n">newsc</span><span class="p">[</span><span class="s2">&quot;zoom&quot;</span><span class="p">]</span>        <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">zoom</span>    
-    <span class="n">newsc</span><span class="p">[</span><span class="s2">&quot;cycle&quot;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S&#39;</span><span class="p">)</span>
-    <span class="n">newsc</span><span class="p">[</span><span class="s2">&quot;duration&quot;</span><span class="p">]</span>    <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">run_duration</span><span class="p">)</span>
+    <span class="n">newsc</span><span class="p">[</span><span class="s2">&quot;cycle&quot;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S&#39;</span><span class="p">)</span>
+    <span class="n">newsc</span><span class="p">[</span><span class="s2">&quot;duration&quot;</span><span class="p">]</span>    <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">runtime</span><span class="p">)</span>
 
     <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span>
     <span class="n">newsc</span><span class="p">[</span><span class="s2">&quot;last_update&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y/%m/</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span> <span class="o">+</span> <span class="s2">&quot; (UTC)&quot;</span><span class="p">)</span>

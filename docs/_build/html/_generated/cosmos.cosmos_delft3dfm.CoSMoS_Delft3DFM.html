@@ -48,7 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../manual.html">User manual</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../functions.html">Functions</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../functions.html#main-classes">Main classes</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../functions.html#model-classes">Model classes</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../functions.html#model-specific-classes">Model-specific classes</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_beware.CoSMoS_BEWARE.html">cosmos.cosmos_beware.CoSMoS_BEWARE</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM</a></li>
 <li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_hurrywave.CoSMoS_HurryWave.html">cosmos.cosmos_hurrywave.CoSMoS_HurryWave</a></li>
@@ -110,18 +110,14 @@ and morphological changes in rivers, estuaries, coasts, and oceans (see also <a 
 <dl class="py method">
 <dt id="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.__init__">
 <code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize model attributes described in xml file.</p>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">cosmos.cosmos_scenario()</span></code></p>
-</aside>
+<dd><p>Initialize model attributes described in model.toml file.</p>
 </dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.__init__" title="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>()</p></td>
-<td><p>Initialize model attributes described in xml file.</p></td>
+<td><p>Initialize model attributes described in model.toml file.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_stations</span></code>(name)</p></td>
 <td><p>Add stations that are located within this model.</p></td>
@@ -129,28 +125,31 @@ and morphological changes in rivers, estuaries, coasts, and oceans (see also <a 
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_all_nested_models</span></code>(tp[, all_nested_models])</p></td>
 <td><p>Return a list of all models nested in this model.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_peak_boundary_conditions</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_nested_models</span></code>()</p></td>
+<td><p>Get which model the current model is nested in.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_peak_boundary_conditions</span></code>()</p></td>
 <td><p>Get boundary conditions from overall model and define peak.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.move.html#cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.move" title="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.move"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.move.html#cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.move" title="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.move"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move</span></code></a>()</p></td>
 <td><p>Move Delft3D FM model input, output, and restart files.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.post_process.html#cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.post_process" title="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.post_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">post_process</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.post_process.html#cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.post_process" title="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.post_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">post_process</span></code></a>()</p></td>
 <td><p>Post-process Delft3D FM output: generate wave and water level timeseries.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.pre_process.html#cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.pre_process" title="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.pre_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pre_process</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.pre_process.html#cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.pre_process" title="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.pre_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pre_process</span></code></a>()</p></td>
 <td><p>Preprocess Delft3D FM model.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">prepare</span></code>()</p></td>
-<td><p>Set model paths (input, output, figures, restart, job).</p></td>
-</tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_generic</span></code>()</p></td>
-<td><p>Read model attributes from xml file.</p></td>
+<td><p>Read model attributes from model.toml file.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.read_model_specific.html#cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.read_model_specific" title="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.read_model_specific"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_model_specific</span></code></a>()</p></td>
 <td><p>Read Delft3D FM specific model attributes.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">submit_job</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_paths</span></code>()</p></td>
+<td><p>Set model paths (input, output, figures, restart, job).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">submit_job</span></code>()</p></td>
 <td><p>Submit model.</p></td>
 </tr>
 </tbody>

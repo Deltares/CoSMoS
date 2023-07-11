@@ -42,12 +42,11 @@ class CoSMoS_XBeach(Model):
     cosmos.cosmos_model.Model
     """ 
     def read_model_specific(self):
-        """Read SFINCS specific model attributes.
+        """Read XBeach specific model attributes.
 
         See Also
         ----------
         cht.xbeach.xbeach
-
         """
 
         # Read in the XBeach model
@@ -116,6 +115,7 @@ class CoSMoS_XBeach(Model):
         
     def pre_process(self):
         """Preprocess XBeach model.
+
         - Extract and write water level and wave conditions.
         - Optional: only run XBeach for peak conditions.
         - Write input file. 
@@ -123,7 +123,6 @@ class CoSMoS_XBeach(Model):
         See Also
         ----------
         cht.nesting.nest2
-        
         """
         
         # First generate input that is identical for all members

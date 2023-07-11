@@ -48,7 +48,6 @@ class CoSMoS_BEWARE(Model):
         See Also
         ----------
         cht.beware.beware
-
         """        
         # Read in the BEWARE model
 
@@ -64,15 +63,14 @@ class CoSMoS_BEWARE(Model):
 
     def pre_process(self):
         """Preprocess BEWARE model.
+        
         - Extract and write wave and water level conditions.
         - Write input file. 
         - Optional: make ensemble of models.
 
-
         See Also
         ----------
-        cht.nesting.nest2
-        
+        cht.nesting.nest2 
         """   
         
         # Set path temporarily to job path
@@ -242,7 +240,6 @@ class CoSMoS_BEWARE(Model):
         See Also
         ----------
         cht.misc.prob_maps
-        
         """        
         # Post-processing occurs in cosmos_webviewer.py
         import numpy as np

@@ -16,9 +16,10 @@
       ~Model.__init__
       ~Model.add_stations
       ~Model.get_all_nested_models
+      ~Model.get_nested_models
       ~Model.get_peak_boundary_conditions
-      ~Model.prepare
       ~Model.read_generic
+      ~Model.set_paths
       ~Model.submit_job
    
    

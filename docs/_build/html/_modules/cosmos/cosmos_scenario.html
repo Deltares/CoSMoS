@@ -43,7 +43,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../usage.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../manual.html">User manual</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../functions.html">Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../functions.html">API reference</a></li>
 </ul>
 
         </div>
@@ -78,13 +78,14 @@
 <span class="sd">@author: ormondt</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">toml</span>
 
-<span class="kn">from</span> <span class="nn">.cosmos_main</span> <span class="kn">import</span> <span class="n">cosmos</span>
+<span class="kn">from</span> <span class="nn">.cosmos</span> <span class="kn">import</span> <span class="n">cosmos</span>
 <span class="kn">from</span> <span class="nn">.cosmos_cluster</span> <span class="kn">import</span> <span class="n">cluster_dict</span>
 <span class="kn">from</span> <span class="nn">.cosmos_cluster</span> <span class="kn">import</span> <span class="n">Cluster</span>
 
-<span class="kn">from</span> <span class="nn">cht.misc</span> <span class="kn">import</span> <span class="n">fileops</span> <span class="k">as</span> <span class="n">fo</span>
-<span class="kn">from</span> <span class="nn">cht.misc</span> <span class="kn">import</span> <span class="n">xmlkit</span> <span class="k">as</span> <span class="n">xml</span>
+<span class="c1"># from cht.misc import fileops as fo</span>
+<span class="c1"># from cht.misc import xmlkit as xml</span>
 
 <div class="viewcode-block" id="Scenario"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_scenario.Scenario.html#cosmos.cosmos_scenario.Scenario">[docs]</a><span class="k">class</span> <span class="nc">Scenario</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Scenario class to read scenario file and initialize models. </span>
@@ -116,247 +117,85 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">cycle_path</span>    <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tile_path</span>     <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">job_list_path</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">restart_path</span>  <span class="o">=</span> <span class="kc">None</span></div>
-        
+        <span class="bp">self</span><span class="o">.</span><span class="n">restart_path</span>  <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_cycle</span>    <span class="o">=</span> <span class="kc">None</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">track_ensemble</span>             <span class="o">=</span> <span class="kc">None</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">track_ensemble_nr_realizations</span> <span class="o">=</span> <span class="mi">0</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">meteo_dataset</span>              <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meteo_spiderweb</span>            <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meteo_wind</span>                 <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meteo_atmospheric_pressure</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meteo_precipitation</span>        <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meteo_track</span>                <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">observations_path</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span></div>
+
     <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Read scenario file, set model paths and settings, initialize and read model data. Potentially cluster models and</span>
-<span class="sd">        generate cyclone (ensemble) tracks.</span>
-<span class="sd">        &quot;&quot;&quot;</span>        
-        <span class="c1"># Set paths</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cycle_path</span>            <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_string</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cycle_models_path</span>     <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_string</span><span class="p">,</span> <span class="s2">&quot;models&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cycle_tiles_path</span>      <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_string</span><span class="p">,</span> <span class="s2">&quot;tiles&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cycle_job_list_path</span>   <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_string</span><span class="p">,</span> <span class="s2">&quot;job_list&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">restart_path</span>          <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;restart&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">timeseries_path</span>       <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;timeseries&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cycle_timeseries_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;timeseries&quot;</span><span class="p">,</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_string</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;Read scenario file, set model paths and settings, initialize models and read model generic and model specific data. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">xml_obj</span> <span class="o">=</span> <span class="n">xml</span><span class="o">.</span><span class="n">xml2obj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">)</span>
+        <span class="c1"># Read scenario file</span>
+        <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Reading scenario file ...&quot;</span><span class="p">)</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">scenarios</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">scenario_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;scenario.toml&quot;</span><span class="p">)</span>     
+        <span class="n">sc_dict</span> <span class="o">=</span> <span class="n">toml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">scenario_file</span><span class="p">)</span>
+
+        <span class="c1"># Turn into object        </span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">sc_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;model&quot;</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>    
+<span class="c1">#                for key, value in sc_dict[key].items():</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
         
-        <span class="c1">### Names</span>
-        <span class="c1"># Check if cycle is supplied (if not, this is a forecasting run)</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_obj</span><span class="p">,</span> <span class="s2">&quot;longname&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="n">xml_obj</span><span class="o">.</span><span class="n">longname</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
-            
-        <span class="bp">self</span><span class="o">.</span><span class="n">run_duration</span> <span class="o">=</span> <span class="n">xml_obj</span><span class="o">.</span><span class="n">runtime</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-        
-            
-        <span class="c1">### Meteo forcing   </span>
-        <span class="n">scn_meteo_dataset</span>              <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">scn_meteo_spiderweb</span>            <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">scn_meteo_wind</span>                 <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">scn_meteo_atmospheric_pressure</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">scn_meteo_precipitation</span>        <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">scn_ensemble</span>                   <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">scn_make_flood_map</span>             <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">scn_make_wave_map</span>              <span class="o">=</span> <span class="kc">True</span>
-
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_obj</span><span class="p">,</span> <span class="s2">&quot;meteo_dataset&quot;</span><span class="p">):</span>
-            <span class="n">scn_meteo_dataset</span> <span class="o">=</span> <span class="n">xml_obj</span><span class="o">.</span><span class="n">meteo_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_obj</span><span class="p">,</span> <span class="s2">&quot;meteo_spiderweb&quot;</span><span class="p">):</span>
-            <span class="n">scn_meteo_spiderweb</span> <span class="o">=</span> <span class="n">xml_obj</span><span class="o">.</span><span class="n">meteo_spiderweb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_obj</span><span class="p">,</span> <span class="s2">&quot;wind&quot;</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">xml_obj</span><span class="o">.</span><span class="n">wind</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span>
-                <span class="n">scn_meteo_wind</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">else</span><span class="p">:</span>    
-                <span class="n">scn_meteo_wind</span> <span class="o">=</span> <span class="kc">False</span>
-        
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_obj</span><span class="p">,</span> <span class="s2">&quot;atmospheric_pressure&quot;</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">xml_obj</span><span class="o">.</span><span class="n">atmospheric_pressure</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span>
-                <span class="n">scn_meteo_atmospheric_pressure</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">else</span><span class="p">:</span>    
-                <span class="n">scn_meteo_atmospheric_pressure</span> <span class="o">=</span> <span class="kc">False</span>
-
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_obj</span><span class="p">,</span> <span class="s2">&quot;precipitation&quot;</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">xml_obj</span><span class="o">.</span><span class="n">precipitation</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span>
-                <span class="n">scn_meteo_precipitation</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">else</span><span class="p">:</span>    
-                <span class="n">scn_meteo_precipitation</span> <span class="o">=</span> <span class="kc">False</span>
-
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_obj</span><span class="p">,</span> <span class="s2">&quot;ensemble&quot;</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">xml_obj</span><span class="o">.</span><span class="n">ensemble</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span>
-                <span class="n">scn_ensemble</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">else</span><span class="p">:</span>    
-                <span class="n">scn_ensemble</span> <span class="o">=</span> <span class="kc">False</span>
-
-        <span class="c1">### Web viewer</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_obj</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lon</span> <span class="o">=</span> <span class="n">xml_obj</span><span class="o">.</span><span class="n">lon</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_obj</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lat</span> <span class="o">=</span> <span class="n">xml_obj</span><span class="o">.</span><span class="n">lat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_obj</span><span class="p">,</span> <span class="s2">&quot;zoom&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span> <span class="o">=</span> <span class="n">xml_obj</span><span class="o">.</span><span class="n">zoom</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_obj</span><span class="p">,</span> <span class="s2">&quot;observations_path&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">observations_path</span> <span class="o">=</span> <span class="n">xml_obj</span><span class="o">.</span><span class="n">observations_path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">observations_path</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_obj</span><span class="p">,</span> <span class="s2">&quot;make_flood_map&quot;</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">xml_obj</span><span class="o">.</span><span class="n">make_flood_map</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span>
-                <span class="n">scn_make_flood_map</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">else</span><span class="p">:</span>    
-                <span class="n">scn_make_flood_map</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_obj</span><span class="p">,</span> <span class="s2">&quot;make_wave_map&quot;</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">xml_obj</span><span class="o">.</span><span class="n">make_wave_map</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span>
-                <span class="n">scn_make_wave_map</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">else</span><span class="p">:</span>    
-                <span class="n">scn_make_wave_map</span> <span class="o">=</span> <span class="kc">False</span>
             
         <span class="c1"># First find all the models and store in dict models_in_scenario</span>
         <span class="n">models_in_scenario</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">mdl</span> <span class="ow">in</span> <span class="n">xml_obj</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
-            
-            <span class="n">mdl_meteo_dataset</span>              <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">mdl_meteo_spiderweb</span>            <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">mdl_meteo_wind</span>                 <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">mdl_meteo_atmospheric_pressure</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">mdl_meteo_precipitation</span>        <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">mdl_ensemble</span>                   <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">mdl_make_flood_map</span>             <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">mdl_make_wave_map</span>              <span class="o">=</span> <span class="kc">None</span>
-            
-            <span class="c1"># Read meteo forcing for this model (overrides values given in scenario)          </span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">mdl</span><span class="p">,</span> <span class="s2">&quot;meteo_dataset&quot;</span><span class="p">):</span>
-                <span class="n">mdl_meteo_dataset</span> <span class="o">=</span> <span class="n">mdl</span><span class="o">.</span><span class="n">meteo_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">mdl</span><span class="p">,</span> <span class="s2">&quot;meteo_spiderweb&quot;</span><span class="p">):</span>
-                <span class="n">mdl_meteo_spiderweb</span> <span class="o">=</span> <span class="n">mdl</span><span class="o">.</span><span class="n">meteo_spiderweb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">mdl</span><span class="p">,</span> <span class="s2">&quot;wind&quot;</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">mdl</span><span class="o">.</span><span class="n">wind</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span>
-                    <span class="n">mdl_meteo_wind</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="k">else</span><span class="p">:</span>    
-                    <span class="n">mdl_meteo_wind</span> <span class="o">=</span> <span class="kc">False</span>            
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">mdl</span><span class="p">,</span> <span class="s2">&quot;atmospheric_pressure&quot;</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">mdl</span><span class="o">.</span><span class="n">atmospheric_pressure</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span>
-                    <span class="n">mdl_meteo_atmospheric_pressure</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="k">else</span><span class="p">:</span>    
-                    <span class="n">mdl_meteo_atmospheric_pressure</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">mdl</span><span class="p">,</span> <span class="s2">&quot;precipitation&quot;</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">mdl</span><span class="o">.</span><span class="n">precipitation</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span>
-                    <span class="n">mdl_meteo_precipitation</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="k">else</span><span class="p">:</span>    
-                    <span class="n">mdl_meteo_precipitation</span> <span class="o">=</span> <span class="kc">False</span>                    
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">mdl</span><span class="p">,</span> <span class="s2">&quot;ensemble&quot;</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">mdl</span><span class="o">.</span><span class="n">ensemble</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span>
-                    <span class="n">mdl_ensemble</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="k">else</span><span class="p">:</span>    
-                    <span class="n">mdl_ensemble</span> <span class="o">=</span> <span class="kc">False</span>        
-
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">mdl</span><span class="p">,</span> <span class="s2">&quot;make_flood_map&quot;</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">mdl</span><span class="o">.</span><span class="n">make_flood_map</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span>
-                    <span class="n">mdl_make_flood_map</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="k">else</span><span class="p">:</span>    
-                    <span class="n">mdl_make_flood_map</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">mdl</span><span class="p">,</span> <span class="s2">&quot;make_wave_map&quot;</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">mdl</span><span class="o">.</span><span class="n">make_wave_map</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span>
-                    <span class="n">mdl_make_wave_map</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="k">else</span><span class="p">:</span>    
-                    <span class="n">mdl_make_wave_map</span> <span class="o">=</span> <span class="kc">False</span>
-                                
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">mdl</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">):</span>
-
+        <span class="k">for</span> <span class="n">mdl</span> <span class="ow">in</span> <span class="n">sc_dict</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]:</span>                        
+            <span class="c1"># Add the models in this scenario                     </span>
+            <span class="k">if</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">mdl</span><span class="p">:</span>
                 <span class="c1"># Individual model</span>
-
-                <span class="n">name</span> <span class="o">=</span> <span class="n">mdl</span><span class="o">.</span><span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">mdl</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
                 <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">all_models</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
-                
-                <span class="c1"># Set default values provided for scenario as a whole</span>
-                <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_dataset&quot;</span><span class="p">]</span>              <span class="o">=</span> <span class="n">scn_meteo_dataset</span>
-                <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_spiderweb&quot;</span><span class="p">]</span>            <span class="o">=</span> <span class="n">scn_meteo_spiderweb</span>
-                <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_wind&quot;</span><span class="p">]</span>                 <span class="o">=</span> <span class="n">scn_meteo_wind</span>
-                <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_atmospheric_pressure&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scn_meteo_atmospheric_pressure</span>
-                <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_precipitation&quot;</span><span class="p">]</span>        <span class="o">=</span> <span class="n">scn_meteo_precipitation</span>
-                <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;ensemble&quot;</span><span class="p">]</span>                   <span class="o">=</span> <span class="n">scn_ensemble</span>
-                <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;make_flood_map&quot;</span><span class="p">]</span>             <span class="o">=</span> <span class="n">scn_make_flood_map</span>
-                <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;make_wave_map&quot;</span><span class="p">]</span>              <span class="o">=</span> <span class="n">scn_make_wave_map</span>
-
-                <span class="c1"># Override if other data is provided</span>
-                <span class="k">if</span> <span class="n">mdl_meteo_dataset</span><span class="p">:</span>
-                    <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_dataset&quot;</span><span class="p">]</span>              <span class="o">=</span> <span class="n">mdl_meteo_dataset</span>
-                <span class="k">if</span> <span class="n">mdl_meteo_spiderweb</span><span class="p">:</span>
-                    <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_spiderweb&quot;</span><span class="p">]</span>            <span class="o">=</span> <span class="n">mdl_meteo_spiderweb</span>
-                <span class="k">if</span> <span class="n">mdl_meteo_wind</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">or</span> <span class="n">mdl_meteo_wind</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-                    <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_wind&quot;</span><span class="p">]</span>                 <span class="o">=</span> <span class="n">mdl_meteo_wind</span>
-                <span class="k">if</span> <span class="n">mdl_meteo_atmospheric_pressure</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">or</span> <span class="n">mdl_meteo_atmospheric_pressure</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-                    <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_atmospheric_pressure&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mdl_meteo_atmospheric_pressure</span>
-                <span class="k">if</span> <span class="n">mdl_meteo_precipitation</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">or</span> <span class="n">mdl_meteo_precipitation</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-                    <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_precipitation&quot;</span><span class="p">]</span>        <span class="o">=</span> <span class="n">mdl_meteo_precipitation</span>
-                <span class="k">if</span> <span class="n">mdl_ensemble</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">or</span> <span class="n">mdl_ensemble</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-                    <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;ensemble&quot;</span><span class="p">]</span>             <span class="o">=</span> <span class="n">mdl_ensemble</span>
-                <span class="k">if</span> <span class="n">mdl_make_flood_map</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">or</span> <span class="n">mdl_make_flood_map</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-                    <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;make_flood_map&quot;</span><span class="p">]</span>             <span class="o">=</span> <span class="n">mdl_make_flood_map</span> 
-                <span class="k">if</span> <span class="n">mdl_make_wave_map</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">or</span> <span class="n">mdl_make_wave_map</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-                    <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;make_wave_map&quot;</span><span class="p">]</span>              <span class="o">=</span> <span class="n">mdl_make_flood_map</span> 
-                    
-                                    
+                <span class="c1"># Set meteo to one give in scenario</span>
+                <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_dataset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meteo_dataset</span>
+                <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_spiderweb&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meteo_spiderweb</span>
+                <span class="c1"># But override is separate dataset is provided for model</span>
+                <span class="k">if</span> <span class="s2">&quot;meteo_dataset&quot;</span> <span class="ow">in</span> <span class="n">mdl</span><span class="p">:</span>
+                    <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_dataset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mdl</span><span class="p">[</span><span class="s2">&quot;meteo_dataset&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="s2">&quot;meteo_spiderweb&quot;</span> <span class="ow">in</span> <span class="n">mdl</span><span class="p">:</span>
+                    <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_spiderweb&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mdl</span><span class="p">[</span><span class="s2">&quot;meteo_spiderweb&quot;</span><span class="p">]</span>
+                                                        
             <span class="k">else</span><span class="p">:</span>
-
-                <span class="c1"># Model by region and type</span>
                 
+                <span class="c1"># Model by region and type                </span>
+                <span class="c1"># First make list of all regions to include</span>
                 <span class="n">region_list</span>       <span class="o">=</span> <span class="p">[]</span> <span class="c1"># List of regions</span>
                 <span class="n">type_list</span>         <span class="o">=</span> <span class="p">[]</span> <span class="c1"># List of types</span>
 
-                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">mdl</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">):</span>
-                    <span class="k">for</span> <span class="n">xml_region</span> <span class="ow">in</span> <span class="n">mdl</span><span class="o">.</span><span class="n">region</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="ow">not</span> <span class="n">xml_region</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">region_list</span><span class="p">:</span>
-                            <span class="n">region_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xml_region</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
-                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">mdl</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">):</span>
-                    <span class="k">for</span> <span class="n">xml_type</span> <span class="ow">in</span> <span class="n">mdl</span><span class="o">.</span><span class="n">type</span><span class="p">:</span>                    
-                        <span class="n">type_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xml_type</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
-                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">mdl</span><span class="p">,</span> <span class="s2">&quot;super_region&quot;</span><span class="p">):</span>
-                    <span class="k">for</span> <span class="n">spr</span> <span class="ow">in</span> <span class="n">mdl</span><span class="o">.</span><span class="n">super_region</span><span class="p">:</span>
-                        <span class="n">super_region_name</span> <span class="o">=</span> <span class="n">spr</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-                        <span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">super_region</span><span class="p">[</span><span class="n">super_region_name</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="s2">&quot;type&quot;</span> <span class="ow">in</span> <span class="n">mdl</span><span class="p">:</span>
+                    <span class="n">type_list</span> <span class="o">=</span> <span class="n">mdl</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="s2">&quot;region&quot;</span> <span class="ow">in</span> <span class="n">mdl</span><span class="p">:</span>
+                    <span class="n">region_list</span> <span class="o">=</span> <span class="n">mdl</span><span class="p">[</span><span class="s2">&quot;region&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="s2">&quot;super_region&quot;</span> <span class="ow">in</span> <span class="n">mdl</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">spr</span> <span class="ow">in</span> <span class="n">mdl</span><span class="p">[</span><span class="s2">&quot;super_region&quot;</span><span class="p">]:</span>
+                        <span class="n">super_region_name</span> <span class="o">=</span> <span class="n">spr</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                        <span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">super_region</span><span class="p">[</span><span class="n">super_region_name</span><span class="p">][</span><span class="s2">&quot;region&quot;</span><span class="p">]:</span>
                             <span class="k">if</span> <span class="ow">not</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">region_list</span><span class="p">:</span>
                                 <span class="n">region_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">region</span><span class="p">)</span>
 
                 <span class="c1"># Loop through all available models</span>
-                <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">properties</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">all_models</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="n">okay</span> <span class="o">=</span> <span class="kc">True</span>
-                    <span class="c1"># Filter by region</span>
-                    <span class="k">if</span> <span class="n">region_list</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="ow">not</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;region&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">region_list</span><span class="p">:</span>
-                            <span class="c1"># Region of this model is not in region_list</span>
-                            <span class="n">okay</span> <span class="o">=</span> <span class="kc">False</span>
-                            <span class="k">continue</span>
-                    <span class="c1"># Filter by type</span>
-                    <span class="k">if</span> <span class="n">type_list</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="ow">not</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">type_list</span><span class="p">:</span>
-                            <span class="n">okay</span> <span class="o">=</span> <span class="kc">False</span>
-                            <span class="k">continue</span>
-                    <span class="k">if</span> <span class="n">okay</span><span class="p">:</span>
-                        <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">properties</span>
-                        
-                        <span class="c1"># Set default values provided for scenario as a whole</span>
-                        <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_dataset&quot;</span><span class="p">]</span>              <span class="o">=</span> <span class="n">scn_meteo_dataset</span>
-                        <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_spiderweb&quot;</span><span class="p">]</span>            <span class="o">=</span> <span class="n">scn_meteo_spiderweb</span>
-                        <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_wind&quot;</span><span class="p">]</span>                 <span class="o">=</span> <span class="n">scn_meteo_wind</span>
-                        <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_atmospheric_pressure&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scn_meteo_atmospheric_pressure</span>
-                        <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_precipitation&quot;</span><span class="p">]</span>        <span class="o">=</span> <span class="n">scn_meteo_precipitation</span>
-                        <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;ensemble&quot;</span><span class="p">]</span>                   <span class="o">=</span> <span class="n">scn_ensemble</span>
-                        <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;make_flood_map&quot;</span><span class="p">]</span>             <span class="o">=</span> <span class="n">scn_make_flood_map</span>
-                        <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;make_wave_map&quot;</span><span class="p">]</span>              <span class="o">=</span> <span class="n">scn_make_wave_map</span>
-        
-                        <span class="c1"># Override if other data is provided</span>
-                        <span class="k">if</span> <span class="n">mdl_meteo_dataset</span><span class="p">:</span>
-                            <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_dataset&quot;</span><span class="p">]</span>              <span class="o">=</span> <span class="n">mdl_meteo_dataset</span>
-                        <span class="k">if</span> <span class="n">mdl_meteo_spiderweb</span><span class="p">:</span>
-                            <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_spiderweb&quot;</span><span class="p">]</span>            <span class="o">=</span> <span class="n">mdl_meteo_spiderweb</span>
-                        <span class="k">if</span> <span class="n">mdl_meteo_wind</span><span class="p">:</span>
-                            <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_wind&quot;</span><span class="p">]</span>                 <span class="o">=</span> <span class="n">mdl_meteo_wind</span>
-                        <span class="k">if</span> <span class="n">mdl_meteo_atmospheric_pressure</span><span class="p">:</span>
-                            <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_atmospheric_pressure&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mdl_meteo_atmospheric_pressure</span>
-                        <span class="k">if</span> <span class="n">mdl_meteo_precipitation</span><span class="p">:</span>
-                            <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_precipitation&quot;</span><span class="p">]</span>        <span class="o">=</span> <span class="n">mdl_meteo_precipitation</span>
-                        <span class="k">if</span> <span class="n">mdl_ensemble</span><span class="p">:</span>
-                            <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;ensemble&quot;</span><span class="p">]</span>             <span class="o">=</span> <span class="n">mdl_ensemble</span>
-                        <span class="k">if</span> <span class="n">mdl_make_flood_map</span><span class="p">:</span>
-                            <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;make_flood_map&quot;</span><span class="p">]</span>             <span class="o">=</span> <span class="n">mdl_make_flood_map</span> 
-                        <span class="k">if</span> <span class="n">mdl_make_wave_map</span><span class="p">:</span>
-                            <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;make_wave_map&quot;</span><span class="p">]</span>              <span class="o">=</span> <span class="n">mdl_make_flood_map</span> 
-                        
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">all_models</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">all_models</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;region&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">region_list</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">all_models</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">type_list</span><span class="p">:</span>
+                            <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">all_models</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+                            <span class="c1"># Set meteo to one give in scenario</span>
+                            <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_dataset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meteo_dataset</span>
+                            <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_spiderweb&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meteo_spiderweb</span>
+                            <span class="c1"># But override is separate dataset is provided for model</span>
+                            <span class="k">if</span> <span class="s2">&quot;meteo_dataset&quot;</span> <span class="ow">in</span> <span class="n">mdl</span><span class="p">:</span>
+                                <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_dataset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mdl</span><span class="p">[</span><span class="s2">&quot;meteo_dataset&quot;</span><span class="p">]</span>
+                            <span class="k">if</span> <span class="s2">&quot;meteo_spiderweb&quot;</span> <span class="ow">in</span> <span class="n">mdl</span><span class="p">:</span>
+                                <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_spiderweb&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mdl</span><span class="p">[</span><span class="s2">&quot;meteo_spiderweb&quot;</span><span class="p">]</span>
 
         <span class="c1">### Add missing models</span>
         <span class="c1"># We know which models need to be added. Check if all models that provide boundary conditions are there as well.</span>
@@ -367,18 +206,11 @@
         <span class="n">spinup_ensembles</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># Loop through models in scenario         </span>
-        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">properties</span> <span class="ow">in</span> <span class="n">models_in_scenario</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">models_in_scenario</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             
-            <span class="n">region</span> <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;region&quot;</span><span class="p">]</span>
-            <span class="n">tp</span>     <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span>
-            <span class="n">vsn</span>    <span class="o">=</span> <span class="s2">&quot;001&quot;</span>
-
-            <span class="c1"># Path where model sits in model database                        </span>
-            <span class="n">model_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">main_path</span><span class="p">,</span>
-                                      <span class="s2">&quot;models&quot;</span><span class="p">,</span> <span class="n">region</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-
-            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model_path</span><span class="p">,</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.xml&quot;</span><span class="p">)</span>
-
+            <span class="nb">print</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>            
+            <span class="n">tp</span>     <span class="o">=</span> <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]</span>
+            
             <span class="c1"># Initialize models</span>
             <span class="k">if</span> <span class="n">tp</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;ww3&quot;</span><span class="p">:</span>
                 <span class="kn">from</span> <span class="nn">cosmos.cosmos_ww3</span> <span class="kn">import</span> <span class="n">CoSMoS_WW3</span>
@@ -408,200 +240,187 @@
                 <span class="n">model</span><span class="o">.</span><span class="n">flow</span> <span class="o">=</span> <span class="kc">True</span>
 
             <span class="c1"># Set model paths</span>
+            <span class="c1"># Path where model sits in model database                        </span>
+            <span class="n">region</span> <span class="o">=</span> <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;region&quot;</span><span class="p">]</span>
+            <span class="n">vsn</span>    <span class="o">=</span> <span class="s2">&quot;001&quot;</span>
+
+            <span class="n">model_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_database</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+                                      <span class="n">region</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model_path</span><span class="p">,</span> <span class="s2">&quot;model.toml&quot;</span><span class="p">)</span>
 
             <span class="c1"># Path in model database</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">model_path</span>
-                                    
-            <span class="n">model</span><span class="o">.</span><span class="n">name</span>                       <span class="o">=</span> <span class="n">name</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">version</span>                    <span class="o">=</span> <span class="n">vsn</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">region</span>                     <span class="o">=</span> <span class="n">region</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">file_name</span>                  <span class="o">=</span> <span class="n">file_name</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">type</span>                       <span class="o">=</span> <span class="n">tp</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">meteo_dataset</span>              <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;meteo_dataset&quot;</span><span class="p">]</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">meteo_spiderweb</span>            <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;meteo_spiderweb&quot;</span><span class="p">]</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">meteo_wind</span>                 <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;meteo_wind&quot;</span><span class="p">]</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">meteo_precipitation</span>        <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;meteo_precipitation&quot;</span><span class="p">]</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">meteo_atmospheric_pressure</span> <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;meteo_atmospheric_pressure&quot;</span><span class="p">]</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">ensemble</span>                   <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;ensemble&quot;</span><span class="p">]</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">make_flood_map</span>             <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;make_flood_map&quot;</span><span class="p">]</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">make_wave_map</span>              <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;make_wave_map&quot;</span><span class="p">]</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">path</span>        <span class="o">=</span> <span class="n">model_path</span>                                    
+            <span class="n">model</span><span class="o">.</span><span class="n">name</span>        <span class="o">=</span> <span class="n">name</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">version</span>     <span class="o">=</span> <span class="n">vsn</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">region</span>      <span class="o">=</span> <span class="n">region</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">file_name</span>   <span class="o">=</span> <span class="n">file_name</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">type</span>        <span class="o">=</span> <span class="n">tp</span>
+
+            <span class="n">model</span><span class="o">.</span><span class="n">meteo_dataset</span>              <span class="o">=</span> <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_dataset&quot;</span><span class="p">]</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">meteo_spiderweb</span>            <span class="o">=</span> <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_spiderweb&quot;</span><span class="p">]</span>
+            
+            <span class="c1"># If wind/pressure/rain are actively turned off in scenario, also do it here    </span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">meteo_wind</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">meteo_wind</span><span class="p">:</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">meteo_wind</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">meteo_atmospheric_pressure</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">meteo_atmospheric_pressure</span><span class="p">:</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">meteo_atmospheric_pressure</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">meteo_precipitation</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">meteo_precipitation</span><span class="p">:</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">meteo_precipitation</span> <span class="o">=</span> <span class="kc">False</span>
 
             <span class="n">model</span><span class="o">.</span><span class="n">flow_start_time</span>            <span class="o">=</span> <span class="kc">None</span>
             <span class="n">model</span><span class="o">.</span><span class="n">flow_stop_time</span>             <span class="o">=</span> <span class="kc">None</span>
 
-            <span class="c1"># if hasattr(mdl, &quot;tide&quot;):</span>
-            <span class="c1">#     tide = mdl.tide[0].value</span>
-            <span class="c1">#     if tide == &quot;yes&quot;:</span>
-            <span class="c1">#         model.tide = True</span>
-            <span class="c1">#     else:</span>
-            <span class="c1">#         model.tide = False</span>
-            <span class="c1"># else:</span>
             <span class="n">model</span><span class="o">.</span><span class="n">tide</span> <span class="o">=</span> <span class="kc">True</span>
 
-            <span class="c1"># Read in model generic data (from xml file)</span>
+            <span class="c1"># Read in model generic data (from toml file)</span>
             <span class="n">model</span><span class="o">.</span><span class="n">read_generic</span><span class="p">()</span>
 
-            <span class="c1"># # Read in model specific data (input files)</span>
-            <span class="c1"># # Should move this bit to pre-processing of model</span>
+            <span class="c1"># Read in model specific data (input files)</span>
+            <span class="c1"># Should move this bit to pre-processing of model</span>
             <span class="n">model</span><span class="o">.</span><span class="n">read_model_specific</span><span class="p">()</span>
             
-            <span class="c1"># # Overrule data in in model xml with those found in scenario xml</span>
-            <span class="c1"># if hasattr(mdl, &quot;boundary_water_level_correction&quot;):</span>
-            <span class="c1">#     model.boundary_water_level_correction = mdl.boundary_water_level_correction[0].value</span>
-            <span class="c1"># if hasattr(mdl, &quot;make_flood_map&quot;):</span>
-            <span class="c1">#     if mdl.make_flood_map[0].value[0].lower() == &quot;y&quot;:</span>
-            <span class="c1">#         model.make_flood_map = True</span>
-            <span class="c1">#     else:    </span>
-            <span class="c1">#         model.make_flood_map = False</span>
-            <span class="c1"># if hasattr(mdl, &quot;make_wave_map&quot;):</span>
-            <span class="c1">#     if mdl.make_wave_map[0].value[0].lower() == &quot;y&quot;:</span>
-            <span class="c1">#         model.make_wave_map = True</span>
-            <span class="c1">#     else:    </span>
-            <span class="c1">#         model.make_wave_map = False</span>
-
-            <span class="c1"># # Additional stations</span>
-            <span class="c1"># if hasattr(mdl, &quot;station&quot;):</span>
-            <span class="c1">#     for station in mdl.station:</span>
-            <span class="c1">#         model.add_stations(station.value[0].lower)</span>
-            
-            <span class="c1"># model.archive_path = os.path.join(model.results_path,</span>
-            <span class="c1">#                                   &quot;archive&quot;)        </span>
-            <span class="n">spinup_ensembles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">flow_spinup_time</span><span class="p">)</span>    
-            <span class="n">spinup_ensembles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">wave_spinup_time</span><span class="p">)</span>    
-
+            <span class="c1"># Find matching meteo subset</span>
+            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">meteo_dataset</span><span class="p">:</span>
+               <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">meteo_subset</span><span class="p">:</span>
+                   <span class="k">if</span> <span class="n">subset</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">model</span><span class="o">.</span><span class="n">meteo_dataset</span><span class="p">:</span>
+                       <span class="n">model</span><span class="o">.</span><span class="n">meteo_subset</span> <span class="o">=</span> <span class="n">subset</span>
+                       <span class="k">break</span>
+                        
             <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-                
-        <span class="c1">### Add models to clusters </span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_obj</span><span class="p">,</span> <span class="s2">&quot;cluster&quot;</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">xml_cluster</span> <span class="ow">in</span> <span class="n">xml_obj</span><span class="o">.</span><span class="n">cluster</span><span class="p">:</span>
-                <span class="n">name</span> <span class="o">=</span> <span class="n">xml_cluster</span><span class="o">.</span><span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-                <span class="n">cl</span> <span class="o">=</span> <span class="n">Cluster</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_cluster</span><span class="p">,</span> <span class="s2">&quot;run_condition&quot;</span><span class="p">):</span>
-                    <span class="n">cl</span><span class="o">.</span><span class="n">run_condition</span> <span class="o">=</span> <span class="n">xml_cluster</span><span class="o">.</span><span class="n">run_condition</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_cluster</span><span class="p">,</span> <span class="s2">&quot;topn&quot;</span><span class="p">):</span>
-                    <span class="n">cl</span><span class="o">.</span><span class="n">topn</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">xml_cluster</span><span class="o">.</span><span class="n">topn</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_cluster</span><span class="p">,</span> <span class="s2">&quot;hm0fac&quot;</span><span class="p">):</span>
-                    <span class="n">cl</span><span class="o">.</span><span class="n">hm0fac</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">xml_cluster</span><span class="o">.</span><span class="n">hm0fac</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_cluster</span><span class="p">,</span> <span class="s2">&quot;boundary_twl_margin&quot;</span><span class="p">):</span>
-                    <span class="n">cl</span><span class="o">.</span><span class="n">boundary_twl_margin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">xml_cluster</span><span class="o">.</span><span class="n">boundary_twl_margin</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_cluster</span><span class="p">,</span> <span class="s2">&quot;use_threshold&quot;</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="n">xml_cluster</span><span class="o">.</span><span class="n">use_threshold</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span>
-                        <span class="n">cl</span><span class="o">.</span><span class="n">use_threshold</span> <span class="o">=</span> <span class="kc">True</span>
-                    <span class="k">else</span><span class="p">:</span>    
-                        <span class="n">cl</span><span class="o">.</span><span class="n">use_threshold</span> <span class="o">=</span> <span class="kc">False</span>                        
-                <span class="k">if</span> <span class="n">cl</span><span class="o">.</span><span class="n">run_condition</span> <span class="o">==</span> <span class="s2">&quot;topn&quot;</span><span class="p">:</span>
-                    <span class="n">cl</span><span class="o">.</span><span class="n">ready</span> <span class="o">=</span> <span class="kc">False</span>
-                    
-                <span class="c1"># Add models to this cluster    </span>
-                <span class="n">region_list</span>       <span class="o">=</span> <span class="p">[]</span> <span class="c1"># List of regions</span>
-                <span class="n">type_list</span>         <span class="o">=</span> <span class="p">[]</span> <span class="c1"># List of types</span>
-
-                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_cluster</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">):</span>
-                    <span class="k">for</span> <span class="n">xml_region</span> <span class="ow">in</span> <span class="n">xml_cluster</span><span class="o">.</span><span class="n">region</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="ow">not</span> <span class="n">xml_region</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">region_list</span><span class="p">:</span>
-                            <span class="n">region_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xml_region</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
-                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_cluster</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">):</span>
-                    <span class="k">for</span> <span class="n">xml_type</span> <span class="ow">in</span> <span class="n">xml_cluster</span><span class="o">.</span><span class="n">type</span><span class="p">:</span>                    
-                        <span class="n">type_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xml_type</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
-                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_cluster</span><span class="p">,</span> <span class="s2">&quot;super_region&quot;</span><span class="p">):</span>
-                    <span class="k">for</span> <span class="n">spr</span> <span class="ow">in</span> <span class="n">xml_cluster</span><span class="o">.</span><span class="n">super_region</span><span class="p">:</span>
-                        <span class="n">super_region_name</span> <span class="o">=</span> <span class="n">spr</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-                        <span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">super_region</span><span class="p">[</span><span class="n">super_region_name</span><span class="p">]:</span>
-                            <span class="k">if</span> <span class="ow">not</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">region_list</span><span class="p">:</span>
-                                <span class="n">region_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">region</span><span class="p">)</span>
-
-                <span class="c1"># Loop through all available models</span>
-                <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
-                    <span class="n">okay</span> <span class="o">=</span> <span class="kc">True</span>
-                    <span class="k">if</span> <span class="n">type_list</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="ow">not</span> <span class="n">model</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">type_list</span><span class="p">:</span>
-                            <span class="n">okay</span> <span class="o">=</span> <span class="kc">False</span>
-                            <span class="k">continue</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">model</span><span class="o">.</span><span class="n">flow_nested_name</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">model</span><span class="o">.</span><span class="n">wave_nested_name</span><span class="p">:</span>
-                        <span class="n">okay</span> <span class="o">=</span> <span class="kc">False</span>
-                        <span class="k">continue</span>                                            
-                    <span class="c1"># Filter by region</span>
-                    <span class="k">if</span> <span class="n">region_list</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="ow">not</span> <span class="n">model</span><span class="o">.</span><span class="n">region</span> <span class="ow">in</span> <span class="n">region_list</span><span class="p">:</span>
-                            <span class="c1"># Region of this model is not in region_list</span>
-                            <span class="n">okay</span> <span class="o">=</span> <span class="kc">False</span>
-                            <span class="k">continue</span>
-                    <span class="c1"># Filter by type</span>
-                    <span class="k">if</span> <span class="n">okay</span><span class="p">:</span>
-                        <span class="n">cl</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-                    
-                <span class="n">cluster_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cl</span>                
-
-        <span class="c1">## Spiderweb generation</span>
-        <span class="k">if</span> <span class="n">scn_meteo_spiderweb</span><span class="p">:</span>
-            <span class="n">spwfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">main_path</span><span class="p">,</span>
-                                            <span class="s2">&quot;meteo&quot;</span><span class="p">,</span>
-                                            <span class="s2">&quot;spiderwebs&quot;</span><span class="p">,</span>
-                                            <span class="n">scn_meteo_spiderweb</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">spwfile</span><span class="p">):</span>
-                <span class="kn">from</span> <span class="nn">cht.tropical_cyclone.tropical_cyclone</span> <span class="kn">import</span> <span class="n">TropicalCyclone</span>
-                <span class="n">tc</span><span class="o">=</span> <span class="n">TropicalCyclone</span><span class="p">()</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">tc</span><span class="o">.</span><span class="n">from_ddb_cyc</span><span class="p">(</span><span class="n">spwfile</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.cyc&#39;</span><span class="p">)</span>
-                    <span class="n">tc</span><span class="o">.</span><span class="n">include_rainfall</span> <span class="o">=</span> <span class="kc">True</span>
-                    <span class="n">tc</span><span class="o">.</span><span class="n">to_spiderweb</span><span class="p">(</span><span class="n">filename</span> <span class="o">=</span> <span class="n">spwfile</span><span class="p">)</span>
-                <span class="k">except</span><span class="p">:</span>
-                    <span class="k">pass</span>
-
-        <span class="c1">### Ensemble</span>
-
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_obj</span><span class="p">,</span> <span class="s2">&quot;track_ensemble&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">track_ensemble</span> <span class="o">=</span> <span class="n">xml_obj</span><span class="o">.</span><span class="n">track_ensemble</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-            <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">member_names</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">ensemble_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">main_path</span><span class="p">,</span>
-                                         <span class="s2">&quot;meteo&quot;</span><span class="p">,</span>
-                                         <span class="bp">self</span><span class="o">.</span><span class="n">track_ensemble</span><span class="p">)</span>
-
-            <span class="c1"># If nr of tracks indicated in scenario file, generate new spw files based on .cyc file in ensemble folder</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_obj</span><span class="p">,</span> <span class="s2">&quot;ensemble_nrtracks&quot;</span><span class="p">):</span>
-                <span class="n">fo</span><span class="o">.</span><span class="n">delete_file</span><span class="p">(</span><span class="n">fo</span><span class="o">.</span><span class="n">list_files</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ensemble_path</span><span class="p">,</span> <span class="s2">&quot;*.spw&quot;</span><span class="p">)))</span>
-
-                <span class="kn">from</span> <span class="nn">cht.tropical_cyclone.tropical_cyclone</span> <span class="kn">import</span> <span class="n">TropicalCyclone</span>
-                <span class="kn">from</span> <span class="nn">cht.tropical_cyclone.tropical_cyclone</span> <span class="kn">import</span> <span class="n">TropicalCycloneEnsemble</span>
-                <span class="kn">from</span> <span class="nn">cht.tropical_cyclone.tropical_cyclone</span> <span class="kn">import</span> <span class="n">holland2010</span><span class="p">,</span> <span class="n">wind_radii_nederhoff</span>
-                <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
-
-                <span class="n">tc</span><span class="o">=</span> <span class="n">TropicalCyclone</span><span class="p">()</span>
-                <span class="n">file_name_cyc</span> <span class="o">=</span><span class="n">fo</span><span class="o">.</span><span class="n">list_files</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ensemble_path</span><span class="p">,</span> <span class="s2">&quot;*.cyc&quot;</span><span class="p">))</span>
-                <span class="n">cycname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file_name_cyc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-
-                <span class="n">tc</span><span class="o">.</span><span class="n">from_ddb_cyc</span><span class="p">(</span><span class="n">file_name_cyc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="n">tc</span><span class="o">.</span><span class="n">account_for_forward_speed</span><span class="p">()</span>
-                <span class="n">tc</span><span class="o">.</span><span class="n">estimate_missing_values</span><span class="p">()</span>
-                <span class="n">tc</span><span class="o">.</span><span class="n">include_rainfall</span> <span class="o">=</span> <span class="kc">True</span>
-
-                <span class="bp">self</span><span class="o">.</span><span class="n">ensemble_nrtracks</span> <span class="o">=</span> <span class="n">xml_obj</span><span class="o">.</span><span class="n">ensemble_nrtracks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-                <span class="n">tc2</span><span class="o">=</span> <span class="n">TropicalCycloneEnsemble</span><span class="p">(</span><span class="n">name</span><span class="o">=</span> <span class="n">cycname</span><span class="p">,</span> <span class="n">TropicalCyclone</span><span class="o">=</span> <span class="n">tc</span><span class="p">)</span>
-                <span class="n">tc2</span><span class="o">.</span><span class="n">tstart</span>  <span class="o">=</span> <span class="n">xml_obj</span><span class="o">.</span><span class="n">cycle</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">-</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">spinup_ensembles</span><span class="p">)</span><span class="o">+</span><span class="mi">3</span><span class="p">)</span>
-                <span class="n">tc2</span><span class="o">.</span><span class="n">tstart_ensemble</span>  <span class="o">=</span> <span class="n">xml_obj</span><span class="o">.</span><span class="n">cycle</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-                <span class="n">tc2</span><span class="o">.</span><span class="n">tend</span>    <span class="o">=</span> <span class="n">xml_obj</span><span class="o">.</span><span class="n">cycle</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">+</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">run_duration</span><span class="p">)</span>
-                <span class="n">tc2</span><span class="o">.</span><span class="n">compute_ensemble</span><span class="p">(</span><span class="n">number_of_realizations</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble_nrtracks</span><span class="p">)</span>
-
-                <span class="n">tc2</span><span class="o">.</span><span class="n">to_shapefile</span><span class="p">(</span><span class="n">folder_path</span><span class="o">=</span><span class="n">ensemble_path</span><span class="p">)</span>
-                <span class="n">tc2</span><span class="o">.</span><span class="n">to_spiderweb</span><span class="p">(</span><span class="n">folder_path</span><span class="o">=</span><span class="n">ensemble_path</span><span class="p">)</span>
-
-            <span class="n">file_names</span> <span class="o">=</span> <span class="n">fo</span><span class="o">.</span><span class="n">list_files</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ensemble_path</span><span class="p">,</span> <span class="s2">&quot;*.spw&quot;</span><span class="p">))</span>
-
-            <span class="c1"># Loop through file names</span>
-            <span class="k">for</span> <span class="n">file_name</span> <span class="ow">in</span> <span class="n">file_names</span><span class="p">:</span>                
-                <span class="k">if</span> <span class="n">file_name</span><span class="p">[</span><span class="o">-</span><span class="mi">9</span><span class="p">:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span><span class="o">==</span><span class="s2">&quot;00000&quot;</span><span class="p">:</span>
-                    <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">best_track_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ensemble_path</span><span class="p">,</span>
-                                                                <span class="n">file_name</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">member_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">file_name</span><span class="p">)[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">4</span><span class="p">])</span>
         
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">track_ensemble</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># ### Add models to clusters </span>
+        <span class="c1"># if hasattr(xml_obj, &quot;cluster&quot;):</span>
+        <span class="c1">#     for xml_cluster in xml_obj.cluster:</span>
+        <span class="c1">#         name = xml_cluster.name[0].value.lower()</span>
+        <span class="c1">#         cl = Cluster(name)</span>
+        <span class="c1">#         if hasattr(xml_cluster, &quot;run_condition&quot;):</span>
+        <span class="c1">#             cl.run_condition = xml_cluster.run_condition[0].value</span>
+        <span class="c1">#         if hasattr(xml_cluster, &quot;topn&quot;):</span>
+        <span class="c1">#             cl.topn = int(xml_cluster.topn[0].value)</span>
+        <span class="c1">#         if hasattr(xml_cluster, &quot;hm0fac&quot;):</span>
+        <span class="c1">#             cl.hm0fac = float(xml_cluster.hm0fac[0].value)</span>
+        <span class="c1">#         if hasattr(xml_cluster, &quot;boundary_twl_margin&quot;):</span>
+        <span class="c1">#             cl.boundary_twl_margin = float(xml_cluster.boundary_twl_margin[0].value)</span>
+        <span class="c1">#         if hasattr(xml_cluster, &quot;use_threshold&quot;):</span>
+        <span class="c1">#             if xml_cluster.use_threshold[0].value == &quot;y&quot;:</span>
+        <span class="c1">#                 cl.use_threshold = True</span>
+        <span class="c1">#             else:    </span>
+        <span class="c1">#                 cl.use_threshold = False                        </span>
+        <span class="c1">#         if cl.run_condition == &quot;topn&quot;:</span>
+        <span class="c1">#             cl.ready = False</span>
+                    
+        <span class="c1">#         # Add models to this cluster    </span>
+        <span class="c1">#         region_list       = [] # List of regions</span>
+        <span class="c1">#         type_list         = [] # List of types</span>
+
+        <span class="c1">#         if hasattr(xml_cluster, &quot;region&quot;):</span>
+        <span class="c1">#             for xml_region in xml_cluster.region:</span>
+        <span class="c1">#                 if not xml_region.value.lower() in region_list:</span>
+        <span class="c1">#                     region_list.append(xml_region.value.lower())</span>
+        <span class="c1">#         if hasattr(xml_cluster, &quot;type&quot;):</span>
+        <span class="c1">#             for xml_type in xml_cluster.type:                    </span>
+        <span class="c1">#                 type_list.append(xml_type.value.lower())</span>
+        <span class="c1">#         if hasattr(xml_cluster, &quot;super_region&quot;):</span>
+        <span class="c1">#             for spr in xml_cluster.super_region:</span>
+        <span class="c1">#                 super_region_name = spr.value.lower()</span>
+        <span class="c1">#                 for region in cosmos.super_region[super_region_name]:</span>
+        <span class="c1">#                     if not region in region_list:</span>
+        <span class="c1">#                         region_list.append(region)</span>
+
+        <span class="c1">#         # Loop through all available models</span>
+        <span class="c1">#         for model in self.model:</span>
+        <span class="c1">#             okay = True</span>
+        <span class="c1">#             if type_list:</span>
+        <span class="c1">#                 if not model.type in type_list:</span>
+        <span class="c1">#                     okay = False</span>
+        <span class="c1">#                     continue</span>
+        <span class="c1">#             if not model.flow_nested_name and not model.wave_nested_name:</span>
+        <span class="c1">#                 okay = False</span>
+        <span class="c1">#                 continue                                            </span>
+        <span class="c1">#             # Filter by region</span>
+        <span class="c1">#             if region_list:</span>
+        <span class="c1">#                 if not model.region in region_list:</span>
+        <span class="c1">#                     # Region of this model is not in region_list</span>
+        <span class="c1">#                     okay = False</span>
+        <span class="c1">#                     continue</span>
+        <span class="c1">#             # Filter by type</span>
+        <span class="c1">#             if okay:</span>
+        <span class="c1">#                 cl.add_model(model)</span>
+                    
+        <span class="c1">#         cluster_dict[name] = cl                </span>
+         
+        
+        
+        <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Finished reading scenario&quot;</span><span class="p">)</span>   
+
+    <span class="k">def</span> <span class="nf">set_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set cycle paths.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">cycle_path</span>            <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_string</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cycle_models_path</span>     <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_string</span><span class="p">,</span> <span class="s2">&quot;models&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cycle_tiles_path</span>      <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_string</span><span class="p">,</span> <span class="s2">&quot;tiles&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cycle_job_list_path</span>   <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_string</span><span class="p">,</span> <span class="s2">&quot;job_list&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cycle_track_ensemble_path</span>    <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_string</span><span class="p">,</span> <span class="s2">&quot;track_ensemble&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cycle_track_ensemble_cyc_path</span>    <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_string</span><span class="p">,</span> <span class="s2">&quot;track_ensemble&quot;</span><span class="p">,</span> <span class="s2">&quot;cyc&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cycle_track_ensemble_spw_path</span>    <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_string</span><span class="p">,</span> <span class="s2">&quot;track_ensemble&quot;</span><span class="p">,</span> <span class="s2">&quot;spw&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restart_path</span>          <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;restart&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeseries_path</span>       <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;timeseries&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cycle_timeseries_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;timeseries&quot;</span><span class="p">,</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_string</span><span class="p">)</span>
+
+        <span class="c1"># cluster_dict[name] = cl                </span>
+         
+        <span class="c1"># ### Ensemble</span>
+
+        <span class="c1"># if hasattr(xml_obj, &quot;track_ensemble&quot;):</span>
+        <span class="c1">#     self.track_ensemble = xml_obj.track_ensemble[0].value</span>
+        <span class="c1">#     cosmos.scenario.member_names = []</span>
+        <span class="c1">#     ensemble_path = os.path.join(cosmos.config.main_path,</span>
+        <span class="c1">#                                  &quot;meteo&quot;,</span>
+        <span class="c1">#                                  self.track_ensemble)</span>
+
+        <span class="c1">#     # If nr of tracks indicated in scenario file, generate new spw files based on .cyc file in ensemble folder</span>
+        <span class="c1">#     if hasattr(xml_obj, &quot;ensemble_nrtracks&quot;):</span>
+        <span class="c1">#         fo.delete_file(fo.list_files(os.path.join(ensemble_path, &quot;*.spw&quot;)))</span>
+
+        <span class="c1">#         from cht.tropical_cyclone.tropical_cyclone import TropicalCyclone</span>
+        <span class="c1">#         from cht.tropical_cyclone.tropical_cyclone import TropicalCycloneEnsemble</span>
+        <span class="c1">#         from cht.tropical_cyclone.tropical_cyclone import holland2010, wind_radii_nederhoff</span>
+        <span class="c1">#         from datetime import datetime, timedelta</span>
+
+        <span class="c1">#         tc= TropicalCyclone()</span>
+        <span class="c1">#         file_name_cyc =fo.list_files(os.path.join(ensemble_path, &quot;*.cyc&quot;))</span>
+        <span class="c1">#         cycname = os.path.basename(file_name_cyc[0]).split(&#39;.&#39;)[0]</span>
+
+        <span class="c1">#         tc.from_ddb_cyc(file_name_cyc[0])</span>
+        <span class="c1">#         tc.account_for_forward_speed()</span>
+        <span class="c1">#         tc.estimate_missing_values()</span>
+        <span class="c1">#         tc.include_rainfall = True</span>
+
+        <span class="c1">#         self.ensemble_nrtracks = xml_obj.ensemble_nrtracks[0].value</span>
+        <span class="c1">#         tc2= TropicalCycloneEnsemble(name= cycname, TropicalCyclone= tc)</span>
+        <span class="c1">#         tc2.tstart  = xml_obj.cycle[0].value-timedelta(hours=max(spinup_ensembles)+3)</span>
+        <span class="c1">#         tc2.tstart_ensemble  = xml_obj.cycle[0].value</span>
+        <span class="c1">#         tc2.tend    = xml_obj.cycle[0].value+timedelta(hours=self.run_duration)</span>
+        <span class="c1">#         tc2.compute_ensemble(number_of_realizations= self.ensemble_nrtracks)</span>
+
+        <span class="c1">#         tc2.to_shapefile(folder_path=ensemble_path)</span>
+        <span class="c1">#         tc2.to_spiderweb(folder_path=ensemble_path)</span>
+
+        <span class="c1">#     file_names = fo.list_files(os.path.join(ensemble_path, &quot;*.spw&quot;))</span>
+
+        <span class="c1">#     # Loop through file names</span>
+        <span class="c1">#     for file_name in file_names:                </span>
+        <span class="c1">#         if file_name[-9:-4]==&quot;00000&quot;:</span>
+        <span class="c1">#             cosmos.scenario.best_track_file = os.path.join(ensemble_path,</span>
+        <span class="c1">#                                                         file_name)</span>
+        <span class="c1">#         else:</span>
+        <span class="c1">#             cosmos.scenario.member_names.append(os.path.split(file_name)[1][0:-4])</span>
+        
+        <span class="c1"># else:</span>
+        <span class="c1">#     self.track_ensemble = None</span>
 
 
-        <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Finished reading scenario&quot;</span><span class="p">)</span>    </div>
-
-
+        <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Finished reading scenario&quot;</span><span class="p">)</span> </div>
 </pre></div>
 
            </div>

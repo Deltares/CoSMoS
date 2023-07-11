@@ -18,7 +18,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="cosmos.cosmos_main_loop.MainLoop.start" href="cosmos.cosmos_main_loop.MainLoop.start.html" />
-    <link rel="prev" title="cosmos.cosmos_main.CoSMoS.stop" href="cosmos.cosmos_main.CoSMoS.stop.html" /> 
+    <link rel="prev" title="cosmos.cosmos.CoSMoS.post_process" href="cosmos.cosmos.CoSMoS.post_process.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,7 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../manual.html">User manual</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../functions.html">Functions</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../functions.html#main-classes">Main classes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../functions.html#model-classes">Model classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../functions.html#model-specific-classes">Model-specific classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../functions.html#additional-classes">Additional classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../functions.html#cosmos-functions">CoSMoS functions</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../functions.html#mainloop-and-modelloop-functions">MainLoop and ModelLoop functions</a><ul class="current">
@@ -96,18 +96,18 @@
 <code class="sig-prename descclassname">MainLoop.</code><code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmos/cosmos_main_loop.html#MainLoop.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cosmos.cosmos_main_loop.MainLoop.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run main loop.</p>
 <ul class="simple">
-<li><p>Read configuration file, stations, meteo sources, super regions, scenario.</p></li>
 <li><p>Initialize models</p></li>
 <li><p>Remove old cycles</p></li>
 <li><p>Get list of nested models</p></li>
 <li><p>Check if models are finished</p></li>
 <li><p>Get start and stop times</p></li>
 <li><p>Download and collect meteo</p></li>
+<li><p>Optional: Make track ensemble</p></li>
 <li><p>Start model loop</p></li>
 </ul>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">cosmos.cosmos_configuration.read_config_file()</span></code>, <a class="reference internal" href="cosmos.cosmos_stations.Stations.html#cosmos.cosmos_stations.Stations" title="cosmos.cosmos_stations.Stations"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cosmos.cosmos_stations.Stations()</span></code></a>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">cosmos.cosmos_meteo.read_meteo_sources()</span></code>, <a class="reference internal" href="cosmos.cosmos_scenario.Scenario.html#cosmos.cosmos_scenario.Scenario" title="cosmos.cosmos_scenario.Scenario"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cosmos.cosmos_scenario.Scenario()</span></code></a>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">cosmos.cosmos_scenario.Scenario.read()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">cosmos.cosmos_model.Model.prepare()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">cosmos.cosmos_meteo.Meteo.download_and_collect_meteo()</span></code>, <a class="reference internal" href="cosmos.cosmos_model_loop.ModelLoop.start.html#cosmos.cosmos_model_loop.ModelLoop.start" title="cosmos.cosmos_model_loop.ModelLoop.start"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cosmos.cosmos_model_loop.ModelLoop.start()</span></code></a></p>
+<p><a class="reference internal" href="cosmos.cosmos_model.Model.get_nested_models.html#cosmos.cosmos_model.Model.get_nested_models" title="cosmos.cosmos_model.Model.get_nested_models"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cosmos.cosmos_model.Model.get_nested_models()</span></code></a>, <a class="reference internal" href="cosmos.cosmos_model.Model.set_paths.html#cosmos.cosmos_model.Model.set_paths" title="cosmos.cosmos_model.Model.set_paths"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cosmos.cosmos_model.Model.set_paths()</span></code></a>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">cosmos.cosmos_meteo.Meteo.download_and_collect_meteo()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">cosmos.cosmos_track_ensemble.setup_track_ensemble()</span></code>, <a class="reference internal" href="cosmos.cosmos_model_loop.ModelLoop.start.html#cosmos.cosmos_model_loop.ModelLoop.start" title="cosmos.cosmos_model_loop.ModelLoop.start"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cosmos.cosmos_model_loop.ModelLoop.start()</span></code></a></p>
 </aside>
 </dd></dl>
 
@@ -117,7 +117,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="cosmos.cosmos_main.CoSMoS.stop.html" class="btn btn-neutral float-left" title="cosmos.cosmos_main.CoSMoS.stop" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cosmos.cosmos.CoSMoS.post_process.html" class="btn btn-neutral float-left" title="cosmos.cosmos.CoSMoS.post_process" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="cosmos.cosmos_main_loop.MainLoop.start.html" class="btn btn-neutral float-right" title="cosmos.cosmos_main_loop.MainLoop.start" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

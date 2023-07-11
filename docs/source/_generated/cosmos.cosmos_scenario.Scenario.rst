@@ -15,6 +15,7 @@
    
       ~Scenario.__init__
       ~Scenario.read
+      ~Scenario.set_paths
    
    
 

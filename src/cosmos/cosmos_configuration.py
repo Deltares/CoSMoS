@@ -56,6 +56,17 @@ class Cycle:
         self.run_mode        = "serial"
 
 class Configuration:
+    """CoSMoS Configuration class.
+
+    Set configuration for:
+
+    - Main CoSMoS path.
+    - Model database path.
+    - Model executable paths.
+    - Webserver and webviewer settings.
+    - Cycle settings (can be overwritten by CoSMoS initialization settings).
+    """   
+
     def __init__(self):        
         self.path           = Path()
         self.model_database = ModelDatabase()
@@ -66,6 +77,16 @@ class Configuration:
         self.kwargs         = {}
     
     def set(self, **kwargs):
+        """Set CoSMoS configuration settings.
+        
+        - Set configuration paths.
+        - Read configuration file.
+        - Overwrite values in configuration file with input arguments.
+        - Find all available models in model database.
+        - Read all available Stations.
+        - Read all available meteo datasets.
+        - Read all available super regions.
+        """        
 
         from .cosmos import cosmos
                 
@@ -132,7 +153,8 @@ class Configuration:
 
 
     def read_config_file(self):
-        
+        """Read configuration file (.toml file).
+        """        
         config_file = os.path.join(self.path.config,
                                    self.file_name)     
 

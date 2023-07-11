@@ -43,7 +43,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../usage.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../manual.html">User manual</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../functions.html">Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../functions.html">API reference</a></li>
 </ul>
 
         </div>
@@ -83,21 +83,22 @@
 <span class="kn">import</span> <span class="nn">sched</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="c1">#import toml</span>
 
-<span class="kn">from</span> <span class="nn">.cosmos_main</span> <span class="kn">import</span> <span class="n">cosmos</span>
-<span class="kn">from</span> <span class="nn">.cosmos_meteo</span> <span class="kn">import</span> <span class="n">read_meteo_sources</span>
+<span class="kn">from</span> <span class="nn">.cosmos</span> <span class="kn">import</span> <span class="n">cosmos</span>
+<span class="c1">#from .cosmos_meteo import read_meteo_sources</span>
 <span class="kn">from</span> <span class="nn">.cosmos_meteo</span> <span class="kn">import</span> <span class="n">download_and_collect_meteo</span>
-<span class="kn">from</span> <span class="nn">.cosmos_stations</span> <span class="kn">import</span> <span class="n">Stations</span>
+<span class="kn">from</span> <span class="nn">.cosmos_track_ensemble</span> <span class="kn">import</span> <span class="n">setup_track_ensemble</span>
+<span class="c1">#from .cosmos_stations import Stations</span>
 <span class="kn">from</span> <span class="nn">.cosmos_scenario</span> <span class="kn">import</span> <span class="n">Scenario</span>
-<span class="kn">from</span> <span class="nn">.cosmos_configuration</span> <span class="kn">import</span> <span class="n">read_config_file</span>
 <span class="c1">#from .cosmos_tiling import tile_layer</span>
 
 <span class="kn">import</span> <span class="nn">cht.misc.fileops</span> <span class="k">as</span> <span class="nn">fo</span>
-<span class="kn">import</span> <span class="nn">cht.misc.xmlkit</span> <span class="k">as</span> <span class="nn">xml</span>
+<span class="c1">#import cht.misc.xmlkit as xml</span>
 <span class="c1">#from cht.tiling.tiling import TileLayer</span>
 
 <div class="viewcode-block" id="MainLoop"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_main_loop.MainLoop.html#cosmos.cosmos_main_loop.MainLoop">[docs]</a><span class="k">class</span> <span class="nc">MainLoop</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Read the xml scenario file, determine cycle times, and run cosmos model loop. </span>
+    <span class="sd">&quot;&quot;&quot;Read the scenario.toml file, determine cycle times, and run cosmos model loop. </span>
 <span class="sd">    </span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -107,8 +108,8 @@
 <span class="sd">        Run main loop</span>
 
 <span class="sd">    See Also</span>
-<span class="sd">    -------</span>
-<span class="sd">    cosmos.cosmos_main.CoSMoS</span>
+<span class="sd">    --------</span>
+<span class="sd">    cosmos.cosmos.CoSMoS</span>
 <span class="sd">    cosmos.cosmos_scenario.Scenario</span>
 <span class="sd">    cosmos.cosmos_model_loop.ModelLoop</span>
 <span class="sd">    cosmos.cosmos_model.Model</span>
@@ -120,96 +121,75 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">run_models</span>      <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clean_up</span>        <span class="o">=</span> <span class="kc">True</span></div>
     
-<div class="viewcode-block" id="MainLoop.start"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_main_loop.MainLoop.start.html#cosmos.cosmos_main_loop.MainLoop.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cycle_time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span> 
-        <span class="sd">&quot;&quot;&quot;Read the xml scenario file, determine cycle times, and start cosmos_main_loop.run with scheduler. </span>
+<div class="viewcode-block" id="MainLoop.start"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_main_loop.MainLoop.start.html#cosmos.cosmos_main_loop.MainLoop.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cycle</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;Read the scenario.toml file, determine cycle times, and start cosmos_main_loop.run with scheduler. </span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        cycle_time : int</span>
+<span class="sd">        cycle : int</span>
 <span class="sd">            Datestring of cycle time</span>
 
 <span class="sd">        See Also</span>
-<span class="sd">        -------</span>
-<span class="sd">        cosmos.cosmos_configuration.read_config_file</span>
-<span class="sd">        cosmos.cosmos_main_loop.MainLoop.start</span>
-
+<span class="sd">        --------</span>
+<span class="sd">        cosmos.cosmos_configuration.Configuration</span>
+<span class="sd">        cosmos.cosmos_main_loop.MainLoop.run</span>
 <span class="sd">        &quot;&quot;&quot;</span>
             
         <span class="c1"># Determines cycle time and runs main loop</span>
 
         <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Starting main loop ...&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Update config (it&#39;s possible that this was changed while running a forecast scenario)</span>
+        <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+                
+        <span class="c1"># Read scenario</span>
+        <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span> <span class="o">=</span> <span class="n">Scenario</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">scenario_name</span><span class="p">)</span>
+        <span class="c1"># This also determines which models are part of this scenario</span>
+        <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
         
-        <span class="c1"># Read xml config file</span>
-        <span class="n">read_config_file</span><span class="p">()</span>
-        
-        <span class="n">xml_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">main_path</span><span class="p">,</span>
-                    <span class="s2">&quot;scenarios&quot;</span><span class="p">,</span>
-                    <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">scenario_name</span><span class="p">,</span>
-                    <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">scenario_name</span> <span class="o">+</span> <span class="s2">&quot;.xml&quot;</span><span class="p">)</span>
-        <span class="n">xml_obj</span> <span class="o">=</span> <span class="n">xml</span><span class="o">.</span><span class="n">xml2obj</span><span class="p">(</span><span class="n">xml_file</span><span class="p">)</span>
-        
-        <span class="c1"># Determine cycle time</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">cycle_time</span><span class="p">:</span>
-            
-            <span class="c1"># Cycle time not given. This is the first time this loop is run.</span>
-            <span class="c1"># Check if this is a forecast or hindcast.</span>
-            
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_obj</span><span class="p">,</span> <span class="s2">&quot;cycle&quot;</span><span class="p">):</span>
-                <span class="c1"># First cycle in hindcast</span>
-                <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">forecast</span> <span class="o">=</span> <span class="kc">False</span>
-                <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span> <span class="o">=</span> <span class="n">xml_obj</span><span class="o">.</span><span class="n">cycle</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">cycle</span><span class="p">:</span>            
+            <span class="c1"># Determine cycle time</span>
+            <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">cycle</span><span class="p">:</span>
+                <span class="c1"># Cycle provided in scenario file</span>
+                <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">cycle</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># First cycle in forecast</span>
-                <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">forecast</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="c1"># First main loop in forecast scenario </span>
+                <span class="c1"># Determine which cycle to run</span>
                 <span class="n">delay</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="n">t</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span> <span class="o">-</span> \
                     <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="n">delay</span><span class="p">)</span>
                 <span class="n">h0</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">hour</span>
-                <span class="n">h0</span> <span class="o">=</span> <span class="n">h0</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">h0</span><span class="p">,</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cycle_interval</span><span class="p">)</span>
-                <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">microsecond</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">second</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">minute</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">hour</span><span class="o">=</span><span class="n">h0</span><span class="p">)</span>
-
-            <span class="n">cosmos</span><span class="o">.</span><span class="n">stop_time</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span> <span class="o">+</span> \
-                <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="n">xml_obj</span><span class="o">.</span><span class="n">runtime</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>    
-            <span class="n">cosmos</span><span class="o">.</span><span class="n">next_cycle_time</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cycle_interval</span><span class="p">)</span>
-            
-            <span class="c1"># Cycle given in config, so override cycle_time</span>
-            <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cycle</span><span class="p">:</span>
-                <span class="n">cosmos</span><span class="o">.</span><span class="n">next_cycle_time</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cycle_interval</span><span class="p">)</span>
-                <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cycle</span>
-                <span class="n">cosmos</span><span class="o">.</span><span class="n">stop_time</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span> <span class="o">+</span> \
-                    <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="n">xml_obj</span><span class="o">.</span><span class="n">runtime</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>    
-                <span class="c1"># Set back to None, so it&#39;s not used anymore in the next cycle                </span>
-                <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cycle</span> <span class="o">=</span> <span class="kc">None</span>
-                                
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_obj</span><span class="p">,</span> <span class="s2">&quot;last_cycle&quot;</span><span class="p">):</span>
-                <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_stop_time</span> <span class="o">=</span> <span class="n">xml_obj</span><span class="o">.</span><span class="n">last_cycle</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>                        
-            
+                <span class="n">h0</span> <span class="o">=</span> <span class="n">h0</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">h0</span><span class="p">,</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cycle</span><span class="o">.</span><span class="n">interval</span><span class="p">)</span>
+                <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">microsecond</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">second</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">minute</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">hour</span><span class="o">=</span><span class="n">h0</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Cycle time given as input from last model loop iteration</span>
-            <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span> <span class="o">=</span> <span class="n">cycle_time</span>
-            <span class="n">cosmos</span><span class="o">.</span><span class="n">stop_time</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span> <span class="o">+</span> \
-                <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="n">xml_obj</span><span class="o">.</span><span class="n">runtime</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>    
-            <span class="n">cosmos</span><span class="o">.</span><span class="n">next_cycle_time</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cycle_interval</span><span class="p">)</span>
-                    
-        <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_string</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%Hz&quot;</span><span class="p">)</span>
+            <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle</span> <span class="o">=</span> <span class="n">cycle</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
 
+        <span class="c1"># Determine end time of cycle and next cycle time                </span>
+        <span class="n">cosmos</span><span class="o">.</span><span class="n">stop_time</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle</span> <span class="o">+</span> \
+            <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">runtime</span><span class="p">)</span>    
+        <span class="n">cosmos</span><span class="o">.</span><span class="n">next_cycle_time</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cycle</span><span class="o">.</span><span class="n">interval</span><span class="p">)</span>
+            
+        <span class="c1"># Cycle string (used for file and folder names)                   </span>
+        <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_string</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%Hz&quot;</span><span class="p">)</span>
 
-        <span class="n">delay</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># Delay in hours</span>
+        <span class="c1"># Set scenario paths</span>
+        <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">set_paths</span><span class="p">()</span>
         
-        <span class="c1"># Check whether last cycle is currently running. If so, next_cycle_time is set to None</span>
-        <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_stop_time</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span><span class="o">&gt;</span><span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_stop_time</span><span class="p">:</span>
+        <span class="c1"># Check if this is the last cycle provided in the scenario file</span>
+        <span class="c1"># If so, make sure the next cycle will not be run</span>
+        <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">last_cycle</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle</span><span class="o">&gt;=</span><span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">last_cycle</span><span class="p">:</span>
                 <span class="n">cosmos</span><span class="o">.</span><span class="n">next_cycle_time</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># Determine time at which this cycle should start running</span>
-        
+        <span class="n">delay</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># Delay in hours        </span>
         <span class="n">tnow</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">tnow</span> <span class="o">&gt;</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span> <span class="o">+</span> <span class="n">delay</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">tnow</span> <span class="o">&gt;</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle</span> <span class="o">+</span> <span class="n">delay</span><span class="p">:</span>
             <span class="c1"># start now</span>
             <span class="n">start_time</span> <span class="o">=</span> <span class="n">tnow</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># start after delay</span>
-            <span class="n">start_time</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span> <span class="o">+</span> <span class="n">delay</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle</span> <span class="o">+</span> <span class="n">delay</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="o">=</span> <span class="n">sched</span><span class="o">.</span><span class="n">scheduler</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">)</span>
         <span class="n">dt</span> <span class="o">=</span> <span class="n">start_time</span> <span class="o">-</span> <span class="n">tnow</span>
         
@@ -222,121 +202,60 @@
 <div class="viewcode-block" id="MainLoop.run"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_main_loop.MainLoop.run.html#cosmos.cosmos_main_loop.MainLoop.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Run main loop.</span>
 
-<span class="sd">        - Read configuration file, stations, meteo sources, super regions, scenario.</span>
 <span class="sd">        - Initialize models</span>
 <span class="sd">        - Remove old cycles</span>
 <span class="sd">        - Get list of nested models</span>
 <span class="sd">        - Check if models are finished</span>
 <span class="sd">        - Get start and stop times</span>
 <span class="sd">        - Download and collect meteo</span>
+<span class="sd">        - Optional: Make track ensemble</span>
 <span class="sd">        - Start model loop</span>
 
 <span class="sd">        See Also</span>
-<span class="sd">        -------</span>
-<span class="sd">        cosmos.cosmos_configuration.read_config_file</span>
-<span class="sd">        cosmos.cosmos_stations.Stations</span>
-<span class="sd">        cosmos.cosmos_meteo.read_meteo_sources</span>
-<span class="sd">        cosmos.cosmos_scenario.Scenario</span>
-<span class="sd">        cosmos.cosmos_scenario.Scenario.read</span>
-<span class="sd">        cosmos.cosmos_model.Model.prepare</span>
+<span class="sd">        --------</span>
+<span class="sd">        cosmos.cosmos_model.Model.get_nested_models</span>
+<span class="sd">        cosmos.cosmos_model.Model.set_paths</span>
 <span class="sd">        cosmos.cosmos_meteo.Meteo.download_and_collect_meteo</span>
+<span class="sd">        cosmos.cosmos_track_ensemble.setup_track_ensemble</span>
 <span class="sd">        cosmos.cosmos_model_loop.ModelLoop.start</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Start by reading all available models, stations, etc.</span>
         <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Starting cycle ...&quot;</span><span class="p">)</span>    
- 
-        <span class="c1"># Read xml config file (again, but maybe something was changed while cosmos was waiting)</span>
-        <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Reading config file ...&quot;</span><span class="p">)</span>    
-        <span class="n">read_config_file</span><span class="p">()</span>
-        
-        <span class="c1"># Available stations</span>
-        <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Reading stations ...&quot;</span><span class="p">)</span>    
-        <span class="n">cosmos</span><span class="o">.</span><span class="n">stations</span> <span class="o">=</span> <span class="n">Stations</span><span class="p">()</span>
-        <span class="n">cosmos</span><span class="o">.</span><span class="n">stations</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+         
+<span class="c1">#         if self.clean_up:</span>
+<span class="c1">#             # Don&#39;t allow clean up when just initializing or continuous mode</span>
+<span class="c1">#             if not self.just_initialize and cosmos.config.cycle_mode == &quot;single_shot&quot;:           </span>
+<span class="c1">#                 # Remove old directories</span>
+<span class="c1">#                 pths = fo.list_folders(os.path.join(cosmos.scenario.path,&quot;*&quot;))</span>
+<span class="c1">#                 for pth in pths:</span>
+<span class="c1">#                     fo.rmdir(pth)</span>
+<span class="c1">#                 fo.rmdir(os.path.join(cosmos.config.job_path,</span>
+<span class="c1">#                                       cosmos.config.scenario_name))</span>
 
-        <span class="c1"># Available meteo sources</span>
-        <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Reading meteo sources ...&quot;</span><span class="p">)</span>    
-        <span class="n">read_meteo_sources</span><span class="p">()</span>
+<span class="c1">#         # Remove older cycles</span>
+<span class="c1">#         if not self.just_initialize and cosmos.config.cycle_mode == &quot;continuous&quot;:           </span>
+<span class="c1">#             if cosmos.config.remove_old_cycles&gt;0 and not cosmos.storm_flag:</span>
+<span class="c1">#                 # Get list of all cycles</span>
+<span class="c1">#                 cycle_list = fo.list_folders(os.path.join(cosmos.scenario.path,&quot;*z&quot;))</span>
 
-        <span class="c1"># Find all available super regions</span>
-        <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Reading super regions ...&quot;</span><span class="p">)</span>    
-        <span class="n">cosmos</span><span class="o">.</span><span class="n">super_region</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">super_region_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">main_path</span><span class="p">,</span> <span class="s2">&quot;super_regions&quot;</span><span class="p">)</span>
-        <span class="n">super_region_list</span> <span class="o">=</span> <span class="n">fo</span><span class="o">.</span><span class="n">list_files</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">super_region_path</span><span class="p">,</span> <span class="s2">&quot;*.xml&quot;</span><span class="p">))</span>
-        <span class="k">for</span> <span class="n">super_file</span> <span class="ow">in</span> <span class="n">super_region_list</span><span class="p">:</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">super_file</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">cosmos</span><span class="o">.</span><span class="n">super_region</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">xml_obj</span> <span class="o">=</span> <span class="n">xml</span><span class="o">.</span><span class="n">xml2obj</span><span class="p">(</span><span class="n">super_file</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">xml_obj</span><span class="o">.</span><span class="n">region</span><span class="p">:</span>
-                <span class="n">cosmos</span><span class="o">.</span><span class="n">super_region</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">region</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
-        
-        <span class="c1"># Find all available models and store in dict cosmos.all_models</span>
-        <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Finding available models ...&quot;</span><span class="p">)</span>    
-        <span class="n">cosmos</span><span class="o">.</span><span class="n">all_models</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">region_list</span> <span class="o">=</span> <span class="n">fo</span><span class="o">.</span><span class="n">list_folders</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">main_path</span><span class="p">,</span>
-                                                   <span class="s2">&quot;models&quot;</span><span class="p">,</span> <span class="s2">&quot;*&quot;</span><span class="p">))</span>
-        <span class="k">for</span> <span class="n">region_path</span> <span class="ow">in</span> <span class="n">region_list</span><span class="p">:</span>
-            <span class="n">region_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">region_path</span><span class="p">)</span>
-            <span class="n">type_list</span> <span class="o">=</span> <span class="n">fo</span><span class="o">.</span><span class="n">list_folders</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">region_path</span><span class="p">,</span><span class="s2">&quot;*&quot;</span><span class="p">))</span>
-            <span class="k">for</span> <span class="n">type_path</span> <span class="ow">in</span> <span class="n">type_list</span><span class="p">:</span>
-                <span class="n">type_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">type_path</span><span class="p">)</span>
-                <span class="n">name_list</span> <span class="o">=</span> <span class="n">fo</span><span class="o">.</span><span class="n">list_folders</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">type_path</span><span class="p">,</span><span class="s2">&quot;*&quot;</span><span class="p">))</span>
-                <span class="k">for</span> <span class="n">name_path</span> <span class="ow">in</span> <span class="n">name_list</span><span class="p">:</span>
-                    <span class="n">name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">name_path</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-                    <span class="c1"># Check if xml file exists</span>
-                    <span class="n">xml_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">name_path</span><span class="p">,</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.xml&quot;</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">xml_file</span><span class="p">):</span>
-                        <span class="n">cosmos</span><span class="o">.</span><span class="n">all_models</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">type_name</span><span class="p">,</span>
-                                                   <span class="s2">&quot;region&quot;</span><span class="p">:</span> <span class="n">region_name</span><span class="p">}</span>
-                
-        <span class="c1"># Scenario</span>
-        <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Reading scenario ...&quot;</span><span class="p">)</span>
-        <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span> <span class="o">=</span> <span class="n">Scenario</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">scenario_name</span><span class="p">)</span>
-        <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">main_path</span><span class="p">,</span>
-                                          <span class="s2">&quot;scenarios&quot;</span><span class="p">,</span>
-                                          <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">scenario_name</span><span class="p">)</span>
-        <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
-                                                 <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">scenario_name</span> <span class="o">+</span> <span class="s2">&quot;.xml&quot;</span><span class="p">)</span>
-
-        <span class="c1"># Read scenario and add models (the models are also initialized here)</span>
-        <span class="c1"># This is also where all the scenario and model paths are set</span>
-        <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-                
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">clean_up</span><span class="p">:</span>
-            <span class="c1"># Don&#39;t allow clean up when just initializing or continuous mode</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">just_initialize</span> <span class="ow">and</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cycle_mode</span> <span class="o">==</span> <span class="s2">&quot;single_shot&quot;</span><span class="p">:</span>           
-                <span class="c1"># Remove old directories</span>
-                <span class="n">pths</span> <span class="o">=</span> <span class="n">fo</span><span class="o">.</span><span class="n">list_folders</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">path</span><span class="p">,</span><span class="s2">&quot;*&quot;</span><span class="p">))</span>
-                <span class="k">for</span> <span class="n">pth</span> <span class="ow">in</span> <span class="n">pths</span><span class="p">:</span>
-                    <span class="n">fo</span><span class="o">.</span><span class="n">rmdir</span><span class="p">(</span><span class="n">pth</span><span class="p">)</span>
-                <span class="n">fo</span><span class="o">.</span><span class="n">rmdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">job_path</span><span class="p">,</span>
-                                      <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">scenario_name</span><span class="p">))</span>
-
-        <span class="c1"># Remove older cycles</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">just_initialize</span> <span class="ow">and</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cycle_mode</span> <span class="o">==</span> <span class="s2">&quot;continuous&quot;</span><span class="p">:</span>           
-            <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">remove_old_cycles</span><span class="o">&gt;</span><span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">storm_flag</span><span class="p">:</span>
-                <span class="c1"># Get list of all cycles</span>
-                <span class="n">cycle_list</span> <span class="o">=</span> <span class="n">fo</span><span class="o">.</span><span class="n">list_folders</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">path</span><span class="p">,</span><span class="s2">&quot;*z&quot;</span><span class="p">))</span>
-
-                <span class="n">tkeep</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">remove_old_cycles</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="n">cycle_list</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">storm_keeplist</span><span class="p">:</span>
-                        <span class="k">continue</span>
-                    <span class="n">keepfile_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cycle</span><span class="p">,</span> <span class="s2">&quot;keep.txt&quot;</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">keepfile_name</span><span class="p">):</span>
-                        <span class="n">cosmos</span><span class="o">.</span><span class="n">storm_keeplist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cycle</span><span class="p">)</span>
-                        <span class="k">continue</span>
-                    <span class="n">t</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">cycle</span><span class="p">[</span><span class="o">-</span><span class="mi">12</span><span class="p">:],</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%Hz&quot;</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">t</span><span class="o">&lt;</span><span class="n">tkeep</span><span class="p">:</span>
-                        <span class="k">pass</span>
-                    <span class="c1"># Commented out for now</span>
-<span class="c1">#                        cosmos.log(&quot;Removing older cycle : &quot; + cycle[-12:])</span>
-<span class="c1">#                        fo.rmdir(cycle)</span>
-            <span class="k">elif</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">storm_flag</span><span class="p">:</span>
-                <span class="n">cycle_list</span> <span class="o">=</span> <span class="n">fo</span><span class="o">.</span><span class="n">list_folders</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">path</span><span class="p">,</span><span class="s2">&quot;*z&quot;</span><span class="p">))</span>
-                <span class="n">cosmos</span><span class="o">.</span><span class="n">storm_keeplist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cycle_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="c1">#                 tkeep = cosmos.cycle_time.replace(tzinfo=None) - datetime.timedelta(hours=cosmos.config.remove_old_cycles)</span>
+<span class="c1">#                 for cycle in cycle_list:</span>
+<span class="c1">#                     if cycle in cosmos.storm_keeplist:</span>
+<span class="c1">#                         continue</span>
+<span class="c1">#                     keepfile_name = os.path.join(cycle, &quot;keep.txt&quot;)</span>
+<span class="c1">#                     if os.path.exists(keepfile_name):</span>
+<span class="c1">#                         cosmos.storm_keeplist.append(cycle)</span>
+<span class="c1">#                         continue</span>
+<span class="c1">#                     t = datetime.datetime.strptime(cycle[-12:],&quot;%Y%m%d_%Hz&quot;)</span>
+<span class="c1">#                     if t&lt;tkeep:</span>
+<span class="c1">#                         pass</span>
+<span class="c1">#                     # Commented out for now</span>
+<span class="c1"># #                        cosmos.log(&quot;Removing older cycle : &quot; + cycle[-12:])</span>
+<span class="c1"># #                        fo.rmdir(cycle)</span>
+<span class="c1">#             elif cosmos.storm_flag:</span>
+<span class="c1">#                 cycle_list = fo.list_folders(os.path.join(cosmos.scenario.path,&quot;*z&quot;))</span>
+<span class="c1">#                 cosmos.storm_keeplist.append(cycle_list[-1])</span>
                         
         <span class="c1"># Create scenario cycle paths</span>
         <span class="n">fo</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">cycle_path</span><span class="p">)</span>
@@ -344,63 +263,27 @@
         <span class="n">fo</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">cycle_tiles_path</span><span class="p">)</span>
         <span class="n">fo</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">cycle_job_list_path</span><span class="p">)</span>
 
-        <span class="c1"># Prepare models and determine which models are nested in which</span>
-        <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Preparing models ...&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
-
-            <span class="n">model</span><span class="o">.</span><span class="n">prepare</span><span class="p">()</span>
-            
-            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">flow_nested_name</span><span class="p">:</span>
-                <span class="c1"># Look up model from which it gets it boundary conditions</span>
-                <span class="k">for</span> <span class="n">model2</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">model2</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">model</span><span class="o">.</span><span class="n">flow_nested_name</span><span class="p">:</span>
-                        <span class="n">model</span><span class="o">.</span><span class="n">flow_nested</span> <span class="o">=</span> <span class="n">model2</span>
-                        <span class="n">model2</span><span class="o">.</span><span class="n">nested_flow_models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-                        <span class="k">break</span>
-            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">wave_nested_name</span><span class="p">:</span>
-                <span class="c1"># Look up model from which it gets it boundary conditions</span>
-                <span class="k">for</span> <span class="n">model2</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">model2</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">model</span><span class="o">.</span><span class="n">wave_nested_name</span><span class="p">:</span>
-                        <span class="n">model</span><span class="o">.</span><span class="n">wave_nested</span> <span class="o">=</span> <span class="n">model2</span>
-                        <span class="n">model2</span><span class="o">.</span><span class="n">nested_wave_models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-                        <span class="k">break</span>
-            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">bw_nested_name</span><span class="p">:</span>
-                <span class="c1"># Look up model from which it gets it boundary conditions</span>
-                <span class="k">for</span> <span class="n">model2</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">model2</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">model</span><span class="o">.</span><span class="n">bw_nested_name</span><span class="p">:</span>
-                        <span class="n">model</span><span class="o">.</span><span class="n">bw_nested</span> <span class="o">=</span> <span class="n">model2</span>
-                        <span class="n">model2</span><span class="o">.</span><span class="n">nested_bw_models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-                        <span class="k">break</span>
-
         <span class="c1"># Get list of models that have already finished</span>
         <span class="n">finished_list</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">cycle_job_list_path</span><span class="p">)</span>
 
-        <span class="c1"># Set initial durations and what needs to be done for each model</span>
+        <span class="c1"># Prepare some stuff for each model</span>
         <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
-
+            <span class="n">model</span><span class="o">.</span><span class="n">get_nested_models</span><span class="p">()</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">set_paths</span><span class="p">()</span>
+            <span class="c1"># Set model status</span>
             <span class="n">model</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;waiting&quot;</span>
-
             <span class="c1"># Check finished models</span>
             <span class="k">for</span> <span class="n">file_name</span> <span class="ow">in</span> <span class="n">finished_list</span><span class="p">:</span>
                 <span class="n">model_name</span> <span class="o">=</span> <span class="n">file_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">model_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
                     <span class="n">model</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;finished&quot;</span>
                     <span class="n">model</span><span class="o">.</span><span class="n">run_simulation</span> <span class="o">=</span> <span class="kc">False</span>
-                    <span class="k">break</span>
-            
+                    <span class="k">break</span>            
             <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">priority</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">model</span><span class="o">.</span><span class="n">run_simulation</span> <span class="o">=</span> <span class="kc">False</span>
-                
-            <span class="c1"># Find matching meteo subset</span>
-            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">meteo_dataset</span><span class="p">:</span>
-               <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">meteo_subset</span><span class="p">:</span>
-                   <span class="k">if</span> <span class="n">subset</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">model</span><span class="o">.</span><span class="n">meteo_dataset</span><span class="p">:</span>
-                       <span class="n">model</span><span class="o">.</span><span class="n">meteo_subset</span> <span class="o">=</span> <span class="n">subset</span>
-                       <span class="k">break</span>
 
         <span class="c1"># Start and stop times</span>
         <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s1">&#39;Getting start and stop times ...&#39;</span><span class="p">)</span>
-        <span class="c1"># In case of a forecast ...</span>
         <span class="n">get_start_and_stop_times</span><span class="p">()</span>
         
         <span class="c1"># Set reference date to minimum of all start times</span>
@@ -430,24 +313,30 @@
         <span class="c1"># tile_layer              = {}</span>
         <span class="c1"># tile_layer[&quot;flood_map&quot;] = TileLayer(&quot;flood_map&quot;)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">just_initialize</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">just_initialize</span><span class="p">:</span>
+            <span class="c1"># No need to do anything else here </span>
+            <span class="k">return</span>
             
-            <span class="c1"># Get meteo data</span>
-            <span class="n">download_and_collect_meteo</span><span class="p">()</span>
-            
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_models</span><span class="p">:</span>        
-                <span class="c1"># And now start the model loop</span>
-                <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Starting model loop ...&quot;</span><span class="p">)</span>
-                <span class="n">cosmos</span><span class="o">.</span><span class="n">model_loop</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div></div>
+        <span class="c1"># Get meteo data (in case of forcing with track file, this is also where the spiderweb is generated)</span>
+        <span class="n">download_and_collect_meteo</span><span class="p">()</span>
+
+        <span class="c1"># Make track ensemble (this also add &#39;new&#39; ensemble models that fall within the cone)</span>
+        <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">track_ensemble_nr_realizations</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">setup_track_ensemble</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_models</span><span class="p">:</span>
+            <span class="c1"># And now start the model loop</span>
+            <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Starting model loop ...&quot;</span><span class="p">)</span>
+            <span class="n">cosmos</span><span class="o">.</span><span class="n">model_loop</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div></div>
 
 <span class="k">def</span> <span class="nf">get_start_and_stop_times</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Get cycle start and stop times.</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
         
-    <span class="n">y</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span><span class="o">.</span><span class="n">year</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle</span><span class="o">.</span><span class="n">year</span>
     <span class="n">cosmos</span><span class="o">.</span><span class="n">reference_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     
-    <span class="n">start_time</span>  <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span>
+    <span class="n">start_time</span>  <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle</span>
         
     <span class="n">stop_time</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">stop_time</span>    
         
@@ -569,7 +458,7 @@
                 <span class="n">model</span><span class="o">.</span><span class="n">flow_stop_time</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">wave_stop_time</span>
 
 <span class="k">def</span> <span class="nf">check_for_wave_restart_files</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Check if there are wave restart files</span>
+    <span class="sd">&quot;&quot;&quot;Check if there are wave restart files.</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
     <span class="n">restart_time</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">restart_file</span> <span class="o">=</span> <span class="kc">None</span>
@@ -599,7 +488,7 @@
     <span class="k">return</span> <span class="n">restart_time</span><span class="p">,</span> <span class="n">restart_file</span>
 
 <span class="k">def</span> <span class="nf">check_for_flow_restart_files</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Check if there are flow restart files</span>
+    <span class="sd">&quot;&quot;&quot;Check if there are flow restart files.</span>
 <span class="sd">    &quot;&quot;&quot;</span>   
     <span class="n">restart_time</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">restart_file</span> <span class="o">=</span> <span class="kc">None</span>

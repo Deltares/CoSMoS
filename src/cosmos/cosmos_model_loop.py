@@ -14,7 +14,6 @@ from .cosmos_postprocess import post_process
 import cht.misc.fileops as fo
 
 class ModelLoop():
-    
     """Pre-process, submit, move, and post-process all models and initialize webviewer once all models are finished.
 
     Parameters
@@ -35,7 +34,6 @@ class ModelLoop():
     cosmos.cosmos_hurrywave.CoSMoS_HurryWave
     cosmos.cosmos_sfincs.CoSMoS_SFINCS
     cosmos.cosmos_xbeach.CoSMoS_XBeach
-
     """
     def __init__(self):
         pass
@@ -75,7 +73,6 @@ class ModelLoop():
         cosmos.cosmos_sfincs.CoSMoS_SFINCS.pre_process
         cosmos.cosmos_model.Model.submit_job
         cosmos.cosmos_sfincs.CoSMoS_SFINCS.post_process
-        
         """
 
         # First check for finished simulations

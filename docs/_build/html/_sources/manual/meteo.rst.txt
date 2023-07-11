@@ -59,7 +59,7 @@ For forecasts, the netcdf files are contained in a folder with the cycle time na
 CoSMoS gets the meteo data in two steps:
 
 - Download
-    If the keyword *get_meteo* is set to True (see :py:class:`cosmos.cosmos_main.CoSMoS`), meteo data are downloaded from a webserver. The following datasets can be downloaded automatically:
+    If the keyword *get_meteo* is set to True (see :py:class:`cosmos.cosmos.CoSMoS`), meteo data are downloaded from a webserver. The following datasets can be downloaded automatically:
     
     - gfs_anl_0p50
     - gfs_forecast_0p25
@@ -90,7 +90,7 @@ In this way, we can obtain a probabilistic estimate of nearshore water levels, w
 The cyclone tracks are generated based on De Maria et al. (2009), taking into account along-track (AT), cross-track (CT), and maximum wind speed (VE) errors.
 For more information, see the `Advanced Tropical Cyclone Toolbox <https://publicwiki.deltares.nl/display/DDB/Advanced+Tropical+Cyclone>`_.
 
-To run a scenario in ensemble mode, set the keyword *ensemble* to True (see :ref:`Running CoSMoS <running>` and :py:class:`cosmos.cosmos_main.CoSMoS`).
+To run a scenario in ensemble mode, set the keyword *ensemble* to True (see :ref:`Running CoSMoS <running>` and :py:class:`cosmos.cosmos.CoSMoS`).
 The keyword *track_ensemble* in the scenario file must refer to a folder in the *meteo* folder that contains a *.cyc* file.
 This meteo dataset does not need to be described in the *meteo_subsets.xml* file.
 The keyword *track_ensemble_nr_realizations* in the scenario file specifies the number of tracks that need to be generated.

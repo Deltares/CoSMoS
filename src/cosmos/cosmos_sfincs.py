@@ -52,7 +52,6 @@ class CoSMoS_SFINCS(Model):
         See Also
         ----------
         cht.sfincs.sfincs
-
         """         
         # Read in the SFINCS model                        
         input_file  = os.path.join(self.path, "input", "sfincs.inp")
@@ -67,6 +66,7 @@ class CoSMoS_SFINCS(Model):
         
     def pre_process(self):
         """Preprocess SFINCS model.
+
         - Extract and write water level and wave conditions.
         - Write input file. 
         - Write meteo forcing.
@@ -76,7 +76,6 @@ class CoSMoS_SFINCS(Model):
         See Also
         ----------
         cht.nesting.nest2
-        
         """
         # Set path temporarily to job path
         pth = self.domain.path

@@ -38,7 +38,6 @@ class CoSMoS:
     cosmos.cosmos_hurrywave.CoSMoS_HurryWave
     cosmos.cosmos_sfincs.CoSMoS_SFINCS
     cosmos.cosmos_xbeach.CoSMoS_XBeach
-
     """
     
     def __init__(self):
@@ -56,7 +55,6 @@ class CoSMoS:
         ----------
         main_path : str
             Path of CoSMoS main folder.
-
         """
         
         self.config.main_path = main_path

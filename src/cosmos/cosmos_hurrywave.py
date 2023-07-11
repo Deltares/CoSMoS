@@ -37,15 +37,14 @@ class CoSMoS_HurryWave(Model):
     cosmos.cosmos_scenario.Scenario
     cosmos.cosmos_model_loop.ModelLoop
     cosmos.cosmos_model.Model
-    """    
-    
+    """  
+
     def read_model_specific(self):
         """Read HurryWave specific model attributes.
 
         See Also
         ----------
         cht.hurrywave.hurrywave
-
         """ 
         # Read in the HurryWave model
         
@@ -60,6 +59,7 @@ class CoSMoS_HurryWave(Model):
         
     def pre_process(self):
         """Preprocess HurryWave model.
+
         - Extract and write wave conditions.
         - Write input file. 
         - Write meteo forcing.
@@ -69,7 +69,6 @@ class CoSMoS_HurryWave(Model):
         See Also
         ----------
         cht.nesting.nest2
-        
         """
         # Set path temporarily to job path
         pth = self.domain.path
@@ -114,9 +113,7 @@ class CoSMoS_HurryWave(Model):
                                           self.domain.input.variables.tref)
             self.domain.input.variables.amufile = "hurrywave.amu"
             self.domain.input.variables.amvfile = "hurrywave.amv"
-    
-        if self.meteo_spiderweb or cosmos.scenario.track_ensemble:
-            
+                
         if self.meteo_spiderweb:            
             # Single spiderweb file given, copy to job folder
             self.domain.input.variables.spwfile = self.meteo_spiderweb

@@ -43,7 +43,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../usage.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../manual.html">User manual</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../functions.html">Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../functions.html">API reference</a></li>
 </ul>
 
         </div>
@@ -91,7 +91,7 @@
 <span class="kn">from</span> <span class="nn">cht.tide.tide_predict</span> <span class="kn">import</span> <span class="n">predict</span>
 <span class="kn">from</span> <span class="nn">cht.misc.misc_tools</span> <span class="kn">import</span> <span class="n">findreplace</span>
 
-<span class="kn">from</span> <span class="nn">.cosmos_main</span> <span class="kn">import</span> <span class="n">cosmos</span>
+<span class="kn">from</span> <span class="nn">.cosmos</span> <span class="kn">import</span> <span class="n">cosmos</span>
 <span class="kn">from</span> <span class="nn">.cosmos_model</span> <span class="kn">import</span> <span class="n">Model</span>
 <span class="kn">from</span> <span class="nn">.cosmos_tiling</span> <span class="kn">import</span> <span class="n">make_flood_map_tiles</span>
 
@@ -121,7 +121,6 @@
 <span class="sd">        See Also</span>
 <span class="sd">        ----------</span>
 <span class="sd">        cht.beware.beware</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>        
         <span class="c1"># Read in the BEWARE model</span>
 
@@ -137,15 +136,14 @@
 
 <div class="viewcode-block" id="CoSMoS_BEWARE.pre_process"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_beware.CoSMoS_BEWARE.pre_process.html#cosmos.cosmos_beware.CoSMoS_BEWARE.pre_process">[docs]</a>    <span class="k">def</span> <span class="nf">pre_process</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Preprocess BEWARE model.</span>
+<span class="sd">        </span>
 <span class="sd">        - Extract and write wave and water level conditions.</span>
 <span class="sd">        - Write input file. </span>
 <span class="sd">        - Optional: make ensemble of models.</span>
 
-
 <span class="sd">        See Also</span>
 <span class="sd">        ----------</span>
-<span class="sd">        cht.nesting.nest2</span>
-<span class="sd">        </span>
+<span class="sd">        cht.nesting.nest2 </span>
 <span class="sd">        &quot;&quot;&quot;</span>   
         
         <span class="c1"># Set path temporarily to job path</span>
@@ -315,7 +313,6 @@
 <span class="sd">        See Also</span>
 <span class="sd">        ----------</span>
 <span class="sd">        cht.misc.prob_maps</span>
-<span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>        
         <span class="c1"># Post-processing occurs in cosmos_webviewer.py</span>
         <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>

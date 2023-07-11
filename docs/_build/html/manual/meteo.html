@@ -189,7 +189,7 @@ Meteorological forcing data can be found in the <em>meteo</em> folder. An exampl
 <p>CoSMoS gets the meteo data in two steps:</p>
 <ul class="simple">
 <li><dl class="simple">
-<dt>Download</dt><dd><p>If the keyword <em>get_meteo</em> is set to True (see <a class="reference internal" href="../_generated/cosmos.cosmos_main.CoSMoS.html#cosmos.cosmos_main.CoSMoS" title="cosmos.cosmos_main.CoSMoS"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_main.CoSMoS</span></code></a>), meteo data are downloaded from a webserver. The following datasets can be downloaded automatically:</p>
+<dt>Download</dt><dd><p>If the keyword <em>get_meteo</em> is set to True (see <a class="reference internal" href="../_generated/cosmos.cosmos.CoSMoS.html#cosmos.cosmos.CoSMoS" title="cosmos.cosmos.CoSMoS"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos.CoSMoS</span></code></a>), meteo data are downloaded from a webserver. The following datasets can be downloaded automatically:</p>
 <ul>
 <li><p>gfs_anl_0p50</p></li>
 <li><p>gfs_forecast_0p25</p></li>
@@ -224,7 +224,7 @@ If this folder only contains a <em>.cyc</em> file, this file is converted into a
 In this way, we can obtain a probabilistic estimate of nearshore water levels, waves, and inundation.
 The cyclone tracks are generated based on De Maria et al. (2009), taking into account along-track (AT), cross-track (CT), and maximum wind speed (VE) errors.
 For more information, see the <a class="reference external" href="https://publicwiki.deltares.nl/display/DDB/Advanced+Tropical+Cyclone">Advanced Tropical Cyclone Toolbox</a>.</p>
-<p>To run a scenario in ensemble mode, set the keyword <em>ensemble</em> to True (see <a class="reference internal" href="running.html#running"><span class="std std-ref">Running CoSMoS</span></a> and <a class="reference internal" href="../_generated/cosmos.cosmos_main.CoSMoS.html#cosmos.cosmos_main.CoSMoS" title="cosmos.cosmos_main.CoSMoS"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_main.CoSMoS</span></code></a>).
+<p>To run a scenario in ensemble mode, set the keyword <em>ensemble</em> to True (see <a class="reference internal" href="running.html#running"><span class="std std-ref">Running CoSMoS</span></a> and <a class="reference internal" href="../_generated/cosmos.cosmos.CoSMoS.html#cosmos.cosmos.CoSMoS" title="cosmos.cosmos.CoSMoS"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos.CoSMoS</span></code></a>).
 The keyword <em>track_ensemble</em> in the scenario file must refer to a folder in the <em>meteo</em> folder that contains a <em>.cyc</em> file.
 This meteo dataset does not need to be described in the <em>meteo_subsets.xml</em> file.
 The keyword <em>track_ensemble_nr_realizations</em> in the scenario file specifies the number of tracks that need to be generated.

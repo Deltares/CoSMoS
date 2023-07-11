@@ -43,7 +43,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../usage.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../manual.html">User manual</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../functions.html">Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../functions.html">API reference</a></li>
 </ul>
 
         </div>
@@ -83,7 +83,7 @@
 <span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
 
-<span class="kn">from</span> <span class="nn">.cosmos_main</span> <span class="kn">import</span> <span class="n">cosmos</span>
+<span class="kn">from</span> <span class="nn">.cosmos</span> <span class="kn">import</span> <span class="n">cosmos</span>
 <span class="kn">from</span> <span class="nn">.cosmos_model</span> <span class="kn">import</span> <span class="n">Model</span>
 <span class="kn">from</span> <span class="nn">.cosmos_tiling</span> <span class="kn">import</span> <span class="n">make_sedero_tiles</span>
 <span class="kn">from</span> <span class="nn">.cosmos_tiling</span> <span class="kn">import</span> <span class="n">make_bedlevel_tiles</span>
@@ -115,12 +115,11 @@
 <span class="sd">    cosmos.cosmos_model.Model</span>
 <span class="sd">    &quot;&quot;&quot;</span> 
 <div class="viewcode-block" id="CoSMoS_XBeach.read_model_specific"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_xbeach.CoSMoS_XBeach.read_model_specific.html#cosmos.cosmos_xbeach.CoSMoS_XBeach.read_model_specific">[docs]</a>    <span class="k">def</span> <span class="nf">read_model_specific</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Read SFINCS specific model attributes.</span>
+        <span class="sd">&quot;&quot;&quot;Read XBeach specific model attributes.</span>
 
 <span class="sd">        See Also</span>
 <span class="sd">        ----------</span>
 <span class="sd">        cht.xbeach.xbeach</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Read in the XBeach model</span>
@@ -189,6 +188,7 @@
         
 <div class="viewcode-block" id="CoSMoS_XBeach.pre_process"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_xbeach.CoSMoS_XBeach.pre_process.html#cosmos.cosmos_xbeach.CoSMoS_XBeach.pre_process">[docs]</a>    <span class="k">def</span> <span class="nf">pre_process</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Preprocess XBeach model.</span>
+
 <span class="sd">        - Extract and write water level and wave conditions.</span>
 <span class="sd">        - Optional: only run XBeach for peak conditions.</span>
 <span class="sd">        - Write input file. </span>
@@ -196,7 +196,6 @@
 <span class="sd">        See Also</span>
 <span class="sd">        ----------</span>
 <span class="sd">        cht.nesting.nest2</span>
-<span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="c1"># First generate input that is identical for all members</span>

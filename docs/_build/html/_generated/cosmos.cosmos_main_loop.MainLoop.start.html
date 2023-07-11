@@ -48,7 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../manual.html">User manual</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../functions.html">Functions</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../functions.html#main-classes">Main classes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../functions.html#model-classes">Model classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../functions.html#model-specific-classes">Model-specific classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../functions.html#additional-classes">Additional classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../functions.html#cosmos-functions">CoSMoS functions</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../functions.html#mainloop-and-modelloop-functions">MainLoop and ModelLoop functions</a><ul class="current">
@@ -93,16 +93,16 @@
 <h1>cosmos.cosmos_main_loop.MainLoop.start<a class="headerlink" href="#cosmos-cosmos-main-loop-mainloop-start" title="Permalink to this headline">¶</a></h1>
 <dl class="py method">
 <dt id="cosmos.cosmos_main_loop.MainLoop.start">
-<code class="sig-prename descclassname">MainLoop.</code><code class="sig-name descname">start</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cycle_time</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmos/cosmos_main_loop.html#MainLoop.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cosmos.cosmos_main_loop.MainLoop.start" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read the xml scenario file, determine cycle times, and start cosmos_main_loop.run with scheduler.</p>
+<code class="sig-prename descclassname">MainLoop.</code><code class="sig-name descname">start</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cycle</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmos/cosmos_main_loop.html#MainLoop.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cosmos.cosmos_main_loop.MainLoop.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the scenario.toml file, determine cycle times, and start cosmos_main_loop.run with scheduler.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>cycle_time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – Datestring of cycle time</p>
+<dd class="field-odd"><p><strong>cycle</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – Datestring of cycle time</p>
 </dd>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">cosmos.cosmos_configuration.read_config_file()</span></code>, <a class="reference internal" href="#cosmos.cosmos_main_loop.MainLoop.start" title="cosmos.cosmos_main_loop.MainLoop.start"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cosmos.cosmos_main_loop.MainLoop.start()</span></code></a></p>
+<p><a class="reference internal" href="cosmos.cosmos_configuration.Configuration.html#cosmos.cosmos_configuration.Configuration" title="cosmos.cosmos_configuration.Configuration"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cosmos.cosmos_configuration.Configuration()</span></code></a>, <a class="reference internal" href="cosmos.cosmos_main_loop.MainLoop.run.html#cosmos.cosmos_main_loop.MainLoop.run" title="cosmos.cosmos_main_loop.MainLoop.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cosmos.cosmos_main_loop.MainLoop.run()</span></code></a></p>
 </aside>
 </dd></dl>
 

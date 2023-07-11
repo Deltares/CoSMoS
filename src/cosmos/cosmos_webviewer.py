@@ -43,10 +43,10 @@ class WebViewer:
     
     def make(self):
         """Make webviewer. 
+
         - Makes local copy of the webviewer from a template. If such a copy already exists, data will be copied to the existing webviewer.
         - Updating the scenario.js with the current scenario.
         - Make a variable file defining the variables that are mapped for the current scenario.
-
         """        
         # Makes local copy of the web viewer
         # If such a copy already exists, data will be copied to the existing web viewer

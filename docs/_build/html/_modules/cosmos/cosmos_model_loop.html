@@ -43,7 +43,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../usage.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../manual.html">User manual</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../functions.html">Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../functions.html">API reference</a></li>
 </ul>
 
         </div>
@@ -81,13 +81,12 @@
 <span class="kn">import</span> <span class="nn">sched</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
-<span class="kn">from</span> <span class="nn">.cosmos_main</span> <span class="kn">import</span> <span class="n">cosmos</span>
+<span class="kn">from</span> <span class="nn">.cosmos</span> <span class="kn">import</span> <span class="n">cosmos</span>
 <span class="kn">from</span> <span class="nn">.cosmos_cluster</span> <span class="kn">import</span> <span class="n">cluster_dict</span> <span class="k">as</span> <span class="n">cluster</span>
 <span class="kn">from</span> <span class="nn">.cosmos_postprocess</span> <span class="kn">import</span> <span class="n">post_process</span>
 <span class="kn">import</span> <span class="nn">cht.misc.fileops</span> <span class="k">as</span> <span class="nn">fo</span>
 
 <div class="viewcode-block" id="ModelLoop"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_model_loop.ModelLoop.html#cosmos.cosmos_model_loop.ModelLoop">[docs]</a><span class="k">class</span> <span class="nc">ModelLoop</span><span class="p">():</span>
-    
     <span class="sd">&quot;&quot;&quot;Pre-process, submit, move, and post-process all models and initialize webviewer once all models are finished.</span>
 
 <span class="sd">    Parameters</span>
@@ -108,7 +107,6 @@
 <span class="sd">    cosmos.cosmos_hurrywave.CoSMoS_HurryWave</span>
 <span class="sd">    cosmos.cosmos_sfincs.CoSMoS_SFINCS</span>
 <span class="sd">    cosmos.cosmos_xbeach.CoSMoS_XBeach</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="ModelLoop.__init__"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_model_loop.ModelLoop.html#cosmos.cosmos_model_loop.ModelLoop.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span></div>
@@ -148,7 +146,6 @@
 <span class="sd">        cosmos.cosmos_sfincs.CoSMoS_SFINCS.pre_process</span>
 <span class="sd">        cosmos.cosmos_model.Model.submit_job</span>
 <span class="sd">        cosmos.cosmos_sfincs.CoSMoS_SFINCS.post_process</span>
-<span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># First check for finished simulations</span>
@@ -189,17 +186,22 @@
             <span class="n">fo</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">cycle_post_path</span><span class="p">)</span>
             <span class="n">fo</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">restart_flow_path</span><span class="p">)</span>
             <span class="n">fo</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">restart_wave_path</span><span class="p">)</span>
-                                        
+
+            <span class="c1"># Make folders for ensemble members</span>
+            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">ensemble</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">iens</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">track_ensemble_nr_realizations</span><span class="p">):</span>
+                    <span class="n">fo</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">job_path</span><span class="p">,</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">ensemble_names</span><span class="p">[</span><span class="n">iens</span><span class="p">]))</span>
+
             <span class="n">model</span><span class="o">.</span><span class="n">pre_process</span><span class="p">()</span>  <span class="c1"># Adjust model input (nesting etc.)</span>
 
 <span class="c1">#            if cosmos.config.run_mode == &quot;serial&quot;:</span>
-            <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;serial&quot;</span> <span class="ow">or</span> <span class="n">model</span><span class="o">.</span><span class="n">type</span><span class="o">==</span><span class="s2">&quot;beware&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cycle</span><span class="o">.</span><span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;serial&quot;</span> <span class="ow">or</span> <span class="n">model</span><span class="o">.</span><span class="n">type</span><span class="o">==</span><span class="s2">&quot;beware&quot;</span><span class="p">:</span>
                 <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Submitting &quot;</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">long_name</span> <span class="o">+</span> <span class="s2">&quot; ...&quot;</span><span class="p">)</span>
                 <span class="n">model</span><span class="o">.</span><span class="n">submit_job</span><span class="p">()</span>
-            <span class="k">elif</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;parallel&quot;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cycle</span><span class="o">.</span><span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;parallel&quot;</span><span class="p">:</span>
                 <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Ready to run &quot;</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">long_name</span> <span class="o">+</span> <span class="s2">&quot; ...&quot;</span><span class="p">)</span>
                 <span class="c1"># Write ready file            </span>
-                <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">job_path</span><span class="p">,</span>
+                <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">jobs</span><span class="p">,</span>
                                          <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                                          <span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                                          <span class="s2">&quot;ready.txt&quot;</span><span class="p">)</span>
@@ -207,8 +209,8 @@
                 <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Model is ready to run&quot;</span><span class="p">)</span>
                 <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
                 
-                <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">track_ensemble</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">ensemble</span><span class="p">:</span>
-                     <span class="k">for</span> <span class="n">member_name</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">member_names</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">ensemble</span><span class="p">:</span>
+                     <span class="k">for</span> <span class="n">member_name</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">ensemble_names</span><span class="p">:</span>
                         <span class="c1"># Write ready file            </span>
                         <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">job_path</span><span class="p">,</span>
                                                 <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
@@ -268,16 +270,16 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;done&quot;</span>
                                     
             <span class="c1"># Move log file to scenario cycle path               </span>
-            <span class="n">log_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">main_path</span><span class="p">,</span> <span class="s2">&quot;cosmos.log&quot;</span><span class="p">)</span>
+            <span class="n">log_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="s2">&quot;cosmos.log&quot;</span><span class="p">)</span>
             <span class="n">fo</span><span class="o">.</span><span class="n">move_file</span><span class="p">(</span><span class="n">log_file</span><span class="p">,</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">cycle_path</span><span class="p">)</span>
             
             <span class="c1"># Delete jobs folder</span>
-            <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;serial&quot;</span><span class="p">:</span>
-                <span class="n">pth</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">job_path</span><span class="p">,</span>
+            <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cycle</span><span class="o">.</span><span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;serial&quot;</span><span class="p">:</span>
+                <span class="n">pth</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">jobs</span><span class="p">,</span>
                                    <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
                 <span class="n">fo</span><span class="o">.</span><span class="n">rmdir</span><span class="p">(</span><span class="n">pth</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cycle_mode</span> <span class="o">==</span> <span class="s2">&quot;continuous&quot;</span> <span class="ow">and</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">next_cycle_time</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cycle</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;continuous&quot;</span> <span class="ow">and</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">next_cycle_time</span><span class="p">:</span>
                 <span class="c1"># Start new main loop</span>
                 <span class="n">cosmos</span><span class="o">.</span><span class="n">main_loop</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">cycle_time</span><span class="o">=</span><span class="n">cosmos</span><span class="o">.</span><span class="n">next_cycle_time</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -353,13 +355,13 @@
         
         <span class="c1"># Sort waiting list according to prioritization</span>
         <span class="n">waiting_list</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">priorities</span><span class="p">,</span> <span class="n">reverse</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;serial&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cycle</span><span class="o">.</span><span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;serial&quot;</span><span class="p">:</span>
             <span class="c1"># Only put first job in waiting list</span>
             <span class="n">waiting_list</span> <span class="o">=</span> <span class="n">waiting_list</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span>        
             <span class="k">if</span> <span class="n">running</span><span class="p">:</span>
                 <span class="c1"># There is already a model running. Wait for it to finish.</span>
                 <span class="n">waiting_list</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">elif</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;parallel&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cycle</span><span class="o">.</span><span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;parallel&quot;</span><span class="p">:</span>
             <span class="c1"># Put all jobs at certain priority level in waiting list</span>
             <span class="n">waiting_list</span> <span class="o">=</span> <span class="n">waiting_list</span><span class="p">[:]</span>        
 

@@ -31,12 +31,12 @@ The CoSMoS system consists of three main classes:
 
 **CoSMoS class**
 
-CoSMoS is initialized with the *run_cosmos* (see :ref:`Running CoSMoS <running>`) script, calling the main CoSMoS class (:py:class:`cosmos.cosmos_main.CoSMoS`). 
+CoSMoS is initialized with the *run_cosmos* (see :ref:`Running CoSMoS <running>`) script, calling the main CoSMoS class (:py:class:`cosmos.cosmos.CoSMoS`). 
 This class saves input settings to *self.config*, which can be accessed by other CoSMoS classes. The CoSMoS class has three main options:
 
-1. run (:py:func:`cosmos.cosmos_main.CoSMoS.run`): The CoSMoS class starts the :py:class:`cosmos.cosmos_main_loop.MainLoop`.
-2. post-process (:py:func:`cosmos.cosmos_main.CoSMoS.post_process`): The CoSMoS class only starts post-processing (a selection of) finished models.
-3. make webviewer (:py:func:`cosmos.cosmos_main.CoSMoS.make_webviewer`): The CoSMoS class only makes the webviewer based on finished and post-processed models.
+1. run (:py:func:`cosmos.cosmos.CoSMoS.run`): The CoSMoS class starts the :py:class:`cosmos.cosmos_main_loop.MainLoop`.
+2. post-process (:py:func:`cosmos.cosmos.CoSMoS.post_process`): The CoSMoS class only starts post-processing (a selection of) finished models.
+3. make webviewer (:py:func:`cosmos.cosmos.CoSMoS.make_webviewer`): The CoSMoS class only makes the webviewer based on finished and post-processed models.
 
 **Main Loop**
 

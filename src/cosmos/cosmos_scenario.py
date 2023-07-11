@@ -281,6 +281,8 @@ class Scenario:
         cosmos.log("Finished reading scenario")   
 
     def set_paths(self):
+        """Set cycle paths.
+        """        
         self.cycle_path            = os.path.join(self.path, cosmos.cycle_string)
         self.cycle_models_path     = os.path.join(self.path, cosmos.cycle_string, "models")
         self.cycle_tiles_path      = os.path.join(self.path, cosmos.cycle_string, "tiles")

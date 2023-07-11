@@ -48,7 +48,6 @@ class CoSMoS_Delft3DFM(Model):
         See Also
         ----------
         cht.delft3dfm.delft3dfm
-
         """   
         # First set some defaults
 #        self.flow_spinup_time = 0.0
@@ -76,6 +75,7 @@ class CoSMoS_Delft3DFM(Model):
         
     def pre_process(self):
         """Preprocess Delft3D FM model.
+        
         - Extract and write wave and water level conditions.
         - Write input file. 
         - Write meteo forcing.
@@ -84,7 +84,6 @@ class CoSMoS_Delft3DFM(Model):
         See Also
         ----------
         cht.nesting.nest2
-        
         """   
         # Set path temporarily to job path
 #        pth = self.domain.path

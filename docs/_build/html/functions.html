@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Functions &mdash; CoSMoS 0.1 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>API reference &mdash; CoSMoS 0.1 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
@@ -17,7 +17,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="cosmos.cosmos_main.CoSMoS" href="_generated/cosmos.cosmos_main.CoSMoS.html" />
+    <link rel="next" title="cosmos.cosmos.CoSMoS" href="_generated/cosmos.cosmos.CoSMoS.html" />
     <link rel="prev" title="CoSMoS output" href="manual/output.html" /> 
 </head>
 
@@ -46,16 +46,16 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="manual.html">User manual</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Functions</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#main-classes">Main classes</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_main.CoSMoS.html">cosmos.cosmos_main.CoSMoS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos.CoSMoS.html">cosmos.cosmos.CoSMoS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_main_loop.MainLoop.html">cosmos.cosmos_main_loop.MainLoop</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_model_loop.ModelLoop.html">cosmos.cosmos_model_loop.ModelLoop</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_scenario.Scenario.html">cosmos.cosmos_scenario.Scenario</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_model.Model.html">cosmos.cosmos_model.Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_scenario.Scenario.html">cosmos.cosmos_scenario.Scenario</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#model-classes">Model classes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#model-specific-classes">Model-specific classes</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_beware.CoSMoS_BEWARE.html">cosmos.cosmos_beware.CoSMoS_BEWARE</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.html">cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_hurrywave.CoSMoS_HurryWave.html">cosmos.cosmos_hurrywave.CoSMoS_HurryWave</a></li>
@@ -64,18 +64,19 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#additional-classes">Additional classes</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_cluster.Cluster.html">cosmos.cosmos_cluster.Cluster</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_stations.Stations.html">cosmos.cosmos_stations.Stations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_webviewer.WebViewer.html">cosmos.cosmos_webviewer.WebViewer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_cluster.Cluster.html">cosmos.cosmos_cluster.Cluster</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_configuration.Configuration.html">cosmos.cosmos_configuration.Configuration</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#cosmos-functions">CoSMoS functions</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_main.CoSMoS.initialize.html">cosmos.cosmos_main.CoSMoS.initialize</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_main.CoSMoS.log.html">cosmos.cosmos_main.CoSMoS.log</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_main.CoSMoS.make_webviewer.html">cosmos.cosmos_main.CoSMoS.make_webviewer</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_main.CoSMoS.post_process.html">cosmos.cosmos_main.CoSMoS.post_process</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_main.CoSMoS.run.html">cosmos.cosmos_main.CoSMoS.run</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_main.CoSMoS.stop.html">cosmos.cosmos_main.CoSMoS.stop</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos.CoSMoS.initialize.html">cosmos.cosmos.CoSMoS.initialize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos.CoSMoS.run.html">cosmos.cosmos.CoSMoS.run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos.CoSMoS.stop.html">cosmos.cosmos.CoSMoS.stop</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos.CoSMoS.log.html">cosmos.cosmos.CoSMoS.log</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos.CoSMoS.make_webviewer.html">cosmos.cosmos.CoSMoS.make_webviewer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos.CoSMoS.post_process.html">cosmos.cosmos.CoSMoS.post_process</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#mainloop-and-modelloop-functions">MainLoop and ModelLoop functions</a><ul>
@@ -87,6 +88,13 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#model-functions">Model functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_model.Model.read_generic.html">cosmos.cosmos_model.Model.read_generic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_model.Model.set_paths.html">cosmos.cosmos_model.Model.set_paths</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_model.Model.get_nested_models.html">cosmos.cosmos_model.Model.get_nested_models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_model.Model.submit_job.html">cosmos.cosmos_model.Model.submit_job</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_model.Model.get_all_nested_models.html">cosmos.cosmos_model.Model.get_all_nested_models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_model.Model.add_stations.html">cosmos.cosmos_model.Model.add_stations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_model.Model.get_peak_boundary_conditions.html">cosmos.cosmos_model.Model.get_peak_boundary_conditions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_beware.CoSMoS_BEWARE.read_model_specific.html">cosmos.cosmos_beware.CoSMoS_BEWARE.read_model_specific</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_beware.CoSMoS_BEWARE.pre_process.html">cosmos.cosmos_beware.CoSMoS_BEWARE.pre_process</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_beware.CoSMoS_BEWARE.move.html">cosmos.cosmos_beware.CoSMoS_BEWARE.move</a></li>
@@ -109,6 +117,10 @@
 <li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_xbeach.CoSMoS_XBeach.post_process.html">cosmos.cosmos_xbeach.CoSMoS_XBeach.post_process</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#other-functions">Other functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_generated/cosmos.cosmos_configuration.Configuration.set.html">cosmos.cosmos_configuration.Configuration.set</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -127,7 +139,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Functions</li>
+      <li class="breadcrumb-item active">API reference</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/functions.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -137,32 +149,32 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="functions">
-<h1>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h1>
+  <section id="api-reference">
+<h1>API reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h1>
 <section id="main-classes">
 <h2>Main classes<a class="headerlink" href="#main-classes" title="Permalink to this headline">¶</a></h2>
 <table class="longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_main.CoSMoS.html#cosmos.cosmos_main.CoSMoS" title="cosmos.cosmos_main.CoSMoS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_main.CoSMoS</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos.CoSMoS.html#cosmos.cosmos.CoSMoS" title="cosmos.cosmos.CoSMoS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos.CoSMoS</span></code></a>()</p></td>
 <td><p>This is the main CoSMoS class.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_main_loop.MainLoop.html#cosmos.cosmos_main_loop.MainLoop" title="cosmos.cosmos_main_loop.MainLoop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_main_loop.MainLoop</span></code></a>()</p></td>
-<td><p>Read the xml scenario file, determine cycle times, and run cosmos model loop.</p></td>
+<td><p>Read the scenario.toml file, determine cycle times, and run cosmos model loop.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_model_loop.ModelLoop.html#cosmos.cosmos_model_loop.ModelLoop" title="cosmos.cosmos_model_loop.ModelLoop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_model_loop.ModelLoop</span></code></a>()</p></td>
 <td><p>Pre-process, submit, move, and post-process all models and initialize webviewer once all models are finished.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_scenario.Scenario.html#cosmos.cosmos_scenario.Scenario" title="cosmos.cosmos_scenario.Scenario"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_scenario.Scenario</span></code></a>(name)</p></td>
-<td><p>Scenario class to read scenario file and initialize models.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_model.Model.html#cosmos.cosmos_model.Model" title="cosmos.cosmos_model.Model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_model.Model</span></code></a>()</p></td>
+<td><p>Read generic model data from toml file, prepare model run paths, and submit jobs.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_model.Model.html#cosmos.cosmos_model.Model" title="cosmos.cosmos_model.Model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_model.Model</span></code></a>()</p></td>
-<td><p>Read generic model data from xml file, prepare model run paths, and submit jobs.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_scenario.Scenario.html#cosmos.cosmos_scenario.Scenario" title="cosmos.cosmos_scenario.Scenario"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_scenario.Scenario</span></code></a>(name)</p></td>
+<td><p>Scenario class to read scenario file and initialize models.</p></td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="model-classes">
-<h2>Model classes<a class="headerlink" href="#model-classes" title="Permalink to this headline">¶</a></h2>
+<section id="model-specific-classes">
+<h2>Model-specific classes<a class="headerlink" href="#model-specific-classes" title="Permalink to this headline">¶</a></h2>
 <table class="longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_beware.CoSMoS_BEWARE.html#cosmos.cosmos_beware.CoSMoS_BEWARE" title="cosmos.cosmos_beware.CoSMoS_BEWARE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_beware.CoSMoS_BEWARE</span></code></a>()</p></td>
@@ -188,14 +200,17 @@
 <p>Classes for pre-processing, running, and post-processing.</p>
 <table class="longtable docutils align-default">
 <tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_stations.Stations.html#cosmos.cosmos_stations.Stations" title="cosmos.cosmos_stations.Stations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_stations.Stations</span></code></a>()</p></td>
+<td><p>Cosmos observation stations.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_webviewer.WebViewer.html#cosmos.cosmos_webviewer.WebViewer" title="cosmos.cosmos_webviewer.WebViewer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_webviewer.WebViewer</span></code></a>(name)</p></td>
+<td><p>Cosmos webviewer class</p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_cluster.Cluster.html#cosmos.cosmos_cluster.Cluster" title="cosmos.cosmos_cluster.Cluster"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_cluster.Cluster</span></code></a>(name)</p></td>
 <td><p>Conditionally run models.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_stations.Stations.html#cosmos.cosmos_stations.Stations" title="cosmos.cosmos_stations.Stations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_stations.Stations</span></code></a>()</p></td>
-<td><p>Cosmos observation stations.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_webviewer.WebViewer.html#cosmos.cosmos_webviewer.WebViewer" title="cosmos.cosmos_webviewer.WebViewer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_webviewer.WebViewer</span></code></a>(name)</p></td>
-<td><p>Cosmos webviewer class</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_configuration.Configuration.html#cosmos.cosmos_configuration.Configuration" title="cosmos.cosmos_configuration.Configuration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_configuration.Configuration</span></code></a>()</p></td>
+<td><p>CoSMoS Configuration class.</p></td>
 </tr>
 </tbody>
 </table>
@@ -204,23 +219,23 @@
 <h2>CoSMoS functions<a class="headerlink" href="#cosmos-functions" title="Permalink to this headline">¶</a></h2>
 <table class="longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_main.CoSMoS.initialize.html#cosmos.cosmos_main.CoSMoS.initialize" title="cosmos.cosmos_main.CoSMoS.initialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_main.CoSMoS.initialize</span></code></a>(main_path)</p></td>
-<td><p>Set the path of the CoSMoS main folder.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos.CoSMoS.initialize.html#cosmos.cosmos.CoSMoS.initialize" title="cosmos.cosmos.CoSMoS.initialize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos.CoSMoS.initialize</span></code></a>(main_path, …)</p></td>
+<td><p>Initialize CoSMoS configuration based on configuration file and input arguments.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_main.CoSMoS.log.html#cosmos.cosmos_main.CoSMoS.log" title="cosmos.cosmos_main.CoSMoS.log"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_main.CoSMoS.log</span></code></a>(message)</p></td>
-<td><p>Write log message to cosmos.log</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_main.CoSMoS.make_webviewer.html#cosmos.cosmos_main.CoSMoS.make_webviewer" title="cosmos.cosmos_main.CoSMoS.make_webviewer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_main.CoSMoS.make_webviewer</span></code></a>(…)</p></td>
-<td><p>Just make webviewer</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_main.CoSMoS.post_process.html#cosmos.cosmos_main.CoSMoS.post_process" title="cosmos.cosmos_main.CoSMoS.post_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_main.CoSMoS.post_process</span></code></a>(sc_name)</p></td>
-<td><p>Just post-process model results.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_main.CoSMoS.run.html#cosmos.cosmos_main.CoSMoS.run" title="cosmos.cosmos_main.CoSMoS.run"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_main.CoSMoS.run</span></code></a>(scenario_name)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos.CoSMoS.run.html#cosmos.cosmos.CoSMoS.run" title="cosmos.cosmos.CoSMoS.run"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos.CoSMoS.run</span></code></a>(*args)</p></td>
 <td><p>Run a CoSMoS scenario:</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_main.CoSMoS.stop.html#cosmos.cosmos_main.CoSMoS.stop" title="cosmos.cosmos_main.CoSMoS.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_main.CoSMoS.stop</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos.CoSMoS.stop.html#cosmos.cosmos.CoSMoS.stop" title="cosmos.cosmos.CoSMoS.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos.CoSMoS.stop</span></code></a>()</p></td>
 <td><p>Stop main loop and model loop.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos.CoSMoS.log.html#cosmos.cosmos.CoSMoS.log" title="cosmos.cosmos.CoSMoS.log"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos.CoSMoS.log</span></code></a>(message)</p></td>
+<td><p>Write log message to cosmos.log</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos.CoSMoS.make_webviewer.html#cosmos.cosmos.CoSMoS.make_webviewer" title="cosmos.cosmos.CoSMoS.make_webviewer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos.CoSMoS.make_webviewer</span></code></a>(sc_name, …)</p></td>
+<td><p>Just make webviewer</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos.CoSMoS.post_process.html#cosmos.cosmos.CoSMoS.post_process" title="cosmos.cosmos.CoSMoS.post_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos.CoSMoS.post_process</span></code></a>(sc_name[, …])</p></td>
+<td><p>Just post-process model results.</p></td>
 </tr>
 </tbody>
 </table>
@@ -232,8 +247,8 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_main_loop.MainLoop.run.html#cosmos.cosmos_main_loop.MainLoop.run" title="cosmos.cosmos_main_loop.MainLoop.run"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_main_loop.MainLoop.run</span></code></a>()</p></td>
 <td><p>Run main loop.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_main_loop.MainLoop.start.html#cosmos.cosmos_main_loop.MainLoop.start" title="cosmos.cosmos_main_loop.MainLoop.start"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_main_loop.MainLoop.start</span></code></a>([…])</p></td>
-<td><p>Read the xml scenario file, determine cycle times, and start cosmos_main_loop.run with scheduler.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_main_loop.MainLoop.start.html#cosmos.cosmos_main_loop.MainLoop.start" title="cosmos.cosmos_main_loop.MainLoop.start"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_main_loop.MainLoop.start</span></code></a>([cycle])</p></td>
+<td><p>Read the scenario.toml file, determine cycle times, and start cosmos_main_loop.run with scheduler.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_model_loop.ModelLoop.run.html#cosmos.cosmos_model_loop.ModelLoop.run" title="cosmos.cosmos_model_loop.ModelLoop.run"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_model_loop.ModelLoop.run</span></code></a>()</p></td>
 <td><p>Run all cosmos models defined in the scenario file.</p></td>
@@ -251,65 +266,96 @@
 <h2>Model functions<a class="headerlink" href="#model-functions" title="Permalink to this headline">¶</a></h2>
 <table class="longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_beware.CoSMoS_BEWARE.read_model_specific.html#cosmos.cosmos_beware.CoSMoS_BEWARE.read_model_specific" title="cosmos.cosmos_beware.CoSMoS_BEWARE.read_model_specific"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_beware.CoSMoS_BEWARE.read_model_specific</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_model.Model.read_generic.html#cosmos.cosmos_model.Model.read_generic" title="cosmos.cosmos_model.Model.read_generic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_model.Model.read_generic</span></code></a>()</p></td>
+<td><p>Read model attributes from model.toml file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_model.Model.set_paths.html#cosmos.cosmos_model.Model.set_paths" title="cosmos.cosmos_model.Model.set_paths"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_model.Model.set_paths</span></code></a>()</p></td>
+<td><p>Set model paths (input, output, figures, restart, job).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_model.Model.get_nested_models.html#cosmos.cosmos_model.Model.get_nested_models" title="cosmos.cosmos_model.Model.get_nested_models"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_model.Model.get_nested_models</span></code></a>()</p></td>
+<td><p>Get which model the current model is nested in.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_model.Model.submit_job.html#cosmos.cosmos_model.Model.submit_job" title="cosmos.cosmos_model.Model.submit_job"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_model.Model.submit_job</span></code></a>()</p></td>
+<td><p>Submit model.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_model.Model.get_all_nested_models.html#cosmos.cosmos_model.Model.get_all_nested_models" title="cosmos.cosmos_model.Model.get_all_nested_models"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_model.Model.get_all_nested_models</span></code></a>(tp)</p></td>
+<td><p>Return a list of all models nested in this model.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_model.Model.add_stations.html#cosmos.cosmos_model.Model.add_stations" title="cosmos.cosmos_model.Model.add_stations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_model.Model.add_stations</span></code></a>(name)</p></td>
+<td><p>Add stations that are located within this model.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_model.Model.get_peak_boundary_conditions.html#cosmos.cosmos_model.Model.get_peak_boundary_conditions" title="cosmos.cosmos_model.Model.get_peak_boundary_conditions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_model.Model.get_peak_boundary_conditions</span></code></a>()</p></td>
+<td><p>Get boundary conditions from overall model and define peak.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_beware.CoSMoS_BEWARE.read_model_specific.html#cosmos.cosmos_beware.CoSMoS_BEWARE.read_model_specific" title="cosmos.cosmos_beware.CoSMoS_BEWARE.read_model_specific"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_beware.CoSMoS_BEWARE.read_model_specific</span></code></a>()</p></td>
 <td><p>Read BEWARE specific model attributes.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_beware.CoSMoS_BEWARE.pre_process.html#cosmos.cosmos_beware.CoSMoS_BEWARE.pre_process" title="cosmos.cosmos_beware.CoSMoS_BEWARE.pre_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_beware.CoSMoS_BEWARE.pre_process</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_beware.CoSMoS_BEWARE.pre_process.html#cosmos.cosmos_beware.CoSMoS_BEWARE.pre_process" title="cosmos.cosmos_beware.CoSMoS_BEWARE.pre_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_beware.CoSMoS_BEWARE.pre_process</span></code></a>()</p></td>
 <td><p>Preprocess BEWARE model.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_beware.CoSMoS_BEWARE.move.html#cosmos.cosmos_beware.CoSMoS_BEWARE.move" title="cosmos.cosmos_beware.CoSMoS_BEWARE.move"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_beware.CoSMoS_BEWARE.move</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_beware.CoSMoS_BEWARE.move.html#cosmos.cosmos_beware.CoSMoS_BEWARE.move" title="cosmos.cosmos_beware.CoSMoS_BEWARE.move"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_beware.CoSMoS_BEWARE.move</span></code></a>()</p></td>
 <td><p>Move BEWARE model input and output files.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_beware.CoSMoS_BEWARE.post_process.html#cosmos.cosmos_beware.CoSMoS_BEWARE.post_process" title="cosmos.cosmos_beware.CoSMoS_BEWARE.post_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_beware.CoSMoS_BEWARE.post_process</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_beware.CoSMoS_BEWARE.post_process.html#cosmos.cosmos_beware.CoSMoS_BEWARE.post_process" title="cosmos.cosmos_beware.CoSMoS_BEWARE.post_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_beware.CoSMoS_BEWARE.post_process</span></code></a>()</p></td>
 <td><p>Post-process BEWARE output: generate (probabilistic) runup timeseries.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_sfincs.CoSMoS_SFINCS.read_model_specific.html#cosmos.cosmos_sfincs.CoSMoS_SFINCS.read_model_specific" title="cosmos.cosmos_sfincs.CoSMoS_SFINCS.read_model_specific"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_sfincs.CoSMoS_SFINCS.read_model_specific</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_sfincs.CoSMoS_SFINCS.read_model_specific.html#cosmos.cosmos_sfincs.CoSMoS_SFINCS.read_model_specific" title="cosmos.cosmos_sfincs.CoSMoS_SFINCS.read_model_specific"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_sfincs.CoSMoS_SFINCS.read_model_specific</span></code></a>()</p></td>
 <td><p>Read SFINCS specific model attributes.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_sfincs.CoSMoS_SFINCS.pre_process.html#cosmos.cosmos_sfincs.CoSMoS_SFINCS.pre_process" title="cosmos.cosmos_sfincs.CoSMoS_SFINCS.pre_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_sfincs.CoSMoS_SFINCS.pre_process</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_sfincs.CoSMoS_SFINCS.pre_process.html#cosmos.cosmos_sfincs.CoSMoS_SFINCS.pre_process" title="cosmos.cosmos_sfincs.CoSMoS_SFINCS.pre_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_sfincs.CoSMoS_SFINCS.pre_process</span></code></a>()</p></td>
 <td><p>Preprocess SFINCS model.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_sfincs.CoSMoS_SFINCS.move.html#cosmos.cosmos_sfincs.CoSMoS_SFINCS.move" title="cosmos.cosmos_sfincs.CoSMoS_SFINCS.move"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_sfincs.CoSMoS_SFINCS.move</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_sfincs.CoSMoS_SFINCS.move.html#cosmos.cosmos_sfincs.CoSMoS_SFINCS.move" title="cosmos.cosmos_sfincs.CoSMoS_SFINCS.move"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_sfincs.CoSMoS_SFINCS.move</span></code></a>()</p></td>
 <td><p>Move SFINCS model input, output, and restart files.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_sfincs.CoSMoS_SFINCS.post_process.html#cosmos.cosmos_sfincs.CoSMoS_SFINCS.post_process" title="cosmos.cosmos_sfincs.CoSMoS_SFINCS.post_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_sfincs.CoSMoS_SFINCS.post_process</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_sfincs.CoSMoS_SFINCS.post_process.html#cosmos.cosmos_sfincs.CoSMoS_SFINCS.post_process" title="cosmos.cosmos_sfincs.CoSMoS_SFINCS.post_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_sfincs.CoSMoS_SFINCS.post_process</span></code></a>()</p></td>
 <td><p>Post-process SFINCS output: generate (probabilistic) water level timeseries and flood maps.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.read_model_specific.html#cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.read_model_specific" title="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.read_model_specific"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.read_model_specific</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.read_model_specific.html#cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.read_model_specific" title="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.read_model_specific"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.read_model_specific</span></code></a>()</p></td>
 <td><p>Read Delft3D FM specific model attributes.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.pre_process.html#cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.pre_process" title="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.pre_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.pre_process</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.pre_process.html#cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.pre_process" title="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.pre_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.pre_process</span></code></a>()</p></td>
 <td><p>Preprocess Delft3D FM model.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.move.html#cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.move" title="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.move"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.move</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.move.html#cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.move" title="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.move"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.move</span></code></a>()</p></td>
 <td><p>Move Delft3D FM model input, output, and restart files.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.post_process.html#cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.post_process" title="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.post_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.post_process</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.post_process.html#cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.post_process" title="cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.post_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.post_process</span></code></a>()</p></td>
 <td><p>Post-process Delft3D FM output: generate wave and water level timeseries.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_hurrywave.CoSMoS_HurryWave.read_model_specific.html#cosmos.cosmos_hurrywave.CoSMoS_HurryWave.read_model_specific" title="cosmos.cosmos_hurrywave.CoSMoS_HurryWave.read_model_specific"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_hurrywave.CoSMoS_HurryWave.read_model_specific</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_hurrywave.CoSMoS_HurryWave.read_model_specific.html#cosmos.cosmos_hurrywave.CoSMoS_HurryWave.read_model_specific" title="cosmos.cosmos_hurrywave.CoSMoS_HurryWave.read_model_specific"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_hurrywave.CoSMoS_HurryWave.read_model_specific</span></code></a>()</p></td>
 <td><p>Read HurryWave specific model attributes.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_hurrywave.CoSMoS_HurryWave.pre_process.html#cosmos.cosmos_hurrywave.CoSMoS_HurryWave.pre_process" title="cosmos.cosmos_hurrywave.CoSMoS_HurryWave.pre_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_hurrywave.CoSMoS_HurryWave.pre_process</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_hurrywave.CoSMoS_HurryWave.pre_process.html#cosmos.cosmos_hurrywave.CoSMoS_HurryWave.pre_process" title="cosmos.cosmos_hurrywave.CoSMoS_HurryWave.pre_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_hurrywave.CoSMoS_HurryWave.pre_process</span></code></a>()</p></td>
 <td><p>Preprocess HurryWave model.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_hurrywave.CoSMoS_HurryWave.move.html#cosmos.cosmos_hurrywave.CoSMoS_HurryWave.move" title="cosmos.cosmos_hurrywave.CoSMoS_HurryWave.move"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_hurrywave.CoSMoS_HurryWave.move</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_hurrywave.CoSMoS_HurryWave.move.html#cosmos.cosmos_hurrywave.CoSMoS_HurryWave.move" title="cosmos.cosmos_hurrywave.CoSMoS_HurryWave.move"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_hurrywave.CoSMoS_HurryWave.move</span></code></a>()</p></td>
 <td><p>Move HurryWave model input, output, and restart files.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_hurrywave.CoSMoS_HurryWave.post_process.html#cosmos.cosmos_hurrywave.CoSMoS_HurryWave.post_process" title="cosmos.cosmos_hurrywave.CoSMoS_HurryWave.post_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_hurrywave.CoSMoS_HurryWave.post_process</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_hurrywave.CoSMoS_HurryWave.post_process.html#cosmos.cosmos_hurrywave.CoSMoS_HurryWave.post_process" title="cosmos.cosmos_hurrywave.CoSMoS_HurryWave.post_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_hurrywave.CoSMoS_HurryWave.post_process</span></code></a>()</p></td>
 <td><p>Post-process HurryWave output: generate (probabilistic) wave timeseries and maps.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_xbeach.CoSMoS_XBeach.read_model_specific.html#cosmos.cosmos_xbeach.CoSMoS_XBeach.read_model_specific" title="cosmos.cosmos_xbeach.CoSMoS_XBeach.read_model_specific"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_xbeach.CoSMoS_XBeach.read_model_specific</span></code></a>()</p></td>
-<td><p>Read SFINCS specific model attributes.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_xbeach.CoSMoS_XBeach.read_model_specific.html#cosmos.cosmos_xbeach.CoSMoS_XBeach.read_model_specific" title="cosmos.cosmos_xbeach.CoSMoS_XBeach.read_model_specific"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_xbeach.CoSMoS_XBeach.read_model_specific</span></code></a>()</p></td>
+<td><p>Read XBeach specific model attributes.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_xbeach.CoSMoS_XBeach.pre_process.html#cosmos.cosmos_xbeach.CoSMoS_XBeach.pre_process" title="cosmos.cosmos_xbeach.CoSMoS_XBeach.pre_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_xbeach.CoSMoS_XBeach.pre_process</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_xbeach.CoSMoS_XBeach.pre_process.html#cosmos.cosmos_xbeach.CoSMoS_XBeach.pre_process" title="cosmos.cosmos_xbeach.CoSMoS_XBeach.pre_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_xbeach.CoSMoS_XBeach.pre_process</span></code></a>()</p></td>
 <td><p>Preprocess XBeach model.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_xbeach.CoSMoS_XBeach.move.html#cosmos.cosmos_xbeach.CoSMoS_XBeach.move" title="cosmos.cosmos_xbeach.CoSMoS_XBeach.move"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_xbeach.CoSMoS_XBeach.move</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_xbeach.CoSMoS_XBeach.move.html#cosmos.cosmos_xbeach.CoSMoS_XBeach.move" title="cosmos.cosmos_xbeach.CoSMoS_XBeach.move"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_xbeach.CoSMoS_XBeach.move</span></code></a>()</p></td>
 <td><p>Move XBeach model input and output files.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_xbeach.CoSMoS_XBeach.post_process.html#cosmos.cosmos_xbeach.CoSMoS_XBeach.post_process" title="cosmos.cosmos_xbeach.CoSMoS_XBeach.post_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_xbeach.CoSMoS_XBeach.post_process</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_xbeach.CoSMoS_XBeach.post_process.html#cosmos.cosmos_xbeach.CoSMoS_XBeach.post_process" title="cosmos.cosmos_xbeach.CoSMoS_XBeach.post_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_xbeach.CoSMoS_XBeach.post_process</span></code></a>()</p></td>
 <td><p>Post-process XBeach output: generate sedimentation/erosion maps.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="other-functions">
+<h2>Other functions<a class="headerlink" href="#other-functions" title="Permalink to this headline">¶</a></h2>
+<table class="longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/cosmos.cosmos_configuration.Configuration.set.html#cosmos.cosmos_configuration.Configuration.set" title="cosmos.cosmos_configuration.Configuration.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosmos.cosmos_configuration.Configuration.set</span></code></a>(…)</p></td>
+<td><p>Set CoSMoS configuration settings.</p></td>
 </tr>
 </tbody>
 </table>
@@ -321,7 +367,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="manual/output.html" class="btn btn-neutral float-left" title="CoSMoS output" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="_generated/cosmos.cosmos_main.CoSMoS.html" class="btn btn-neutral float-right" title="cosmos.cosmos_main.CoSMoS" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="_generated/cosmos.cosmos.CoSMoS.html" class="btn btn-neutral float-right" title="cosmos.cosmos.CoSMoS" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

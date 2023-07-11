@@ -17,8 +17,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="cosmos.cosmos_model_loop.ModelLoop" href="cosmos.cosmos_model_loop.ModelLoop.html" />
-    <link rel="prev" title="cosmos.cosmos_main.CoSMoS" href="cosmos.cosmos_main.CoSMoS.html" /> 
+    <link rel="next" title="cosmos.cosmos_hw.MainLoop2" href="cosmos.cosmos_hw.MainLoop2.html" />
+    <link rel="prev" title="cosmos.cosmos.CoSMoS" href="cosmos.cosmos.CoSMoS.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,14 +48,15 @@
 <li class="toctree-l1"><a class="reference internal" href="../manual.html">User manual</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../functions.html">Functions</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../functions.html#main-classes">Main classes</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_main.CoSMoS.html">cosmos.cosmos_main.CoSMoS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos.CoSMoS.html">cosmos.cosmos.CoSMoS</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">cosmos.cosmos_main_loop.MainLoop</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_hw.MainLoop2.html">cosmos.cosmos_hw.MainLoop2</a></li>
 <li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_model_loop.ModelLoop.html">cosmos.cosmos_model_loop.ModelLoop</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_scenario.Scenario.html">cosmos.cosmos_scenario.Scenario</a></li>
 <li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_model.Model.html">cosmos.cosmos_model.Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cosmos.cosmos_scenario.Scenario.html">cosmos.cosmos_scenario.Scenario</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../functions.html#model-classes">Model classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../functions.html#model-specific-classes">Model-specific classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../functions.html#additional-classes">Additional classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../functions.html#cosmos-functions">CoSMoS functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../functions.html#mainloop-and-modelloop-functions">MainLoop and ModelLoop functions</a></li>
@@ -94,7 +95,7 @@
 <dl class="py class">
 <dt id="cosmos.cosmos_main_loop.MainLoop">
 <em class="property">class </em><code class="sig-prename descclassname">cosmos.cosmos_main_loop.</code><code class="sig-name descname">MainLoop</code><a class="reference internal" href="../_modules/cosmos/cosmos_main_loop.html#MainLoop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cosmos.cosmos_main_loop.MainLoop" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read the xml scenario file, determine cycle times, and run cosmos model loop.</p>
+<dd><p>Read the scenario.toml file, determine cycle times, and run cosmos model loop.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -105,7 +106,7 @@
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference internal" href="cosmos.cosmos_main.CoSMoS.html#cosmos.cosmos_main.CoSMoS" title="cosmos.cosmos_main.CoSMoS"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_main.CoSMoS</span></code></a>, <a class="reference internal" href="cosmos.cosmos_scenario.Scenario.html#cosmos.cosmos_scenario.Scenario" title="cosmos.cosmos_scenario.Scenario"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_scenario.Scenario</span></code></a>, <a class="reference internal" href="cosmos.cosmos_model_loop.ModelLoop.html#cosmos.cosmos_model_loop.ModelLoop" title="cosmos.cosmos_model_loop.ModelLoop"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_model_loop.ModelLoop</span></code></a>, <a class="reference internal" href="cosmos.cosmos_model.Model.html#cosmos.cosmos_model.Model" title="cosmos.cosmos_model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_model.Model</span></code></a></p>
+<p><a class="reference internal" href="cosmos.cosmos.CoSMoS.html#cosmos.cosmos.CoSMoS" title="cosmos.cosmos.CoSMoS"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos.CoSMoS</span></code></a>, <a class="reference internal" href="cosmos.cosmos_scenario.Scenario.html#cosmos.cosmos_scenario.Scenario" title="cosmos.cosmos_scenario.Scenario"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_scenario.Scenario</span></code></a>, <a class="reference internal" href="cosmos.cosmos_model_loop.ModelLoop.html#cosmos.cosmos_model_loop.ModelLoop" title="cosmos.cosmos_model_loop.ModelLoop"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_model_loop.ModelLoop</span></code></a>, <a class="reference internal" href="cosmos.cosmos_model.Model.html#cosmos.cosmos_model.Model" title="cosmos.cosmos_model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos_model.Model</span></code></a></p>
 </aside>
 <dl class="py method">
 <dt id="cosmos.cosmos_main_loop.MainLoop.__init__">
@@ -122,8 +123,8 @@
 <tr class="row-even"><td><p><a class="reference internal" href="cosmos.cosmos_main_loop.MainLoop.run.html#cosmos.cosmos_main_loop.MainLoop.run" title="cosmos.cosmos_main_loop.MainLoop.run"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run</span></code></a>()</p></td>
 <td><p>Run main loop.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="cosmos.cosmos_main_loop.MainLoop.start.html#cosmos.cosmos_main_loop.MainLoop.start" title="cosmos.cosmos_main_loop.MainLoop.start"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start</span></code></a>([cycle_time])</p></td>
-<td><p>Read the xml scenario file, determine cycle times, and start cosmos_main_loop.run with scheduler.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="cosmos.cosmos_main_loop.MainLoop.start.html#cosmos.cosmos_main_loop.MainLoop.start" title="cosmos.cosmos_main_loop.MainLoop.start"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start</span></code></a>([cycle])</p></td>
+<td><p>Read the scenario.toml file, determine cycle times, and start cosmos_main_loop.run with scheduler.</p></td>
 </tr>
 </tbody>
 </table>
@@ -135,8 +136,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="cosmos.cosmos_main.CoSMoS.html" class="btn btn-neutral float-left" title="cosmos.cosmos_main.CoSMoS" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="cosmos.cosmos_model_loop.ModelLoop.html" class="btn btn-neutral float-right" title="cosmos.cosmos_model_loop.ModelLoop" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="cosmos.cosmos.CoSMoS.html" class="btn btn-neutral float-left" title="cosmos.cosmos.CoSMoS" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cosmos.cosmos_hw.MainLoop2.html" class="btn btn-neutral float-right" title="cosmos.cosmos_hw.MainLoop2" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
