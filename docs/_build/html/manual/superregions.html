@@ -90,23 +90,10 @@
 <span id="super-regions"></span><h1>Defining super regions<a class="headerlink" href="#defining-super-regions" title="Permalink to this headline">¶</a></h1>
 <p>For large scale storm forecasting, it is often necessary to run multiple models. For example, you can have several models for each US state.
 These models can be referenced individually in the scenario file, or per region.
-However, you can also combine different regions into a super region file, located in the <em>super_regions</em> folder.
+However, you can also combine different regions into a super region file, located in the <em>configuration/super_regions</em> folder.
 You can then refer to this <em>super_region</em> in your scenario file with the keyword <em>super_region</em>, simplifying the structure of your scenario file.
 An example of a super_region file is given below:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&lt;?xml version=&quot;1.0&quot;?&gt;
-&lt;!-- Written on 11-Oct-2011 18:21:28 using the XML Toolbox for Matlab --&gt;
-&lt;root&gt;
-  &lt;region&gt;north_atlantic&lt;/region&gt;
-  &lt;region&gt;gulf_of_mexico&lt;/region&gt;
-  &lt;region&gt;us_east_coast&lt;/region&gt;
-  &lt;region&gt;texas&lt;/region&gt;
-  &lt;region&gt;mississippi&lt;/region&gt;
-  &lt;region&gt;alabama&lt;/region&gt;
-  &lt;region&gt;nw_florida&lt;/region&gt;
-  &lt;region&gt;sw_florida&lt;/region&gt;
-  &lt;region&gt;puerto_rico&lt;/region&gt;
-  &lt;region&gt;north_carolina&lt;/region&gt;
-&lt;/root&gt;
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">region</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;north_atlantic&quot;</span><span class="p">,</span> <span class="s2">&quot;gulf_of_mexico&quot;</span><span class="p">,</span> <span class="s2">&quot;us_east_coast&quot;</span><span class="p">,</span> <span class="s2">&quot;texas&quot;</span><span class="p">,</span> <span class="s2">&quot;mississippi&quot;</span><span class="p">,</span> <span class="s2">&quot;alabama&quot;</span><span class="p">,</span> <span class="s2">&quot;nw_florida&quot;</span><span class="p">,</span> <span class="s2">&quot;sw_florida&quot;</span><span class="p">,</span> <span class="s2">&quot;north_carolina&quot;</span><span class="p">,</span> <span class="s2">&quot;puerto_rico&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </section>
