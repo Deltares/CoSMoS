@@ -63,7 +63,7 @@
 <li class="toctree-l2"><a class="reference internal" href="output.html">CoSMoS output</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../functions.html">Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../functions.html">API reference</a></li>
 </ul>
 
         </div>
@@ -154,49 +154,121 @@ Meteorological forcing data can be found in the <em>meteo</em> folder. An exampl
 <p>The following attributes can be included in the meteo subsets:</p>
 <table class="docutils align-default">
 <colgroup>
-<col style="width: 30%" />
-<col style="width: 70%" />
+<col style="width: 19%" />
+<col style="width: 44%" />
+<col style="width: 19%" />
+<col style="width: 19%" />
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p>name</p></td>
 <td><p>Name of the meteo dataset</p></td>
+<td><p>default setting</p></td>
+<td><p>unit</p></td>
 </tr>
 <tr class="row-even"><td><p>source</p></td>
 <td><p>Source of meteo dataset. Options: gfs_anl_0p50, gfs_forecast_0p25, coamps_analysis, coamps_tc_hindcast, coamps_tc_forecast, alternative</p></td>
+<td></td>
+<td></td>
 </tr>
 <tr class="row-odd"><td><p>x_range, y_range</p></td>
-<td><p>Optional: X and Y range for which meteo data needs to be downloaded / collected.</p></td>
+<td><p>Optional: X and Y range for which meteo data needs to be downloaded / collected (in EPSG 4326).</p></td>
+<td><p>None</p></td>
+<td><p>Degree</p></td>
 </tr>
 <tr class="row-even"><td><p>xystride</p></td>
 <td><p>Optional: ??</p></td>
+<td><p>1</p></td>
+<td></td>
 </tr>
 </tbody>
 </table>
 <section id="regularly-gridded-meteo-data">
 <h2>Regularly gridded meteo data<a class="headerlink" href="#regularly-gridded-meteo-data" title="Permalink to this headline">¶</a></h2>
 <p>Regularly gridded meteorological datasets contain <em>netcdf</em> files with the following information:</p>
-<ul class="simple">
-<li><p>lon</p></li>
-<li><p>lat</p></li>
-<li><p>wind_u</p></li>
-<li><p>wind_v</p></li>
-<li><p>barometric_pressure</p></li>
-<li><p>precipitation (optional)</p></li>
-</ul>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 44%" />
+<col style="width: 19%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>parameter</p></th>
+<th class="head"><p>description</p></th>
+<th class="head"><p>dimensions</p></th>
+<th class="head"><p>unit</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>lat</p></td>
+<td><p>Latitude</p></td>
+<td><p>lat</p></td>
+<td><p>degree</p></td>
+</tr>
+<tr class="row-odd"><td><p>lon</p></td>
+<td><p>Longitude</p></td>
+<td><p>lon</p></td>
+<td><p>degree</p></td>
+</tr>
+<tr class="row-even"><td><p>wind_u</p></td>
+<td><p>Wind speed in x direction</p></td>
+<td><p>[lon, lat]</p></td>
+<td><p>??</p></td>
+</tr>
+<tr class="row-odd"><td><p>wind_v</p></td>
+<td><p>Wind speed in y direction</p></td>
+<td><p>[lon, lat]</p></td>
+<td><p>??</p></td>
+</tr>
+<tr class="row-even"><td><p>barometric_pressure</p></td>
+<td><p>Barometric pressure</p></td>
+<td><p>[lon, lat]</p></td>
+<td><p>??</p></td>
+</tr>
+<tr class="row-odd"><td><p>precipitation</p></td>
+<td><p>Precipitation</p></td>
+<td><p>[lon, lat]</p></td>
+<td><p>??</p></td>
+</tr>
+</tbody>
+</table>
 <p>The netcdf files must be named as follows:</p>
 <p>&lt;dataset_name&gt;.&lt;yyyymmdd_hhmm&gt;.nc.</p>
 <p>For forecasts, the netcdf files are contained in a folder with the cycle time name (see meteo folder structure above).</p>
 <p>CoSMoS gets the meteo data in two steps:</p>
-<ul class="simple">
-<li><dl class="simple">
-<dt>Download</dt><dd><p>If the keyword <em>get_meteo</em> is set to True (see <a class="reference internal" href="../_generated/cosmos.cosmos.CoSMoS.html#cosmos.cosmos.CoSMoS" title="cosmos.cosmos.CoSMoS"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos.CoSMoS</span></code></a>), meteo data are downloaded from a webserver. The following datasets can be downloaded automatically:</p>
 <ul>
-<li><p>gfs_anl_0p50</p></li>
-<li><p>gfs_forecast_0p25</p></li>
-<li><p>coamps_analysis</p></li>
-<li><p>coamps_tc_hindcast</p></li>
-<li><p>coamps_tc_forecast</p></li>
-</ul>
+<li><dl>
+<dt>Download</dt><dd><blockquote>
+<div><p>If the keyword <em>get_meteo</em> is set to True (see <a class="reference internal" href="../_generated/cosmos.cosmos.CoSMoS.html#cosmos.cosmos.CoSMoS" title="cosmos.cosmos.CoSMoS"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos.CoSMoS</span></code></a>), meteo data are downloaded from a webserver. The following datasets can be downloaded automatically:</p>
+</div></blockquote>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 70%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>dataset</p></th>
+<th class="head"><p>description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>gfs_anl_0p50</p></td>
+<td><p>Global Forecast System (GFS) analysis</p></td>
+</tr>
+<tr class="row-odd"><td><p>gfs_forecast_0p25</p></td>
+<td><p>Global Forecast System (GFS) forecast</p></td>
+</tr>
+<tr class="row-even"><td><p>coamps_analysis</p></td>
+<td><p>Coupled Ocean/Atmosphere Mesoscale Prediction System (COAMPS) analysis</p></td>
+</tr>
+<tr class="row-odd"><td><p>coamps_tc_hindcast</p></td>
+<td><p>Coupled Ocean/Atmosphere Mesoscale Prediction System (COAMPS) tropical cyclone hindcast</p></td>
+</tr>
+<tr class="row-even"><td><p>coamps_tc_forecast</p></td>
+<td><p>Coupled Ocean/Atmosphere Mesoscale Prediction System (COAMPS) tropical cyclone hindcast</p></td>
+</tr>
+</tbody>
+</table>
 </dd>
 </dl>
 </li>
@@ -213,7 +285,7 @@ The individual CoSMoS model classes (see <a class="reference internal" href="mod
 <h2>Spiderweb forcing<a class="headerlink" href="#spiderweb-forcing" title="Permalink to this headline">¶</a></h2>
 <p>For cyclone forecasting, spiderweb grids are commonly used.
 Spiderwebs are circular grids, for which each time in the time series of space varying wind and pressure (and potentially precipitation)
-the position of the cyclone eye must be given. For more information, see also the <a class="reference external" href="https://publicwiki.deltares.nl/display/DDB/Tropical+Cyclone">Tropical Cyclone Toolbox</a> and the Delft3D-FLOW manual.</p>
+the position of the cyclone eye must be given. For more information, see also the <a class="reference external" href="https://publicwiki.deltares.nl/display/DDB/Tropical+Cyclone">Tropical Cyclone Toolbox</a> and the <a class="reference external" href="https://oss.deltares.nl/web/delft3d/manuals">Delft3D-FLOW manual</a>.</p>
 <p>When using a single spiderweb as forcing, use the keyword: <em>&lt;meteo_spiderweb&gt;</em> in the scenario file,
 indicating the name of the spiderweb (without extension) that is located in the <em>meteo/spiderwebs/</em> folder.
 If this folder only contains a <em>.cyc</em> file, this file is converted into a spiderweb by CoSMoS.</p>
@@ -224,13 +296,12 @@ If this folder only contains a <em>.cyc</em> file, this file is converted into a
 In this way, we can obtain a probabilistic estimate of nearshore water levels, waves, and inundation.
 The cyclone tracks are generated based on De Maria et al. (2009), taking into account along-track (AT), cross-track (CT), and maximum wind speed (VE) errors.
 For more information, see the <a class="reference external" href="https://publicwiki.deltares.nl/display/DDB/Advanced+Tropical+Cyclone">Advanced Tropical Cyclone Toolbox</a>.</p>
-<p>To run a scenario in ensemble mode, set the keyword <em>ensemble</em> to True (see <a class="reference internal" href="running.html#running"><span class="std std-ref">Running CoSMoS</span></a> and <a class="reference internal" href="../_generated/cosmos.cosmos.CoSMoS.html#cosmos.cosmos.CoSMoS" title="cosmos.cosmos.CoSMoS"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos.CoSMoS</span></code></a>).
-The keyword <em>track_ensemble</em> in the scenario file must refer to a folder in the <em>meteo</em> folder that contains a <em>.cyc</em> file.
-This meteo dataset does not need to be described in the <em>meteo_subsets.xml</em> file.
-The keyword <em>track_ensemble_nr_realizations</em> in the scenario file specifies the number of tracks that need to be generated.
-If this keyword is not defined, CoSMoS uses the tracks that are already present in the <em>track_ensemble</em> folder.
-For each model, region, or super region, you can define whether it needs to be run for the entire set of tracks
-(keyword <em>ensemble</em> is <em>yes</em> in the scenario file), or whether it needs to be run for the best track estimation (<em>ensemble</em> is <em>no</em>).</p>
+<ul class="simple">
+<li><p>To run a scenario in ensemble mode, set the keyword <em>ensemble</em> to True (see <a class="reference internal" href="running.html#running"><span class="std std-ref">Running CoSMoS</span></a> and <a class="reference internal" href="../_generated/cosmos.cosmos.CoSMoS.html#cosmos.cosmos.CoSMoS" title="cosmos.cosmos.CoSMoS"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos.CoSMoS</span></code></a>).</p></li>
+<li><p>The keyword <em>track_ensemble</em> in the scenario file must refer to a folder in the <em>meteo</em> folder that contains a <em>.cyc</em> file. This meteo dataset does not need to be described in the <em>meteo_subsets.xml</em> file.</p></li>
+<li><p>The keyword <em>track_ensemble_nr_realizations</em> in the scenario file specifies the number of tracks that need to be generated. If this keyword is not defined, CoSMoS uses the tracks that are already present in the <em>track_ensemble</em> folder.</p></li>
+<li><p>For each model, region, or super region, you can define whether it needs to be run for the entire set of tracks (keyword <em>ensemble</em> is <em>True</em> in the model or scenario file), or whether it needs to be run for the best track estimation (<em>ensemble</em> is <em>False</em>).</p></li>
+</ul>
 </section>
 </section>
 

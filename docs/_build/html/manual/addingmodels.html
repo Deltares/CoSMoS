@@ -58,7 +58,7 @@
 <li class="toctree-l2"><a class="reference internal" href="output.html">CoSMoS output</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../functions.html">Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../functions.html">API reference</a></li>
 </ul>
 
         </div>
@@ -90,7 +90,7 @@
 <span id="models"></span><h1>Adding models to the database<a class="headerlink" href="#adding-models-to-the-database" title="Permalink to this headline">¶</a></h1>
 <p>The CoSMoS model database contains all model input files.
 CoSMoS automatically nests the models and collects the required meteorological data. Therefore, the model folders contain only the grid and input files for the individual models.
-A separate xml file describes, among other things, in which model it is nested and which meteo sources and observation stations are to be used:</p>
+A separate toml file describes, among other things, in which model it is nested and which meteo sources and observation stations are to be used:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">long_name</span> <span class="o">=</span> <span class="s2">&quot;HurryWave North Atlantic&quot;</span>
 <span class="nb">type</span> <span class="o">=</span> <span class="s2">&quot;hurrywave&quot;</span>
 <span class="n">crs</span> <span class="o">=</span> <span class="s2">&quot;WGS 84&quot;</span>
@@ -105,57 +105,178 @@ A separate xml file describes, among other things, in which model it is nested a
 <p>The following settings can be included in the model file:</p>
 <table class="docutils align-default">
 <colgroup>
-<col style="width: 30%" />
-<col style="width: 70%" />
+<col style="width: 19%" />
+<col style="width: 44%" />
+<col style="width: 19%" />
+<col style="width: 19%" />
 </colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>parameter</p></th>
+<th class="head"><p>description</p></th>
+<th class="head"><p>default</p></th>
+<th class="head"><p>unit</p></th>
+</tr>
+</thead>
 <tbody>
-<tr class="row-odd"><td><p>longname</p></td>
+<tr class="row-even"><td><p>longname</p></td>
 <td><p>Model long name</p></td>
+<td><p>name</p></td>
+<td></td>
 </tr>
-<tr class="row-even"><td><p>runid</p></td>
+<tr class="row-odd"><td><p>runid</p></td>
 <td><p>Model id used in CoSMoS</p></td>
+<td><p>None</p></td>
+<td></td>
 </tr>
-<tr class="row-odd"><td><p>type</p></td>
+<tr class="row-even"><td><p>type</p></td>
 <td><p>Model type (options: beware, delft3dfm, hurrywave, sfincs, xbeach)</p></td>
+<td></td>
+<td></td>
 </tr>
-<tr class="row-even"><td><p>coordsys</p></td>
+<tr class="row-odd"><td><p>crs</p></td>
 <td><p>Coordinate system</p></td>
+<td></td>
+<td></td>
 </tr>
-<tr class="row-odd"><td><p>coordsystype</p></td>
-<td><p>projected or geographic</p></td>
+<tr class="row-even"><td><p>flow</p></td>
+<td><p>Run flow model.</p></td>
+<td><p>False</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>wave</p></td>
+<td><p>Run wave model.</p></td>
+<td><p>False</p></td>
+<td></td>
 </tr>
 <tr class="row-even"><td><p>priority</p></td>
 <td><p>Optional to define order in which models are run.</p></td>
+<td><p>10</p></td>
+<td></td>
 </tr>
-<tr class="row-odd"><td><p>wavenested</p></td>
-<td><p>Name of model in which current model is nested (waves)</p></td>
-</tr>
-<tr class="row-even"><td><p>flownested</p></td>
+<tr class="row-odd"><td><p>flow_nested</p></td>
 <td><p>Name of model in which current model is nested (flow)</p></td>
+<td><p>None</p></td>
+<td></td>
 </tr>
-<tr class="row-odd"><td><p>wavespinup</p></td>
-<td><p>Spinup time (hours) (waves)</p></td>
+<tr class="row-even"><td><p>wave_nested</p></td>
+<td><p>Name of model in which current model is nested (waves)</p></td>
+<td><p>None</p></td>
+<td></td>
 </tr>
-<tr class="row-even"><td><p>flowspinup</p></td>
-<td><p>Spinup time (hours) (flow)</p></td>
+<tr class="row-odd"><td><p>bw_nested</p></td>
+<td><p>Name of model in which current model is nested (BEWARE)</p></td>
+<td><p>None</p></td>
+<td></td>
 </tr>
-<tr class="row-odd"><td><p>vertical_reference_level_name</p></td>
+<tr class="row-even"><td><p>flow_spinup_time</p></td>
+<td><p>Spinup time (flow)</p></td>
+<td><p>0</p></td>
+<td><p>hours</p></td>
+</tr>
+<tr class="row-odd"><td><p>wave_spinup_time</p></td>
+<td><p>Spinup time (waves)</p></td>
+<td><p>0</p></td>
+<td><p>hours</p></td>
+</tr>
+<tr class="row-even"><td><p>vertical_reference_level_name</p></td>
 <td><p>Name of vertical reference level</p></td>
+<td><p>‘MSL’</p></td>
+<td></td>
 </tr>
-<tr class="row-even"><td><p>vertical_reference_level_difference_with_msl</p></td>
-<td><p>Difference of vertical reference level with MSL (m)</p></td>
+<tr class="row-odd"><td><p>vertical_reference_level_difference_with_msl</p></td>
+<td><p>Difference of vertical reference level with MSL</p></td>
+<td><p>0</p></td>
+<td><p>m</p></td>
+</tr>
+<tr class="row-even"><td><p>boundary_water_level_correction</p></td>
+<td><p>Water level correction at boundary</p></td>
+<td><p>0</p></td>
+<td><p>m</p></td>
 </tr>
 <tr class="row-odd"><td><p>station</p></td>
 <td><p>Station xml file (located in cosmos//stations) added as observation points in model.</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>meteo_dataset</p></td>
+<td><p>Meteo dataset to use from meteo\meteo_subsets.xml (see <a class="reference internal" href="meteo.html#meteo"><span class="std std-ref">Meteo</span></a>).</p></td>
+<td><p>None</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>meteo_spiderweb</p></td>
+<td><p>Meteo spiderweb to use from meteo\spiderwebs (see <a class="reference internal" href="meteo.html#meteo"><span class="std std-ref">Meteo</span></a>).</p></td>
+<td><p>None</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>meteo_wind</p></td>
+<td><p>Add wind forcing.</p></td>
+<td><p>True</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>meteo_atmospheric_pressure</p></td>
+<td><p>Add atmospheric pressure forcing.</p></td>
+<td><p>True</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>meteo_precipitation</p></td>
+<td><p>Add precipitation.</p></td>
+<td><p>True</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>polygon</p></td>
+<td><p>??</p></td>
+<td><p>None</p></td>
+<td></td>
 </tr>
 <tr class="row-even"><td><p>make_wave_map</p></td>
-<td><p>Yes or no to make wave maps</p></td>
+<td><p>Make wave maps</p></td>
+<td><p>False</p></td>
+<td></td>
 </tr>
 <tr class="row-odd"><td><p>make_flood_map</p></td>
-<td><p>Yes or no to make flood maps</p></td>
+<td><p>Make flood maps</p></td>
+<td><p>False</p></td>
+<td></td>
 </tr>
 <tr class="row-even"><td><p>make_sedero_map</p></td>
-<td><p>Yes or no to make sedimentation/erosion maps</p></td>
+<td><p>Make sedimentation/erosion maps</p></td>
+<td><p>False</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>sa_correction</p></td>
+<td><p>Solar annual correction for tidal constituents.</p></td>
+<td><p>None</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>ssa_correction</p></td>
+<td><p>Solar semiannual correction for tidal constituents.</p></td>
+<td><p>None</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>mhhw</p></td>
+<td><p>Mean Higher High Water to estimate total water level</p></td>
+<td><p>0</p></td>
+<td><p>m</p></td>
+</tr>
+<tr class="row-even"><td><p>cluster</p></td>
+<td><p>?? Name of cluster that model belongs to.</p></td>
+<td><p>None</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>boundary_twl_threshold</p></td>
+<td><p>Total water level threshold to cluster models.</p></td>
+<td><p>999</p></td>
+<td><p>m</p></td>
+</tr>
+<tr class="row-even"><td><p>zb_deshoal</p></td>
+<td><p>?? Depth to which nearshore wave heights are deshoaled.</p></td>
+<td><p>None</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>ensemble</p></td>
+<td><p>Run in ensemble mode.</p></td>
+<td><p>False</p></td>
+<td></td>
 </tr>
 </tbody>
 </table>

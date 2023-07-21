@@ -11,8 +11,20 @@ Main classes
    cosmos.cosmos.CoSMoS
    cosmos.cosmos_main_loop.MainLoop
    cosmos.cosmos_model_loop.ModelLoop
+
+Additional classes
+^^^^^^^^^^^^
+Classes for pre-processing, running, and post-processing.
+
+.. autosummary:: 
+   :toctree: _generated/  
+
    cosmos.cosmos_model.Model
    cosmos.cosmos_scenario.Scenario
+   cosmos.cosmos_configuration.Configuration
+   cosmos.cosmos_stations.Stations
+   cosmos.cosmos_webviewer.WebViewer
+   cosmos.cosmos_cluster.Cluster
 
 Model-specific classes
 ^^^^^^^^^^^^
@@ -24,19 +36,6 @@ Model-specific classes
    cosmos.cosmos_hurrywave.CoSMoS_HurryWave
    cosmos.cosmos_sfincs.CoSMoS_SFINCS
    cosmos.cosmos_xbeach.CoSMoS_XBeach
-
-Additional classes
-^^^^^^^^^^^^
-Classes for pre-processing, running, and post-processing.
-
-.. autosummary:: 
-   :toctree: _generated/  
-
-   cosmos.cosmos_stations.Stations
-   cosmos.cosmos_webviewer.WebViewer
-   cosmos.cosmos_cluster.Cluster
-   cosmos.cosmos_configuration.Configuration
-
 
 CoSMoS functions
 ^^^^^^^^^^^^
@@ -94,10 +93,4 @@ Model functions
    cosmos.cosmos_xbeach.CoSMoS_XBeach.move
    cosmos.cosmos_xbeach.CoSMoS_XBeach.post_process
 
-Other functions
-^^^^^^^^^^^^
-.. autosummary:: 
-   :toctree: _generated/  
-
-   cosmos.cosmos_configuration.Configuration.set
 

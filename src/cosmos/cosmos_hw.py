@@ -16,7 +16,13 @@ from .cosmos import cosmos
 #from .cosmos_meteo import read_meteo_sources
 from .cosmos_meteo import download_and_collect_meteo
 from .cosmos_track_ensemble import setup_track_ensemble
+#from .cosmos_stations import Stations
+from .cosmos_scenario import Scenario
+#from .cosmos_tiling import tile_layer
 
+import cht.misc.fileops as fo
+#import cht.misc.xmlkit as xml
+#from cht.tiling.tiling import TileLayer
 
 class MainLoop2:
     """Test

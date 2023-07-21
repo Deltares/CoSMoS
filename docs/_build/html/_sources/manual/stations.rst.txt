@@ -24,7 +24,7 @@ The following attributes can be described in the station file:
    * - name
      - Name of the observation station.
 
-   * - long_name
+   * - longname
      - Long name of the observation station.
 
    * - longitude, latitude
@@ -39,13 +39,13 @@ The following attributes can be described in the station file:
    * - ndbc_id
      - Optional: NDBC wave buoy id.
 
-   * - mllw
-     - Optional: Mean lower low water level.
-
    * - water_level_correction
      - Optional: Water level correction.
 
-The default cosmos_run_folder contains xml files with locations of the NDBC wave buoys and the NOAA CO-OPS water level stations. 
+   * - mllw
+     - ??
+
+The default *cosmos_run_folder* contains xml files with locations of the NDBC wave buoys and the NOAA CO-OPS water level stations. 
 Other observation locations can be added manually. 
 
 Observation data
@@ -65,9 +65,12 @@ The csv-files must be stored under:
 *observations//[observations_path]//waves//waves.[stationid].observed.csv*
 
 Similarly, other water level or wave data can be added to the observation folder, using the format given below. Note that water level data must be stored using the following format:
-*observations//[observations_path]//waterlevels//waterlevels.[stationid].observed.csv*
+*observations//[observations_path]//waterlevels//waterlevel.[stationid].observed.csv*
 
  .. include:: examples/waves.42060.observed.csv.js
+       :literal: 
+
+ .. include:: examples/waterlevel.42060.observed.csv.js
        :literal: 
 
 In the :ref:`scenario file <scenario>`, you must refer to the *observations_path* to include these observations in the webviewer.

@@ -27,7 +27,8 @@ Webviewer
 ^^^^^^^^^^^^
 
 CoSMoS output is presented in a webviewer which provides an interactive method of viewing the results for the different scenarios and model output. 
-The webviewer can be found under *webviewers/webviewer_name* and is structured as follows:
+The webviewer can be found under *webviewers/webviewer_name* and is structured as listed below. All model results are automatically transferred to the webviewer folder.
+The only thing you need to do is open the webviewer file (*index.html*)!
 
 .. include:: examples/webviewer_folder.txt
        :literal: 
@@ -70,7 +71,7 @@ The webviewer can be found under *webviewers/webviewer_name* and is structured a
      - Html codes to plot water level, wave height, and runup timeseries in webviewer.
 
    * - img
-     - Pngs used in the webviewer.
+     - Standard pngs used in the webviewer (logos, markers, infographics).
 
    * - js
      - Main code to generate webviewer.
