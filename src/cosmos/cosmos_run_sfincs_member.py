@@ -95,5 +95,5 @@ if config["ensemble"]:
                             "ensemble" + ensemble_member_name + ".spw")
     fo.copy_file(fname0, "sfincs.spw")
 
-# Run the SFINCS model
+# Run the SFINCS model (this is only for windows now)
 os.system("call run_sfincs.bat\n")
