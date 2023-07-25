@@ -43,11 +43,10 @@ def setup_track_ensemble():
         tc.estimate_missing_values()
         tc.include_rainfall = True
 
-        # Write *.cyc file
-        tc.write_track("laura.cyc", "ddb_cyc")
     else:
         # Read in storm track from *.cyc file
         tc = tc.read(cosmos.scenario.meteo_track)    
+
     # Generate track ensemble
     cosmos.scenario.track_ensemble = TropicalCycloneEnsemble(TropicalCyclone=tc)
     t0str = tc.track.loc[0]["datetime"]

@@ -14,7 +14,8 @@ import datetime
 from cht.sfincs.sfincs import SFINCS
 import cht.misc.fileops as fo
 from cht.tide.tide_predict import predict
-from cht.misc.deltares_ini import IniStruct
+#from cht.misc.deltares_ini import IniStruct
+from cht.misc.misc_tools import dict2yaml
 
 from .cosmos import cosmos
 from .cosmos_model import Model
@@ -24,7 +25,7 @@ import cosmos.cosmos_meteo as meteo
 #import xmlkit as xml
 
 from cht.nesting.nest1 import nest1
-from cht.nesting.nest2 import nest2
+#from cht.nesting.nest2 import nest2
 
 
 class CoSMoS_SFINCS(Model):
@@ -103,35 +104,37 @@ class CoSMoS_SFINCS(Model):
 
         # Boundary conditions        
         if self.flow_nested:
-
-            # Get boundary conditions from overall model (Nesting 2)
-
-            # Correct boundary water levels. Assuming that output from overall
-            # model is in MSL !!!
-            zcor = self.boundary_water_level_correction - self.vertical_reference_level_difference_with_msl
-
+            # The actual nesting occurs in the run_job.py file 
             self.domain.input.bzsfile = "sfincs.bzs"
-            # Get boundary conditions from overall model (Nesting 2)
-            if self.ensemble:
-                # Loop through ensemble members
-                for iens in range(cosmos.scenario.track_ensemble_nr_realizations):
-                    name = cosmos.scenario.ensemble_names[iens]
-                    nest2(self.flow_nested.domain,
-                          self.domain,
-                          output_path=os.path.join(self.flow_nested.cycle_output_path, name),
-                          output_file= 'sfincs_his.nc',
-                          boundary_water_level_correction=zcor,
-                          option="flow",
-                          bc_path=os.path.join(self.job_path, name))
-            else:
-                # Deterministic    
-                nest2(self.flow_nested.domain,
-                        self.domain,
-                        output_path=self.flow_nested.cycle_output_path,
-                        output_file='sfincs_his.nc',
-                        boundary_water_level_correction=zcor,
-                        option="flow",
-                        bc_path=self.job_path)
+
+            # # Get boundary conditions from overall model (Nesting 2)
+
+            # # Correct boundary water levels. Assuming that output from overall
+            # # model is in MSL !!!
+            # zcor = self.boundary_water_level_correction - self.vertical_reference_level_difference_with_msl
+
+            # self.domain.input.bzsfile = "sfincs.bzs"
+            # # Get boundary conditions from overall model (Nesting 2)
+            # if self.ensemble:
+            #     # Loop through ensemble members
+            #     for iens in range(cosmos.scenario.track_ensemble_nr_realizations):
+            #         name = cosmos.scenario.ensemble_names[iens]
+            #         nest2(self.flow_nested.domain,
+            #               self.domain,
+            #               output_path=os.path.join(self.flow_nested.cycle_output_path, name),
+            #               output_file= 'sfincs_his.nc',
+            #               boundary_water_level_correction=zcor,
+            #               option="flow",
+            #               bc_path=os.path.join(self.job_path, name))
+            # else:
+            #     # Deterministic    
+            #     nest2(self.flow_nested.domain,
+            #             self.domain,
+            #             output_path=self.flow_nested.cycle_output_path,
+            #             output_file='sfincs_his.nc',
+            #             boundary_water_level_correction=zcor,
+            #             option="flow",
+            #             bc_path=self.job_path)
             
             
         elif self.domain.input.bcafile:
@@ -153,6 +156,7 @@ class CoSMoS_SFINCS(Model):
             self.domain.write_flow_boundary_conditions()
 
         if self.wave_nested:
+            # The actual nesting occurs in the run_job.py file 
             
             # Get wave boundary conditions from overall model (Nesting 2)
 
@@ -173,48 +177,49 @@ class CoSMoS_SFINCS(Model):
             self.domain.input.snapwave_bwdfile = "snapwave.bwd"
             self.domain.input.snapwave_bdsfile = "snapwave.bds"
 
-            # Get boundary conditions from overall model (Nesting 2)
-            if self.ensemble:
-                # Loop through ensemble members
-                for iens in range(cosmos.scenario.track_ensemble_nr_realizations):
-                    name = cosmos.scenario.ensemble_names[iens]
-                    nest2(self.wave_nested.domain,
-                          self.domain,
-                          output_path=os.path.join(self.wave_nested.cycle_output_path, name),
-                          option="wave",
-                          bc_path=os.path.join(self.job_path, name))
-            else:
-                # Deterministic    
-                nest2(self.wave_nested.domain,
-                        self.domain,
-                        output_path=self.wave_nested.cycle_output_path,
-                        option="wave",
-                        bc_path=self.job_path)
+            # # Get boundary conditions from overall model (Nesting 2)
+            # if self.ensemble:
+            #     # Loop through ensemble members
+            #     for iens in range(cosmos.scenario.track_ensemble_nr_realizations):
+            #         name = cosmos.scenario.ensemble_names[iens]
+            #         nest2(self.wave_nested.domain,
+            #               self.domain,
+            #               output_path=os.path.join(self.wave_nested.cycle_output_path, name),
+            #               option="wave",
+            #               bc_path=os.path.join(self.job_path, name))
+            # else:
+            #     # Deterministic    
+            #     nest2(self.wave_nested.domain,
+            #             self.domain,
+            #             output_path=self.wave_nested.cycle_output_path,
+            #             option="wave",
+            #             bc_path=self.job_path)
 
         # If SFINCS nested in Hurrywave for SNAPWAVE setup, separately run BEWARE nesting for LF waves
         if self.bw_nested:
+            # The actual nesting occurs in the run_job.py file 
 
             self.domain.input.wfpfile = "sfincs.wfp"
             self.domain.input.whifile = "sfincs.whi"
             self.domain.input.wtifile = "sfincs.wti"
 
-            # Get wave maker conditions from overall model (Nesting 2)
-            if self.ensemble:
-                # Loop through ensemble members
-                for iens in range(cosmos.scenario.track_ensemble_nr_realizations):
-                    name = cosmos.scenario.ensemble_names[iens]
-                    nest2(self.bw_nested.domain,
-                          self.domain,
-                          output_path=os.path.join(self.bw_nested.cycle_output_path, name),
-                          option="wave",
-                          bc_path=os.path.join(self.job_path, name))
-            else:
-                # Deterministic    
-                nest2(self.bw_nested.domain,
-                      self.domain,
-                      output_path=self.bw_nested.cycle_output_path,
-                      option="wave",
-                      bc_path=self.job_path)
+            # # Get wave maker conditions from overall model (Nesting 2)
+            # if self.ensemble:
+            #     # Loop through ensemble members
+            #     for iens in range(cosmos.scenario.track_ensemble_nr_realizations):
+            #         name = cosmos.scenario.ensemble_names[iens]
+            #         nest2(self.bw_nested.domain,
+            #               self.domain,
+            #               output_path=os.path.join(self.bw_nested.cycle_output_path, name),
+            #               option="wave",
+            #               bc_path=os.path.join(self.job_path, name))
+            # else:
+            #     # Deterministic    
+            #     nest2(self.bw_nested.domain,
+            #           self.domain,
+            #           output_path=self.bw_nested.cycle_output_path,
+            #           option="wave",
+            #           bc_path=self.job_path)
 
             self.domain.write_wavemaker_forcing_points()
 
@@ -257,23 +262,50 @@ class CoSMoS_SFINCS(Model):
             self.domain.input.ampfile = None
             self.domain.input.amprfile = None
 
-        if self.ensemble:
-            # Copy all spiderwebs to jobs folder
-            self.domain.input.spwfile = "sfincs.spw"
-            for iens in range(cosmos.scenario.track_ensemble_nr_realizations):
-                name = cosmos.scenario.ensemble_names[iens]
-                fname0 = os.path.join(cosmos.scenario.cycle_track_ensemble_spw_path,
-                                      "ensemble" + name + ".spw")
-                fname1 = os.path.join(self.job_path, name, "sfincs.spw")
-                fo.copy_file(fname0, fname1)
-#            self.domain.input.variables.amufile = None
-#            self.domain.input.variables.amvfile = None
+#         if self.ensemble:
+#             # Copy all spiderwebs to jobs folder
+#             self.domain.input.spwfile = "sfincs.spw"
+#             for iens in range(cosmos.scenario.track_ensemble_nr_realizations):
+#                 name = cosmos.scenario.ensemble_names[iens]
+#                 fname0 = os.path.join(cosmos.scenario.cycle_track_ensemble_spw_path,
+#                                       "ensemble" + name + ".spw")
+#                 fname1 = os.path.join(self.job_path, name, "sfincs.spw")
+#                 fo.copy_file(fname0, fname1)
+# #            self.domain.input.variables.amufile = None
+# #            self.domain.input.variables.amvfile = None
 
         # Now write input file (sfincs.inp)
         self.domain.write_input_file()
 
+        # Copy the correct to run_job.py
+        pth = os.path.dirname(__file__)
+        fo.copy_file(os.path.join(pth, "cosmos_run_sfincs.py"), os.path.join(self.job_path, "run_job.py"))
+        fo.copy_file(os.path.join(pth, "cosmos_run_sfincs_member.py"), self.job_path)
+
+        # Write config file
+        config = {}
+        config["ensemble"] = self.ensemble
+        config["run_mode"] = cosmos.config.cycle.run_mode
+        if self.flow_nested:
+            config["flow_nested_path"] = self.flow_nested.cycle_output_path
+        if self.wave_nested:
+            config["wave_nested_path"] = self.wave_nested.cycle_output_path
+        if self.bw_nested: 
+            config["bw_nested_path"]   = self.bw_nested.cycle_output_path
+        config["spw_path"] = cosmos.scenario.cycle_track_ensemble_spw_path
+        
+        dict2yaml(os.path.join(self.job_path, "config.yml"), config)
+
+        if self.ensemble:
+            # Write ensemble members to file
+            with open(os.path.join(self.job_path, "ensemble_members.txt"), "w") as f:
+                for member in cosmos.scenario.ensemble_names:
+                    f.write(member + "\n")
+
+
+
         # Make run batch file
-        batch_file = os.path.join(self.job_path, "run.bat")
+        batch_file = os.path.join(self.job_path, "run_sfincs.bat")
         fid = open(batch_file, "w")
         fid.write("@ echo off\n")
         fid.write("DATE /T > running.txt\n")

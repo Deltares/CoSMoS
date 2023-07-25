@@ -25,6 +25,14 @@ class ModelDatabase:
     def __init__(self):
         self.path = None
 
+class MeteoDatabase:
+    def __init__(self):
+        self.path = None
+
+class Conda:
+    def __init__(self):
+        self.path = None
+
 class Executables:
     def __init__(self):
         self.sfincs_path    = None
@@ -59,6 +67,8 @@ class Configuration:
     def __init__(self):        
         self.path           = Path()
         self.model_database = ModelDatabase()
+        self.meteo_database = MeteoDatabase()
+        self.conda          = Conda()
         self.executables    = Executables()
         self.webserver      = WebServer()
         self.webviewer      = WebViewer()

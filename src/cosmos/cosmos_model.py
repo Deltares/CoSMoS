@@ -21,8 +21,9 @@ from .cosmos import cosmos
 from .cosmos_cluster import cluster_dict as cluster
 
 import cht.misc.xmlkit as xml
-from cht.nesting.nest1 import nest1
+#from cht.nesting.nest1 import nest1
 from cht.nesting.nest2 import nest2
+import cht.misc.fileops as fo
 
 class Model:
     """Read generic model data from xml file, prepare model run paths, and submit jobs.
@@ -211,72 +212,16 @@ class Model:
                                      cosmos.scenario.name,
                                      self.name)        
 
+    def make_paths(self):
+        # Make model cycle paths
+        fo.mkdir(self.cycle_path)
+        fo.mkdir(self.cycle_input_path)
+        fo.mkdir(self.cycle_output_path)
+        fo.mkdir(self.cycle_figures_path)
+        fo.mkdir(self.cycle_post_path)
+        fo.mkdir(self.restart_flow_path)
+        fo.mkdir(self.restart_wave_path)
 
-        # # Should do this later on
-        # fo.mkdir(self.cycle_path)
-        # fo.mkdir(self.cycle_input_path)
-        # fo.mkdir(self.cycle_output_path)
-        # fo.mkdir(self.cycle_figures_path)
-        # fo.mkdir(self.cycle_post_path)
-        # fo.mkdir(self.restart_flow_path)
-        # fo.mkdir(self.restart_wave_path)
-
-#         fo.mkdir(path)
-
-#         self.restart_path = os.path.join(path, "restart")        
-#         fo.mkdir(self.restart_path)
-#         fo.mkdir(os.path.join(self.restart_path, "flow"))
-#         fo.mkdir(os.path.join(self.restart_path, "wave"))
-
-# #        self.archive_path = os.path.join(path,
-# #                                         "archive")        
-#         fo.mkdir(self.archive_path)
-
-#         self.cycle_path = os.path.join(self.archive_path,
-#                                        cosmos.cycle_string)        
-#         fo.mkdir(self.cycle_path)
-
-#         fo.mkdir(os.path.join(self.cycle_path, "input"))
-#         fo.mkdir(os.path.join(self.cycle_path, "output"))
-#         fo.mkdir(os.path.join(self.cycle_path, "figures"))
-#         fo.mkdir(os.path.join(self.cycle_path, "post"))
-
-        self.ensemble_path = os.path.join(cycle_path, "ensemble")
-        
-        # Make scenario, restart, 
-# tmpdir=hm.tempDir;
-# jobdir=hm.jobDir;
-
-# %% Clear temp directory
-# lst=dir(tmpdir);
-# for i=1:length(lst)
-#     if isdir([tmpdir lst(i).name])
-#         switch lst(i).name
-#             case{'.','..'}
-#             otherwise
-#                 [success,message,messageid]=rmdir([tmpdir lst(i).name],'s');
-#         end
-#     end
-# end
-# try
-#     delete([tmpdir '*']);
-# end
-        # Prepare job folder and copy all input to that folder
-        
-
-        # # Delete existing job folder
-        # fo.rmdir(job_path)
-
-        # # Make new job folder
-        # fo.mkdir(job_path)
-        
-        # # Copy all input files to job folder
-        # src = os.path.join(self.path, "input", "*")
-        # fo.copy_file(src, job_path)
-                
-#        self.job_path = job_path      
-
-#            model.set_paths()            
     def get_nested_models(self):
         if self.flow_nested_name:
             # Look up model from which it gets it boundary conditions
@@ -300,45 +245,7 @@ class Model:
                     model2.nested_bw_models.append(self)
                     break
 
-    def submit_job(self):
-        """Submit model.
-        """
-        if self.ensemble:            
-            # Make run batch file
-            fid = open("tmp.bat", "w")
-#            fid.write(self.job_path[0:2] + "\n")     
-            fid.write("cd " + self.job_path + "\n")
-            for member_name in cosmos.scenario.ensemble_names:
-                # Job path for this ensemble member
-                pth = member_name
-                # Copy base files to member path
-                fid.write("copy *.* " + pth + "\n")
-                fid.write("cd " + pth + "\n")
-                fid.write("call run.bat\n")
-                fid.write("cd ..\n")
 
-            # All is done, so now do the merging of the outputs
-
-
-            fid.write("DATE /T > finished.txt\n")
-            fid.write("exit\n")
-
-            fid.close()
-            pass
-
-        else:
-
-            # Make run batch file
-            cosmos.log("Writing tmp.bat in " + os.getcwd() + " ...")
-            fid = open("tmp.bat", "w")
-            fid.write(self.job_path[0:2] + "\n")
-            fid.write("cd " + self.job_path + "\n")
-            fid.write("call run.bat\n")
-            fid.write("exit\n")
-            fid.close()
-
-        os.system('start tmp.bat')
-#        os.remove('tmp.bat')
 
     def get_all_nested_models(self, tp, all_nested_models=None):
         """Return a list of all models nested in this model.
@@ -417,7 +324,6 @@ class Model:
             # Water level boundary conditions
 
             # Get boundary conditions from overall model (Nesting 2)
-#            output_path = os.path.join(self.flow_nested.cycle_path, "output")   
             zcor = self.boundary_water_level_correction - self.vertical_reference_level_difference_with_msl                    
 
             if self.type == "xbeach":
@@ -436,7 +342,6 @@ class Model:
             if self.wave_nested:
     
                 # Get boundary conditions from overall model (Nesting 2)
-#                output_path = os.path.join(self.wave_nested.cycle_path, "output")                                   
                 hm0_max = nest2(self.wave_nested.domain,
                                 self.domain,
                                 output_path=self.wave_nested.cycle_output_path,

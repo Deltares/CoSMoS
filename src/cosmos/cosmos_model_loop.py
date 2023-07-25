@@ -107,50 +107,62 @@ class ModelLoop():
             fo.mkdir(model.job_path)
             src = os.path.join(model.path, "input", "*")
             fo.copy_file(src, model.job_path)
+            # Also make model cycle paths in scenario folder
+            model.make_paths()
 
-            # Also make model cycle paths
-            fo.mkdir(model.cycle_path)
-            fo.mkdir(model.cycle_input_path)
-            fo.mkdir(model.cycle_output_path)
-            fo.mkdir(model.cycle_figures_path)
-            fo.mkdir(model.cycle_post_path)
-            fo.mkdir(model.restart_flow_path)
-            fo.mkdir(model.restart_wave_path)
+            model.pre_process()  # Adjust model input
+            cosmos.log("Submitting " + model.long_name + " ...")
+            model.status = "running"
+            
+            # Submit the job
 
-            # Make folders for ensemble members
-            if model.ensemble:
-                for iens in range(cosmos.scenario.track_ensemble_nr_realizations):
-                    fo.mkdir(os.path.join(model.job_path, cosmos.scenario.ensemble_names[iens]))
+            # First prepare batch file
 
-            model.pre_process()  # Adjust model input (nesting etc.)
+            if cosmos.config.cycle.run_mode == "cloud":
+                # Make sh file (run.sh) that activates the correct environment and runs run_job.py
+                fid = open(os.path.join(model.job_path, "run.sh"), "w")
+                fid.close()
 
-#            if cosmos.config.run_mode == "serial":
-            if cosmos.config.cycle.run_mode == "serial" or model.type=="beware":
-                cosmos.log("Submitting " + model.long_name + " ...")
-                model.submit_job()
-            elif cosmos.config.cycle.run_mode == "parallel":
-                cosmos.log("Ready to run " + model.long_name + " ...")
-                # Write ready file            
+            else:
+                # Make windows batch file (run.bat) that activates the correct environment and runs run_job.py   
+                fid = open(os.path.join(model.job_path, "run.bat"), "w")
+                fid.write("@ echo off\n")
+                fid.write("DATE /T > running.txt\n")
+                fid.write('set CONDAPATH=' + cosmos.config.conda.path + '\n')
+                fid.write(r"call %CONDAPATH%\Scripts\activate.bat cosmos" + "\n")
+                fid.write("python run_job.py\n")
+                fid.write("move running.txt finished.txt\n")
+                fid.write("exit\n")
+                fid.close()
+
+            # And now actually kick off this job
+            if cosmos.config.cycle.run_mode == "serial" or self.type=="beware":
+                # Model needs to be run in serial mode (local on the job path of a windows machine)        
+                cosmos.log("Writing tmp.bat in " + os.getcwd() + " ...")
+                fid = open("tmp.bat", "w")
+                fid.write(model.job_path[0:2] + "\n")
+                fid.write("cd " + model.job_path + "\n")
+                fid.write("call run.bat\n")
+                fid.write("exit\n")
+                fid.close()
+                os.system('start tmp.bat')
+                pass
+
+            elif cosmos.config.cycle.run_mode == "cloud":
+                # Floris does his magic
+                pass
+
+            else:
+                # Model will be run on WCP node
+                # Write ready file (WCP nodes will pick up this job)           
                 file_name = os.path.join(cosmos.config.path.jobs,
-                                         cosmos.scenario.name,
-                                         model.name,
-                                         "ready.txt")
+                                            cosmos.scenario.name,
+                                            model.name,
+                                            "ready.txt")
                 fid = open(file_name, "w")
                 fid.write("Model is ready to run")
                 fid.close()
-                
-                if model.ensemble:
-                     for member_name in cosmos.scenario.ensemble_names:
-                        # Write ready file            
-                        file_name = os.path.join(cosmos.config.job_path,
-                                                cosmos.scenario.name,
-                                                model.name + "_" + member_name,
-                                                "ready.txt")
-                        fid = open(file_name, "w")
-                        fid.write("Model is ready to run")
-                        fid.close()
 
-            model.status = "running"
 
         # Now do post-processing on simulations that were finished
         for model in finished_list:
