@@ -1,6 +1,7 @@
 import yaml
 import sys
 import os
+import boto3
 
 from cht.sfincs.sfincs import SFINCS
 from cht.nesting import nest2
@@ -90,10 +91,33 @@ if "bw_nested_path" in config:
 
 # Copy the correct spiderweb file
 if config["ensemble"]:
-    # Copy all spiderwebs to jobs folder
-    fname0 = os.path.join(config["spw_path"],
-                            "ensemble" + ensemble_member_name + ".spw")
-    fo.copy_file(fname0, "sfincs.spw")
+    if config["run_mode"] == "cloud":
+        bucket_name = config["spw_path"].split('/')[0]
+        s3_key = config["spw_path"].split('/')[1] + '/ensemble' + ensemble_member_name + '.spw'  # Replace with the actual file path in S3
+        local_file_path = f'/input/{ensemble_member_name}/sfincs.spw'  # Replace with the local path where you want to save the file
 
-# Run the SFINCS model (this is only for windows now)
-os.system("call run_sfincs.bat\n")
+        session = boto3.Session(
+            aws_access_key_id=config["access_key"],
+            aws_secret_access_key=config["secret_key"],
+            region_name='eu-west-1'
+        )
+
+        # Create an S3 client
+        s3 = session.client('s3')
+
+        # Download the file from S3
+        try:
+            s3.download_file(bucket_name, s3_key, local_file_path)
+            print(f"File downloaded successfully to '{local_file_path}'")
+        except Exception as e:
+            print(f"Error: {e}")
+
+    else:
+        # Copy all spiderwebs to jobs folder
+        fname0 = os.path.join(config["spw_path"],
+                                "ensemble" + ensemble_member_name + ".spw")
+        fo.copy_file(fname0, "sfincs.spw")
+
+if config["run_mode"] != "cloud":
+    # Run the SFINCS model (this is only for windows now)
+    os.system("call run_sfincs.bat\n")

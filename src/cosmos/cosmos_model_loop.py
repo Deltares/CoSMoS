@@ -10,6 +10,7 @@ import os
 
 from .cosmos import cosmos
 from .cosmos_cluster import cluster_dict as cluster
+from .cosmos_argo import Argo
 from .cosmos_postprocess import post_process
 import cht.misc.fileops as fo
 
@@ -117,7 +118,7 @@ class ModelLoop():
             # Submit the job
 
             # First prepare batch file
-
+            print(cosmos.config.cycle.run_mode)
             if cosmos.config.cycle.run_mode == "cloud":
                 # Make sh file (run.sh) that activates the correct environment and runs run_job.py
                 fid = open(os.path.join(model.job_path, "run.sh"), "w")
@@ -136,7 +137,8 @@ class ModelLoop():
                 fid.close()
 
             # And now actually kick off this job
-            if cosmos.config.cycle.run_mode == "serial" or self.type=="beware":
+            if cosmos.config.cycle.run_mode == "serial":
+                #or self.type=="beware":
                 # Model needs to be run in serial mode (local on the job path of a windows machine)        
                 cosmos.log("Writing tmp.bat in " + os.getcwd() + " ...")
                 fid = open("tmp.bat", "w")
@@ -149,8 +151,8 @@ class ModelLoop():
                 pass
 
             elif cosmos.config.cycle.run_mode == "cloud":
-                # Floris does his magic
-                pass
+                cosmos.log("Ready to submit to Argo" + model.long_name + " ...")
+                model.cloud_job = Argo.submit_template_job(model)
 
             else:
                 # Model will be run on WCP node
@@ -238,10 +240,15 @@ def check_for_finished_simulations():
     
     for model in cosmos.scenario.model:
         if model.status == "running":
-            file_name = os.path.join(model.job_path,
-                                     "finished.txt")
-            if os.path.exists(file_name):
-                finished_list.append(model)
+            if cosmos.config.cycle.run_mode == "serial":
+                file_name = os.path.join(model.job_path,
+                                        "finished.txt")
+                if os.path.exists(file_name):
+                    finished_list.append(model)
+            elif cosmos.config.cycle.run_mode == "cloud":
+                #cosmos.log(model.cloud_job)
+                if Argo.get_task_status(model.cloud_job):
+                    finished_list.append(model)
                               
     return finished_list
 

@@ -15,9 +15,15 @@ if config["ensemble"]:
     ensemble_members = [x.strip() for x in ensemble_members]
 
     if config["run_mode"] == "cloud": 
-        # Run sfincs members and wait for all members to be finished
-        pass
-
+        curdir = os.getcwd()
+        for ensemble_member in ensemble_members:
+            print('Running ensemble member ' + ensemble_member)
+            # Make folder for ensemble member and copy all input files
+            fo.mkdir(ensemble_member)
+            fo.copy_file("*.*", ensemble_member)
+            os.chdir(ensemble_member)
+            os.system('python cosmos_run_sfincs_member.py ' + ensemble_member)
+            os.chdir(curdir)
     else:
         # Loop over ensemble members and run them in one by one
         curdir = os.getcwd()
@@ -40,7 +46,7 @@ if config["ensemble"]:
 
 else:
 
-    if config["run_mode"] == "cloud": 
+    if config["run_mode"] == "cloud":
         # Run sfincs simulation and wait for it to be finished
         pass
     

@@ -10,6 +10,7 @@ import pandas as pd
 import numpy as np
 import shutil
 import datetime
+import boto3
 
 from cht.sfincs.sfincs import SFINCS
 import cht.misc.fileops as fo
@@ -293,6 +294,11 @@ class CoSMoS_SFINCS(Model):
         if self.bw_nested: 
             config["bw_nested_path"]   = self.bw_nested.cycle_output_path
         config["spw_path"] = cosmos.scenario.cycle_track_ensemble_spw_path
+
+        if cosmos.config.cycle.run_mode == "cloud":
+            config["spw_path"] = "sfincs-input/scenario_spw"
+            config["access_key"] = cosmos.config.cloud_config.access_key
+            config["secret_key"] = cosmos.config.cloud_config.secret_key
         
         dict2yaml(os.path.join(self.job_path, "config.yml"), config)
 
@@ -559,13 +565,36 @@ class CoSMoS_SFINCS(Model):
             # #pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
 
             # Make probabilistic water level timeseries
-            file_list = []
-            for member in cosmos.scenario.ensemble_names:
-                file_list.append(os.path.join(output_path, member, "sfincs_his.nc"))
-            prcs= [0.05, 0.5, 0.95]
-            vars= ["point_zs"]
-            output_file_name = os.path.join(output_path, "sfincs_his_ensemble.nc")
-            pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
+            if cosmos.config.cycle.run_mode == "cloud":
+                # Download merged his file
+                bucket_name = "sfincs-input"
+                s3_key = "sfincs_his/sfincs_his_ensemble.nc"
+                output_file_name = os.path.join(output_path, "sfincs_his_ensemble.nc")
+
+                # Create a session using your AWS credentials (or configure it in other ways)
+                session = boto3.Session(
+                    aws_access_key_id=cosmos.config.cloud_config.access_key,
+                    aws_secret_access_key=cosmos.config.cloud_config.secret_key,
+                    region_name=cosmos.config.cloud_config.region
+                )
+
+                # Create an S3 client
+                s3 = session.client('s3')
+
+                # Download the file from S3
+                try:
+                    s3.download_file(bucket_name, s3_key, output_file_name)
+                    print(f"File downloaded successfully to '{output_file_name}'")
+                except Exception as e:
+                    cosmos.log(f"Error: {e}")
+            else:
+                file_list = []
+                for member in cosmos.scenario.ensemble_names:
+                    file_list.append(os.path.join(output_path, member, "sfincs_his.nc"))
+                prcs= [0.05, 0.5, 0.95]
+                vars= ["point_zs"]
+                output_file_name = os.path.join(output_path, "sfincs_his_ensemble.nc")
+                pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
 
         if self.station:
 
