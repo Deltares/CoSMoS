@@ -21,9 +21,8 @@ class Argo:
             workflow_template_ref=wt_ref,
         )
 
-        w.create()
         cosmos.log("Cloud Workflow started")
-        w.wait()
+        w.create(wait=True)
         cosmos.log("Cloud Workflow finished")
 
         return w
