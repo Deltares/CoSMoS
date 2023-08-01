@@ -115,14 +115,15 @@ The CoSMoS run folder is organized as follows:
 .. include:: examples/cosmos_folder.txt
        :literal: 
 
-- *configuration/config.toml* contains the paths to the model executables, model database and meteo folder.
+- *configuration/config.toml* contains the paths to, among other things, the model executables, model database and meteo folder (see :ref:`Configuration <configuration>`).
 - *configuration/stations* contains the station xml files with observation station locations (see :ref:`Observation stations <stations>`).
 - *configuration/super_regions* contains super region files in which models can be grouped (see :ref:`Super regions <super_regions>`).
 - *configuration/webviewer_templates* contains webviewer templates that can be used for viewing CoSMoS model outputs (see :ref:`Webviewer <webviewer>`).
 - *jobs* is the folder in which the models are running.
-- *meteo/meteo_subsets.xml* contains the meteo sources (see :ref:`Meteo <meteo>`). 
 - *scenarios* contains the model scenario folders with scenario input files and model results (see :ref:`Scenario <scenario>`).
+- *webviewers* contains the webviewer with post-processed model results (see :ref:`Webviewer <webviewer>`).
 - *model_database* contains the individual model input files and model description (see :ref:`Models <models>`).
+- *meteo_database/meteo_subsets.xml* contains the meteo sources (see :ref:`Meteo <meteo>`). 
 - *run_cosmos.py* contains an example of how to run CoSMoS (see :ref:`Running CoSMoS <running>`).
 
 .. .. The following table provides an overview of all cosmos system components:

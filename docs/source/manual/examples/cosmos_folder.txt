@@ -9,12 +9,11 @@ cosmos
 			└── [superregion_name.xml]
 		├── webviewer_templates
 	├── jobs
-	├── meteo
-		└── meteo_subsets.xml
 	├── observations
 	├── scenarios
 		├── [scenario_name]
 			└── scenario.toml
+	├── webviewers
 			
 	model_database
 	├── [region]
@@ -25,5 +24,8 @@ cosmos
 				├── setup
 				├── tiling				
 				└── model.toml
+
+	meteo_database
+	└── meteo_subsets.xml
 					
 	└── run_cosmos.py

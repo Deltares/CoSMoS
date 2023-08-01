@@ -305,41 +305,89 @@ class Model:
     def submit_job(self):
         """Submit model.
         """
-        if self.ensemble:            
-            # Make run batch file
-            fid = open("tmp.bat", "w")
-#            fid.write(self.job_path[0:2] + "\n")     
-            fid.write("cd " + self.job_path + "\n")
-            for member_name in cosmos.scenario.ensemble_names:
-                # Job path for this ensemble member
-                pth = member_name
-                # Copy base files to member path
-                fid.write("copy *.* " + pth + "\n")
-                fid.write("cd " + pth + "\n")
-                fid.write("call run.bat\n")
-                fid.write("cd ..\n")
 
-            # All is done, so now do the merging of the outputs
+        # First prepare batch file
 
-
-            fid.write("DATE /T > finished.txt\n")
-            fid.write("exit\n")
-
+        if cosmos.config.cycle.run_mode == "cloud":
+            # Make sh file (run.sh) that activates the correct environment and runs run_job.py
+            fid = open(os.path.join(self.job_path, "run.sh"), "w")
             fid.close()
-            pass
 
         else:
+            # Make windows batch file (run.bat) that activates the correct environment and runs run_job.py   
+            fid = open(os.path.join(self.job_path, "run_job.bat"), "w")
+            fid.write("@ echo off\n")
+            fid.write("DATE /T > running.txt\n")
+            fid.write('set CONDAPATH=' + cosmos.config.conda.path + '\n')
+            fid.write(r"call %CONDAPATH%\Scripts\activate.bat cosmos" + "\n")
+            fid.write("python run_job.py\n")
+            fid.write("move running.txt finished.txt\n")
+            fid.write("exit\n")
+            fid.close()
 
-            # Make run batch file
+        # And now actually kick off this job
+        if cosmos.config.cycle.run_mode == "serial" or self.type=="beware":
+            # Model needs to be run in serial mode (local on the job path of a windows machine)        
             cosmos.log("Writing tmp.bat in " + os.getcwd() + " ...")
             fid = open("tmp.bat", "w")
             fid.write(self.job_path[0:2] + "\n")
             fid.write("cd " + self.job_path + "\n")
-            fid.write("call run.bat\n")
+            fid.write("call run_job.bat\n")
             fid.write("exit\n")
             fid.close()
+            os.system('start tmp.bat')
+            pass
 
-        os.system('start tmp.bat')
+        elif cosmos.config.cycle.run_mode == "cloud":
+            # Floris does his magic
+            pass
+
+        else:
+            # Model will be run on WCP node
+            # Write ready file (WCP nodes will pick up this job)           
+            file_name = os.path.join(cosmos.config.path.jobs,
+                                        cosmos.scenario.name,
+                                        self.name,
+                                        "ready.txt")
+            fid = open(file_name, "w")
+            fid.write("Model is ready to run")
+            fid.close()
+
+#         if self.ensemble:            
+#             # Make run batch file
+#             fid = open("tmp.bat", "w")
+# #            fid.write(self.job_path[0:2] + "\n")     
+#             fid.write("cd " + self.job_path + "\n")
+#             for member_name in cosmos.scenario.ensemble_names:
+#                 # Job path for this ensemble member
+#                 pth = member_name
+#                 # Copy base files to member path
+#                 fid.write("copy *.* " + pth + "\n")
+#                 fid.write("cd " + pth + "\n")
+#                 fid.write("call run.bat\n")
+#                 fid.write("cd ..\n")
+
+#             # All is done, so now do the merging of the outputs
+
+
+#             fid.write("DATE /T > finished.txt\n")
+#             fid.write("exit\n")
+
+#             fid.close()
+#             pass
+
+#         else:
+
+#             # Make run batch file
+#             cosmos.log("Writing tmp.bat in " + os.getcwd() + " ...")
+#             fid = open("tmp.bat", "w")
+#             fid.write(self.job_path[0:2] + "\n")
+#             fid.write("cd " + self.job_path + "\n")
+#             fid.write("call run.bat\n")
+#             fid.write("exit\n")
+#             fid.close()
+
+#         os.system('start tmp.bat')
 #        os.remove('tmp.bat')
 
     def get_all_nested_models(self, tp, all_nested_models=None):

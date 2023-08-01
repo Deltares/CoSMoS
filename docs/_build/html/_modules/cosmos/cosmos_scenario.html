@@ -123,10 +123,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">track_ensemble_nr_realizations</span> <span class="o">=</span> <span class="mi">0</span> 
         <span class="bp">self</span><span class="o">.</span><span class="n">meteo_dataset</span>              <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">meteo_spiderweb</span>            <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meteo_track</span>                <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">meteo_wind</span>                 <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">meteo_atmospheric_pressure</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">meteo_precipitation</span>        <span class="o">=</span> <span class="kc">True</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">meteo_track</span>                <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">observations_path</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span></div>
 
     <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -159,11 +159,14 @@
                 <span class="c1"># Set meteo to one give in scenario</span>
                 <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_dataset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meteo_dataset</span>
                 <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_spiderweb&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meteo_spiderweb</span>
+                <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_track&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meteo_track</span>
                 <span class="c1"># But override is separate dataset is provided for model</span>
                 <span class="k">if</span> <span class="s2">&quot;meteo_dataset&quot;</span> <span class="ow">in</span> <span class="n">mdl</span><span class="p">:</span>
                     <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_dataset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mdl</span><span class="p">[</span><span class="s2">&quot;meteo_dataset&quot;</span><span class="p">]</span>
                 <span class="k">if</span> <span class="s2">&quot;meteo_spiderweb&quot;</span> <span class="ow">in</span> <span class="n">mdl</span><span class="p">:</span>
                     <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_spiderweb&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mdl</span><span class="p">[</span><span class="s2">&quot;meteo_spiderweb&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="s2">&quot;meteo_track&quot;</span> <span class="ow">in</span> <span class="n">mdl</span><span class="p">:</span>
+                    <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_track&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mdl</span><span class="p">[</span><span class="s2">&quot;meteo_track&quot;</span><span class="p">]</span>
                                                         
             <span class="k">else</span><span class="p">:</span>
                 
@@ -191,11 +194,14 @@
                             <span class="c1"># Set meteo to one give in scenario</span>
                             <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_dataset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meteo_dataset</span>
                             <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_spiderweb&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meteo_spiderweb</span>
+                            <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_track&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meteo_track</span>
                             <span class="c1"># But override is separate dataset is provided for model</span>
                             <span class="k">if</span> <span class="s2">&quot;meteo_dataset&quot;</span> <span class="ow">in</span> <span class="n">mdl</span><span class="p">:</span>
                                 <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_dataset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mdl</span><span class="p">[</span><span class="s2">&quot;meteo_dataset&quot;</span><span class="p">]</span>
                             <span class="k">if</span> <span class="s2">&quot;meteo_spiderweb&quot;</span> <span class="ow">in</span> <span class="n">mdl</span><span class="p">:</span>
                                 <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_spiderweb&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mdl</span><span class="p">[</span><span class="s2">&quot;meteo_spiderweb&quot;</span><span class="p">]</span>
+                            <span class="k">if</span> <span class="s2">&quot;meteo_track&quot;</span> <span class="ow">in</span> <span class="n">mdl</span><span class="p">:</span>
+                                <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_track&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mdl</span><span class="p">[</span><span class="s2">&quot;meteo_track&quot;</span><span class="p">]</span>
 
         <span class="c1">### Add missing models</span>
         <span class="c1"># We know which models need to be added. Check if all models that provide boundary conditions are there as well.</span>
@@ -258,7 +264,8 @@
 
             <span class="n">model</span><span class="o">.</span><span class="n">meteo_dataset</span>              <span class="o">=</span> <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_dataset&quot;</span><span class="p">]</span>
             <span class="n">model</span><span class="o">.</span><span class="n">meteo_spiderweb</span>            <span class="o">=</span> <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_spiderweb&quot;</span><span class="p">]</span>
-            
+            <span class="n">model</span><span class="o">.</span><span class="n">meteo_track</span>                <span class="o">=</span> <span class="n">models_in_scenario</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;meteo_track&quot;</span><span class="p">]</span>
+
             <span class="c1"># If wind/pressure/rain are actively turned off in scenario, also do it here    </span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">meteo_wind</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">meteo_wind</span><span class="p">:</span>
                 <span class="n">model</span><span class="o">.</span><span class="n">meteo_wind</span> <span class="o">=</span> <span class="kc">False</span>

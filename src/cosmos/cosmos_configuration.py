@@ -25,12 +25,21 @@ class ModelDatabase:
     def __init__(self):
         self.path = None
 
+class MeteoDatabase:
+    def __init__(self):
+        self.path = None
+
+class Conda:
+    def __init__(self):
+        self.path = None
+
 class Executables:
     def __init__(self):
         self.sfincs_path    = None
         self.hurrywave_path = None
         self.delft3d_path   = None
         self.xbeach_path    = None
+        self.beware_path    = None
 
 class WebServer:
     def __init__(self):
@@ -43,7 +52,7 @@ class WebViewer:
     def __init__(self):
         self.name    = None
         self.version = None
-        
+            
 class Cycle:
     def __init__(self):
         self.mode            = "single_shot"
@@ -54,6 +63,9 @@ class Cycle:
         self.upload          = True
         self.get_meteo       = True
         self.run_mode        = "serial"
+        self.just_initialize = False
+        self.run_models      = True
+        self.only_run_ensembles = False
 
 class Configuration:
     """CoSMoS Configuration class.
@@ -70,6 +82,8 @@ class Configuration:
     def __init__(self):        
         self.path           = Path()
         self.model_database = ModelDatabase()
+        self.meteo_database = MeteoDatabase()
+        self.conda          = Conda()
         self.executables    = Executables()
         self.webserver      = WebServer()
         self.webviewer      = WebViewer()
@@ -97,7 +111,8 @@ class Configuration:
         self.path.jobs      = os.path.join(self.path.main, "jobs")
         self.path.stations  = os.path.join(self.path.config, "stations")
         self.path.scenarios = os.path.join(self.path.main, "scenarios")
-
+        self.path.webviewer = os.path.join(self.path.main, "webviewers")
+        
         # Read config file
         self.read_config_file()
 
@@ -140,7 +155,6 @@ class Configuration:
         # Available meteo sources
         cosmos.log("Reading meteo sources ...")    
         read_meteo_sources()
-
 
         # Find all available super regions
         cosmos.log("Reading super regions ...")    

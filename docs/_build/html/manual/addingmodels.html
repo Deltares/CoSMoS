@@ -48,7 +48,18 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../manual.html">User manual</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="modelcomponents.html">Overview model components and folder structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="quickstart.html">Quickstart CoSMoS</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Adding models to the database</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Adding models to the database</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#model-database">Model database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#model-specific-input">Model-specific input</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#beware">BEWARE</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#delft3d-fm">Delft3D-FM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hurrywave">HurryWave</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sfincs">SFINCS</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#xbeach">XBeach</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="configuration.html">Setting up your configuration file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="scenario.html">Setting up a scenario</a></li>
 <li class="toctree-l2"><a class="reference internal" href="stations.html">Observation stations</a></li>
@@ -88,7 +99,9 @@
              
   <section id="adding-models-to-the-database">
 <span id="models"></span><h1>Adding models to the database<a class="headerlink" href="#adding-models-to-the-database" title="Permalink to this headline">¶</a></h1>
-<p>The CoSMoS model database contains all model input files.
+<section id="model-database">
+<h2>Model database<a class="headerlink" href="#model-database" title="Permalink to this headline">¶</a></h2>
+<p>The CoSMoS model database contains all model input files. The path to your model database must be specified in the <a class="reference internal" href="configuration.html#configuration"><span class="std std-ref">*config.toml*</span></a> file.
 CoSMoS automatically nests the models and collects the required meteorological data. Therefore, the model folders contain only the grid and input files for the individual models.
 A separate toml file describes, among other things, in which model it is nested and which meteo sources and observation stations are to be used:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">long_name</span> <span class="o">=</span> <span class="s2">&quot;HurryWave North Atlantic&quot;</span>
@@ -280,6 +293,85 @@ A separate toml file describes, among other things, in which model it is nested 
 </tr>
 </tbody>
 </table>
+</section>
+<section id="model-specific-input">
+<h2>Model-specific input<a class="headerlink" href="#model-specific-input" title="Permalink to this headline">¶</a></h2>
+<p>There are currently five types of models that can be included in CoSMoS.
+The specific input for these models is described below.</p>
+<section id="beware">
+<h3>BEWARE<a class="headerlink" href="#beware" title="Permalink to this headline">¶</a></h3>
+<p>BEWARE is a meta-model based on XBeach for predicting nearshore wave heights and total water levels at reef-lined coasts.</p>
+<p>The BEWARE executable folder, whose location is specified in the <a class="reference internal" href="configuration.html#configuration"><span class="std std-ref">*config.toml*</span></a> file, must contain the following files:</p>
+<ul class="simple">
+<li><p>XBeach_BEWARE_database.nc: the database of XBeach runup and wave condition predictions.</p></li>
+<li><p>run_bw.bas: file to run <em>run_beware.py</em>.</p></li>
+<li><p>run_beware.py: script to run BEWARE. To be able to run <em>run_beware.py</em>, you must have installed the Coastal Hazards Toolkit in an environment called cosmos.</p></li>
+</ul>
+<p>The BEWARE input folder in your model database must contain the following information:</p>
+<ul class="simple">
+<li><p><em>beware.inp</em>: BEWARE input file</p></li>
+<li><p><em>r2matchfile</em> as specified in <em>beware.inp</em>: a <em>.mat</em> that describes the matching probabilities for each input profile.</p></li>
+<li><p><em>profsfile</em> as specified in <em>beware.inp</em>: a profile describing the characteristics of the BEWARE input profiles. The profsfile must contain the following information:</p>
+<ul>
+<li><p>profid: ID of profile.</p></li>
+<li><p>x_off: Offshore x-coordinate (for nesting in wave model).</p></li>
+<li><p>y_off: Offshore y-coordinate (for nesting in wave model).</p></li>
+<li><p>x_coast: X-coordinate of intersection with the coastline (for plotting total water levels).</p></li>
+<li><p>y_coast: Y-coordinate of intersection with the coastline (for plotting total water levels).</p></li>
+<li><p>x_flow: Nearshore x-coordinate for nesting in flow model (to include surge in total water level estimation).</p></li>
+<li><p>y_flow: Nearshore y-coordinate for nesting in flow model (to include surge in total water level estimation).</p></li>
+<li><p>beachslope: Beach slope of transect for total water level prediction.</p></li>
+</ul>
+</li>
+<li><p><em>runup.x</em> and <em>runup.y</em>: files describing the x and y coordinates (in the coordinate system as specified in the <em>model.toml</em> file) for different runup levels (here between 0 and 15 m). The format is as follows:</p></li>
+</ul>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>      &lt;runup_level1&gt; &lt;runup_level1&gt; &lt;runup_level3&gt;
+
+      &lt;profid&gt; &lt;x runup_level1&gt; &lt;x runup_level1&gt; &lt;x runup_level3&gt;
+
+e.g.
+0 2 4
+29 163960.98 163961.75 164154.9
+35 163961.98 163962.75 164156.9
+</pre></div>
+</div>
+</section>
+<section id="delft3d-fm">
+<h3>Delft3D-FM<a class="headerlink" href="#delft3d-fm" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="https://www.deltares.nl/en/software-and-data/products/delft3d-flexible-mesh-suite">Delft3D-FM</a> can be run as separate flow model, or as coupled flow-wave model.
+The Delft3D-FM <em>input</em> folder must contain the following folders and files:</p>
+<ul class="simple">
+<li><p><em>flow</em> folder containing flow model input. The <em>.mdu</em> file name must be equal to the <em>runid</em> keyword specified in the <em>model.toml</em> file.</p></li>
+<li><p><em>wave</em> folder containing wave model input. The <em>.mdw</em> file must be called <em>wave.mdw</em>. The grid for which you want to generate output timeseries must be called <em>wave.grd</em>. You can also add a nested model called <em>nest.grd</em>.</p></li>
+</ul>
+<p>The following settings in the <em>.mdw</em> are adjusted by CoSMoS:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>ReferenceDate         = REFDATEKEY</p></li>
+<li><p>LocationFile          = OBSFILEKEY</p></li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li><p><em>dimr_config.xml</em> file that describes the working directories for the flow and wave models. The &lt;time&gt; (starttime of the simulation) is set by CoSMoS by replacing the keyword <em>TIMEKEY</em>.</p></li>
+</ul>
+</section>
+<section id="hurrywave">
+<h3>HurryWave<a class="headerlink" href="#hurrywave" title="Permalink to this headline">¶</a></h3>
+<p>HurryWave is a computationally efficient third generation spectral wave model, with physics similar to those of SWAN and WAVEWATCH III.</p>
+<p>HurryWave model input files are located in the <em>input</em> folder of your HurryWave model directory.
+In the <em>tiling</em> folder, <em>indices</em> and <em>topobathy</em> folders must be included to generate wave maps.</p>
+</section>
+<section id="sfincs">
+<h3>SFINCS<a class="headerlink" href="#sfincs" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="https://sfincs.readthedocs.io/en/latest/">SFINCS</a> model input files are located in the <em>input</em> folder of your SFINCS model directory.
+In the <em>tiling</em> folder, <em>indices</em> and <em>topobathy</em> folders must be included to generate flood maps.</p>
+</section>
+<section id="xbeach">
+<h3>XBeach<a class="headerlink" href="#xbeach" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="https://xbeach.readthedocs.io/en/latest/">XBeach</a> model input files are located in the <em>input</em> folder of your XBeach model directory.
+In the <em>tiling</em> folder, an <em>indices</em> folder must be included to generate pre and post-storm bed level maps.</p>
+</section>
+</section>
 </section>
 
 

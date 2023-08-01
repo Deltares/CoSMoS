@@ -50,10 +50,10 @@ class Scenario:
         self.track_ensemble_nr_realizations = 0 
         self.meteo_dataset              = None
         self.meteo_spiderweb            = None
+        self.meteo_track                = None
         self.meteo_wind                 = True
         self.meteo_atmospheric_pressure = True
         self.meteo_precipitation        = True
-        self.meteo_track                = None
         self.observations_path = ""
 
     def read(self):
@@ -86,11 +86,14 @@ class Scenario:
                 # Set meteo to one give in scenario
                 models_in_scenario[name]["meteo_dataset"] = self.meteo_dataset
                 models_in_scenario[name]["meteo_spiderweb"] = self.meteo_spiderweb
+                models_in_scenario[name]["meteo_track"] = self.meteo_track
                 # But override is separate dataset is provided for model
                 if "meteo_dataset" in mdl:
                     models_in_scenario[name]["meteo_dataset"] = mdl["meteo_dataset"]
                 if "meteo_spiderweb" in mdl:
                     models_in_scenario[name]["meteo_spiderweb"] = mdl["meteo_spiderweb"]
+                if "meteo_track" in mdl:
+                    models_in_scenario[name]["meteo_track"] = mdl["meteo_track"]
                                                         
             else:
                 
@@ -118,11 +121,14 @@ class Scenario:
                             # Set meteo to one give in scenario
                             models_in_scenario[name]["meteo_dataset"] = self.meteo_dataset
                             models_in_scenario[name]["meteo_spiderweb"] = self.meteo_spiderweb
+                            models_in_scenario[name]["meteo_track"] = self.meteo_track
                             # But override is separate dataset is provided for model
                             if "meteo_dataset" in mdl:
                                 models_in_scenario[name]["meteo_dataset"] = mdl["meteo_dataset"]
                             if "meteo_spiderweb" in mdl:
                                 models_in_scenario[name]["meteo_spiderweb"] = mdl["meteo_spiderweb"]
+                            if "meteo_track" in mdl:
+                                models_in_scenario[name]["meteo_track"] = mdl["meteo_track"]
 
         ### Add missing models
         # We know which models need to be added. Check if all models that provide boundary conditions are there as well.
@@ -185,7 +191,8 @@ class Scenario:
 
             model.meteo_dataset              = models_in_scenario[name]["meteo_dataset"]
             model.meteo_spiderweb            = models_in_scenario[name]["meteo_spiderweb"]
-            
+            model.meteo_track                = models_in_scenario[name]["meteo_track"]
+
             # If wind/pressure/rain are actively turned off in scenario, also do it here    
             if not self.meteo_wind and model.meteo_wind:
                 model.meteo_wind = False

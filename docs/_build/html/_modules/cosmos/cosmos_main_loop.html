@@ -282,6 +282,28 @@
             <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">priority</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">model</span><span class="o">.</span><span class="n">run_simulation</span> <span class="o">=</span> <span class="kc">False</span>
 
+        <span class="c1"># Check if model data needs to be uploaded to webviewer (only upload for high-res nested models)</span>
+        <span class="n">modelopt</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;flow&quot;</span><span class="p">,</span> <span class="s2">&quot;wave&quot;</span><span class="p">]</span>
+        <span class="n">modeloptnames</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;tide_gauge&quot;</span><span class="p">,</span> <span class="s2">&quot;wave_buoy&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">iopt</span><span class="p">,</span> <span class="n">opts</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">modelopt</span><span class="p">):</span>
+                <span class="n">all_nested_models</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_all_nested_models</span><span class="p">(</span><span class="n">opts</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">all_nested_models</span><span class="p">:</span>
+                    <span class="n">all_nested_stations</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">if</span> <span class="n">all_nested_models</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;beware&#39;</span><span class="p">:</span>
+                        <span class="n">all_nested_models</span><span class="o">=</span> <span class="p">[</span><span class="n">model</span><span class="p">]</span>
+                        <span class="n">bw</span><span class="o">=</span><span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">bw</span><span class="o">=</span><span class="mi">0</span>
+                    <span class="k">for</span> <span class="n">mdl</span> <span class="ow">in</span> <span class="n">all_nested_models</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">st</span> <span class="ow">in</span> <span class="n">mdl</span><span class="o">.</span><span class="n">station</span><span class="p">:</span>
+                            <span class="n">all_nested_stations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">station</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">station</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">station</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">modeloptnames</span><span class="p">[</span><span class="n">iopt</span><span class="p">]:</span>
+                            <span class="k">if</span> <span class="n">station</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">all_nested_stations</span> <span class="ow">and</span> <span class="n">bw</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>                            
+                                <span class="n">station</span><span class="o">.</span><span class="n">upload</span> <span class="o">=</span> <span class="kc">False</span> 
+        
         <span class="c1"># Start and stop times</span>
         <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s1">&#39;Getting start and stop times ...&#39;</span><span class="p">)</span>
         <span class="n">get_start_and_stop_times</span><span class="p">()</span>

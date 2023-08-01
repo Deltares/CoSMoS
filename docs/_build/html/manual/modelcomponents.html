@@ -204,12 +204,11 @@ The (<a class="reference internal" href="../_generated/cosmos.cosmos_model.Model
                         └── [superregion_name.xml]
                 ├── webviewer_templates
         ├── jobs
-        ├── meteo
-                └── meteo_subsets.xml
         ├── observations
         ├── scenarios
                 ├── [scenario_name]
                         └── scenario.toml
+        ├── webviewers
                         
         model_database
         ├── [region]
@@ -220,17 +219,21 @@ The (<a class="reference internal" href="../_generated/cosmos.cosmos_model.Model
                                 ├── setup
                                 ├── tiling                              
                                 └── model.toml
+
+        meteo_database
+        └── meteo_subsets.xml
                                         
         └── run_cosmos.py</pre>
 <ul class="simple">
-<li><p><em>configuration/config.toml</em> contains the paths to the model executables, model database and meteo folder.</p></li>
+<li><p><em>configuration/config.toml</em> contains the paths to, among other things, the model executables, model database and meteo folder (see <a class="reference internal" href="configuration.html#configuration"><span class="std std-ref">Configuration</span></a>).</p></li>
 <li><p><em>configuration/stations</em> contains the station xml files with observation station locations (see <a class="reference internal" href="stations.html#stations"><span class="std std-ref">Observation stations</span></a>).</p></li>
 <li><p><em>configuration/super_regions</em> contains super region files in which models can be grouped (see <a class="reference internal" href="superregions.html#super-regions"><span class="std std-ref">Super regions</span></a>).</p></li>
 <li><p><em>configuration/webviewer_templates</em> contains webviewer templates that can be used for viewing CoSMoS model outputs (see <a class="reference internal" href="output.html#webviewer"><span class="std std-ref">Webviewer</span></a>).</p></li>
 <li><p><em>jobs</em> is the folder in which the models are running.</p></li>
-<li><p><em>meteo/meteo_subsets.xml</em> contains the meteo sources (see <a class="reference internal" href="meteo.html#meteo"><span class="std std-ref">Meteo</span></a>).</p></li>
 <li><p><em>scenarios</em> contains the model scenario folders with scenario input files and model results (see <a class="reference internal" href="scenario.html#scenario"><span class="std std-ref">Scenario</span></a>).</p></li>
+<li><p><em>webviewers</em> contains the webviewer with post-processed model results (see <a class="reference internal" href="output.html#webviewer"><span class="std std-ref">Webviewer</span></a>).</p></li>
 <li><p><em>model_database</em> contains the individual model input files and model description (see <a class="reference internal" href="addingmodels.html#models"><span class="std std-ref">Models</span></a>).</p></li>
+<li><p><em>meteo_database/meteo_subsets.xml</em> contains the meteo sources (see <a class="reference internal" href="meteo.html#meteo"><span class="std std-ref">Meteo</span></a>).</p></li>
 <li><p><em>run_cosmos.py</em> contains an example of how to run CoSMoS (see <a class="reference internal" href="running.html#running"><span class="std std-ref">Running CoSMoS</span></a>).</p></li>
 </ul>
 </section>

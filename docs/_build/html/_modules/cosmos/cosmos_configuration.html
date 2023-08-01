@@ -98,12 +98,21 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="kc">None</span>
 
+<span class="k">class</span> <span class="nc">MeteoDatabase</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="k">class</span> <span class="nc">Conda</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="kc">None</span>
+
 <span class="k">class</span> <span class="nc">Executables</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sfincs_path</span>    <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hurrywave_path</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">delft3d_path</span>   <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">xbeach_path</span>    <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beware_path</span>    <span class="o">=</span> <span class="kc">None</span>
 
 <span class="k">class</span> <span class="nc">WebServer</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -116,7 +125,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span>    <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="kc">None</span>
-        
+            
 <span class="k">class</span> <span class="nc">Cycle</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mode</span>            <span class="o">=</span> <span class="s2">&quot;single_shot&quot;</span>
@@ -127,6 +136,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">upload</span>          <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">get_meteo</span>       <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">run_mode</span>        <span class="o">=</span> <span class="s2">&quot;serial&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">just_initialize</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_models</span>      <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">only_run_ensembles</span> <span class="o">=</span> <span class="kc">False</span>
 
 <div class="viewcode-block" id="Configuration"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_configuration.Configuration.html#cosmos.cosmos_configuration.Configuration">[docs]</a><span class="k">class</span> <span class="nc">Configuration</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;CoSMoS Configuration class.</span>
@@ -143,6 +155,8 @@
 <div class="viewcode-block" id="Configuration.__init__"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_configuration.Configuration.html#cosmos.cosmos_configuration.Configuration.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>        
         <span class="bp">self</span><span class="o">.</span><span class="n">path</span>           <span class="o">=</span> <span class="n">Path</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_database</span> <span class="o">=</span> <span class="n">ModelDatabase</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meteo_database</span> <span class="o">=</span> <span class="n">MeteoDatabase</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conda</span>          <span class="o">=</span> <span class="n">Conda</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">executables</span>    <span class="o">=</span> <span class="n">Executables</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">webserver</span>      <span class="o">=</span> <span class="n">WebServer</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">webviewer</span>      <span class="o">=</span> <span class="n">WebViewer</span><span class="p">()</span>
@@ -170,7 +184,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">jobs</span>      <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="s2">&quot;jobs&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">stations</span>  <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="s2">&quot;stations&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">scenarios</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="s2">&quot;scenarios&quot;</span><span class="p">)</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">webviewer</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="s2">&quot;webviewers&quot;</span><span class="p">)</span>
+        
         <span class="c1"># Read config file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">read_config_file</span><span class="p">()</span>
 
@@ -213,7 +228,6 @@
         <span class="c1"># Available meteo sources</span>
         <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Reading meteo sources ...&quot;</span><span class="p">)</span>    
         <span class="n">read_meteo_sources</span><span class="p">()</span>
-
 
         <span class="c1"># Find all available super regions</span>
         <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Reading super regions ...&quot;</span><span class="p">)</span>    

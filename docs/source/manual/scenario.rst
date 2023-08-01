@@ -49,11 +49,6 @@ The following settings can be included in the scenario file:
      -
      -
 
-   * - track_ensemble
-     - If ran in ensemble mode: meteo folder with .cyc file.
-     - None
-     -
-
    * - track_ensemble_nr_realizations
      - If ran in ensemble mode: number of cyclone tracks to be generated.
      - 0
@@ -85,12 +80,17 @@ The following settings can be included in the scenario file:
      - **unit**
 
    * - meteo_dataset
-     - Meteo dataset to use from meteo\\meteo_subsets.xml (see :ref:`Meteo <meteo>`).
+     - Meteo dataset to use from meteo_database\\meteo_subsets.xml (see :ref:`Meteo <meteo>`).
      - None
      -
 
    * - meteo_spiderweb
-     - Meteo spiderweb to use from meteo\\spiderwebs (see :ref:`Meteo <meteo>`).
+     - Meteo spiderweb to use from meteo_database\\spiderwebs (see :ref:`Meteo <meteo>`).
+     - None
+     -
+
+   * - meteo_track
+     - Meteo track file (.cyc) to use from meteo_database\\tracks (see :ref:`Meteo <meteo>`).
      - None
      -
 

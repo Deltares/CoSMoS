@@ -9,5 +9,5 @@ meteo
     └── gfs_anl_0p50_north_atlantic.20170704_0300.nc
 ├── spiderwebs
     └── irma.spw/cyc
-├── hurricane_irma
+├── tracks
     └── irma.cyc

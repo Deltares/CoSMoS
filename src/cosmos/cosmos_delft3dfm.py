@@ -124,11 +124,20 @@ class CoSMoS_Delft3DFM(Model):
         # Boundary conditions        
         if self.flow_nested:
 
+            # Correct boundary water levels. Assuming that output from overall
+            # model is in MSL !!!
+            zcor = self.boundary_water_level_correction - self.vertical_reference_level_difference_with_msl
+
             # Get boundary conditions from overall model (Nesting 2)
 #            output_path = os.path.join(self.flow_nested.cycle_path, "output")    
+            # Deterministic    
             nest2(self.flow_nested.domain,
                   self.domain,
-                  output_path=self.flow_nested.cycle_output_path)
+                  output_path=self.flow_nested.cycle_output_path,
+                  output_file = self.flow_nested.domain.runid + '_his.nc',
+                  boundary_water_level_correction=zcor,
+                  option = "flow",
+                  bc_path=self.job_path)
 
         if self.wave_nested:
             # TODO
@@ -186,7 +195,7 @@ class CoSMoS_Delft3DFM(Model):
             if not self.domain.input.obsfile:
                 self.domain.input.obsfile = self.runid + ".xyn"
             self.domain.write_observation_points(path=job_path_flow)       
-        if self.nested_wave_models:
+        if self.wave:
             self.domain.write_observation_points(path=job_path_wave)    
             findreplace(mdw_file, "OBSFILEKEY", self.domain.input.obsfile)    
 
@@ -217,8 +226,8 @@ class CoSMoS_Delft3DFM(Model):
         fid = open(batch_file, "w")            
         fid.write("@ echo off\n")
         fid.write("DATE /T > running.txt\n")
-        exe_path = os.path.join("call " + cosmos.config.delft3dfm_exe_path,
-                                 "x64\\dimr\\scripts\\run_dimr.bat dimr_config.xml\n")
+        exe_path = os.path.join("call \"" + cosmos.config.executables.delft3dfm_path,
+                                 "x64\\dimr\\scripts\\run_dimr.bat\" dimr_config.xml\n")
         fid.write(exe_path)
         fid.write("move running.txt finished.txt\n")
         fid.write("exit\n")
@@ -291,11 +300,17 @@ class CoSMoS_Delft3DFM(Model):
     def post_process(self):
         """Post-process Delft3D FM output: generate wave and water level timeseries.        
         """         
+        import cht.misc.misc_tools
+
         # Extract water levels
 
         output_path = self.cycle_output_path
-        post_path   = self.cycle_post_path
-
+        # post_path   = self.cycle_post_path
+        post_path =  os.path.join(cosmos.config.path.webviewer, 
+                                  cosmos.config.webviewer.name,
+                                  "data",
+                                  cosmos.scenario.name)
+        
         hisfile = os.path.join(output_path, self.runid + "_his.nc")
         
         if self.station:
@@ -304,15 +319,21 @@ class CoSMoS_Delft3DFM(Model):
 
             v = self.domain.read_timeseries_output(file_name=hisfile)
             for station in self.station:
-                vv=v[station.name]
-                vv.index.name='date_time'
-                vv.name='wl'
-                vv = vv + station.water_level_correction
-                file_name = os.path.join(post_path,
-                                         "waterlevel." + station.name + ".csv")
-                vv.to_csv(file_name,
-                          date_format='%Y-%m-%dT%H:%M:%S',
-                          float_format='%.3f')
+                if station.upload:
+                    vv=v[station.name]
+                    vv.index.name='date_time'
+                    vv.name='wl'
+                    vv += self.vertical_reference_level_difference_with_msl
+
+                    fo.mkdir(os.path.join(post_path, 'timeseries'))
+                    csv_file = os.path.join(post_path,
+                                             "timeseries",
+                                            "waterlevel." + self.name + "." + station.name + ".csv.js")
+                    
+                    s = vv.to_csv(date_format='%Y-%m-%dT%H:%M:%S',
+                                    float_format='%.3f',
+                                    header=False) 
+                    cht.misc.misc_tools.write_csv_js(csv_file, s, "var csv = `date_time,wl")
 
         # Extract waves
         if self.wave:
@@ -320,13 +341,16 @@ class CoSMoS_Delft3DFM(Model):
             if self.station:
 
                 cosmos.log("Extracting wave time series from model " + self.name)    
-                wavefile = [os.path.join(output_path, "wavh-wave-nest.nc"), os.path.join(output_path, "wavh-wave-Entire_swn.nc")]
+                wavefile = [os.path.join(output_path, "wavh-wave-wave.nc")]
                 v = self.domain.read_timeseries_output(file_name=hisfile, file_name_wave = wavefile)
                 for station in self.station:
-                    vv=v[station.name]
-                    vv.index.name='date_time'
-                    file_name = os.path.join(post_path,
-                                            "waves." + station.name + ".csv")
-                    vv.to_csv(file_name,
-                            date_format='%Y-%m-%dT%H:%M:%S',
-                            float_format='%.3f')        
+                    if station.upload:
+                        vv=v[station.name]
+                        vv.index.name='date_time'
+                        csv_file = os.path.join(post_path,
+                                                 "timeseries",
+                                                "waves." + self.name + "." + station.name + ".csv.js")
+                        s = vv.to_csv(date_format='%Y-%m-%dT%H:%M:%S',
+                                    float_format='%.3f',
+                                    header=False)       
+                        cht.misc.misc_tools.write_csv_js(csv_file, s, "var csv = `date_time,hm0,tp") 

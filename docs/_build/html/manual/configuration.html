@@ -88,15 +88,22 @@
              
   <section id="setting-up-your-configuration-file">
 <span id="configuration"></span><h1>Setting up your configuration file<a class="headerlink" href="#setting-up-your-configuration-file" title="Permalink to this headline">¶</a></h1>
-<p>The CoSMoS configuration file specifies the model database path, the model executable paths, and the webserver, webviewer, and cycle settings:</p>
+<p>The CoSMoS configuration file specifies the model and meteo database paths, the conda path, the model executable paths, and the webserver, webviewer, and cycle settings:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">model_database</span><span class="p">]</span>
 <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;c:</span><span class="se">\\</span><span class="s2">work</span><span class="se">\\</span><span class="s2">cosmos</span><span class="se">\\</span><span class="s2">model_database&quot;</span>
+
+<span class="p">[</span><span class="n">meteo_database</span><span class="p">]</span>
+<span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;p:</span><span class="se">\\</span><span class="s2">11204750-onr-westernpacific</span><span class="se">\\</span><span class="s2">Year2-3</span><span class="se">\\</span><span class="s2">cosmos</span><span class="se">\\</span><span class="s2">version03</span><span class="se">\\</span><span class="s2">cosmos</span><span class="se">\\</span><span class="s2">run_folder</span><span class="se">\\</span><span class="s2">meteo&quot;</span>
+
+<span class="p">[</span><span class="n">conda</span><span class="p">]</span>
+<span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;c:</span><span class="se">\\</span><span class="s2">Users</span><span class="se">\\</span><span class="si">%u</span><span class="s2">sername%</span><span class="se">\\</span><span class="s2">Anaconda3&quot;</span>
 
 <span class="p">[</span><span class="n">executables</span><span class="p">]</span>
 <span class="n">delft3dfm_path</span> <span class="o">=</span> <span class="s2">&quot;c:</span><span class="se">\\</span><span class="s2">Program Files (x86)</span><span class="se">\\</span><span class="s2">Deltares</span><span class="se">\\</span><span class="s2">Delft3D Flexible Mesh Suite HMWQ (2021.02)</span><span class="se">\\</span><span class="s2">plugins</span><span class="se">\\</span><span class="s2">DeltaShell.Dimr</span><span class="se">\\</span><span class="s2">kernels&quot;</span>
 <span class="n">sfincs_path</span>    <span class="o">=</span> <span class="s2">&quot;c:</span><span class="se">\\</span><span class="s2">work</span><span class="se">\\</span><span class="s2">checkouts</span><span class="se">\\</span><span class="s2">git</span><span class="se">\\</span><span class="s2">sfincs</span><span class="se">\\</span><span class="s2">source</span><span class="se">\\</span><span class="s2">sfincs</span><span class="se">\\</span><span class="s2">x64</span><span class="se">\\</span><span class="s2">Release&quot;</span>
 <span class="n">hurrywave_path</span> <span class="o">=</span> <span class="s2">&quot;c:</span><span class="se">\\</span><span class="s2">work</span><span class="se">\\</span><span class="s2">checkouts</span><span class="se">\\</span><span class="s2">git</span><span class="se">\\</span><span class="s2">hurrywave</span><span class="se">\\</span><span class="s2">source</span><span class="se">\\</span><span class="s2">hurrywave</span><span class="se">\\</span><span class="s2">x64</span><span class="se">\\</span><span class="s2">Release&quot;</span>
 <span class="n">xbeach_path</span>    <span class="o">=</span> <span class="s2">&quot;yourxbeachpath&quot;</span>
+<span class="n">xbeach_path</span>    <span class="o">=</span> <span class="s2">&quot;yourbewarepath&quot;</span>
 
 <span class="p">[</span><span class="n">webserver</span><span class="p">]</span>
 <span class="n">hostname</span> <span class="o">=</span> <span class="s2">&quot;c-oet0074.directory.intra&quot;</span>

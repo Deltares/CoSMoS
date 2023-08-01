@@ -378,41 +378,89 @@
 <div class="viewcode-block" id="Model.submit_job"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_model.Model.submit_job.html#cosmos.cosmos_beware.Model.submit_job">[docs]</a>    <span class="k">def</span> <span class="nf">submit_job</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Submit model.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="p">:</span>            
-            <span class="c1"># Make run batch file</span>
-            <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;tmp.bat&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
-<span class="c1">#            fid.write(self.job_path[0:2] + &quot;\n&quot;)     </span>
-            <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;cd &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">job_path</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">member_name</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">ensemble_names</span><span class="p">:</span>
-                <span class="c1"># Job path for this ensemble member</span>
-                <span class="n">pth</span> <span class="o">=</span> <span class="n">member_name</span>
-                <span class="c1"># Copy base files to member path</span>
-                <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;copy *.* &quot;</span> <span class="o">+</span> <span class="n">pth</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;cd &quot;</span> <span class="o">+</span> <span class="n">pth</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;call run.bat</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;cd ..</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
-            <span class="c1"># All is done, so now do the merging of the outputs</span>
+        <span class="c1"># First prepare batch file</span>
 
-
-            <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;DATE /T &gt; finished.txt</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;exit</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-
+        <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cycle</span><span class="o">.</span><span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;cloud&quot;</span><span class="p">:</span>
+            <span class="c1"># Make sh file (run.sh) that activates the correct environment and runs run_job.py</span>
+            <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">,</span> <span class="s2">&quot;run.sh&quot;</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
             <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-            <span class="k">pass</span>
 
         <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Make windows batch file (run.bat) that activates the correct environment and runs run_job.py   </span>
+            <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">,</span> <span class="s2">&quot;run_job.bat&quot;</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+            <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;@ echo off</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;DATE /T &gt; running.txt</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;set CONDAPATH=&#39;</span> <span class="o">+</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">conda</span><span class="o">.</span><span class="n">path</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;call %CONDAPATH%\Scripts\activate.bat cosmos&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;python run_job.py</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;move running.txt finished.txt</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;exit</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-            <span class="c1"># Make run batch file</span>
+        <span class="c1"># And now actually kick off this job</span>
+        <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cycle</span><span class="o">.</span><span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;serial&quot;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="o">==</span><span class="s2">&quot;beware&quot;</span><span class="p">:</span>
+            <span class="c1"># Model needs to be run in serial mode (local on the job path of a windows machine)        </span>
             <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Writing tmp.bat in &quot;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot; ...&quot;</span><span class="p">)</span>
             <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;tmp.bat&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
             <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;cd &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">job_path</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;call run.bat</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;call run_job.bat</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;exit</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s1">&#39;start tmp.bat&#39;</span><span class="p">)</span>
+            <span class="k">pass</span>
 
-        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s1">&#39;start tmp.bat&#39;</span><span class="p">)</span></div>
+        <span class="k">elif</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cycle</span><span class="o">.</span><span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;cloud&quot;</span><span class="p">:</span>
+            <span class="c1"># Floris does his magic</span>
+            <span class="k">pass</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Model will be run on WCP node</span>
+            <span class="c1"># Write ready file (WCP nodes will pick up this job)           </span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">jobs</span><span class="p">,</span>
+                                        <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                        <span class="s2">&quot;ready.txt&quot;</span><span class="p">)</span>
+            <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+            <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Model is ready to run&quot;</span><span class="p">)</span>
+            <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<span class="c1">#         if self.ensemble:            </span>
+<span class="c1">#             # Make run batch file</span>
+<span class="c1">#             fid = open(&quot;tmp.bat&quot;, &quot;w&quot;)</span>
+<span class="c1"># #            fid.write(self.job_path[0:2] + &quot;\n&quot;)     </span>
+<span class="c1">#             fid.write(&quot;cd &quot; + self.job_path + &quot;\n&quot;)</span>
+<span class="c1">#             for member_name in cosmos.scenario.ensemble_names:</span>
+<span class="c1">#                 # Job path for this ensemble member</span>
+<span class="c1">#                 pth = member_name</span>
+<span class="c1">#                 # Copy base files to member path</span>
+<span class="c1">#                 fid.write(&quot;copy *.* &quot; + pth + &quot;\n&quot;)</span>
+<span class="c1">#                 fid.write(&quot;cd &quot; + pth + &quot;\n&quot;)</span>
+<span class="c1">#                 fid.write(&quot;call run.bat\n&quot;)</span>
+<span class="c1">#                 fid.write(&quot;cd ..\n&quot;)</span>
+
+<span class="c1">#             # All is done, so now do the merging of the outputs</span>
+
+
+<span class="c1">#             fid.write(&quot;DATE /T &gt; finished.txt\n&quot;)</span>
+<span class="c1">#             fid.write(&quot;exit\n&quot;)</span>
+
+<span class="c1">#             fid.close()</span>
+<span class="c1">#             pass</span>
+
+<span class="c1">#         else:</span>
+
+<span class="c1">#             # Make run batch file</span>
+<span class="c1">#             cosmos.log(&quot;Writing tmp.bat in &quot; + os.getcwd() + &quot; ...&quot;)</span>
+<span class="c1">#             fid = open(&quot;tmp.bat&quot;, &quot;w&quot;)</span>
+<span class="c1">#             fid.write(self.job_path[0:2] + &quot;\n&quot;)</span>
+<span class="c1">#             fid.write(&quot;cd &quot; + self.job_path + &quot;\n&quot;)</span>
+<span class="c1">#             fid.write(&quot;call run.bat\n&quot;)</span>
+<span class="c1">#             fid.write(&quot;exit\n&quot;)</span>
+<span class="c1">#             fid.close()</span>
+
+<span class="c1">#         os.system(&#39;start tmp.bat&#39;)</span>
 <span class="c1">#        os.remove(&#39;tmp.bat&#39;)</span>
 
 <div class="viewcode-block" id="Model.get_all_nested_models"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_model.Model.get_all_nested_models.html#cosmos.cosmos_beware.Model.get_all_nested_models">[docs]</a>    <span class="k">def</span> <span class="nf">get_all_nested_models</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">all_nested_models</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>

@@ -235,11 +235,15 @@ class CoSMoS_XBeach(Model):
         """
         
         output_path = self.cycle_output_path
-        sedero_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+        post_path =  os.path.join(cosmos.config.path.webviewer, 
+                            cosmos.config.webviewer.name,
+                            "data",
+                            cosmos.scenario.name)
+        sedero_map_path = os.path.join(post_path,
                                        "sedero")
-        zb0_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+        zb0_map_path = os.path.join(post_path,
                                        "zb0")  
-        zbend_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+        zbend_map_path = os.path.join(post_path,
                                        "zbend")              
         index_path = os.path.join(self.path, "tiling", "indices")
         

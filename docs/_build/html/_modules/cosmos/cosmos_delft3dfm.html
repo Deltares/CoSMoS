@@ -197,11 +197,20 @@
         <span class="c1"># Boundary conditions        </span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow_nested</span><span class="p">:</span>
 
+            <span class="c1"># Correct boundary water levels. Assuming that output from overall</span>
+            <span class="c1"># model is in MSL !!!</span>
+            <span class="n">zcor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundary_water_level_correction</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertical_reference_level_difference_with_msl</span>
+
             <span class="c1"># Get boundary conditions from overall model (Nesting 2)</span>
 <span class="c1">#            output_path = os.path.join(self.flow_nested.cycle_path, &quot;output&quot;)    </span>
+            <span class="c1"># Deterministic    </span>
             <span class="n">nest2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flow_nested</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
                   <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
-                  <span class="n">output_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">flow_nested</span><span class="o">.</span><span class="n">cycle_output_path</span><span class="p">)</span>
+                  <span class="n">output_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">flow_nested</span><span class="o">.</span><span class="n">cycle_output_path</span><span class="p">,</span>
+                  <span class="n">output_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow_nested</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">runid</span> <span class="o">+</span> <span class="s1">&#39;_his.nc&#39;</span><span class="p">,</span>
+                  <span class="n">boundary_water_level_correction</span><span class="o">=</span><span class="n">zcor</span><span class="p">,</span>
+                  <span class="n">option</span> <span class="o">=</span> <span class="s2">&quot;flow&quot;</span><span class="p">,</span>
+                  <span class="n">bc_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wave_nested</span><span class="p">:</span>
             <span class="c1"># TODO</span>
@@ -259,7 +268,7 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">obsfile</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">obsfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">runid</span> <span class="o">+</span> <span class="s2">&quot;.xyn&quot;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">write_observation_points</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">job_path_flow</span><span class="p">)</span>       
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nested_wave_models</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wave</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">write_observation_points</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">job_path_wave</span><span class="p">)</span>    
             <span class="n">findreplace</span><span class="p">(</span><span class="n">mdw_file</span><span class="p">,</span> <span class="s2">&quot;OBSFILEKEY&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">obsfile</span><span class="p">)</span>    
 
@@ -290,8 +299,8 @@
         <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">batch_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>            
         <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;@ echo off</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;DATE /T &gt; running.txt</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">exe_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;call &quot;</span> <span class="o">+</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">delft3dfm_exe_path</span><span class="p">,</span>
-                                 <span class="s2">&quot;x64</span><span class="se">\\</span><span class="s2">dimr</span><span class="se">\\</span><span class="s2">scripts</span><span class="se">\\</span><span class="s2">run_dimr.bat dimr_config.xml</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">exe_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;call </span><span class="se">\&quot;</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">executables</span><span class="o">.</span><span class="n">delft3dfm_path</span><span class="p">,</span>
+                                 <span class="s2">&quot;x64</span><span class="se">\\</span><span class="s2">dimr</span><span class="se">\\</span><span class="s2">scripts</span><span class="se">\\</span><span class="s2">run_dimr.bat</span><span class="se">\&quot;</span><span class="s2"> dimr_config.xml</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">exe_path</span><span class="p">)</span>
         <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;move running.txt finished.txt</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;exit</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -364,11 +373,17 @@
 <div class="viewcode-block" id="CoSMoS_Delft3DFM.post_process"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.post_process.html#cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.post_process">[docs]</a>    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Post-process Delft3D FM output: generate wave and water level timeseries.        </span>
 <span class="sd">        &quot;&quot;&quot;</span>         
+        <span class="kn">import</span> <span class="nn">cht.misc.misc_tools</span>
+
         <span class="c1"># Extract water levels</span>
 
         <span class="n">output_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cycle_output_path</span>
-        <span class="n">post_path</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cycle_post_path</span>
-
+        <span class="c1"># post_path   = self.cycle_post_path</span>
+        <span class="n">post_path</span> <span class="o">=</span>  <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">webviewer</span><span class="p">,</span> 
+                                  <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">webviewer</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                  <span class="s2">&quot;data&quot;</span><span class="p">,</span>
+                                  <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        
         <span class="n">hisfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">runid</span> <span class="o">+</span> <span class="s2">&quot;_his.nc&quot;</span><span class="p">)</span>
         
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="p">:</span>
@@ -377,15 +392,21 @@
 
             <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">read_timeseries_output</span><span class="p">(</span><span class="n">file_name</span><span class="o">=</span><span class="n">hisfile</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">station</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="p">:</span>
-                <span class="n">vv</span><span class="o">=</span><span class="n">v</span><span class="p">[</span><span class="n">station</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
-                <span class="n">vv</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;date_time&#39;</span>
-                <span class="n">vv</span><span class="o">.</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;wl&#39;</span>
-                <span class="n">vv</span> <span class="o">=</span> <span class="n">vv</span> <span class="o">+</span> <span class="n">station</span><span class="o">.</span><span class="n">water_level_correction</span>
-                <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">post_path</span><span class="p">,</span>
-                                         <span class="s2">&quot;waterlevel.&quot;</span> <span class="o">+</span> <span class="n">station</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.csv&quot;</span><span class="p">)</span>
-                <span class="n">vv</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span>
-                          <span class="n">date_format</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S&#39;</span><span class="p">,</span>
-                          <span class="n">float_format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.3f</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">station</span><span class="o">.</span><span class="n">upload</span><span class="p">:</span>
+                    <span class="n">vv</span><span class="o">=</span><span class="n">v</span><span class="p">[</span><span class="n">station</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+                    <span class="n">vv</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;date_time&#39;</span>
+                    <span class="n">vv</span><span class="o">.</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;wl&#39;</span>
+                    <span class="n">vv</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertical_reference_level_difference_with_msl</span>
+
+                    <span class="n">fo</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">post_path</span><span class="p">,</span> <span class="s1">&#39;timeseries&#39;</span><span class="p">))</span>
+                    <span class="n">csv_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">post_path</span><span class="p">,</span>
+                                             <span class="s2">&quot;timeseries&quot;</span><span class="p">,</span>
+                                            <span class="s2">&quot;waterlevel.&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">station</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.csv.js&quot;</span><span class="p">)</span>
+                    
+                    <span class="n">s</span> <span class="o">=</span> <span class="n">vv</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">date_format</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S&#39;</span><span class="p">,</span>
+                                    <span class="n">float_format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.3f</span><span class="s1">&#39;</span><span class="p">,</span>
+                                    <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> 
+                    <span class="n">cht</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">misc_tools</span><span class="o">.</span><span class="n">write_csv_js</span><span class="p">(</span><span class="n">csv_file</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="s2">&quot;var csv = `date_time,wl&quot;</span><span class="p">)</span>
 
         <span class="c1"># Extract waves</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wave</span><span class="p">:</span>
@@ -393,16 +414,19 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="p">:</span>
 
                 <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Extracting wave time series from model &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>    
-                <span class="n">wavefile</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s2">&quot;wavh-wave-nest.nc&quot;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s2">&quot;wavh-wave-Entire_swn.nc&quot;</span><span class="p">)]</span>
+                <span class="n">wavefile</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s2">&quot;wavh-wave-wave.nc&quot;</span><span class="p">)]</span>
                 <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">read_timeseries_output</span><span class="p">(</span><span class="n">file_name</span><span class="o">=</span><span class="n">hisfile</span><span class="p">,</span> <span class="n">file_name_wave</span> <span class="o">=</span> <span class="n">wavefile</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">station</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="p">:</span>
-                    <span class="n">vv</span><span class="o">=</span><span class="n">v</span><span class="p">[</span><span class="n">station</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
-                    <span class="n">vv</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;date_time&#39;</span>
-                    <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">post_path</span><span class="p">,</span>
-                                            <span class="s2">&quot;waves.&quot;</span> <span class="o">+</span> <span class="n">station</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.csv&quot;</span><span class="p">)</span>
-                    <span class="n">vv</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span>
-                            <span class="n">date_format</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S&#39;</span><span class="p">,</span>
-                            <span class="n">float_format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.3f</span><span class="s1">&#39;</span><span class="p">)</span>        </div></div>
+                    <span class="k">if</span> <span class="n">station</span><span class="o">.</span><span class="n">upload</span><span class="p">:</span>
+                        <span class="n">vv</span><span class="o">=</span><span class="n">v</span><span class="p">[</span><span class="n">station</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+                        <span class="n">vv</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;date_time&#39;</span>
+                        <span class="n">csv_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">post_path</span><span class="p">,</span>
+                                                 <span class="s2">&quot;timeseries&quot;</span><span class="p">,</span>
+                                                <span class="s2">&quot;waves.&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">station</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.csv.js&quot;</span><span class="p">)</span>
+                        <span class="n">s</span> <span class="o">=</span> <span class="n">vv</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">date_format</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S&#39;</span><span class="p">,</span>
+                                    <span class="n">float_format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.3f</span><span class="s1">&#39;</span><span class="p">,</span>
+                                    <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>       
+                        <span class="n">cht</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">misc_tools</span><span class="o">.</span><span class="n">write_csv_js</span><span class="p">(</span><span class="n">csv_file</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="s2">&quot;var csv = `date_time,hm0,tp&quot;</span><span class="p">)</span> </div></div>
 </pre></div>
 
            </div>

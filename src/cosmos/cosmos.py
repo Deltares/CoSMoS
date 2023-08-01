@@ -102,7 +102,7 @@ class CoSMoS:
         # Set main path        
         self.config.path.main = main_path
 
-        self.config.file_name = "default.toml"
+        self.config.file_name = "config.toml"
         for key, value in kwargs.items():
             if key == "config_file":
                 self.config.file_name = value       
@@ -156,8 +156,8 @@ class CoSMoS:
         self.main_loop  = MainLoop()
         self.model_loop = ModelLoop()
 
-        # self.main_loop.just_initialize = self.config.cycle.just_initialize
-        # self.main_loop.run_models      = self.config.cycle.run_models
+        self.main_loop.just_initialize = self.config.cycle.just_initialize
+        self.main_loop.run_models      = self.config.cycle.run_models
         # self.main_loop.clean_up        = self.config.cycle.clean_up
         
         self.main_loop.start(cycle=cycle)
@@ -276,21 +276,13 @@ class CoSMoS:
             f.write(tstr + message + "\n")
             f.close()
 
-    def make_webviewer(self, sc_name:str, wv_name:str, upload:bool=False, cycle=None,config_file:str="default.xml"):   
+    def make_webviewer(self, sc_name:str):   
         """Just make webviewer
 
         Parameters
         ----------
         sc_name : str
             Scenario name
-        wv_name : str
-            Webviewer version name
-        upload : bool, optional
-            Option to upload webviewer, by default False
-        cycle : datestr, optional
-            Cycle name, by default None
-        config_file : str, optional
-            Configuration file name, by default "config.toml"
         
         See Also
         -------
@@ -300,23 +292,25 @@ class CoSMoS:
 
         """
         
-        if not cosmos.config.main_path:
+        if not cosmos.config.path.main:
             cosmos.log("Error: CoSMoS main path not set! Do this by running cosmos.initialize(main_path) or passing main_path as input argument to cosmos.run().")
             return
         
-        self.run(sc_name,config_file=config_file, just_initialize=True, cycle=cycle)
+        self.config.cycle.just_initialize  = True
+        self.config.cycle.run_models = False
+        self.run(sc_name)
                 
         from .cosmos_webviewer import WebViewer
         
-        wv = WebViewer(wv_name)
+        wv = WebViewer(cosmos.config.webviewer.name)
         wv.make()
 
         # Delete job folder that was just created
-        if cosmos.config.run_mode != "parallel":
-            fo.rmdir(os.path.join(cosmos.config.job_path,
-                                  cosmos.config.scenario_name))
+        if cosmos.config.cycle.run_mode != "parallel":
+            fo.rmdir(os.path.join(cosmos.config.path.jobs,
+                                  cosmos.scenario_name))
         
-        if upload:
+        if cosmos.config.cycle.upload:
             wv.upload()
 
     def post_process(self, sc_name:str, model=None, cycle:str=None):   
@@ -338,20 +332,24 @@ class CoSMoS:
 
         """
                 
-        if not cosmos.config.main_path:
+        if not cosmos.config.path.main:
             cosmos.log("Error: CoSMoS main path not set! Do this by running cosmos.initialize(main_path) or passing main_path as input argument to cosmos.run().")
             return
         
-        self.run(sc_name,just_initialize=True, cycle=cycle)
+        # Overwrite settings for just_initialize and run_models
+        self.config.cycle.just_initialize  = True
+        self.config.cycle.run_models = False
+        self.run(sc_name)
         
         mdls = []
         if model == "all":
             for mdl in cosmos.scenario.model:
                 mdls.append(mdl)
         else:    
-            for mdl in cosmos.scenario.model:
-                if mdl.name == model:
-                    mdls.append(mdl)
+            for model2 in model:
+                for mdl in cosmos.scenario.model:
+                    if mdl.name == model2:
+                        mdls.append(mdl)
                 
         for mdl in mdls:
             fo.mkdir(mdl.cycle_path)
@@ -364,9 +362,9 @@ class CoSMoS:
             mdl.post_process()
 
         # Delete job folder that was just created
-        if cosmos.config.run_mode != "parallel":
-            fo.rmdir(os.path.join(cosmos.config.job_path,
-                                  cosmos.config.scenario_name))
+        if cosmos.config.cycle.run_mode != "parallel":
+            fo.rmdir(os.path.join(cosmos.config.path.jobs,
+                                  cosmos.scenario_name))
 
 # class Config:
 #     def __init__(self):        

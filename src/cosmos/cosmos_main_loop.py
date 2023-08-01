@@ -209,6 +209,28 @@ class MainLoop:
             if model.priority == 0:
                 model.run_simulation = False
 
+        # Check if model data needs to be uploaded to webviewer (only upload for high-res nested models)
+        modelopt = ["flow", "wave"]
+        modeloptnames = ["tide_gauge", "wave_buoy"]
+        for model in cosmos.scenario.model:
+            for iopt, opts in enumerate(modelopt):
+                all_nested_models = model.get_all_nested_models(opts)
+
+                if all_nested_models:
+                    all_nested_stations = []
+                    if all_nested_models[0].type == 'beware':
+                        all_nested_models= [model]
+                        bw=1
+                    else:
+                        bw=0
+                    for mdl in all_nested_models:
+                        for st in mdl.station:
+                            all_nested_stations.append(st.name)
+                    for station in model.station:
+                        if station.type == modeloptnames[iopt]:
+                            if station.name in all_nested_stations and bw==0:                            
+                                station.upload = False 
+        
         # Start and stop times
         cosmos.log('Getting start and stop times ...')
         get_start_and_stop_times()

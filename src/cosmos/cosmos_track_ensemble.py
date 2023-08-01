@@ -47,18 +47,26 @@ def setup_track_ensemble():
         tc.write_track("laura.cyc", "ddb_cyc")
     else:
         # Read in storm track from *.cyc file
-        tc = tc.read(cosmos.scenario.meteo_track)    
+        from cht.tropical_cyclone.tropical_cyclone import TropicalCyclone
+        tc= TropicalCyclone()
+        cyc_file = os.path.join(cosmos.config.meteo_database.path, "tracks", cosmos.scenario.meteo_track + ".cyc")
+        tc.from_ddb_cyc(cyc_file)
+        tc.account_for_forward_speed()
+        tc.estimate_missing_values()
+        tc.include_rainfall = True
+
     # Generate track ensemble
     cosmos.scenario.track_ensemble = TropicalCycloneEnsemble(TropicalCyclone=tc)
-    t0str = tc.track.loc[0]["datetime"]
-    t1str = tc.track.loc[len(tc.track) - 1]["datetime"]
-    cosmos.scenario.track_ensemble.tstart  = datetime.strptime(t0str, "%Y%m%d %H%M%S")
-    cosmos.scenario.track_ensemble.tend    = datetime.strptime(t1str, "%Y%m%d %H%M%S")
+    cosmos.scenario.track_ensemble.tstart           = cosmos.scenario.ref_date
+    cosmos.scenario.track_ensemble.tstart_ensemble  = cosmos.scenario.cycle
+    cosmos.scenario.track_ensemble.tend             = cosmos.stop_time
+    cosmos.scenario.track_ensemble.include_best_track = 1
     cosmos.scenario.track_ensemble.compute_ensemble(number_of_realizations=cosmos.scenario.track_ensemble_nr_realizations)    
 
     # Write to files
     cosmos.scenario.track_ensemble.to_cyc(cosmos.scenario.cycle_track_ensemble_cyc_path)
     cosmos.scenario.track_ensemble.to_spiderweb(cosmos.scenario.cycle_track_ensemble_spw_path)
+    cosmos.scenario.track_ensemble.to_shapefile(cosmos.scenario.cycle_track_ensemble_path)
 
     # Get outline of ensemble
     cone = cosmos.scenario.track_ensemble.get_outline(buffer=300000.0)
@@ -66,7 +74,7 @@ def setup_track_ensemble():
     # Loop through all models and check if they fall within cone
     models_to_add = []
     for model in cosmos.scenario.model:
-        if shapely.intersects(cone.loc[0]["geometry"], model.outline.loc[0]["geometry"]):
+        if model.type == 'beware' or shapely.intersects(cone.loc[0]["geometry"], model.outline.loc[0]["geometry"]):
             # Add model
             ensemble_model = copy.deepcopy(model)
             ensemble_model.name = model.name + "_ensemble"
@@ -85,8 +93,6 @@ def setup_track_ensemble():
         model.get_nested_models()
         model.set_paths()
     
-    cosmos.config.cycle.only_run_ensembles = True
-
     if cosmos.config.cycle.only_run_ensembles:
         # Remove all models that are not ensembles       
         cosmos.scenario.model = [model for model in cosmos.scenario.model if model.ensemble]
@@ -94,5 +100,6 @@ def setup_track_ensemble():
     # Set ensemble names
     cosmos.scenario.ensemble_names = []
     for iens in range(cosmos.scenario.track_ensemble_nr_realizations):
-        cosmos.scenario.ensemble_names.append(str(iens).zfill(5))
+        cosmos.scenario.ensemble_names.append(str(iens+1).zfill(5))
+    cosmos.scenario.best_track = str(0).zfill(5)
 

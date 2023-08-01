@@ -29,4 +29,8 @@
     <name>spiderwebs</name>
     <source>jtwc</source>
   </meteo_subset>
+  <meteo_subset>
+    <name>tracks</name>
+    <source>jtwc</source>
+  </meteo_subset>
 </root>

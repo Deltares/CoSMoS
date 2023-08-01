@@ -11,7 +11,7 @@ To setup CoSMoS for your area of interest, you:
 
 **Step 2: Make a local copy of the CoSMoS run folder.**
 
-Copy the default folders *cosmos_run_folder* and *model_database* from your CoSMoS installation folder to the folder where you want to run CoSMoS.
+Copy the default folders *cosmos_run_folder*, *model_database*, and *meteo_database* from your CoSMoS installation folder to the folder where you want to run CoSMoS.
 
 **Step 3: Add models to the model database.**
 
@@ -21,7 +21,7 @@ Copy the default folders *cosmos_run_folder* and *model_database* from your CoSM
 
 In the *configuration* folder, you can find the file :ref:`*config.toml* <configuration>`. 
 Adjust the model executable paths (for the models that you want to be running) to your local installations. 
-Also, make sure to link to the correct *model_database* folder.
+Also, make sure to link to the correct *model_database* and *meteo_database* folders.
 
 **Step 5: Setup a scenario file.**
 

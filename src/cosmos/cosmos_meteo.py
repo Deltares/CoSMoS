@@ -75,12 +75,11 @@ def read_meteo_sources():
 
     # Meteo subsets
     # Read from xml file
-    xml_file = os.path.join(cosmos.config.path.main,
-                            "meteo",
+    meteo_path = cosmos.config.meteo_database.path
+    xml_file = os.path.join(meteo_path,
                             "meteo_subsets.xml")
     xml_obj = xml.xml2obj(xml_file)
     
-    meteo_path = os.path.join(cosmos.config.path.main, "meteo")
     parameters = ["wind","barometric_pressure","precipitation"]
     
     has_source_list = []

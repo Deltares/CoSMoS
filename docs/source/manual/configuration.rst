@@ -3,7 +3,7 @@
 Setting up your configuration file
 ------------
 
-The CoSMoS configuration file specifies the model database path, the model executable paths, and the webserver, webviewer, and cycle settings:
+The CoSMoS configuration file specifies the model and meteo database paths, the conda path, the model executable paths, and the webserver, webviewer, and cycle settings:
 
 .. include:: examples/config.toml
        :literal: 
