@@ -8,13 +8,11 @@ Created on Tue May 11 16:02:04 2021
 import os
 import pandas as pd
 import numpy as np
-import shutil
 import datetime
 
 from cht.sfincs.sfincs import SFINCS
 import cht.misc.fileops as fo
 from cht.tide.tide_predict import predict
-#from cht.misc.deltares_ini import IniStruct
 from cht.misc.misc_tools import dict2yaml
 
 from .cosmos import cosmos
@@ -22,10 +20,7 @@ from .cosmos_model import Model
 from .cosmos_tiling import make_flood_map_tiles
 import cosmos.cosmos_meteo as meteo
 
-#import xmlkit as xml
-
 from cht.nesting.nest1 import nest1
-#from cht.nesting.nest2 import nest2
 
 
 class CoSMoS_SFINCS(Model):
@@ -71,7 +66,7 @@ class CoSMoS_SFINCS(Model):
                                                   station.name)
                 
         # Add observation points for nested models (Nesting 1)
-        if self.nested_flow_models:            
+        if self.nested_flow_models:
             if not self.domain.input.obsfile:
                 self.domain.input.obsfile = "sfincs.obs"
             
@@ -82,7 +77,7 @@ class CoSMoS_SFINCS(Model):
         if self.nested_flow_models or len(self.station)>0:
             if not self.domain.input.obsfile:
                 self.domain.input.obsfile = "sfincs.obs"
-            self.domain.write_observation_points()            
+            self.domain.write_observation_points()
 
         # Make restart file
         trstsec = self.domain.input.tstop.replace(tzinfo=None) - self.domain.input.tref            
@@ -105,40 +100,10 @@ class CoSMoS_SFINCS(Model):
         # Boundary conditions        
         if self.flow_nested:
             # The actual nesting occurs in the run_job.py file 
+
             self.domain.input.bzsfile = "sfincs.bzs"
-
-            # # Get boundary conditions from overall model (Nesting 2)
-
-            # # Correct boundary water levels. Assuming that output from overall
-            # # model is in MSL !!!
-            # zcor = self.boundary_water_level_correction - self.vertical_reference_level_difference_with_msl
-
-            # self.domain.input.bzsfile = "sfincs.bzs"
-            # # Get boundary conditions from overall model (Nesting 2)
-            # if self.ensemble:
-            #     # Loop through ensemble members
-            #     for iens in range(cosmos.scenario.track_ensemble_nr_realizations):
-            #         name = cosmos.scenario.ensemble_names[iens]
-            #         nest2(self.flow_nested.domain,
-            #               self.domain,
-            #               output_path=os.path.join(self.flow_nested.cycle_output_path, name),
-            #               output_file= 'sfincs_his.nc',
-            #               boundary_water_level_correction=zcor,
-            #               option="flow",
-            #               bc_path=os.path.join(self.job_path, name))
-            # else:
-            #     # Deterministic    
-            #     nest2(self.flow_nested.domain,
-            #             self.domain,
-            #             output_path=self.flow_nested.cycle_output_path,
-            #             output_file='sfincs_his.nc',
-            #             boundary_water_level_correction=zcor,
-            #             option="flow",
-            #             bc_path=self.job_path)
             
-            
-        elif self.domain.input.bcafile:
-            
+        elif self.domain.input.bcafile:            
             # Get boundary conditions from astronomic components (should really do this in sfincs.py) 
 
             times = pd.date_range(start=self.flow_start_time,
@@ -157,43 +122,11 @@ class CoSMoS_SFINCS(Model):
 
         if self.wave_nested:
             # The actual nesting occurs in the run_job.py file 
-            
-            # Get wave boundary conditions from overall model (Nesting 2)
-
-            # Check to see in which model this model is nested 
-            # In case of BEWARE:
-            #    We force the wave makers with IG waves from BEWARE
-            #    Data from bhi file are the IG wave heights
-            #    Data from bti file are the IG wave period
-            # Otherwise:
-            #    We force the model wave makers with SnapWave
-            #    Data from bhs file are Hm0 incident waves
-           
-            # We do this following bit just to make sure the file names are set.
-            # The user should probably make sure that they are present in the sfincs.inp file.
 
             self.domain.input.snapwave_bhsfile = "snapwave.bhs"
             self.domain.input.snapwave_btpfile = "snapwave.btp"
             self.domain.input.snapwave_bwdfile = "snapwave.bwd"
             self.domain.input.snapwave_bdsfile = "snapwave.bds"
-
-            # # Get boundary conditions from overall model (Nesting 2)
-            # if self.ensemble:
-            #     # Loop through ensemble members
-            #     for iens in range(cosmos.scenario.track_ensemble_nr_realizations):
-            #         name = cosmos.scenario.ensemble_names[iens]
-            #         nest2(self.wave_nested.domain,
-            #               self.domain,
-            #               output_path=os.path.join(self.wave_nested.cycle_output_path, name),
-            #               option="wave",
-            #               bc_path=os.path.join(self.job_path, name))
-            # else:
-            #     # Deterministic    
-            #     nest2(self.wave_nested.domain,
-            #             self.domain,
-            #             output_path=self.wave_nested.cycle_output_path,
-            #             option="wave",
-            #             bc_path=self.job_path)
 
         # If SFINCS nested in Hurrywave for SNAPWAVE setup, separately run BEWARE nesting for LF waves
         if self.bw_nested:
@@ -202,26 +135,7 @@ class CoSMoS_SFINCS(Model):
             self.domain.input.wfpfile = "sfincs.wfp"
             self.domain.input.whifile = "sfincs.whi"
             self.domain.input.wtifile = "sfincs.wti"
-
-            # # Get wave maker conditions from overall model (Nesting 2)
-            # if self.ensemble:
-            #     # Loop through ensemble members
-            #     for iens in range(cosmos.scenario.track_ensemble_nr_realizations):
-            #         name = cosmos.scenario.ensemble_names[iens]
-            #         nest2(self.bw_nested.domain,
-            #               self.domain,
-            #               output_path=os.path.join(self.bw_nested.cycle_output_path, name),
-            #               option="wave",
-            #               bc_path=os.path.join(self.job_path, name))
-            # else:
-            #     # Deterministic    
-            #     nest2(self.bw_nested.domain,
-            #           self.domain,
-            #           output_path=self.bw_nested.cycle_output_path,
-            #           option="wave",
-            #           bc_path=self.job_path)
-
-            self.domain.write_wavemaker_forcing_points()
+#            self.domain.write_wavemaker_forcing_points()
 
         # Meteo forcing
         if self.meteo_wind or self.meteo_atmospheric_pressure or self.meteo_precipitation:
@@ -243,17 +157,13 @@ class CoSMoS_SFINCS(Model):
             else:
                 self.domain.input.scsfile = None
 
-        if self.meteo_spiderweb:
-            
+        if self.meteo_spiderweb:            
             # Spiderweb file given, copy to job folder
+
             self.domain.input.spwfile = self.meteo_spiderweb
             meteo_path = os.path.join(cosmos.config.main_path, "meteo", "spiderwebs")
             src = os.path.join(meteo_path, self.meteo_spiderweb)
             fo.copy_file(os.path.join(meteo_path, self.meteo_spiderweb), self.job_path)
-
-            # elif cosmos.scenario.track_ensemble:
-            #     self.domain.input.spwfile = "sfincs.spw"   
-            #     fo.copy_file(cosmos.scenario.best_track_file, os.path.join(self.job_path, "sfincs.spw"))
             
             self.domain.input.baro    = 1
             self.domain.input.utmzone = self.crs.utm_zone
@@ -262,38 +172,55 @@ class CoSMoS_SFINCS(Model):
             self.domain.input.ampfile = None
             self.domain.input.amprfile = None
 
-#         if self.ensemble:
-#             # Copy all spiderwebs to jobs folder
-#             self.domain.input.spwfile = "sfincs.spw"
-#             for iens in range(cosmos.scenario.track_ensemble_nr_realizations):
-#                 name = cosmos.scenario.ensemble_names[iens]
-#                 fname0 = os.path.join(cosmos.scenario.cycle_track_ensemble_spw_path,
-#                                       "ensemble" + name + ".spw")
-#                 fname1 = os.path.join(self.job_path, name, "sfincs.spw")
-#                 fo.copy_file(fname0, fname1)
-# #            self.domain.input.variables.amufile = None
-# #            self.domain.input.variables.amvfile = None
+        if self.ensemble:
+            # Use spiderweb from ensemble
+            self.domain.input.spwfile = "sfincs.spw"
+            if self.crs.is_projected:
+                self.domain.input.utmzone = self.crs.utm_zone
 
         # Now write input file (sfincs.inp)
         self.domain.write_input_file()
 
         # Copy the correct to run_job.py
-        pth = os.path.dirname(__file__)
-        fo.copy_file(os.path.join(pth, "cosmos_run_sfincs.py"), os.path.join(self.job_path, "run_job.py"))
-        fo.copy_file(os.path.join(pth, "cosmos_run_sfincs_member.py"), self.job_path)
+        code_pth = os.path.dirname(__file__)
+        fo.copy_file(os.path.join(code_pth, "cosmos_run_sfincs.py"), os.path.join(self.job_path, "run_job.py"))
+        fo.copy_file(os.path.join(code_pth, "cosmos_run_sfincs_member.py"), self.job_path)
 
-        # Write config file
+        # Write config file to be used in run_job.py
         config = {}
+        config["name"] = self.name
+        config["scenario"] = cosmos.scenario_name
+        config["cycle"]    = cosmos.cycle_string
         config["ensemble"] = self.ensemble
         config["run_mode"] = cosmos.config.cycle.run_mode
         if self.flow_nested:
+            config["flow_nested_type"] = self.flow_nested.type
             config["flow_nested_path"] = self.flow_nested.cycle_output_path
         if self.wave_nested:
+            config["wave_nested_type"] = self.wave_nested.type
             config["wave_nested_path"] = self.wave_nested.cycle_output_path
         if self.bw_nested: 
+            config["bw_nested_type"]   = self.bw_nested.type
             config["bw_nested_path"]   = self.bw_nested.cycle_output_path
-        config["spw_path"] = cosmos.scenario.cycle_track_ensemble_spw_path
-        
+        if self.ensemble:
+            config["spw_path"] = cosmos.scenario.cycle_track_ensemble_spw_path
+        config["boundary_water_level_correction"] = self.boundary_water_level_correction
+        config["vertical_reference_level_difference_with_msl"] = self.vertical_reference_level_difference_with_msl        
+        if cosmos.config.cycle.make_flood_maps and self.make_flood_map:
+            config["flood_map"] = {}
+            if self.ensemble:
+                name = "flood_map_90"
+            else:
+                name = "flood_map"    
+            config["flood_map"]["name"] = name
+            config["flood_map"]["png_path"]   = os.path.join(cosmos.config.webviewer.data_path)
+            config["flood_map"]["index_path"] = os.path.join(self.path, "tiling", "indices")
+            config["flood_map"]["topo_path"]  = os.path.join(self.path, "tiling", "topobathy")
+            config["flood_map"]["start_time"] = cosmos.cycle
+            config["flood_map"]["stop_time"]  = cosmos.stop_time
+            config["flood_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.flood_map_color_map]
+            config["flood_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.flood_map_color_map]
+
         dict2yaml(os.path.join(self.job_path, "config.yml"), config)
 
         if self.ensemble:
@@ -302,174 +229,15 @@ class CoSMoS_SFINCS(Model):
                 for member in cosmos.scenario.ensemble_names:
                     f.write(member + "\n")
 
-
-
-        # Make run batch file
+        # Make run batch file (only for windows)
         batch_file = os.path.join(self.job_path, "run_sfincs.bat")
         fid = open(batch_file, "w")
         fid.write("@ echo off\n")
-        fid.write("DATE /T > running.txt\n")
         exe_path = os.path.join(cosmos.config.executables.sfincs_path, "sfincs.exe")
         fid.write(exe_path + "\n")
-        fid.write("move running.txt finished.txt\n")
         fid.close()
 
-        # # Now loop through ensemble members
-        # if self.ensemble:
-            
-        #     # Use main folder as best_track
-        #     # os.rename(self.job_path, self.job_path + "_besttrack")
-        #     fo.copy_file(cosmos.scenario.best_track_file, os.path.join(self.job_path, "sfincs.spw"))
-        #     self.domain.input.spwfile = "sfincs.spw"
-        #     self.domain.input.baro    = 1
-        #     self.domain.input.utmzone = self.crs.utm_zone
-        #     self.domain.input.amufile = None
-        #     self.domain.input.amvfile = None
-        #     self.domain.input.ampfile = None
-        #     self.domain.input.amprfile = None
-        #     self.domain.write_input_file()
-
-        #     for member_name in cosmos.scenario.member_names:
-                
-        #         # Job path for this ensemble member
-        #         member_path = self.job_path + "_" + member_name
-        #         fo.mkdir(member_path)
-        #         self.domain.path = member_path
-
-        #         # Boundary conditions     
-        #         if self.flow_nested:
-        
-        #             # Correct boundary water levels. Assuming that output from overall
-        #             # model is in MSL !!!
-        #             zcor = self.boundary_water_level_correction - self.vertical_reference_level_difference_with_msl
-                    
-        #             # Get boundary conditions from overall model (Nesting 2)
-
-        #             # This is necessary for reading the timeseries output for nesting
-        #             # when this model has already run
-        #             if self.flow_nested.ensemble:
-        #                 if self.flow_nested.type == "beware":
-        #                     output_file = "beware_his_" + member_name + '.nc'
-        #                 elif self.flow_nested.type == "sfincs":
-        #                     output_file = "sfincs_his_" + member_name + '.nc'
-        #             else:
-        #                 output_file= None                 
-                    
-        #             nest2(self.flow_nested.domain,
-        #                 self.domain,
-        #                 output_path=self.flow_nested.cycle_output_path,
-        #                 output_file= output_file,
-        #                 boundary_water_level_correction=zcor,
-        #                 option="flow")                        
-
-        #             self.domain.input.bzsfile = "sfincs.bzs"
-        #             self.domain.write_flow_boundary_conditions(file_name= os.path.join(member_path, self.domain.input.bzsfile))
-
-        #         elif self.domain.input.bcafile:
-        #             self.domain.input.bcafile = r"..\\" + os.path.basename(self.job_path) + r"\\sfincs.bca"
-        #             self.domain.input.bzsfile = r"..\\" + os.path.basename(self.job_path) + r"\\sfincs.bzs"
-
-        #         if self.wave_nested:
-        #             if self.wave_nested.ensemble:
-        #                 if self.wave_nested.type == "beware":
-        #                     output_file = "beware_his_" + member_name + '.nc'
-        #                 elif self.wave_nested.type == "hurrywave":
-        #                     output_file = "hurrywave_his_" + member_name + '.nc'
-        #             else:
-        #                 output_file= None
-                    
-        #             nest2(self.wave_nested.domain,
-        #                 self.domain,
-        #                 output_path=self.wave_nested.cycle_output_path,
-        #                 output_file= output_file,
-        #                 option="wave")
-
-        #             if self.wave_nested.type == "beware":                
-        #                 self.domain.input.wfpfile = "sfincs.wfp"
-        #                 self.domain.input.whifile = "sfincs.whi"
-        #                 self.domain.input.wtifile = "sfincs.wti"
-        #                 self.domain.input.wstfile = "sfincs.wst"
-
-        #                 self.domain.input.wfpfile = r"..\\" + os.path.basename(self.job_path) + r"\\sfincs.wfp"
-        #                 self.domain.write_whi_file(file_name = os.path.join(member_path, self.domain.input.whifile))
-        #                 self.domain.write_wti_file(file_name = os.path.join(member_path, self.domain.input.wtifile))
-        #                 self.domain.write_wst_file(file_name = os.path.join(member_path, self.domain.input.wstfile))
-
-        #             elif self.wave_nested.type == "hurrywave":
-        #                 self.domain.input.snapwave_bhsfile = "snapwave.bhs"
-        #                 self.domain.input.snapwave_btpfile = "snapwave.btp"
-        #                 self.domain.input.snapwave_bwdfile = "snapwave.bwd"
-        #                 self.domain.input.snapwave_bdsfile = "snapwave.bds"
-
-        #                 self.domain.input.snapwave_encfile = r"..\\" + os.path.basename(self.job_path) + r"\\snapwave.enc"
-        #                 self.domain.input.snapwave_bndfile = r"..\\" + os.path.basename(self.job_path) + r"\\snapwave.bnd"
-        #                 self.domain.input.snapwave_mskfile = r"..\\" + os.path.basename(self.job_path) + r"\\snapwave.msk"
-
-        #                 self.domain.write_bhs_file(file_name = os.path.join(member_path, self.domain.input.snapwave_bhsfile))
-        #                 self.domain.write_btp_file(file_name = os.path.join(member_path, self.domain.input.snapwave_btpfile))
-        #                 self.domain.write_bwd_file(file_name = os.path.join(member_path, self.domain.input.snapwave_bwdfile))
-        #                 self.domain.write_bds_file(file_name = os.path.join(member_path, self.domain.input.snapwave_bdsfile))    
-
-        #         if self.bw_nested:
-        #             if self.bw_nested.ensemble:
-        #                 output_file = "beware_his_" + member_name + '.nc'
-        #             else:
-        #                 output_file= None
-                    
-        #             nest2(self.bw_nested.domain,
-        #                 self.domain,
-        #                 output_path=self.bw_nested.cycle_output_path,
-        #                 output_file= output_file,
-        #                 option="wave")
-        #             self.domain.input.wfpfile = "sfincs.wfp"
-        #             self.domain.input.whifile = "sfincs.whi"
-        #             self.domain.input.wtifile = "sfincs.wti"
-
-        #             self.domain.input.wfpfile = r"..\\" + os.path.basename(self.job_path) + r"\\sfincs.wfp"
-
-        #             self.domain.write_whi_file(file_name = os.path.join(member_path, self.domain.input.whifile))
-        #             self.domain.write_wti_file(file_name = os.path.join(member_path, self.domain.input.wtifile))
-                    
-        #         # Copy spw file to member path
-        #         meteo_path = os.path.join(cosmos.config.main_path, "meteo")
-        #         spwfile = os.path.join(meteo_path,
-        #                                cosmos.scenario.track_ensemble,
-        #                                member_name + ".spw")
-        #         fo.copy_file(spwfile, os.path.join(member_path, "sfincs.spw"))
-
-        #         # Adjust input and save to .inp file
-        #         self.domain.input.spwfile = "sfincs.spw"
-        #         self.domain.input.baro    = 1
-        #         self.domain.input.utmzone = self.crs.utm_zone
-        #         self.domain.input.amufile = None
-        #         self.domain.input.amvfile = None
-        #         self.domain.input.ampfile = None
-        #         self.domain.input.amprfile = None
-        #         if self.domain.input.depfile is not None:
-        #             self.domain.input.depfile = r"..\\" + os.path.basename(self.job_path) + r"\\sfincs.dep"
-        #         self.domain.input.mskfile = r"..\\" + os.path.basename(self.job_path) + r"\\sfincs.msk"
-        #         if self.domain.input.indexfile is not None:
-        #             self.domain.input.indexfile = r"..\\" + os.path.basename(self.job_path) + r"\\sfincs.ind"
-        #         self.domain.input.bndfile = r"..\\" + os.path.basename(self.job_path) + r"\\sfincs.bnd"
-        #         if self.domain.input.sbgfile is not None:
-        #             self.domain.input.sbgfile = r"..\\" + os.path.basename(self.job_path) + r"\\sfincs.sbg"
-        #         if self.domain.input.obsfile is not None:    
-        #             self.domain.input.obsfile = r"..\\" + os.path.basename(self.job_path) + r"\\sfincs.obs"
-        #         try:
-        #             if self.domain.input.qtrfile is not None:
-        #                 self.domain.input.qtrfile = r"..\\" + os.path.basename(self.job_path) + r"\\sfincs.qtr"
-        #         except:
-        #             pass
-        #         try:
-        #             if self.domain.input.scsfile is not None:
-        #                 self.domain.input.scsfile = r"..\\" + os.path.basename(self.job_path) + r"\\sfincs.scs"
-        #         except:
-        #             pass
-
-        #         self.domain.write_input_file(input_file= os.path.join(member_path, "sfincs.inp"))
-        #         fo.copy_file(os.path.join(self.job_path, 'run.bat'), member_path)
-
-        # Set the path back to the one in cosmos\models\etc.
+        # Finally set the path back to the one in cosmos\models\etc.
         self.domain.path = pth
 
     def move(self):
@@ -479,103 +247,62 @@ class CoSMoS_SFINCS(Model):
         input_path   = self.cycle_input_path  
         restart_path = self.restart_flow_path
 
-        # Output        
-        if self.ensemble:
-            # Merging should happen in the job, so there should not be a difference between ensemble and deterministic
-            for member_name in cosmos.scenario.ensemble_names:                
-                pth0 = os.path.join(self.job_path, member_name)
-                pth1 = os.path.join(output_path, member_name)
-                fo.mkdir(pth1)
-                fo.move_file(os.path.join(pth0, "sfincs_map.nc"), pth1)
-                fo.move_file(os.path.join(pth0, "sfincs_his.nc"), pth1)
-        else:
-            fo.move_file(os.path.join(job_path, "sfincs_map.nc"), output_path)
-            fo.move_file(os.path.join(job_path, "sfincs_his.nc"), output_path)
-            fo.move_file(os.path.join(job_path, "*.txt"), output_path)
-        
-        
+        fo.move_file(os.path.join(job_path, "sfincs_map.nc"), output_path)
+        fo.move_file(os.path.join(job_path, "sfincs_his.nc"), output_path)
+        fo.move_file(os.path.join(job_path, "*.txt"), output_path)
+
+        # Restart file used in simulation        
         fo.move_file(os.path.join(self.job_path, "sfincs.rst"), input_path)
 
-        # Restart files 
+        # Restart files created during simulation
         fo.move_file(os.path.join(self.job_path, "*.rst"), restart_path)
-        # Restart files 
-        if self.ensemble:
-            # Copy restart file from first member (they should be identical for all members)
-            member_name = cosmos.scenario.ensemble_names[0]
-            pth0 = os.path.join(self.job_path, member_name)
-            fo.move_file(os.path.join(job_path, member_name, "*.rst"), restart_path)
-        else:
-            fo.move_file(os.path.join(job_path, "*.rst"), restart_path)
 
-        # Input
+        # Input (all the rest)
         fo.move_file(os.path.join(self.job_path, "*.*"), input_path)
         
-        # if cosmos.scenario.track_ensemble and self.ensemble:
-        #     # And now for the ensemble members
-        #     # Only output
-        #     for member_name in cosmos.scenario.member_names:
-                
-        #         pth = self.job_path + "_" + member_name
-
-        #         if os.path.isfile(os.path.join(pth, "zst.txt")):
-        #             fo.move_file(os.path.join(pth, "zst.txt"), os.path.join(self.cycle_output_path, 'zst_'+ member_name +'.txt'))
-        #         if os.path.isfile(os.path.join(pth, "zs.dat")):
-        #             fo.move_file(os.path.join(pth, "zs.dat"), os.path.join(self.cycle_output_path, 'zs_'+ member_name +'.dat'))
-        #         if os.path.isfile(os.path.join(pth, "zsmax.dat")):
-        #             fo.move_file(os.path.join(pth, "zsmax.dat"), os.path.join(self.cycle_output_path, 'zsmax_'+ member_name +'.dat'))
-        #         if os.path.isfile(os.path.join(pth, "sfincs_his.nc")):
-        #             fo.move_file(os.path.join(pth, "sfincs_his.nc"), os.path.join(self.cycle_output_path, 'sfincs_his_'+ member_name +'.nc'))
-        #         if os.path.isfile(os.path.join(pth, "sfincs_map.nc")):
-        #             fo.move_file(os.path.join(pth, "sfincs_map.nc"), os.path.join(self.cycle_output_path, 'sfincs_map_'+ member_name +'.nc'))
-
-        #         try:
-        #             shutil.rmtree(pth)
-        #         except:
-        #             # Folder was probably open in another application
-        #             pass
-        
     def post_process(self):
-        import cht.misc.prob_maps as pm
+#        import cht.misc.prob_maps as pm
 
         # Extract water levels
 
-        input_path  = self.cycle_input_path
+#        input_path  = self.cycle_input_path
         output_path = self.cycle_output_path
         post_path   = self.cycle_post_path
-            
+
+#        return    
         # if not self.domain.input.tref:
         #     # This model has been run before. The model instance has not data on tref, obs points etc.
         #     self.domain.read_input_file(os.path.join(input_path, "sfincs.inp"))
         #     self.domain.read_observation_points()
         
-        if self.ensemble:
-            # Should really do this in the job itself            
-            # Make probabilistic flood maps
-            # file_list = []
-            # file_list= fo.list_files(os.path.join(output_path, "sfincs_map_*"))
-            # prcs= np.concatenate((np.arange(0, 0.9, 0.05), np.arange(0.9, 1, 0.01)))
-            # vars= ["hm0", "tp"]
-            # output_file_name = os.path.join(output_path, "hurrywave_map_ensemble.nc")
-            # #pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
+        # if self.ensemble:
+        #     # Should really do this in the job itself            
+        #     # Make probabilistic flood maps
+        #     # file_list = []
+        #     # file_list= fo.list_files(os.path.join(output_path, "sfincs_map_*"))
+        #     # prcs= np.concatenate((np.arange(0, 0.9, 0.05), np.arange(0.9, 1, 0.01)))
+        #     # vars= ["hm0", "tp"]
+        #     # output_file_name = os.path.join(output_path, "hurrywave_map_ensemble.nc")
+        #     # #pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
 
-            # Make probabilistic water level timeseries
-            file_list = []
-            for member in cosmos.scenario.ensemble_names:
-                file_list.append(os.path.join(output_path, member, "sfincs_his.nc"))
-            prcs= [0.05, 0.5, 0.95]
-            vars= ["point_zs"]
-            output_file_name = os.path.join(output_path, "sfincs_his_ensemble.nc")
-            pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
+        #     # Make probabilistic water level timeseries
+        #     file_list = []
+        #     for member in cosmos.scenario.ensemble_names:
+        #         file_list.append(os.path.join(output_path, member, "sfincs_his.nc"))
+        #     prcs= [0.05, 0.5, 0.95]
+        #     vars= ["point_zs"]
+        #     output_file_name = os.path.join(output_path, "sfincs_his_ensemble.nc")
+        #     pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
 
         if self.station:
 
             # Read in data for all stations
             data = {}
             if self.ensemble:
-                prcs= [0.05, 0.5, 0.95]
+                prcs= [0.10, 0.50, 0.90]
                 for i,v in enumerate(prcs):
                     data["wl_" + str(round(v*100))] = self.domain.read_timeseries_output(path=output_path,
-                                                          file_name= "sfincs_his_ensemble.nc",
+                                                          file_name= "sfincs_his.nc",
                                                           parameter= "point_zs_" + str(round(v*100)))
             else:    
                 data["wl"] = self.domain.read_timeseries_output(path=output_path,  parameter="point_zs")
@@ -647,83 +374,84 @@ class CoSMoS_SFINCS(Model):
         #                   float_format='%.3f')        
 
         return
-        # Make flood map tiles
-        if cosmos.config.cycle.make_flood_maps and self.make_flood_map:
 
-            if self.ensemble:
-                # Make probabilistic flood maps
-                file_list= fo.list_files(os.path.join(output_path, "sfincs_map_*"))
-                prcs= [0.05, 0.5, 0.95]#np.concatenate((np.arange(0, 0.9, 0.05), np.arange(0.9, 1, 0.01)))            
-                vars= ["zs", "zsmax"]
-                output_file_name = os.path.join(output_path, "sfincs_map_ensemble.nc")
-                pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
+        # # Make flood map tiles
+        # if cosmos.config.cycle.make_flood_maps and self.make_flood_map:
 
-            flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-                                          "flood_map")
+        #     if self.ensemble:
+        #         # Make probabilistic flood maps
+        #         file_list= fo.list_files(os.path.join(output_path, "sfincs_map_*"))
+        #         prcs= [0.05, 0.5, 0.95]#np.concatenate((np.arange(0, 0.9, 0.05), np.arange(0.9, 1, 0.01)))            
+        #         vars= ["zs", "zsmax"]
+        #         output_file_name = os.path.join(output_path, "sfincs_map_ensemble.nc")
+        #         pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
+
+        #     flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+        #                                   "flood_map")
             
-            index_path = os.path.join(self.path, "tiling", "indices")
-            topo_path = os.path.join(self.path, "tiling", "topobathy")
+        #     index_path = os.path.join(self.path, "tiling", "indices")
+        #     topo_path = os.path.join(self.path, "tiling", "topobathy")
             
-            if os.path.exists(index_path) and os.path.exists(topo_path):
+        #     if os.path.exists(index_path) and os.path.exists(topo_path):
                 
-                cosmos.log("Making flood map tiles for model " + self.long_name + " ...")                
+        #         cosmos.log("Making flood map tiles for model " + self.long_name + " ...")                
 
-                # 24 hour increments  
-                dtinc = 24
+        #         # 24 hour increments  
+        #         dtinc = 24
     
-                # Wave map for the entire simulation
-                dt1 = datetime.timedelta(hours=1)
-                dt  = datetime.timedelta(hours=dtinc)
-                t0  = cosmos.cycle.replace(tzinfo=None)    
-                t1  = cosmos.stop_time
+        #         # Wave map for the entire simulation
+        #         dt1 = datetime.timedelta(hours=1)
+        #         dt  = datetime.timedelta(hours=dtinc)
+        #         t0  = cosmos.cycle.replace(tzinfo=None)    
+        #         t1  = cosmos.stop_time
                     
-                pathstr = []
+        #         pathstr = []
                 
-                # 6-hour increments
-                requested_times = pd.date_range(start=t0 + dt,
-                                                end=t1,
-                                                freq=str(dtinc) + "H").to_pydatetime().tolist()
+        #         # 6-hour increments
+        #         requested_times = pd.date_range(start=t0 + dt,
+        #                                         end=t1,
+        #                                         freq=str(dtinc) + "H").to_pydatetime().tolist()
     
-                for it, t in enumerate(requested_times):
-                    pathstr.append((t - dt).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
+        #         for it, t in enumerate(requested_times):
+        #             pathstr.append((t - dt).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
     
-                pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
+        #         pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
                             
-                zsmax_file = os.path.join(output_path, "sfincs_map.nc")
+        #         zsmax_file = os.path.join(output_path, "sfincs_map.nc")
                 
-                try:
-                    # Inundation map over dt-hour increments                    
-                    for it, t in enumerate(requested_times):
+        #         try:
+        #             # Inundation map over dt-hour increments                    
+        #             for it, t in enumerate(requested_times):
     
-                        zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file,
-                                                       time_range=[t - dt + dt1, t + dt1])
-                        flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-                                                      "flood_map",
-                                                      pathstr[it])                                            
-                        make_flood_map_tiles(zsmax, index_path, topo_path, flood_map_path,
-                                                 water_level_correction=0.0)
+        #                 zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file,
+        #                                                time_range=[t - dt + dt1, t + dt1])
+        #                 flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+        #                                               "flood_map",
+        #                                               pathstr[it])                                            
+        #                 make_flood_map_tiles(zsmax, index_path, topo_path, flood_map_path,
+        #                                          water_level_correction=0.0)
     
-                    # Full simulation        
-                    flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-                                                  "flood_map",
-                                                   pathstr[-1])                    
-                    zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file,
-                                                   time_range=[t0 + dt1, t1 + dt1])
-                    make_flood_map_tiles(zsmax, index_path, topo_path, flood_map_path,
-                                         water_level_correction=0.0)
+        #             # Full simulation        
+        #             flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+        #                                           "flood_map",
+        #                                            pathstr[-1])                    
+        #             zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file,
+        #                                            time_range=[t0 + dt1, t1 + dt1])
+        #             make_flood_map_tiles(zsmax, index_path, topo_path, flood_map_path,
+        #                                  water_level_correction=0.0)
 
-                    if cosmos.scenario.track_ensemble and self.ensemble:
-                        zsmax_file = os.path.join(output_path, "sfincs_map_ensemble.nc")
-                        # Full simulation        
-                        flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-                                                    "flood_map", 
-                                                    pathstr[-1] + "_95")                    
-                        zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file,
-                                                    time_range=[t0 + dt1, t1 + dt1], parameter = 'zsmax_95')
-                        make_flood_map_tiles(zsmax, index_path, topo_path, flood_map_path,
-                                            water_level_correction=0.0)
-                except:
-                    print("An error occured while making flood map tiles")
+        #             if cosmos.scenario.track_ensemble and self.ensemble:
+        #                 zsmax_file = os.path.join(output_path, "sfincs_map_ensemble.nc")
+        #                 # Full simulation        
+        #                 flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+        #                                             "flood_map", 
+        #                                             pathstr[-1] + "_95")                    
+        #                 zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file,
+        #                                             time_range=[t0 + dt1, t1 + dt1], parameter = 'zsmax_95')
+        #                 make_flood_map_tiles(zsmax, index_path, topo_path, flood_map_path,
+        #                                     water_level_correction=0.0)
+        #         except:
+        #             print("An error occured while making flood map tiles")
 
 
 #         # Make flood map tiles

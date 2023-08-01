@@ -8,3 +8,5 @@ __pycache__
 /cosmos_run_folder/*.log
 /cosmos_run_folder/*.py
 /cosmos_run_folder/*.bat
+_build
+_generated

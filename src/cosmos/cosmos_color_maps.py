@@ -12,7 +12,7 @@ from cht.misc.misc_tools import rgb2hex
 
 def read_color_maps(file_name):
     
-    map_contours = []
+    map_contours = {}
 
     with open(file_name, 'r') as f:
         clrs = yaml.safe_load(f)
@@ -22,7 +22,7 @@ def read_color_maps(file_name):
     maps = clrs["color_range"]
     for tm in maps:
         map_type = {}
-        map_type["name"] = tm["name"]
+#        map_type["name"] = tm["name"]
         map_type["string"] = tm["legend_text"]
         map_type["contours"] = []
         if "scale" not in tm:
@@ -264,6 +264,7 @@ def read_color_maps(file_name):
             
             map_type["contours"] = map_type["contours"][::-1]
             
-        map_contours.append(map_type)    
+#        map_contours.append(map_type)    
+        map_contours[tm["name"]] = map_type
 
     return map_contours

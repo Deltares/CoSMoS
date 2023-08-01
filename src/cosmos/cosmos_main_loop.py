@@ -192,11 +192,8 @@ class MainLoop:
         # Create scenario cycle paths
         fo.mkdir(cosmos.scenario.cycle_path)
         fo.mkdir(cosmos.scenario.cycle_models_path)
-        fo.mkdir(cosmos.scenario.cycle_tiles_path)
+#        fo.mkdir(cosmos.scenario.cycle_tiles_path)
         fo.mkdir(cosmos.scenario.cycle_job_list_path)
-
-        # Get list of models that have already finished
-        finished_list = os.listdir(cosmos.scenario.cycle_job_list_path)
 
         # Prepare some stuff for each model
         for model in cosmos.scenario.model:
@@ -204,13 +201,6 @@ class MainLoop:
             model.set_paths()
             # Set model status
             model.status = "waiting"
-            # Check finished models
-            for file_name in finished_list:
-                model_name = file_name.split('.')[0]
-                if model.name.lower() == model_name.lower():
-                    model.status = "finished"
-                    model.run_simulation = False
-                    break            
             if model.priority == 0:
                 model.run_simulation = False
 
@@ -255,7 +245,17 @@ class MainLoop:
         # Make track ensemble (this also add 'new' ensemble models that fall within the cone)
         if cosmos.scenario.track_ensemble_nr_realizations > 0:
             setup_track_ensemble()
-        
+
+        # Get list of models that have already finished and set their status to finished
+        finished_list = os.listdir(cosmos.scenario.cycle_job_list_path)
+        for model in cosmos.scenario.model:
+            for file_name in finished_list:
+                model_name = file_name.split('.')[0]
+                if model.name.lower() == model_name.lower():
+                    model.status = "finished"
+                    model.run_simulation = False
+                    break            
+
         if self.run_models:
             # And now start the model loop
             cosmos.log("Starting model loop ...")

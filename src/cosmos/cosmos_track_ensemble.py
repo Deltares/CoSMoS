@@ -15,6 +15,7 @@ from .cosmos import cosmos
 from cht.tropical_cyclone.tropical_cyclone import TropicalCycloneEnsemble
 from cht.meteo.meteo import filter_cyclones_TCvitals
 from datetime import datetime
+import cht.misc.misc_tools
 
 def setup_track_ensemble():
     # Check if scenario is forced with track files or gridded data
@@ -43,6 +44,9 @@ def setup_track_ensemble():
         tc.estimate_missing_values()
         tc.include_rainfall = True
 
+        tc.spiderweb_radius = 400.0
+        tc.nr_radial_bins   = 100
+
     else:
         # Read in storm track from *.cyc file
         tc = tc.read(cosmos.scenario.meteo_track)    
@@ -62,6 +66,14 @@ def setup_track_ensemble():
     # Get outline of ensemble
     cone = cosmos.scenario.track_ensemble.get_outline(buffer=300000.0)
 
+    # Make geojson file (in webviewer folder)
+    file_name = os.path.join(cosmos.config.webviewer.data_path,
+                           cosmos.scenario.name,
+                           cosmos.cycle_string,
+                           "track_ensemble.geojson.js")
+    fclc = cosmos.scenario.track_ensemble.get_feature_collection()
+    cht.misc.misc_tools.write_json_js(file_name, fclc, "var track_ensemble =")
+
     # Loop through all models and check if they fall within cone
     models_to_add = []
     for model in cosmos.scenario.model:
@@ -69,7 +81,11 @@ def setup_track_ensemble():
             # Add model
             ensemble_model = copy.deepcopy(model)
             ensemble_model.name = model.name + "_ensemble"
+            ensemble_model.long_name = model.long_name + " (ensemble)"
+            ensemble_model.domain.name = model.name + "_ensemble"
             ensemble_model.ensemble = True
+            ensemble_model.nested_flow_models = []
+            ensemble_model.nested_wave_models = []
             if ensemble_model.flow_nested_name:
                 ensemble_model.flow_nested_name += "_ensemble"
             if ensemble_model.wave_nested_name:
@@ -84,9 +100,7 @@ def setup_track_ensemble():
         model.get_nested_models()
         model.set_paths()
     
-    cosmos.config.cycle.only_run_ensembles = True
-
-    if cosmos.config.cycle.only_run_ensembles:
+    if cosmos.config.cycle.only_run_ensemble:
         # Remove all models that are not ensembles       
         cosmos.scenario.model = [model for model in cosmos.scenario.model if model.ensemble]
 

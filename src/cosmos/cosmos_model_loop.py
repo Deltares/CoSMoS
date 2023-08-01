@@ -90,8 +90,8 @@ class ModelLoop():
                 # Moving model input and output from job folder
                 cosmos.log("Moving model " + model.long_name)
                 model.move()
-                # Delete job path
-                fo.delete_folder(model.job_path)                
+#                # Delete job path
+#                fo.delete_folder(model.job_path)                
                 model.status = "simulation_finished"
     
         # Now prepare new models ready to run        

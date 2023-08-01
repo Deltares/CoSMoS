@@ -71,11 +71,12 @@ class WebViewer:
         # Make scenario folder in web viewer
         scenario_path = os.path.join(self.path,
                                      "data",
-                                     cosmos.scenario.name)
+                                     cosmos.scenario.name,
+                                     cosmos.cycle_string)
 
         cosmos.log("Removing old scenario folder from web viewer ...")
 
-        fo.rmdir(scenario_path)
+#        fo.rmdir(scenario_path)
         fo.mkdir(os.path.join(scenario_path))
         
         # Map variables
@@ -96,9 +97,11 @@ class WebViewer:
 
     def copy_timeseries(self):
 
+        # web viewer scenario path
         scenario_path = os.path.join(self.path,
                                      "data",
-                                     cosmos.scenario.name)
+                                     cosmos.scenario.name,
+                                     cosmos.cycle_string)
 
         # Stations and buoys
         cosmos.log("Copying time series ...")
@@ -174,13 +177,15 @@ class WebViewer:
                                                             "mllw":station.mllw,
                                                             "model_name":model.name,
                                                             "model_type":model.type,
+                                                            "model_ensemble": model.ensemble,
                                                             "cycle": cosmos.cycle_string,
                                                             "obs_file":obs_file,
                                                             "obs_folder": cosmos.scenario.observations_path}))
                         
                         # Merge time series from previous cycles
                         # Go two days back
-                        path = cosmos.scenario.timeseries_path
+#                        path = cosmos.scenario.timeseries_path
+                        path = cosmos.scenario.path
 #                        path = model.archive_path
                         t0 = cosmos.cycle - datetime.timedelta(hours=48)
                         t1 = cosmos.cycle
@@ -191,7 +196,7 @@ class WebViewer:
                                    station.name,
                                    t0=t0.replace(tzinfo=None),
                                    t1=t1.replace(tzinfo=None),
-                                   prefix='waterlevel')
+                                   prefix='wl')
                         
                         # Check if merge returned values
                         if v is not None:                            
@@ -203,8 +208,11 @@ class WebViewer:
                                                     csv_file)
                             s = v.to_csv(date_format='%Y-%m-%dT%H:%M:%S',
                                          float_format='%.3f',
-                                         header=False)                             
-                            cht.misc.misc_tools.write_csv_js(csv_file, s, 'var csv = `date_time,wl')
+                                         header=False)
+                            if model.ensemble:                             
+                                cht.misc.misc_tools.write_csv_js(csv_file, s, 'var csv = `date_time,wl_10,wl_50,wl_90')
+                            else:    
+                                cht.misc.misc_tools.write_csv_js(csv_file, s, 'var csv = `date_time,wl')
         
         # Save stations geojson file
         if features:
@@ -295,13 +303,14 @@ class WebViewer:
 
         scenario_path = os.path.join(self.path,
                                      "data",
-                                     cosmos.scenario.name)
+                                     cosmos.scenario.name,
+                                     cosmos.cycle_string)
 
         # Flood maps
         
         # Check if flood maps are available
-        flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-                                      "flood_map")
+        flood_map_path = os.path.join(scenario_path,
+                                      "flood_map_90")
         
         if fo.exists(flood_map_path):
             
@@ -334,11 +343,11 @@ class WebViewer:
                 pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ") + "_95")
                 namestr.append("Combined " + hrstr + "-hour forecast 95 %")
 
-            wvpath = os.path.join(scenario_path)
-            fo.copy_file(flood_map_path, wvpath)
+            # wvpath = os.path.join(scenario_path)
+            # fo.copy_file(flood_map_path, wvpath)
             dct={}
-            dct["name"]        = "flood_map"
-            dct["long_name"]   = "Flood map"
+            dct["name"]        = "flood_map_90"
+            dct["long_name"]   = "Flood map_90"
             dct["description"] = "This is a flood map. It can tell if you will drown."
             dct["format"]      = "xyz_tile_layer"
             dct["max_native_zoom"]  = 13
@@ -351,7 +360,7 @@ class WebViewer:
                 tms.append(tm)
             dct["times"]        = tms  
 
-            mp = next((x for x in cosmos.config.map_contours if x["name"] == "flood_map"), None)    
+            mp = cosmos.config.map_contours["flood_map"]
             
             lgn = {}
             lgn["text"] = mp["string"]
@@ -376,7 +385,8 @@ class WebViewer:
         # Wave maps
         scenario_path = os.path.join(self.path,
                                      "data",
-                                     cosmos.scenario.name)
+                                     cosmos.scenario.name,
+                                     cosmos.cycle_string)
 
         # 24 hour increments  
         dtinc = 24
@@ -442,7 +452,7 @@ class WebViewer:
 
             contour_set = "Hm0"    
             
-            mp = next((x for x in cosmos.config.map_contours if x["name"] == contour_set), None)    
+            mp = cosmos.config.map_contours["Hm0"]
             
             lgn = {}
             lgn["text"] = mp["string"]
@@ -468,7 +478,8 @@ class WebViewer:
         
         scenario_path = os.path.join(self.path,
                                      "data",
-                                     cosmos.scenario.name)
+                                     cosmos.scenario.name,
+                                     cosmos.cycle_string)
              
         # Check if sedero maps are available
         sedero_path = os.path.join(cosmos.scenario.cycle_tiles_path,
@@ -485,7 +496,7 @@ class WebViewer:
             dct["format"]      = "xyz_tile_layer"
             dct["max_native_zoom"]  = 16
 
-            mp = next((x for x in cosmos.config.map_contours if x["name"] == "sedero"), None)    
+            mp = cosmos.config.map_contours["sedero"]
             
             lgn = {}
             lgn["text"] = mp["string"]
@@ -544,7 +555,8 @@ class WebViewer:
 
         scenario_path = os.path.join(self.path,
                                      "data",
-                                     cosmos.scenario.name)
+                                     cosmos.scenario.name,
+                                     cosmos.cycle_string)
 
         # Wind
         xml_obj = xml.xml2obj(cosmos.scenario.file_name)
@@ -592,7 +604,7 @@ class WebViewer:
                     dct["format"]      = "vector_field"
                     dct["max"]         = wndmx
         
-                    mp = next((x for x in cosmos.config.map_contours if x["name"] == contour_set), None)    
+                    mp = cosmos.config.map_contours[contour_set]
                     
                     lgn = {}
                     lgn["text"] = mp["string"]
@@ -887,8 +899,9 @@ class WebViewer:
     def make_runup_map(self):        
 
         output_path = os.path.join(self.path,
-                                     "data",
-                                     cosmos.scenario.name)
+                                   "data",
+                                   cosmos.scenario.name,
+                                   cosmos.cycle_string)
 
         # Extreme runup height
 
@@ -1262,6 +1275,7 @@ def update_scenarios_js(sc_file):
     newsc["lat"]         = cosmos.scenario.lat
     newsc["zoom"]        = cosmos.scenario.zoom    
     newsc["cycle"]       = cosmos.cycle.strftime('%Y-%m-%dT%H:%M:%S')
+    newsc["cycle_string"] = cosmos.cycle_string
     newsc["duration"]    = str(cosmos.scenario.runtime)
 
     now = datetime.datetime.utcnow()

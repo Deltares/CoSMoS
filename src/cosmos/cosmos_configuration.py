@@ -51,6 +51,7 @@ class WebViewer:
     def __init__(self):
         self.name    = None
         self.version = None
+        self.path    = None
         
 class Cycle:
     def __init__(self):
@@ -62,9 +63,10 @@ class Cycle:
         self.upload          = True
         self.get_meteo       = True
         self.run_mode        = "serial"
+        self.only_run_ensemble = False
 
 class Configuration:
-    def __init__(self):        
+    def __init__(self):
         self.path           = Path()
         self.model_database = ModelDatabase()
         self.meteo_database = MeteoDatabase()
@@ -139,7 +141,10 @@ class Configuration:
         for super_file in super_region_list:
             name = os.path.splitext(os.path.basename(super_file))[0]
             self.super_region[name] = toml.load(super_file)
-
+ 
+        # Set webviewer path
+        self.webviewer.path      = os.path.join(cosmos.config.path.main, "webviewers", self.webviewer.name)
+        self.webviewer.data_path = os.path.join(cosmos.config.path.main, "webviewers", self.webviewer.name, "data")
 
     def read_config_file(self):
         

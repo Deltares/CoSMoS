@@ -56,7 +56,7 @@ class CoSMoS:
 
         from .cosmos_configuration import Configuration
 
-        self.config          = Configuration()
+        self.config = Configuration()
 
         # Set main path        
         self.config.path.main = main_path

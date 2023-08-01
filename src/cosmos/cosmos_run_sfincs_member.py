@@ -3,7 +3,7 @@ import sys
 import os
 
 from cht.sfincs.sfincs import SFINCS
-from cht.nesting import nest2
+from cht.nesting.nest2 import nest2
 import cht.misc.fileops as fo
 from cht.misc.misc_tools import yaml2dict
 
@@ -16,9 +16,11 @@ if len(sys.argv) == 1:
 else:
     ensemble_member_name = sys.argv[1]
 
-
 # Read SFINCS model
 sf = SFINCS("sfincs.inp")
+sf.name = config["name"]
+sf.type = "sfincs"
+sf.path = "."
 
 # Nesting
 if "flow_nested_path" in config:
@@ -31,22 +33,22 @@ if "flow_nested_path" in config:
 
     # Get boundary conditions from overall model (Nesting 2)
     if config["ensemble"]:
-        nest2(self.flow_nested.domain,
-                self.domain,
-                output_path=os.path.join(self.flow_nested.cycle_output_path, ensemble_member_name),
-                output_file= 'sfincs_his.nc',
-                boundary_water_level_correction=zcor,
-                option="flow",
-                bc_path=os.path.join(self.job_path, name))
+        print(sf.type)
+        nest2(config["flow_nested_type"],
+              sf,
+              output_path=config["flow_nested_path"],
+              boundary_water_level_correction=zcor,
+              option="flow",
+              bc_path=".",
+              ensemble_member_index=int(ensemble_member_name))
     else:
         # Deterministic    
-        nest2(self.flow_nested.domain,
-                self.domain,
-                output_path=self.flow_nested.cycle_output_path,
-                output_file='sfincs_his.nc',
-                boundary_water_level_correction=zcor,
-                option="flow",
-                bc_path=self.job_path)
+        nest2(config["flow_nested_type"],
+              sf,
+              output_path=config["flow_nested_path"],
+              boundary_water_level_correction=zcor,
+              option="flow",
+              bc_path=".")
     
 if "wave_nested_path" in config:
     # Get wave boundary conditions from overall model (Nesting 2)

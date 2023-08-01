@@ -159,7 +159,7 @@ class Scenario:
             file_name = os.path.join(model_path, "model.toml")
 
             # Path in model database
-            model.path        = model_path                                    
+            model.path        = model_path
             model.name        = name
             model.version     = vsn
             model.region      = region
