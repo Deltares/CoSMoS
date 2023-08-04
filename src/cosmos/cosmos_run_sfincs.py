@@ -57,7 +57,7 @@ def simulate_single(config, member=None):
     # We're already in the correct folder
     # Read SFINCS model (necessary for nesting)
     sf = SFINCS("sfincs.inp")
-    sf.name = config["name"]
+    sf.name = config["model"]
     sf.type = "sfincs"
     sf.path = "."
     # Nesting
@@ -209,7 +209,7 @@ def map_tiles(config):
                 
         if os.path.exists(index_path) and os.path.exists(topo_path):
             
-            print("Making flood map tiles for model " + config["name"] + " ...")                
+            print("Making flood map tiles for model " + config["model"] + " ...")                
 
             # 24 hour increments  
             dtinc = 12
@@ -303,7 +303,7 @@ def clean_up(config):
             s3_client = session.client('s3')
             config["scenario"] + "/" + config["model"]
             for member in ensemble_members:
-                s3key = config["scenario"] + "/" + config["model"] + "/" + member
+                s3key = config["scenario"] + "/" + "models" + "/" + config["model"] + "/" + member
                 # Delete folder from S3
                 objects = s3_client.list_objects(Bucket="cosmos-scenarios", Prefix=s3key)
                 for object in objects['Contents']:

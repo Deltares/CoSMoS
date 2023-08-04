@@ -90,9 +90,9 @@ class ModelLoop():
             if not model.status == 'failed':
                 if cosmos.config.cycle.run_mode == "cloud":
                     # Download job folder from cloud storage
-                    subfolder = os.path.join(cosmos.scenario.name, model.name)
-                    cosmos.cloud.download_folder(subfolder,
-                                                 "cosmos-scenarios",
+                    subfolder = cosmos.scenario.name + "/" + model.name + "/"
+                    cosmos.cloud.download_folder("cosmos-scenarios",
+                                                 subfolder,
                                                  model.job_path)
                 # Moving files to input, output and restart folders
                 cosmos.log("Moving model " + model.long_name)
@@ -161,14 +161,17 @@ class ModelLoop():
 
             elif cosmos.config.cycle.run_mode == "cloud":
                 cosmos.log("Ready to submit to Argo - " + model.long_name + " ...")
-                s3key = os.path.join(cosmos.scenario.name, "models", model.name)
+                s3key = cosmos.scenario.name + "/" + "models" + "/" + model.name
                 # Delete existing folder in cloud storage
+                cosmos.log("Deleting model folder on S3 : " + model.name)                
                 cosmos.cloud.delete_folder("cosmos-scenarios", s3key)
-                # Upload job folder to cloud storage                
+                # Upload job folder to cloud storage
+                cosmos.log("Uploading model input to S3 : " + s3key)                
                 cosmos.cloud.upload_folder("cosmos-scenarios",
                                            model.job_path,
                                            s3key)
-                model.cloud_job = cosmos.argo.submit_template_job("simple-workflow-02", subfolder)
+                cosmos.log("Submitting to S3 : " + s3key)                
+                model.cloud_job = cosmos.argo.submit_template_job("simple-workflow-02", s3key)
 
             else:
                 # Model will be run on WCP node

@@ -187,7 +187,7 @@ class CoSMoS_SFINCS(Model):
 
         # Write config file to be used in run_job.py
         config = {}
-        config["name"] = self.name
+        config["model"] = self.name
         config["scenario"] = cosmos.scenario_name
         config["cycle"]    = cosmos.cycle_string
         config["ensemble"] = self.ensemble

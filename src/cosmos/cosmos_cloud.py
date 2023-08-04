@@ -65,16 +65,18 @@ class Cloud:
                 print("Uploaded " + os.path.basename(file))
 
     def download_folder(self, bucket_name, s3_folder, local_folder, quiet=True):
-        os.mkdir(local_folder)
+        fo.mkdir(local_folder)
         objects = self.s3_client.list_objects(Bucket=bucket_name, Prefix=s3_folder)
-        for object in objects['Contents']:
-            s3_key = object['Key']
-            local_path = os.path.join(local_folder, os.path.basename(s3_key))
-            self.s3_client.download_file(bucket_name, s3_key, local_path)
-            if not quiet:
-                print("Downloaded " + os.path.basename(s3_key))
+        if "Contents" in objects:
+            for object in objects['Contents']:
+                s3_key = object['Key']
+                local_path = os.path.join(local_folder, os.path.basename(s3_key))
+                self.s3_client.download_file(bucket_name, s3_key, local_path)
+                if not quiet:
+                    print("Downloaded " + os.path.basename(s3_key))
 
     def delete_folder(self, bucket_name, folder):
         objects = self.s3_client.list_objects(Bucket=bucket_name, Prefix=folder)
-        for object in objects['Contents']:
-            self.s3_client.delete_object(Bucket=bucket_name, Key=object['Key'])
+        if "Contents" in objects:
+            for object in objects['Contents']:
+                self.s3_client.delete_object(Bucket=bucket_name, Key=object['Key'])
