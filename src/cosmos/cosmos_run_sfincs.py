@@ -5,33 +5,27 @@ import pandas as pd
 import numpy as np
 import sys
 import boto3
+import datetime
 
 from cht.misc.misc_tools import yaml2dict
 import cht.misc.fileops as fo
-import cht.misc.prob_maps as pm
 from cht.misc.prob_maps import merge_nc_his
 from cht.misc.prob_maps import merge_nc_map
 from cht.tiling.tiling import make_floodmap_tiles
-import datetime
-#from cht.sfincs.sfincs import SFINCS
+from cht.sfincs.sfincs import SFINCS
+from cht.nesting.nest2 import nest2
 
-#sf = SFINCS()
-
-def find_subfolders(root_folder):
-    subfolders = []
-    for root, dirs, files in os.walk(root_folder):
-        for dir_name in dirs:
-            subfolder_path = os.path.join(root, dir_name)
-            subfolders.append(subfolder_path)
-    return subfolders
+def read_ensemble_members():
+    with open('ensemble_members.txt') as f:
+        ensemble_members = f.readlines()
+    ensemble_members = [x.strip() for x in ensemble_members]
+    return ensemble_members
 
 def prepare_ensemble(config):
     # In case of ensemble, make folders for each ensemble member and copy inputs to these folders
     if config["ensemble"]:
         # Read in the list of ensemble members
-        with open('ensemble_members.txt') as f:
-            ensemble_members = f.readlines()
-        ensemble_members = [x.strip() for x in ensemble_members]
+        ensemble_members = read_ensemble_members()
         for member in ensemble_members:
             print('Making folder for ensemble member ' + member)
             # Make folder for ensemble member and copy all input files
@@ -48,9 +42,7 @@ def prepare_ensemble(config):
 def simulate_ensemble(config):
     # Never called in cloud mode
     # Read in the list of ensemble members
-    with open('ensemble_members.txt') as f:
-        ensemble_members = f.readlines()
-    ensemble_members = [x.strip() for x in ensemble_members]
+    ensemble_members = read_ensemble_members()
     # Loop through members
     curdir = os.getcwd()
     for member in ensemble_members:
@@ -61,18 +53,77 @@ def simulate_ensemble(config):
         simulate_single(config, member=member)
         os.chdir(curdir)
 
-    # # Copy restart files from the first ensemble member (restart files are the same for all members)
-    # fo.copy_file(ensemble_members[0] + '/sfincs.*.rst', './')    
-    #     # os.chdir(member)
-    #     # simulate_single(config, member=member)
-    #     # os.chdir(curdir)
-
 def simulate_single(config, member=None):
-
     # We're already in the correct folder
-
+    # Read SFINCS model (necessary for nesting)
+    sf = SFINCS("sfincs.inp")
+    sf.name = config["name"]
+    sf.type = "sfincs"
+    sf.path = "."
     # Nesting
     print("Nesting ...")
+    if "flow_nested_path" in config:
+
+        # Get boundary conditions from overall model (Nesting 2)
+
+        # Correct boundary water levels. Assuming that output from overall
+        # model is in MSL !!!
+        zcor = config["boundary_water_level_correction"] - config["vertical_reference_level_difference_with_msl"]
+
+        # Get boundary conditions from overall model (Nesting 2)
+        if config["ensemble"]:
+            nest2(config["flow_nested_type"],
+                sf,
+                output_path=config["flow_nested_path"],
+                boundary_water_level_correction=zcor,
+                option="flow",
+                bc_path=".",
+                ensemble_member_index=int(member))
+        else:
+            # Deterministic    
+            nest2(config["flow_nested_type"],
+                sf,
+                output_path=config["flow_nested_path"],
+                boundary_water_level_correction=zcor,
+                option="flow",
+                bc_path=".")
+        
+    if "wave_nested_path" in config:
+        # Get boundary conditions from overall model (Nesting 2)
+        if config["ensemble"]:
+            # Loop through ensemble members
+            nest2(self.wave_nested.domain,
+                    self.domain,
+                    output_path=os.path.join(self.wave_nested.cycle_output_path, member),
+                    option="wave",
+                    bc_path=os.path.join(self.job_path, ensemble_member_name))
+        else:
+            # Deterministic    
+            nest2(self.wave_nested.domain,
+                    self.domain,
+                    output_path=self.wave_nested.cycle_output_path,
+                    option="wave",
+                    bc_path=self.job_path)
+
+    # If SFINCS nested in Hurrywave for SNAPWAVE setup, separately run BEWARE nesting for LF waves
+    if "bw_nested_path" in config:
+        # Get wave maker conditions from overall model (Nesting 2)
+        if config["ensemble"]:
+            # Loop through ensemble members
+            nest2(self.bw_nested.domain,
+                    self.domain,
+                    output_path=os.path.join(self.bw_nested.cycle_output_path, ensemble_member_name),
+                    option="wave",
+                    bc_path=os.path.join(self.job_path, name))
+        else:
+            # Deterministic    
+            nest2(self.bw_nested.domain,
+                    self.domain,
+                    output_path=self.bw_nested.cycle_output_path,
+                    option="wave",
+                    bc_path=self.job_path)
+
+        sf.write_wavemaker_forcing_points()
 
     # Spiderweb file
     print("Copying spiderweb file ...")
@@ -106,62 +157,51 @@ def simulate_single(config, member=None):
     # And run the simulation
     if config["run_mode"] == "cloud":
         # Docker container is run in the workflow
-        print("Docker container is run in the workflow")
-#        os.system("docker run deltares/sfincs-cpu:latest\n")
         pass
+#        print("Docker container is run in other workflow template")
+#        os.system("docker run deltares/sfincs-cpu:latest\n")
     else:
         # Run the SFINCS model (this is only for windows)
         os.system("call run_sfincs.bat\n")
 
 def merge_ensemble(config):
     print("Merging ...")
+    if config["run_mode"] == "cloud":
+        folder_path = '/input'
+        his_output_file_name = os.path.join("/output/sfincs_his.nc")
+        map_output_file_name = os.path.join("/output/sfincs_map.nc")
+        # Make output folder_path
+        os.mkdir("output")
+    else:
+        folder_path = './'
+        his_output_file_name = "./sfincs_his.nc"
+        map_output_file_name = "./sfincs_map.nc"
 
-    folder_path = '/input'
-    subfolders_list = find_subfolders(folder_path)
-
-    file_list = []
-
-    for subfolder in subfolders_list:
-        file_list.append(os.path.join(folder_path, subfolder, "sfincs_his.nc"))
-
-    # Make output folder_path
-    os.mkdir("output")
-
-    prcs= [0.05, 0.5, 0.95]
-    vars= ["point_zs"]
-    output_file_name = os.path.join("/output/sfincs_his.nc")
-    pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
-
-    # Remove member folders
-    for subfolder in subfolders_list:
-        try:
-            os.rmdir(subfolder)
-            print("Directory has been removed successfully : " + subfolder)
-        except OSError as error:
-            print(error)
-            print("Directory can not be removed : " + subfolder)
-
+    # Read in the list of ensemble members
+    ensemble_members = read_ensemble_members()
 
     # Merge output files
     his_files = []
     map_files = []
-    for ensemble_member in ensemble_members:
-        his_files.append(ensemble_member + '/sfincs_his.nc')
-        map_files.append(ensemble_member + '/sfincs_map.nc')
-    merge_nc_his(his_files, ["point_zs"], output_file_name="./sfincs_his.nc")
+    for member in ensemble_members:
+        his_files.append(os.path.join(folder_path, member, "sfincs_his.nc"))
+        map_files.append(os.path.join(folder_path, member, "sfincs_map.nc"))
+    merge_nc_his(his_files, ["point_zs"], output_file_name=his_output_file_name)
     if "flood_map" in config:
-        merge_nc_map(map_files, ["zsmax"], output_file_name="./sfincs_map.nc")
+        merge_nc_map(map_files, ["zsmax"], output_file_name=map_output_file_name)
 
     # Copy restart files from the first ensemble member (restart files are the same for all members)
-    fo.copy_file(ensemble_members[0] + '/sfincs.*.rst', './')    
-
+    fo.copy_file(os.path.join(folder_path, ensemble_members[0], 'sfincs.*.rst'), folder_path)    
 
 def map_tiles(config):
 
     # Make flood map tiles
     if "flood_map" in config:
 
-        print("Make flood map")
+        # Make SFINCS object
+        sf = SFINCS()
+
+        print("Making flood map ...")
 
         flood_map_path = config["flood_map"]["png_path"]
         index_path     = config["flood_map"]["index_path"]
@@ -248,6 +288,7 @@ def map_tiles(config):
 
 def clean_up(config):
     if config["ensemble"]:
+        # Remove all ensemble members 
         # Read in the list of ensemble members
         with open('ensemble_members.txt') as f:
             ensemble_members = f.readlines()
@@ -270,12 +311,11 @@ def clean_up(config):
         else:
             for member in ensemble_members:
                 try:
-                    os.rmdir(member)
+                    fo.rmdir(member)
                     print("Directory has been removed successfully : " + member)
                 except OSError as error:
                     print(error)
                     print("Directory can not be removed : " + member)
-
 
 member_name = None
 option = sys.argv[1]
@@ -298,10 +338,14 @@ elif option == "simulate_ensemble":
     # Never called in cloud mode (in cloud mode, this is done in the workflow)
     simulate_ensemble(config)
 elif option == "simulate_single": # includes nesting
+    # Run single simulation (can be either ensemble member or deterministic)
     simulate_single(config, member=member)
 elif option == "merge_ensemble":
+    # Merge his and map files from ensemble members
     merge_ensemble(config)
 elif option == "map_tiles":
+    # Make flood map tiles
     map_tiles(config)
 elif option == "clean_up":
+    # Remove all ensemble members
     clean_up(config)

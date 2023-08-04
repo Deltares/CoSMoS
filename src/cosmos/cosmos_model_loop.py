@@ -88,19 +88,15 @@ class ModelLoop():
             # (so that pre-processing of next model can commence)
             # Post-processing will happen later
             if not model.status == 'failed':
-
                 if cosmos.config.cycle.run_mode == "cloud":
                     # Download job folder from cloud storage
                     subfolder = os.path.join(cosmos.scenario.name, model.name)
                     cosmos.cloud.download_folder(subfolder,
                                                  "cosmos-scenarios",
                                                  model.job_path)
-
-                # Moving model input and output from job folder
+                # Moving files to input, output and restart folders
                 cosmos.log("Moving model " + model.long_name)
                 model.move()
-#                # Delete job path
-#                fo.delete_folder(model.job_path)                
                 model.status = "simulation_finished"
     
         # Now prepare new models ready to run        
@@ -182,7 +178,7 @@ class ModelLoop():
                                          model.name,
                                          "ready.txt")
                 fid = open(file_name, "w")
-                fid.write("Model is ready to run")
+                fid.write(model.job_path)
                 fid.close()
 
 

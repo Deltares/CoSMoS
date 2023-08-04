@@ -185,23 +185,35 @@ class Model:
         cycle_path      = cosmos.scenario.cycle_path
         restart_path    = cosmos.scenario.restart_path
 #        timeseries_path = cosmos.scenario.cycle_timeseries_path
-        region          = self.region
-        tp              = self.type
+        # region          = self.region
+        # tp              = self.type
         name            = self.name
 
+        # # Path with model results in cycle
+        # self.cycle_path = os.path.join(cycle_path,
+        #                                "models", region, tp, name)
+        # self.cycle_input_path   = os.path.join(cycle_path, "models", region, tp, name, "input")
+        # self.cycle_output_path  = os.path.join(cycle_path, "models", region, tp, name, "output")
+        # self.cycle_figures_path = os.path.join(cycle_path, "models", region, tp, name, "figures")
+        # self.cycle_post_path    = os.path.join(cycle_path, "models", region, tp, name, "timeseries")
+        
+        # # Restart paths
+        # self.restart_flow_path = os.path.join(restart_path,
+        #                                       region, tp, name, "flow")
+        # self.restart_wave_path = os.path.join(restart_path,
+        #                                       region, tp, name, "wave")
+
+
         # Path with model results in cycle
-        self.cycle_path = os.path.join(cycle_path,
-                                       "models", region, tp, name)
-        self.cycle_input_path   = os.path.join(cycle_path, "models", region, tp, name, "input")
-        self.cycle_output_path  = os.path.join(cycle_path, "models", region, tp, name, "output")
-        self.cycle_figures_path = os.path.join(cycle_path, "models", region, tp, name, "figures")
-        self.cycle_post_path    = os.path.join(cycle_path, "models", region, tp, name, "timeseries")
+        self.cycle_path         = os.path.join(cycle_path, "models", name)
+        self.cycle_input_path   = os.path.join(cycle_path, "models", name, "input")
+        self.cycle_output_path  = os.path.join(cycle_path, "models", name, "output")
+        self.cycle_figures_path = os.path.join(cycle_path, "models", name, "figures")
+        self.cycle_post_path    = os.path.join(cycle_path, "models", name, "timeseries")
         
         # Restart paths
-        self.restart_flow_path = os.path.join(restart_path,
-                                              region, tp, name, "flow")
-        self.restart_wave_path = os.path.join(restart_path,
-                                              region, tp, name, "wave")
+        self.restart_flow_path = os.path.join(restart_path, name, "flow")
+        self.restart_wave_path = os.path.join(restart_path, name, "wave")
 
         # Model folder in the jobs folder
         # self.job_path = os.path.join(cosmos.config.path.jobs,

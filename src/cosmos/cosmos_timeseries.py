@@ -48,8 +48,8 @@ def merge_timeseries(path, model_name, model_region, model_type, station, t0=Non
             csv_file = os.path.join(path,
                                     cycle_list[it][-12:],
                                     "models",
-                                    model_region,
-                                    model_type,
+                                    # model_region,
+                                    # model_type,
                                     model_name,
                                     "timeseries",
                                     prefix + "." + station + ".csv")

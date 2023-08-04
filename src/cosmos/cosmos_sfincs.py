@@ -251,7 +251,7 @@ class CoSMoS_SFINCS(Model):
 
         fo.move_file(os.path.join(job_path, "sfincs_map.nc"), output_path)
         fo.move_file(os.path.join(job_path, "sfincs_his.nc"), output_path)
-        fo.move_file(os.path.join(job_path, "*.txt"), output_path)
+#        fo.move_file(os.path.join(job_path, "*.txt"), output_path)
 
         # Restart file used in simulation        
         fo.move_file(os.path.join(self.job_path, "sfincs.rst"), input_path)
@@ -301,7 +301,7 @@ class CoSMoS_SFINCS(Model):
             # Read in data for all stations
             data = {}
             if self.ensemble:
-                prcs= [0.10, 0.50, 0.90]
+                prcs= [0.05, 0.50, 0.95]
                 for i,v in enumerate(prcs):
                     data["wl_" + str(round(v*100))] = self.domain.read_timeseries_output(path=output_path,
                                                           file_name= "sfincs_his.nc",
