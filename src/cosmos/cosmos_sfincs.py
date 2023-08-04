@@ -132,7 +132,6 @@ class CoSMoS_SFINCS(Model):
         # If SFINCS nested in Hurrywave for SNAPWAVE setup, separately run BEWARE nesting for LF waves
         if self.bw_nested:
             # The actual nesting occurs in the run_job.py file 
-
             self.domain.input.wfpfile = "sfincs.wfp"
             self.domain.input.whifile = "sfincs.whi"
             self.domain.input.wtifile = "sfincs.wti"
@@ -184,7 +183,7 @@ class CoSMoS_SFINCS(Model):
 
         # Copy the correct to run_job.py
         pth = os.path.dirname(__file__)
-        fo.copy_file(os.path.join(pth, "cosmos_run_sfincs.py"), os.path.join(self.job_path, "run_job.py"))
+        fo.copy_file(os.path.join(pth, "cosmos_run_sfincs.py"), os.path.join(self.job_path, "run_job_2.py"))
 
         # Write config file to be used in run_job.py
         config = {}

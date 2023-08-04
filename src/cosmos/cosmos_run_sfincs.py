@@ -13,9 +13,9 @@ from cht.misc.prob_maps import merge_nc_his
 from cht.misc.prob_maps import merge_nc_map
 from cht.tiling.tiling import make_floodmap_tiles
 import datetime
-from cht.sfincs.sfincs import SFINCS
+#from cht.sfincs.sfincs import SFINCS
 
-sf = SFINCS()
+#sf = SFINCS()
 
 def find_subfolders(root_folder):
     subfolders = []
@@ -25,15 +25,13 @@ def find_subfolders(root_folder):
             subfolders.append(subfolder_path)
     return subfolders
 
-def prepare(config):
-
+def prepare_ensemble(config):
+    # In case of ensemble, make folders for each ensemble member and copy inputs to these folders
     if config["ensemble"]:
-
         # Read in the list of ensemble members
         with open('ensemble_members.txt') as f:
             ensemble_members = f.readlines()
         ensemble_members = [x.strip() for x in ensemble_members]
-
         for member in ensemble_members:
             print('Making folder for ensemble member ' + member)
             # Make folder for ensemble member and copy all input files
@@ -43,45 +41,31 @@ def prepare(config):
             #     # If cloud mode, the input files will be copied in the workflow
             #     # TODO: check if this is still needed in the cloud
             fo.copy_file("*.*", member)
-
     else:
         # Nothing to do here (all the inputs are already in the right folder)
         pass
 
 def simulate_ensemble(config):
     # Never called in cloud mode
-
     # Read in the list of ensemble members
     with open('ensemble_members.txt') as f:
         ensemble_members = f.readlines()
     ensemble_members = [x.strip() for x in ensemble_members]
-
     # Loop through members
+    curdir = os.getcwd()
     for member in ensemble_members:
-        curdir = os.getcwd()
-        for ensemble_member in ensemble_members:
-            print('Running ensemble member ' + ensemble_member)
-            # Make folder for ensemble member and copy all input files
-            os.chdir(ensemble_member)
-            # Run the SFINCS model
-            simulate_single(config, member=ensemble_member)
-            os.chdir(curdir)
+        print('Running ensemble member ' + member)
+        # Make folder for ensemble member and copy all input files
+        os.chdir(member)
+        # Run the SFINCS model
+        simulate_single(config, member=member)
+        os.chdir(curdir)
 
-    # # Merge output files
-    # his_files = []
-    # map_files = []
-    # for ensemble_member in ensemble_members:
-    #     his_files.append(ensemble_member + '/sfincs_his.nc')
-    #     map_files.append(ensemble_member + '/sfincs_map.nc')
-    # merge_nc_his(his_files, ["point_zs"], output_file_name="./sfincs_his.nc")
-    # if "flood_map" in config:
-    #     merge_nc_map(map_files, ["zsmax"], output_file_name="./sfincs_map.nc")
-
-    # Copy restart files from the first ensemble member (restart files are the same for all members)
-    fo.copy_file(ensemble_members[0] + '/sfincs.*.rst', './')    
-        # os.chdir(member)
-        # simulate_single(config, member=member)
-        # os.chdir(curdir)
+    # # Copy restart files from the first ensemble member (restart files are the same for all members)
+    # fo.copy_file(ensemble_members[0] + '/sfincs.*.rst', './')    
+    #     # os.chdir(member)
+    #     # simulate_single(config, member=member)
+    #     # os.chdir(curdir)
 
 def simulate_single(config, member=None):
 
@@ -92,7 +76,6 @@ def simulate_single(config, member=None):
 
     # Spiderweb file
     print("Copying spiderweb file ...")
-
     if config["ensemble"]:
         # Copy spiderweb file
         if config["run_mode"] == "cloud":
@@ -130,7 +113,7 @@ def simulate_single(config, member=None):
         # Run the SFINCS model (this is only for windows)
         os.system("call run_sfincs.bat\n")
 
-def merge(config):
+def merge_ensemble(config):
     print("Merging ...")
 
     folder_path = '/input'
@@ -276,16 +259,14 @@ def clean_up(config):
                 region_name='eu-west-1'
             )
             # Create an S3 client
-            s3 = session.client('s3')
+            s3_client = session.client('s3')
             config["scenario"] + "/" + config["model"]
             for member in ensemble_members:
-                s3key = config["scenario"] + "/" + config["model"] + "/" + member + "/"
+                s3key = config["scenario"] + "/" + config["model"] + "/" + member
                 # Delete folder from S3
-                try:
-                    s3.delete_object(Bucket="cosmos-scenarios", Key=s3key)
-                    print(f"Folder deleted successfully : " + s3key)
-                except Exception as e:
-                    print(f"Error: {e}")
+                objects = s3_client.list_objects(Bucket="cosmos-scenarios", Prefix=s3key)
+                for object in objects['Contents']:
+                    s3_client.delete_object(Bucket="cosmos-scenarios", Key=object['Key'])
         else:
             for member in ensemble_members:
                 try:
@@ -305,23 +286,22 @@ print("Option: " + option)
 # Read config file (config.yml)
 config = yaml2dict("config.yml")
 
-
+# Check if member is specified
 if len(sys.argv) == 3:
     member = sys.argv[2]
     print("Member: " + member)
 
-if option == "prepare":
+if option == "prepare_ensemble":
     # Prepare folders
-    prepare(config)
+    prepare_ensemble(config)
 elif option == "simulate_ensemble":
-    # Never called in cloud mode
+    # Never called in cloud mode (in cloud mode, this is done in the workflow)
     simulate_ensemble(config)
-elif option == "simulate_single":    
+elif option == "simulate_single": # includes nesting
     simulate_single(config, member=member)
-elif option == "merge":
-    merge(config)
+elif option == "merge_ensemble":
+    merge_ensemble(config)
 elif option == "map_tiles":
     map_tiles(config)
 elif option == "clean_up":
     clean_up(config)
-

@@ -126,11 +126,9 @@ class ModelLoop():
             # Submit the job
 
             # First prepare batch file
-            print(cosmos.config.cycle.run_mode)
             if cosmos.config.cycle.run_mode == "cloud":
-                # Make sh file (run.sh) that activates the correct environment and runs run_job.py
-                fid = open(os.path.join(model.job_path, "run.sh"), "w")
-                fid.close()
+                # No need to do anything here. Workflow template will take care of this.
+                pass
 
             else:
                 # Make windows batch file (run.bat) that activates the correct environment and runs run_job.py   
@@ -139,7 +137,14 @@ class ModelLoop():
                 fid.write("DATE /T > running.txt\n")
                 fid.write('set CONDAPATH=' + cosmos.config.conda.path + '\n')
                 fid.write(r"call %CONDAPATH%\Scripts\activate.bat cosmos" + "\n")
-                fid.write("python run_job.py\n")
+                if model.ensemble:
+                    fid.write("python run_job_2.py prepare_ensemble\n")
+                    fid.write("python run_job_2.py simulate_ensemble\n")
+                    fid.write("python run_job_2.py merge_ensemble\n")
+                else:
+                    fid.write("python run_job_2.py simulate_single\n")   
+#                fid.write("python run_job_2.py map_tiles\n")   
+                fid.write("python run_job_2.py clean_up\n")   
                 fid.write("move running.txt finished.txt\n")
                 fid.write("exit\n")
                 fid.close()
@@ -160,20 +165,22 @@ class ModelLoop():
 
             elif cosmos.config.cycle.run_mode == "cloud":
                 cosmos.log("Ready to submit to Argo - " + model.long_name + " ...")
-                # Upload job folder to cloud storage
-                subfolder = os.path.join(cosmos.scenario.name, "models", model.name)
-                cosmos.cloud.upload_folder(model.job_path,
-                                           "cosmos-scenarios",
-                                           subfolder)
-                model.cloud_job = cosmos.argo.submit_template_job(subfolder)
+                s3key = os.path.join(cosmos.scenario.name, "models", model.name)
+                # Delete existing folder in cloud storage
+                cosmos.cloud.delete_folder("cosmos-scenarios", s3key)
+                # Upload job folder to cloud storage                
+                cosmos.cloud.upload_folder("cosmos-scenarios",
+                                           model.job_path,
+                                           s3key)
+                model.cloud_job = cosmos.argo.submit_template_job("simple-workflow-02", subfolder)
 
             else:
                 # Model will be run on WCP node
-                # Write ready file (WCP nodes will pick up this job)           
+                # Write ready file (WCP nodes will pick up this job)
                 file_name = os.path.join(cosmos.config.path.jobs,
-                                            cosmos.scenario.name,
-                                            model.name,
-                                            "ready.txt")
+                                         cosmos.scenario.name,
+                                         model.name,
+                                         "ready.txt")
                 fid = open(file_name, "w")
                 fid.write("Model is ready to run")
                 fid.close()
