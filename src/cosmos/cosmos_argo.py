@@ -10,21 +10,24 @@ GlobalConfig.verify_ssl = False
 
 class Argo:
 
-    def __init__(self, name):
+    def __init__(self):
         pass
 
-    def submit_template_job(model):
-        wt_ref = WorkflowTemplateRef(name="surge-workflow", cluster_scope=False)
+    def submit_template_job(self, workflow_name, subfolder):
+
+        wt_ref = WorkflowTemplateRef(name=workflow_name, cluster_scope=False)
 
         w = Workflow(
-            generate_name="surge-workflow-",
+            generate_name=workflow_name+"-",
             workflow_template_ref=wt_ref,
+            arguments={"subfolder": subfolder}
         )
 
         cosmos.log("Cloud Workflow started")
-        w.create(wait=True)
+        w.create()
         cosmos.log("Cloud Workflow finished")
 
+        w.wait()
         return w
 
     def submit_single_job(model):

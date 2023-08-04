@@ -281,7 +281,7 @@ class CoSMoS_SFINCS(Model):
         # Copy the correct to run_job.py
         pth = os.path.dirname(__file__)
         fo.copy_file(os.path.join(pth, "cosmos_run_sfincs.py"), os.path.join(self.job_path, "run_job.py"))
-        fo.copy_file(os.path.join(pth, "cosmos_run_sfincs_member.py"), self.job_path)
+#        fo.copy_file(os.path.join(pth, "cosmos_run_sfincs_member.py"), self.job_path)
 
         # Write config file
         config = {}

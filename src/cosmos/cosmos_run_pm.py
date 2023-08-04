@@ -10,15 +10,24 @@ def find_subfolders(root_folder):
     return subfolders
 
 folder_path = '/data'
-
+print(folder_path)
 subfolders_list = find_subfolders(folder_path)
+
+file1 = open("./data/MyFile.txt", "w")
+file1.write("WTF?")
+file1.close()
+
+file2 = open("MyFile2.txt", "w")
+file2.write("WTF?")
+file2.close()
 
 file_list = []
 
 for subfolder in subfolders_list:
+    print(subfolder)
     file_list.append(os.path.join(folder_path, subfolder, "sfincs_his.nc"))
 
 prcs= [0.05, 0.5, 0.95]
 vars= ["point_zs"]
-output_file_name = os.path.join("/output", "sfincs_his_ensemble.nc")
+output_file_name = os.path.join("./data/sfincs_his.nc")
 pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)

@@ -88,6 +88,14 @@ class ModelLoop():
             # (so that pre-processing of next model can commence)
             # Post-processing will happen later
             if not model.status == 'failed':
+
+                if cosmos.config.cycle.run_mode == "cloud":
+                    # Download job folder from cloud storage
+                    subfolder = os.path.join(cosmos.scenario.name, model.name)
+                    cosmos.cloud.download_folder(subfolder,
+                                                 "cosmos-scenarios",
+                                                 model.job_path)
+
                 # Moving model input and output from job folder
                 cosmos.log("Moving model " + model.long_name)
                 model.move()
@@ -151,8 +159,13 @@ class ModelLoop():
                 pass
 
             elif cosmos.config.cycle.run_mode == "cloud":
-                cosmos.log("Ready to submit to Argo" + model.long_name + " ...")
-                model.cloud_job = Argo.submit_template_job(model)
+                cosmos.log("Ready to submit to Argo - " + model.long_name + " ...")
+                # Upload job folder to cloud storage
+                subfolder = os.path.join(cosmos.scenario.name, "models", model.name)
+                cosmos.cloud.upload_folder(model.job_path,
+                                           "cosmos-scenarios",
+                                           subfolder)
+                model.cloud_job = cosmos.argo.submit_template_job(subfolder)
 
             else:
                 # Model will be run on WCP node

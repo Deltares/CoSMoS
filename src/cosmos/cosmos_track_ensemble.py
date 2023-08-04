@@ -100,7 +100,6 @@ def setup_track_ensemble():
     # Upload spw files to S3
     if cosmos.config.cycle.run_mode == "cloud":
         cosmos.log("Uploading spiderweb files to S3")
-        flist = fo.list_files(cosmos.scenario.cycle_track_ensemble_spw_path, full_path=False)
-        cosmos.log(cosmos.scenario.cycle_track_ensemble_spw_path)
-        for file in flist:
-            Cloud.upload_file(file, "sfincs-input", "scenario_spw")
+        path = cosmos.scenario.cycle_track_ensemble_spw_path
+        subfolder = os.path.join(cosmos.scenario.name, "track_ensemble", "spw")
+        cosmos.cloud.upload_folder(path, "cosmos-scenarios", subfolder)
