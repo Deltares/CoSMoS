@@ -61,8 +61,8 @@ def simulate_single(config, member=None):
     sf.type = "sfincs"
     sf.path = "."
     # Nesting
-    print("Nesting ...")
     if "flow_nested_path" in config:
+        print("Nesting flow ...")
 
         # Get boundary conditions from overall model (Nesting 2)
 
@@ -89,6 +89,7 @@ def simulate_single(config, member=None):
                 bc_path=".")
         
     if "wave_nested_path" in config:
+        print("Nesting wave ...")
         # Get boundary conditions from overall model (Nesting 2)
         if config["ensemble"]:
             # Loop through ensemble members
@@ -107,6 +108,7 @@ def simulate_single(config, member=None):
 
     # If SFINCS nested in Hurrywave for SNAPWAVE setup, separately run BEWARE nesting for LF waves
     if "bw_nested_path" in config:
+        print("Nesting bw ...")
         # Get wave maker conditions from overall model (Nesting 2)
         if config["ensemble"]:
             # Loop through ensemble members
@@ -126,8 +128,8 @@ def simulate_single(config, member=None):
         sf.write_wavemaker_forcing_points()
 
     # Spiderweb file
-    print("Copying spiderweb file ...")
     if config["ensemble"]:
+        print("Copying spiderweb file ...")
         # Copy spiderweb file
         if config["run_mode"] == "cloud":
             bucket_name = "cosmos-scenarios"
@@ -153,7 +155,6 @@ def simulate_single(config, member=None):
 
 
 
-    print("Running simulation ...")
     # And run the simulation
     if config["run_mode"] == "cloud":
         # Docker container is run in the workflow
@@ -162,6 +163,7 @@ def simulate_single(config, member=None):
 #        os.system("docker run deltares/sfincs-cpu:latest\n")
     else:
         # Run the SFINCS model (this is only for windows)
+        print("Running simulation ...")
         os.system("call run_sfincs.bat\n")
 
 def merge_ensemble(config):

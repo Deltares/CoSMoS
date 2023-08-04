@@ -90,7 +90,7 @@ class ModelLoop():
             if not model.status == 'failed':
                 if cosmos.config.cycle.run_mode == "cloud":
                     # Download job folder from cloud storage
-                    subfolder = cosmos.scenario.name + "/" + model.name + "/"
+                    subfolder = cosmos.scenario.name + "/" + "models" + "/" + model.name + "/"
                     cosmos.cloud.download_folder("cosmos-scenarios",
                                                  subfolder,
                                                  model.job_path)
