@@ -10,6 +10,7 @@ import os
 
 from .cosmos import cosmos
 from .cosmos_cluster import cluster_dict as cluster
+from .cosmos_argo import Argo
 from .cosmos_postprocess import post_process
 import cht.misc.fileops as fo
 
@@ -87,6 +88,14 @@ class ModelLoop():
             # (so that pre-processing of next model can commence)
             # Post-processing will happen later
             if not model.status == 'failed':
+
+                if cosmos.config.cycle.run_mode == "cloud":
+                    # Download job folder from cloud storage
+                    subfolder = os.path.join(cosmos.scenario.name, model.name)
+                    cosmos.cloud.download_folder(subfolder,
+                                                 "cosmos-scenarios",
+                                                 model.job_path)
+
                 # Moving model input and output from job folder
                 cosmos.log("Moving model " + model.long_name)
                 model.move()
@@ -117,7 +126,7 @@ class ModelLoop():
             # Submit the job
 
             # First prepare batch file
-
+            print(cosmos.config.cycle.run_mode)
             if cosmos.config.cycle.run_mode == "cloud":
                 # Make sh file (run.sh) that activates the correct environment and runs run_job.py
                 fid = open(os.path.join(model.job_path, "run.sh"), "w")
@@ -136,7 +145,8 @@ class ModelLoop():
                 fid.close()
 
             # And now actually kick off this job
-            if cosmos.config.cycle.run_mode == "serial" or self.type=="beware":
+            if cosmos.config.cycle.run_mode == "serial":
+                #or self.type=="beware":
                 # Model needs to be run in serial mode (local on the job path of a windows machine)        
                 cosmos.log("Writing tmp.bat in " + os.getcwd() + " ...")
                 fid = open("tmp.bat", "w")
@@ -149,8 +159,13 @@ class ModelLoop():
                 pass
 
             elif cosmos.config.cycle.run_mode == "cloud":
-                # Floris does his magic
-                pass
+                cosmos.log("Ready to submit to Argo - " + model.long_name + " ...")
+                # Upload job folder to cloud storage
+                subfolder = os.path.join(cosmos.scenario.name, "models", model.name)
+                cosmos.cloud.upload_folder(model.job_path,
+                                           "cosmos-scenarios",
+                                           subfolder)
+                model.cloud_job = cosmos.argo.submit_template_job(subfolder)
 
             else:
                 # Model will be run on WCP node
@@ -238,10 +253,15 @@ def check_for_finished_simulations():
     
     for model in cosmos.scenario.model:
         if model.status == "running":
-            file_name = os.path.join(model.job_path,
-                                     "finished.txt")
-            if os.path.exists(file_name):
-                finished_list.append(model)
+            if cosmos.config.cycle.run_mode == "serial":
+                file_name = os.path.join(model.job_path,
+                                        "finished.txt")
+                if os.path.exists(file_name):
+                    finished_list.append(model)
+            elif cosmos.config.cycle.run_mode == "cloud":
+                #cosmos.log(model.cloud_job)
+                if Argo.get_task_status(model.cloud_job):
+                    finished_list.append(model)
                               
     return finished_list
 

@@ -11,6 +11,7 @@ import datetime
 import cht.misc.fileops as fo
 
 
+
 class CoSMoS:
 
     """This is the main CoSMoS class.
@@ -69,6 +70,12 @@ class CoSMoS:
 
         # Read in configuration
         self.config.set(**kwargs)
+
+        # # Set cloud object 
+        # if self.config.cycle.run_mode == "cloud":
+        #     self.cloud = Cloud()
+        #     self.argo = Argo()
+
 
     # def set_main_path(self, main_path):
     #     """Set the path of the CoSMoS main folder.
@@ -329,6 +336,15 @@ class CoSMoS:
         if cosmos.config.run_mode != "parallel":
             fo.rmdir(os.path.join(cosmos.config.job_path,
                                   cosmos.config.scenario_name))
+
+    def test(self, scenario_name):
+        from .cosmos_cloud import Cloud
+        from .cosmos_argo import Argo
+        cosmos.cloud = Cloud()
+        cosmos.argo = Argo()
+        subfolder = scenario_name + "/" + "sfincs_gom_500m_ensemble"
+        cosmos.argo.submit_template_job("simple-workflow-02", subfolder)
+
 
 # class Config:
 #     def __init__(self):        

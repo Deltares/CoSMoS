@@ -52,6 +52,18 @@ class WebViewer:
         self.name    = None
         self.version = None
         self.path    = None
+
+class CloudConfig:
+    def __init__(self):
+        # The url through which the Argo client is available to submit a workflow
+        self.host       = None
+        # Access key and secret (sort of like username/password) for reading/writing files to s3
+        self.access_key = None
+        self.secret_key = None
+        # Region in which the Kubernetes cluster is hosted
+        self.region     = "eu-west-1"
+        # Namespace within the cluster where the argo installation is located
+        self.namespace  = "argo"
         
 class Cycle:
     def __init__(self):
@@ -75,6 +87,7 @@ class Configuration:
         self.webserver      = WebServer()
         self.webviewer      = WebViewer()
         self.cycle          = Cycle()
+        self.cloud_config   = CloudConfig()
         self.kwargs         = {}
     
     def set(self, **kwargs):

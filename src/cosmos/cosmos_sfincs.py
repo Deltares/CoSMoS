@@ -9,6 +9,7 @@ import os
 import pandas as pd
 import numpy as np
 import datetime
+import boto3
 
 from cht.sfincs.sfincs import SFINCS
 import cht.misc.fileops as fo
@@ -182,9 +183,8 @@ class CoSMoS_SFINCS(Model):
         self.domain.write_input_file()
 
         # Copy the correct to run_job.py
-        code_pth = os.path.dirname(__file__)
-        fo.copy_file(os.path.join(code_pth, "cosmos_run_sfincs.py"), os.path.join(self.job_path, "run_job.py"))
-        fo.copy_file(os.path.join(code_pth, "cosmos_run_sfincs_member.py"), self.job_path)
+        pth = os.path.dirname(__file__)
+        fo.copy_file(os.path.join(pth, "cosmos_run_sfincs.py"), os.path.join(self.job_path, "run_job.py"))
 
         # Write config file to be used in run_job.py
         config = {}
@@ -220,7 +220,10 @@ class CoSMoS_SFINCS(Model):
             config["flood_map"]["stop_time"]  = cosmos.stop_time
             config["flood_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.flood_map_color_map]
             config["flood_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.flood_map_color_map]
-
+        if cosmos.config.cycle.run_mode == "cloud":
+            config["access_key"] = cosmos.config.cloud_config.access_key
+            config["secret_key"] = cosmos.config.cloud_config.secret_key
+        
         dict2yaml(os.path.join(self.job_path, "config.yml"), config)
 
         if self.ensemble:

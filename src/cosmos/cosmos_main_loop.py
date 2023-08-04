@@ -18,6 +18,8 @@ from .cosmos_meteo import download_and_collect_meteo
 from .cosmos_track_ensemble import setup_track_ensemble
 #from .cosmos_stations import Stations
 from .cosmos_scenario import Scenario
+from .cosmos_cloud import Cloud
+from .cosmos_argo import Argo
 #from .cosmos_tiling import tile_layer
 
 import cht.misc.fileops as fo
@@ -69,7 +71,12 @@ class MainLoop:
 
         # Update config (it's possible that this was changed while running a forecast scenario)
         cosmos.config.set()
-                
+
+        # Set cloud object 
+        if cosmos.config.cycle.run_mode == "cloud":
+            cosmos.cloud = Cloud()
+            cosmos.argo = Argo()
+
         # Read scenario
         cosmos.scenario = Scenario(cosmos.scenario_name)
         # This also determines which models are part of this scenario

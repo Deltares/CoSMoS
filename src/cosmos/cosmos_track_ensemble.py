@@ -14,6 +14,7 @@ import copy
 from .cosmos import cosmos
 from cht.tropical_cyclone.tropical_cyclone import TropicalCycloneEnsemble
 from cht.meteo.meteo import filter_cyclones_TCvitals
+import cht.misc.fileops as fo
 from datetime import datetime
 import cht.misc.misc_tools
 
@@ -109,3 +110,9 @@ def setup_track_ensemble():
     for iens in range(cosmos.scenario.track_ensemble_nr_realizations):
         cosmos.scenario.ensemble_names.append(str(iens).zfill(5))
 
+    # Upload spw files to S3
+    if cosmos.config.cycle.run_mode == "cloud":
+        cosmos.log("Uploading spiderweb files to S3")
+        path = cosmos.scenario.cycle_track_ensemble_spw_path
+        subfolder = os.path.join(cosmos.scenario.name, "track_ensemble", "spw")
+        cosmos.cloud.upload_folder(path, "cosmos-scenarios", subfolder)
