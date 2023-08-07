@@ -1,6 +1,7 @@
 from hera.workflows import Workflow, WorkflowStatus, Task
 from hera.workflows.models import WorkflowTemplateRef
 from hera.shared import GlobalConfig
+import time
 
 from .cosmos import cosmos
 
@@ -26,7 +27,7 @@ class Argo:
         cosmos.log("Cloud Workflow started")
         w.create()
         cosmos.log("Cloud Workflow finished")
-
+        time.sleep(3) 
         w.wait()
         return w
 

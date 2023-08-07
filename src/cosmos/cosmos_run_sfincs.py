@@ -7,8 +7,8 @@ import sys
 import boto3
 import datetime
 
-from cht.misc.misc_tools import yaml2dict
 import cht.misc.fileops as fo
+from cht.misc.misc_tools import yaml2dict
 from cht.misc.prob_maps import merge_nc_his
 from cht.misc.prob_maps import merge_nc_map
 from cht.tiling.tiling import make_floodmap_tiles
@@ -158,6 +158,7 @@ def simulate_single(config, member=None):
     # And run the simulation
     if config["run_mode"] == "cloud":
         # Docker container is run in the workflow
+
         pass
 #        print("Docker container is run in other workflow template")
 #        os.system("docker run deltares/sfincs-cpu:latest\n")

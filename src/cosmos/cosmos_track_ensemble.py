@@ -29,6 +29,8 @@ def setup_track_ensemble():
                 break
 
 #        meteo_subset = cosmos.meteo_subset[0]
+
+        cosmos.log("Finding storm tracks ...")
         tracks = meteo_subset.find_cyclone_tracks()
 #        # Filter cyclone based on TCvitals
 #        tracks = filter_cyclones_TCvitals(tracks)
@@ -53,6 +55,7 @@ def setup_track_ensemble():
         tc = tc.read(cosmos.scenario.meteo_track)    
 
     # Generate track ensemble
+    cosmos.log("Generating track ensemble ...")
     cosmos.scenario.track_ensemble = TropicalCycloneEnsemble(TropicalCyclone=tc)
     t0str = tc.track.loc[0]["datetime"]
     t1str = tc.track.loc[len(tc.track) - 1]["datetime"]
@@ -61,7 +64,9 @@ def setup_track_ensemble():
     cosmos.scenario.track_ensemble.compute_ensemble(number_of_realizations=cosmos.scenario.track_ensemble_nr_realizations)    
 
     # Write to files
+    cosmos.log("Saving track files ...")
     cosmos.scenario.track_ensemble.to_cyc(cosmos.scenario.cycle_track_ensemble_cyc_path)
+    cosmos.log("Saving spiderweb files ...")
     cosmos.scenario.track_ensemble.to_spiderweb(cosmos.scenario.cycle_track_ensemble_spw_path)
 
     # Get outline of ensemble
@@ -116,3 +121,6 @@ def setup_track_ensemble():
         path = cosmos.scenario.cycle_track_ensemble_spw_path
         subfolder = os.path.join(cosmos.scenario.name, "track_ensemble", "spw")
         cosmos.cloud.upload_folder("cosmos-scenarios", path, subfolder)
+
+    cosmos.log("Track ensemble done ...")
+  
