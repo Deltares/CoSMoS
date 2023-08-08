@@ -14,6 +14,7 @@ from cht.misc.prob_maps import merge_nc_map
 from cht.tiling.tiling import make_floodmap_tiles
 from cht.sfincs.sfincs import SFINCS
 from cht.nesting.nest2 import nest2
+from cht.misc.argo import Argo
 
 def read_ensemble_members():
     with open('ensemble_members.txt') as f:
@@ -24,42 +25,125 @@ def read_ensemble_members():
 def prepare_ensemble(config):
     # In case of ensemble, make folders for each ensemble member and copy inputs to these folders
     if config["ensemble"]:
+        # # Copy run_job_2.py and ensemble_members.txt to main folder
+        # fo.copy_file(os.path.join("input", "run_job_2.py"), ".")
+        # fo.copy_file(os.path.join("input", "ensemble_members.txt"), ".")
+        # fo.copy_file(os.path.join("input", "config.yml"), ".")
         # Read in the list of ensemble members
         ensemble_members = read_ensemble_members()
         for member in ensemble_members:
             print('Making folder for ensemble member ' + member)
             # Make folder for ensemble member and copy all input files
-            fo.mkdir(member)
+            fo.mkdir(member)            
+            # # Write something to this folder (or it won't be uploaded in the cloud)
+            # fname = os.path.join(member, "dummy.txt")
+            # f = open(fname, "w")
+            # f.write(member)
+            # f.close()
+            fo.copy_file(os.path.join("input", "run_job_2.py"), member)
+            fo.copy_file(os.path.join("input", "config.yml"), member)
+            fo.copy_file(os.path.join("input", "ensemble_members.txt"), member)
             # if config["run_mode"] != "cloud":
             #     # If not cloud mode, copy all input files
             #     # If cloud mode, the input files will be copied in the workflow
             #     # TODO: check if this is still needed in the cloud
-            fo.copy_file("*.*", member)
+            # fo.copy_file("*.*", member)
     else:
         # Nothing to do here (all the inputs are already in the right folder)
         pass
 
-def simulate_ensemble(config):
-    # Never called in cloud mode
-    # Read in the list of ensemble members
-    ensemble_members = read_ensemble_members()
-    # Loop through members
-    curdir = os.getcwd()
-    for member in ensemble_members:
-        print('Running ensemble member ' + member)
-        # Make folder for ensemble member and copy all input files
-        os.chdir(member)
-        # Run the SFINCS model
-        simulate_single(config, member=member)
-        os.chdir(curdir)
+# def simulate_ensemble(config):
+#     # Never called in cloud mode
+#     # Read in the list of ensemble members
+#     ensemble_members = read_ensemble_members()
+#     # Loop through members
+#     curdir = os.getcwd()
+#     for member in ensemble_members:
+#         print('Running ensemble member ' + member)
+#         os.chdir(member)
+#         # Run the SFINCS model
+#         prepare_single(config, member=member)
+#         run_single(config, member=member)
+#         os.chdir(curdir)
 
-def simulate_single(config, member=None):
+#def simulate_single(config, member=None):
+    # subfolder = config["scenario"] + "/" + config["model"]
+    # if config["ensemble"]:
+    #     subfolder += "/" + member
+    # w = Argo(config["host"], "cosmos-sfincs", wait=True)
+    # w.submit_job(bucket_name="cosmos-scenarios", subfolder=subfolder)
+
+def prepare_single(config, member=None):
+    # Copying, nesting, spiderweb
     # We're already in the correct folder
+
+    # Copy base input
+    if config["run_mode"] == "cloud":
+        # Copy from S3
+        session = boto3.Session(
+            aws_access_key_id=config["access_key"],
+            aws_secret_access_key=config["secret_key"],
+            region_name='eu-west-1'
+        )
+        # Create an S3 client
+        s3_client = session.client('s3')
+
+        bucket_name = "cosmos-scenarios"
+        s3_key = config["scenario"] + "/" + "models" + "/" + config["model"] + "/" + "input" + "/"
+        local_file_path = f'/input/'  # Replace with the local path where you want to save the file
+
+        objects = s3_client.list_objects(Bucket=bucket_name, Prefix=s3_key)
+        if "Contents" in objects:
+            for object in objects['Contents']:
+                s3_key = object['Key']
+                local_path = os.path.join(local_file_path, os.path.basename(s3_key))
+                print("Copying " + s3_key + " to " + local_path) 
+                s3_client.download_file(bucket_name, s3_key, local_path)
+
+        # # Download the file from S3
+        # try:
+        #     s3_client.download_file(bucket_name, s3_key, local_file_path)
+        #     print(f"File downloaded successfully to '{local_file_path}'")
+        # except Exception as e:
+        #     print(f"Error: {e}")
+        # pass
+    else:
+        if config["ensemble"]:
+            # Copy from input folder
+            # We're already in the right member path
+            fo.copy_file(os.path.join("..", "input", "*.*"), ".")
+
+    # Copy spiderweb file
+    if config["ensemble"]:
+        print("Copying spiderweb file ...")
+        if config["run_mode"] == "cloud":
+            bucket_name = "cosmos-scenarios"
+            s3_key = config["scenario"] + "/" + "track_ensemble" + "/" + "spw" + "/ensemble" + member + ".spw"
+            local_file_path = f'/input/sfincs.spw'  # Replace with the local path where you want to save the file
+            session = boto3.Session(
+                aws_access_key_id=config["access_key"],
+                aws_secret_access_key=config["secret_key"],
+                region_name='eu-west-1'
+            )
+            # Create an S3 client
+            s3 = session.client('s3')
+            # Download the file from S3
+            try:
+                s3.download_file(bucket_name, s3_key, local_file_path)
+                print(f"File downloaded successfully to '{local_file_path}'")
+            except Exception as e:
+                print(f"Error: {e}")
+        else:
+            # Copy all spiderwebs to jobs folder
+            fname0 = os.path.join(config["spw_path"], "ensemble" + member + ".spw")
+            fo.copy_file(fname0, "sfincs.spw")
+
     # Read SFINCS model (necessary for nesting)
     sf = SFINCS("sfincs.inp")
     sf.name = config["model"]
     sf.type = "sfincs"
     sf.path = "."
+
     # Nesting
     if "flow_nested_path" in config:
         print("Nesting flow ...")
@@ -127,45 +211,11 @@ def simulate_single(config, member=None):
 
         sf.write_wavemaker_forcing_points()
 
-    # Spiderweb file
-    if config["ensemble"]:
-        print("Copying spiderweb file ...")
-        # Copy spiderweb file
-        if config["run_mode"] == "cloud":
-            bucket_name = "cosmos-scenarios"
-            s3_key = config["scenario"] + "/" + "track_ensemble" + "/" + "spw" + "/ensemble" + member + ".spw"
-            local_file_path = f'/input/sfincs.spw'  # Replace with the local path where you want to save the file
-            session = boto3.Session(
-                aws_access_key_id=config["access_key"],
-                aws_secret_access_key=config["secret_key"],
-                region_name='eu-west-1'
-            )
-            # Create an S3 client
-            s3 = session.client('s3')
-            # Download the file from S3
-            try:
-                s3.download_file(bucket_name, s3_key, local_file_path)
-                print(f"File downloaded successfully to '{local_file_path}'")
-            except Exception as e:
-                print(f"Error: {e}")
-        else:
-            # Copy all spiderwebs to jobs folder
-            fname0 = os.path.join(config["spw_path"], "ensemble" + member + ".spw")
-            fo.copy_file(fname0, "sfincs.spw")
 
-
-
-    # And run the simulation
-    if config["run_mode"] == "cloud":
-        # Docker container is run in the workflow
-
-        pass
-#        print("Docker container is run in other workflow template")
-#        os.system("docker run deltares/sfincs-cpu:latest\n")
-    else:
-        # Run the SFINCS model (this is only for windows)
-        print("Running simulation ...")
-        os.system("call run_sfincs.bat\n")
+def run_single(config, member=None):
+    # Not called in cloud mode
+    print("Running simulation ...")
+    os.system("call run_sfincs.bat\n")
 
 def merge_ensemble(config):
     print("Merging ...")
@@ -320,6 +370,8 @@ def clean_up(config):
                     print(error)
                     print("Directory can not be removed : " + member)
 
+# SFINCS job script
+
 member_name = None
 option = sys.argv[1]
 
@@ -337,18 +389,50 @@ if len(sys.argv) == 3:
 if option == "prepare_ensemble":
     # Prepare folders
     prepare_ensemble(config)
-elif option == "simulate_ensemble":
-    # Never called in cloud mode (in cloud mode, this is done in the workflow)
-    simulate_ensemble(config)
-elif option == "simulate_single": # includes nesting
-    # Run single simulation (can be either ensemble member or deterministic)
-    simulate_single(config, member=member)
+
+elif option == "simulate":
+    # Never called in cloud mode (in cloud mode, the workflow this script with simulate_single)
+    if config["ensemble"]:
+        # Read in the list of ensemble members
+        ensemble_members = read_ensemble_members()
+        # Loop through members
+        curdir = os.getcwd()
+        for member in ensemble_members:
+            print('Running ensemble member ' + member)
+            os.chdir(member)
+            # Run the SFINCS model
+            prepare_single(config, member=member)
+            run_single(config, member=member)
+            os.chdir(curdir)
+    else:
+        prepare_single(config)
+        run_single(config)
+
+elif option == "simulate_single":
+    # Only called in cloud mode
+    # Kick off cosmos-sfincs workflow (which runs this script with prepare_single, and then runs the sfincs docker)
+    # So effectively, it does the same as run consecutively running prepare_single and run_single
+    subfolder = config["scenario"] + "/" + "models" + "/" + config["model"]
+    if config["ensemble"]:
+        subfolder += "/" + member
+    print("Submitting member in " + subfolder)    
+    w = Argo(config["host"], "sfincs-workflow")
+    w.submit_job(bucket_name="cosmos-scenarios",
+                 subfolder=subfolder,
+                 member=member)
+
+elif option == "prepare_single":
+    # Only called in cloud mode
+    prepare_single(config, member=member)
+
 elif option == "merge_ensemble":
     # Merge his and map files from ensemble members
     merge_ensemble(config)
+
 elif option == "map_tiles":
     # Make flood map tiles
     map_tiles(config)
+
 elif option == "clean_up":
     # Remove all ensemble members
     clean_up(config)

@@ -192,6 +192,7 @@ class CoSMoS_SFINCS(Model):
         config["cycle"]    = cosmos.cycle_string
         config["ensemble"] = self.ensemble
         config["run_mode"] = cosmos.config.cycle.run_mode
+        config["host"]     = cosmos.config.cloud_config.host
         if self.flow_nested:
             config["flow_nested_type"] = self.flow_nested.type
             config["flow_nested_path"] = self.flow_nested.cycle_output_path

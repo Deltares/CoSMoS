@@ -135,10 +135,10 @@ class ModelLoop():
                 fid.write(r"call %CONDAPATH%\Scripts\activate.bat cosmos" + "\n")
                 if model.ensemble:
                     fid.write("python run_job_2.py prepare_ensemble\n")
-                    fid.write("python run_job_2.py simulate_ensemble\n")
+                    fid.write("python run_job_2.py simulate\n")
                     fid.write("python run_job_2.py merge_ensemble\n")
                 else:
-                    fid.write("python run_job_2.py simulate_single\n")   
+                    fid.write("python run_job_2.py simulate\n")
 #                fid.write("python run_job_2.py map_tiles\n")   
                 fid.write("python run_job_2.py clean_up\n")   
                 fid.write("move running.txt finished.txt\n")
@@ -166,12 +166,25 @@ class ModelLoop():
                 cosmos.log("Deleting model folder on S3 : " + model.name)                
                 cosmos.cloud.delete_folder("cosmos-scenarios", s3key)
                 # Upload job folder to cloud storage
-                cosmos.log("Uploading model input to S3 : " + s3key)                
+                inpkey = cosmos.scenario.name + "/" + "models" + "/" + model.name + "/" + "input"
+#                inpkey = cosmos.scenario.name + "/" + "models" + "/" + model.name
+                cosmos.log("Uploading model input to S3 : " + inpkey)                
                 cosmos.cloud.upload_folder("cosmos-scenarios",
                                            model.job_path,
-                                           s3key)
+                                           inpkey)
+                # Upload run_job_2.py etc.
+                cosmos.cloud.upload_file("cosmos-scenarios",
+                                         os.path.join(model.job_path, "run_job_2.py"),
+                                         s3key)
+                cosmos.cloud.upload_file("cosmos-scenarios",
+                                         os.path.join(model.job_path, "config.yml"),
+                                         s3key)
+                if model.ensemble:
+                    cosmos.cloud.upload_file("cosmos-scenarios",
+                                            os.path.join(model.job_path, "ensemble_members.txt"),
+                                            s3key)
                 cosmos.log("Submitting to S3 : " + s3key)                
-                model.cloud_job = cosmos.argo.submit_template_job("simple-workflow-02", s3key)
+                model.cloud_job = cosmos.argo.submit_template_job("ensemble-workflow", s3key)
 
             else:
                 # Model will be run on WCP node
