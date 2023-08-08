@@ -5,9 +5,12 @@ Setting up a scenario
 
 A scenario file is a simple toml-structured text file that defines which models you want to run, for which hindcast or forecast period, and with which data sources.
 
-An example of a scenario file is given below:
+Below, two examples of scenario files are given. The first is a determininistic simulation of hurricane Laura, the second an ensemble run for hurricane Maria.
 
 .. include:: examples/scenario.toml
+       :literal: 
+
+.. include:: examples/scenario2.toml
        :literal: 
 
 The scenario file must always be named *scenario.toml*. CoSMoS assigns the scenario *name* based on the folder name 
@@ -130,12 +133,12 @@ The following settings can be included in the scenario file:
      -
 
    * - region
-     - Instead of model name: region for which all models are run (with same settings).
+     - Instead of model name: region for which all models are run (with same settings). When using the keyword *region* to add models, you must specify the model *type* as indicated in the example scenario file.
      - 
      - 
 
    * - super_region
-     - Instead of model name: super region for which all models are run (with same settings) (see :ref:`Super regions <super_regions>`).
+     - Instead of model name: super region for which all models are run (with same settings) (see :ref:`Super regions <super_regions>`). When using the keyword *super_region* to add models, you must specify the model *type* as indicated in the example scenario file.
      -
      -
 
@@ -165,23 +168,23 @@ The following settings can be included in the scenario file:
      -
 
    * - run_condition
-     - How to select mmodels within cluster to run conditionally. Option: topn
-     -
+     - How to select mmodels within cluster to run conditionally. Option: "topn"
+     - "topn"
      -
      
    * - topn
      - Top x number of models to run per cluster
-     -
+     - 10
      -
 
    * - hm0fac
      - Factor of Hm0 to add to TWL component. 
-     -
+     - 0.2
      -
 
    * - boundary_twl_margin
      - Boundary TWL margin for clustering models.
-     -
+     - 0.0
      -
 
 

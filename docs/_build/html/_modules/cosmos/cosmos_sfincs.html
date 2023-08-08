@@ -97,12 +97,11 @@
 
 <span class="c1">#import xmlkit as xml</span>
 
-<span class="kn">from</span> <span class="nn">cht.nesting.nest1</span> <span class="kn">import</span> <span class="n">nest1</span>
-<span class="kn">from</span> <span class="nn">cht.nesting.nest2</span> <span class="kn">import</span> <span class="n">nest2</span>
+<span class="kn">import</span> <span class="nn">cht.nesting.nesting</span> <span class="k">as</span> <span class="nn">nesting</span>
 
 
 <div class="viewcode-block" id="CoSMoS_SFINCS"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_sfincs.CoSMoS_SFINCS.html#cosmos.cosmos_sfincs.CoSMoS_SFINCS">[docs]</a><span class="k">class</span> <span class="nc">CoSMoS_SFINCS</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Cosmos class for SFINCS model.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Cosmos class for SFINCS model.</span>
 
 <span class="sd">    SFINCS (Super-Fast Inundation of CoastS) is a reduced-complexity model capable of simulating compound flooding </span>
 <span class="sd">    with a high computational efficiency balanced with an adequate accuracy (see also https://sfincs.readthedocs.io/en/latest/).</span>
@@ -121,7 +120,7 @@
 <span class="sd">    cosmos.cosmos_model.Model</span>
 <span class="sd">    &quot;&quot;&quot;</span>        
 <div class="viewcode-block" id="CoSMoS_SFINCS.read_model_specific"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_sfincs.CoSMoS_SFINCS.read_model_specific.html#cosmos.cosmos_sfincs.CoSMoS_SFINCS.read_model_specific">[docs]</a>    <span class="k">def</span> <span class="nf">read_model_specific</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Read SFINCS specific model attributes.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read SFINCS specific model attributes.</span>
 
 <span class="sd">        See Also</span>
 <span class="sd">        ----------</span>
@@ -139,7 +138,7 @@
         
         
 <div class="viewcode-block" id="CoSMoS_SFINCS.pre_process"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_sfincs.CoSMoS_SFINCS.pre_process.html#cosmos.cosmos_sfincs.CoSMoS_SFINCS.pre_process">[docs]</a>    <span class="k">def</span> <span class="nf">pre_process</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Preprocess SFINCS model.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Preprocess SFINCS model.</span>
 
 <span class="sd">        - Extract and write water level and wave conditions.</span>
 <span class="sd">        - Write input file. </span>
@@ -182,7 +181,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">obsfile</span> <span class="o">=</span> <span class="s2">&quot;sfincs.obs&quot;</span>
             
             <span class="k">for</span> <span class="n">nested_model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nested_flow_models</span><span class="p">:</span>
-                <span class="n">nest1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span> <span class="n">nested_model</span><span class="o">.</span><span class="n">domain</span><span class="p">)</span>
+                <span class="n">nesting</span><span class="o">.</span><span class="n">nest1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span> <span class="n">nested_model</span><span class="o">.</span><span class="n">domain</span><span class="p">)</span>
 
         <span class="c1"># Add other observation stations </span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nested_flow_models</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
@@ -223,23 +222,22 @@
                 <span class="c1"># Loop through ensemble members</span>
                 <span class="k">for</span> <span class="n">iens</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">track_ensemble_nr_realizations</span><span class="p">):</span>
                     <span class="n">name</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">ensemble_names</span><span class="p">[</span><span class="n">iens</span><span class="p">]</span>
-                    <span class="n">nest2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flow_nested</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
+                    <span class="n">nesting</span><span class="o">.</span><span class="n">nest2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flow_nested</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
                           <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
                           <span class="n">output_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flow_nested</span><span class="o">.</span><span class="n">cycle_output_path</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span>
                           <span class="n">output_file</span><span class="o">=</span> <span class="s1">&#39;sfincs_his.nc&#39;</span><span class="p">,</span>
                           <span class="n">boundary_water_level_correction</span><span class="o">=</span><span class="n">zcor</span><span class="p">,</span>
                           <span class="n">option</span><span class="o">=</span><span class="s2">&quot;flow&quot;</span><span class="p">,</span>
-                          <span class="n">bc_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+                          <span class="n">bc_file</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">bzsfile</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Deterministic    </span>
-                <span class="n">nest2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flow_nested</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
+                <span class="n">nesting</span><span class="o">.</span><span class="n">nest2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flow_nested</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
                         <span class="n">output_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">flow_nested</span><span class="o">.</span><span class="n">cycle_output_path</span><span class="p">,</span>
                         <span class="n">output_file</span><span class="o">=</span><span class="s1">&#39;sfincs_his.nc&#39;</span><span class="p">,</span>
                         <span class="n">boundary_water_level_correction</span><span class="o">=</span><span class="n">zcor</span><span class="p">,</span>
                         <span class="n">option</span><span class="o">=</span><span class="s2">&quot;flow&quot;</span><span class="p">,</span>
-                        <span class="n">bc_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">)</span>
-           
+                        <span class="n">bc_file</span><span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">bzsfile</span><span class="p">))</span>
             
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">bcafile</span><span class="p">:</span>
             
@@ -285,14 +283,14 @@
                 <span class="c1"># Loop through ensemble members</span>
                 <span class="k">for</span> <span class="n">iens</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">track_ensemble_nr_realizations</span><span class="p">):</span>
                     <span class="n">name</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">ensemble_names</span><span class="p">[</span><span class="n">iens</span><span class="p">]</span>
-                    <span class="n">nest2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wave_nested</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
+                    <span class="n">nesting</span><span class="o">.</span><span class="n">nest2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wave_nested</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
                           <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
                           <span class="n">output_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wave_nested</span><span class="o">.</span><span class="n">cycle_output_path</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span>
                           <span class="n">option</span><span class="o">=</span><span class="s2">&quot;wave&quot;</span><span class="p">,</span>
                           <span class="n">bc_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Deterministic    </span>
-                <span class="n">nest2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wave_nested</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
+                <span class="n">nesting</span><span class="o">.</span><span class="n">nest2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wave_nested</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
                         <span class="n">output_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">wave_nested</span><span class="o">.</span><span class="n">cycle_output_path</span><span class="p">,</span>
                         <span class="n">option</span><span class="o">=</span><span class="s2">&quot;wave&quot;</span><span class="p">,</span>
@@ -310,14 +308,14 @@
                 <span class="c1"># Loop through ensemble members</span>
                 <span class="k">for</span> <span class="n">iens</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">track_ensemble_nr_realizations</span><span class="p">):</span>
                     <span class="n">name</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">ensemble_names</span><span class="p">[</span><span class="n">iens</span><span class="p">]</span>
-                    <span class="n">nest2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bw_nested</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
+                    <span class="n">nesting</span><span class="o">.</span><span class="n">nest2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bw_nested</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
                           <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
                           <span class="n">output_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bw_nested</span><span class="o">.</span><span class="n">cycle_output_path</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span>
                           <span class="n">option</span><span class="o">=</span><span class="s2">&quot;wave&quot;</span><span class="p">,</span>
                           <span class="n">bc_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Deterministic    </span>
-                <span class="n">nest2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bw_nested</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
+                <span class="n">nesting</span><span class="o">.</span><span class="n">nest2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bw_nested</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
                       <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
                       <span class="n">output_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bw_nested</span><span class="o">.</span><span class="n">cycle_output_path</span><span class="p">,</span>
                       <span class="n">option</span><span class="o">=</span><span class="s2">&quot;wave&quot;</span><span class="p">,</span>
@@ -379,40 +377,16 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">meteo_spiderweb</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">meteo_track</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">baro</span>    <span class="o">=</span> <span class="mi">1</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">utmzone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">utm_zone</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">amufile</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">amvfile</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">ampfile</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">amprfile</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">meteo_spiderweb</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">meteo_track</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">amufile</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">amvfile</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">ampfile</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">amprfile</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="c1">#            self.domain.input.variables.amufile = None</span>
 <span class="c1">#            self.domain.input.variables.amvfile = None</span>
 
         <span class="c1"># Now write input file (sfincs.inp)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">write_input_file</span><span class="p">()</span>
-
-        <span class="c1"># Copy the correct to run_job.py</span>
-        <span class="n">git_pth</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
-        <span class="n">fo</span><span class="o">.</span><span class="n">copy_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">git_pth</span><span class="p">,</span> <span class="s2">&quot;cosmos_run_job.py&quot;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">,</span> <span class="s2">&quot;run_job.py&quot;</span><span class="p">))</span>
-        <span class="c1"># fo.copy_file(os.path.join(git_pth, &quot;cosmos_run_sfincs_member.py&quot;), self.job_path)</span>
-
-        <span class="c1"># Write config file</span>
-        <span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;ensemble&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span>
-        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;run_mode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cycle</span><span class="o">.</span><span class="n">run_mode</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow_nested</span><span class="p">:</span>
-            <span class="n">config</span><span class="p">[</span><span class="s2">&quot;flow_nested_path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow_nested</span><span class="o">.</span><span class="n">cycle_output_path</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wave_nested</span><span class="p">:</span>
-            <span class="n">config</span><span class="p">[</span><span class="s2">&quot;wave_nested_path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wave_nested</span><span class="o">.</span><span class="n">cycle_output_path</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bw_nested</span><span class="p">:</span> 
-            <span class="n">config</span><span class="p">[</span><span class="s2">&quot;bw_nested_path&quot;</span><span class="p">]</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bw_nested</span><span class="o">.</span><span class="n">cycle_output_path</span>
-        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;spw_path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">cycle_track_ensemble_spw_path</span>
-        
-        <span class="n">dict2yaml</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">,</span> <span class="s2">&quot;config.yml&quot;</span><span class="p">),</span> <span class="n">config</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="p">:</span>
-            <span class="c1"># Write ensemble members to file</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">,</span> <span class="s2">&quot;ensemble_members.txt&quot;</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">ensemble_names</span><span class="p">:</span>
-                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">member</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="c1"># Make run batch file</span>
         <span class="n">batch_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">,</span> <span class="s2">&quot;run.bat&quot;</span><span class="p">)</span>
@@ -428,7 +402,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">pth</span></div>
 
 <div class="viewcode-block" id="CoSMoS_SFINCS.move"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_sfincs.CoSMoS_SFINCS.move.html#cosmos.cosmos_sfincs.CoSMoS_SFINCS.move">[docs]</a>    <span class="k">def</span> <span class="nf">move</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Move SFINCS model input, output, and restart files.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Move SFINCS model input, output, and restart files.</span>
 <span class="sd">        &quot;&quot;&quot;</span>   
         <span class="n">job_path</span>     <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">job_path</span>
         <span class="n">output_path</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cycle_output_path</span>
@@ -467,7 +441,7 @@
         <span class="n">fo</span><span class="o">.</span><span class="n">move_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">job_path</span><span class="p">,</span> <span class="s2">&quot;*.*&quot;</span><span class="p">),</span> <span class="n">input_path</span><span class="p">)</span></div>
         
 <div class="viewcode-block" id="CoSMoS_SFINCS.post_process"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_sfincs.CoSMoS_SFINCS.post_process.html#cosmos.cosmos_sfincs.CoSMoS_SFINCS.post_process">[docs]</a>    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Post-process SFINCS output: generate (probabilistic) water level timeseries and flood maps.        </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Post-process SFINCS output: generate (probabilistic) water level timeseries and flood maps.        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">import</span> <span class="nn">cht.misc.prob_maps</span> <span class="k">as</span> <span class="nn">pm</span>
         <span class="kn">import</span> <span class="nn">cht.misc.misc_tools</span>

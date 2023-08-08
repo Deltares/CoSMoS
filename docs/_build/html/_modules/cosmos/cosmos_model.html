@@ -94,15 +94,16 @@
 <span class="kn">from</span> <span class="nn">.cosmos_cluster</span> <span class="kn">import</span> <span class="n">cluster_dict</span> <span class="k">as</span> <span class="n">cluster</span>
 
 <span class="kn">import</span> <span class="nn">cht.misc.xmlkit</span> <span class="k">as</span> <span class="nn">xml</span>
-<span class="kn">from</span> <span class="nn">cht.nesting.nest1</span> <span class="kn">import</span> <span class="n">nest1</span>
-<span class="kn">from</span> <span class="nn">cht.nesting.nest2</span> <span class="kn">import</span> <span class="n">nest2</span>
+<span class="kn">import</span> <span class="nn">cht.misc.fileops</span> <span class="k">as</span> <span class="nn">fo</span>
+<span class="kn">import</span> <span class="nn">cht.nesting.nesting</span> <span class="k">as</span> <span class="nn">nesting</span>
+<span class="kn">from</span> <span class="nn">cht.misc.misc_tools</span> <span class="kn">import</span> <span class="n">dict2yaml</span>
 
 <div class="viewcode-block" id="Model"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_model.Model.html#cosmos.cosmos_beware.Model">[docs]</a><span class="k">class</span> <span class="nc">Model</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Read generic model data from toml file, prepare model run paths, and submit jobs.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read generic model data from toml file, prepare model run paths, and submit jobs.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="Model.__init__"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_model.Model.html#cosmos.cosmos_beware.Model.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Initialize model attributes described in model.toml file.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize model attributes described in model.toml file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">flow</span>               <span class="o">=</span> <span class="kc">False</span>
@@ -150,7 +151,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span>           <span class="o">=</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="Model.read_generic"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_model.Model.read_generic.html#cosmos.cosmos_beware.Model.read_generic">[docs]</a>    <span class="k">def</span> <span class="nf">read_generic</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Read model attributes from model.toml file.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read model attributes from model.toml file.</span>
 
 <span class="sd">        See Also</span>
 <span class="sd">        --------</span>
@@ -246,7 +247,7 @@
                 
         
 <div class="viewcode-block" id="Model.set_paths"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_model.Model.set_paths.html#cosmos.cosmos_beware.Model.set_paths">[docs]</a>    <span class="k">def</span> <span class="nf">set_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set model paths (input, output, figures, restart, job).</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set model paths (input, output, figures, restart, job).</span>
 
 <span class="sd">        See Also</span>
 <span class="sd">        --------</span>
@@ -351,7 +352,7 @@
 
 <span class="c1">#            model.set_paths()            </span>
 <div class="viewcode-block" id="Model.get_nested_models"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_model.Model.get_nested_models.html#cosmos.cosmos_beware.Model.get_nested_models">[docs]</a>    <span class="k">def</span> <span class="nf">get_nested_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get which model the current model is nested in. </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get which model the current model is nested in. </span>
 <span class="sd">        &quot;&quot;&quot;</span>        
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow_nested_name</span><span class="p">:</span>
             <span class="c1"># Look up model from which it gets it boundary conditions</span>
@@ -376,10 +377,35 @@
                     <span class="k">break</span></div>
 
 <div class="viewcode-block" id="Model.submit_job"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_model.Model.submit_job.html#cosmos.cosmos_beware.Model.submit_job">[docs]</a>    <span class="k">def</span> <span class="nf">submit_job</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Submit model.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Submit model.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># First prepare batch file</span>
+        <span class="c1"># Copy the correct to run_job.py</span>
+        <span class="n">git_pth</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+        <span class="n">fo</span><span class="o">.</span><span class="n">copy_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">git_pth</span><span class="p">,</span> <span class="s2">&quot;cosmos_run_job.py&quot;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">,</span> <span class="s2">&quot;run_job.py&quot;</span><span class="p">))</span>
+        <span class="c1"># fo.copy_file(os.path.join(git_pth, &quot;cosmos_run_sfincs_member.py&quot;), self.job_path)</span>
+
+        <span class="c1"># Write config file</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;ensemble&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span>
+        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;run_mode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cycle</span><span class="o">.</span><span class="n">run_mode</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow_nested</span><span class="p">:</span>
+            <span class="n">config</span><span class="p">[</span><span class="s2">&quot;flow_nested_path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow_nested</span><span class="o">.</span><span class="n">cycle_output_path</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wave_nested</span><span class="p">:</span>
+            <span class="n">config</span><span class="p">[</span><span class="s2">&quot;wave_nested_path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wave_nested</span><span class="o">.</span><span class="n">cycle_output_path</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bw_nested</span><span class="p">:</span> 
+            <span class="n">config</span><span class="p">[</span><span class="s2">&quot;bw_nested_path&quot;</span><span class="p">]</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bw_nested</span><span class="o">.</span><span class="n">cycle_output_path</span>
+        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;spw_path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">cycle_track_ensemble_spw_path</span>
+        
+        <span class="n">dict2yaml</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">,</span> <span class="s2">&quot;config.yml&quot;</span><span class="p">),</span> <span class="n">config</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="p">:</span>
+            <span class="c1"># Write ensemble members to file</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">,</span> <span class="s2">&quot;ensemble_members.txt&quot;</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">ensemble_names</span><span class="p">:</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">member</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># prepare batch file</span>
 
         <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cycle</span><span class="o">.</span><span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;cloud&quot;</span><span class="p">:</span>
             <span class="c1"># Make sh file (run.sh) that activates the correct environment and runs run_job.py</span>
@@ -464,7 +490,7 @@
 <span class="c1">#        os.remove(&#39;tmp.bat&#39;)</span>
 
 <div class="viewcode-block" id="Model.get_all_nested_models"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_model.Model.get_all_nested_models.html#cosmos.cosmos_beware.Model.get_all_nested_models">[docs]</a>    <span class="k">def</span> <span class="nf">get_all_nested_models</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">all_nested_models</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return a list of all models nested in this model.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a list of all models nested in this model.</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
         <span class="c1"># def get_all_nested_models(self, tp, all_nested_models=[]):</span>
         <span class="c1"># don&#39;t define empty list as default ! (https://nikos7am.com/posts/mutable-default-arguments/)</span>
@@ -490,7 +516,7 @@
         <span class="k">return</span> <span class="n">all_nested_models</span></div>
         
 <div class="viewcode-block" id="Model.add_stations"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_model.Model.add_stations.html#cosmos.cosmos_beware.Model.add_stations">[docs]</a>    <span class="k">def</span> <span class="nf">add_stations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Add stations that are located within this model.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add stations that are located within this model.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -540,7 +566,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">station</span><span class="p">)</span></div>
             
 <div class="viewcode-block" id="Model.get_peak_boundary_conditions"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_model.Model.get_peak_boundary_conditions.html#cosmos.cosmos_beware.Model.get_peak_boundary_conditions">[docs]</a>    <span class="k">def</span> <span class="nf">get_peak_boundary_conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="sd">&quot;&quot;&quot;Get boundary conditions from overall model and define peak.</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Get boundary conditions from overall model and define peak.</span>
 <span class="sd">            &quot;&quot;&quot;</span>      
             <span class="c1"># Water level boundary conditions</span>
 
@@ -552,7 +578,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">tref</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow_start_time</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">tstop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow_stop_time</span>
 
-            <span class="n">z_max</span> <span class="o">=</span> <span class="n">nest2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flow_nested</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
+            <span class="n">z_max</span> <span class="o">=</span> <span class="n">nesting</span><span class="o">.</span><span class="n">nest2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flow_nested</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
                           <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
                           <span class="n">output_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">flow_nested</span><span class="o">.</span><span class="n">cycle_output_path</span><span class="p">,</span>
                           <span class="n">boundary_water_level_correction</span><span class="o">=</span><span class="n">zcor</span><span class="p">,</span>
@@ -565,7 +591,7 @@
     
                 <span class="c1"># Get boundary conditions from overall model (Nesting 2)</span>
 <span class="c1">#                output_path = os.path.join(self.wave_nested.cycle_path, &quot;output&quot;)                                   </span>
-                <span class="n">hm0_max</span> <span class="o">=</span> <span class="n">nest2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wave_nested</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
+                <span class="n">hm0_max</span> <span class="o">=</span> <span class="n">nesting</span><span class="o">.</span><span class="n">nest2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wave_nested</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
                                 <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
                                 <span class="n">output_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">wave_nested</span><span class="o">.</span><span class="n">cycle_output_path</span><span class="p">,</span>
                                 <span class="n">option</span><span class="o">=</span><span class="s2">&quot;timeseries&quot;</span><span class="p">,</span>

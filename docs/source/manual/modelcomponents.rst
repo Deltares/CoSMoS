@@ -38,7 +38,7 @@ CoSMoS is initialized with the *run_cosmos* (see :ref:`Running CoSMoS <running>`
 Upon initialization (:py:class:`cosmos.cosmos.CoSMoS.initialize`) of the CoSMoS class, CoSMoS calls the Configuration class (:py:class:`cosmos.cosmos.Configuration`).
 The Configuration class reads the main :ref:`configuration file <configuration>` and input settings, sets the model paths, and finds available models in the model database.
 In addition, it reads all :ref:`available stations <stations>`, :ref:`meteo datasets <meteo>`, and :ref:`super region files <super_regions>`. 
-The CoSMoS class saves all input settings to *self.config*, which can be accessed by other CoSMoS classes. 
+The CoSMoS class saves all input settings to *cosmos.config*, which can be accessed by other CoSMoS classes. 
 
 The CoSMoS class has three main execution options:
 

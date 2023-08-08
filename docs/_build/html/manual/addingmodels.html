@@ -132,12 +132,12 @@ A separate toml file describes, among other things, in which model it is nested 
 </thead>
 <tbody>
 <tr class="row-even"><td><p>longname</p></td>
-<td><p>Model long name</p></td>
+<td><p>Model long name (shown in webviewer)</p></td>
 <td><p>name</p></td>
 <td></td>
 </tr>
 <tr class="row-odd"><td><p>runid</p></td>
-<td><p>Model id used in CoSMoS</p></td>
+<td><p>Model id used in CoSMoS.</p></td>
 <td><p>None</p></td>
 <td></td>
 </tr>
@@ -207,7 +207,7 @@ A separate toml file describes, among other things, in which model it is nested 
 <td><p>m</p></td>
 </tr>
 <tr class="row-odd"><td><p>station</p></td>
-<td><p>Station xml file (located in cosmos//stations) added as observation points in model.</p></td>
+<td><p>List of station xml files (located in cosmos//stations) added as observation points in model.</p></td>
 <td></td>
 <td></td>
 </tr>
@@ -282,13 +282,8 @@ A separate toml file describes, among other things, in which model it is nested 
 <td><p>m</p></td>
 </tr>
 <tr class="row-even"><td><p>zb_deshoal</p></td>
-<td><p>?? Depth to which nearshore wave heights are deshoaled.</p></td>
+<td><p>Depth to which nearshore wave heights are deshoaled.</p></td>
 <td><p>None</p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p>ensemble</p></td>
-<td><p>Run in ensemble mode.</p></td>
-<td><p>False</p></td>
 <td></td>
 </tr>
 </tbody>
@@ -354,22 +349,26 @@ The Delft3D-FM <em>input</em> folder must contain the following folders and file
 <ul class="simple">
 <li><p><em>dimr_config.xml</em> file that describes the working directories for the flow and wave models. The &lt;time&gt; (starttime of the simulation) is set by CoSMoS by replacing the keyword <em>TIMEKEY</em>.</p></li>
 </ul>
+<p>The <em>misc</em> folder must contain a text file with the same name as the model name, containing the coordinates of the model outline.</p>
 </section>
 <section id="hurrywave">
 <h3>HurryWave<a class="headerlink" href="#hurrywave" title="Permalink to this headline">¶</a></h3>
 <p>HurryWave is a computationally efficient third generation spectral wave model, with physics similar to those of SWAN and WAVEWATCH III.</p>
 <p>HurryWave model input files are located in the <em>input</em> folder of your HurryWave model directory.
 In the <em>tiling</em> folder, <em>indices</em> and <em>topobathy</em> folders must be included to generate wave maps.</p>
+<p>The <em>misc</em> folder must contain a text file with the same name as the model name, containing the coordinates of the model outline.</p>
 </section>
 <section id="sfincs">
 <h3>SFINCS<a class="headerlink" href="#sfincs" title="Permalink to this headline">¶</a></h3>
 <p><a class="reference external" href="https://sfincs.readthedocs.io/en/latest/">SFINCS</a> model input files are located in the <em>input</em> folder of your SFINCS model directory.
 In the <em>tiling</em> folder, <em>indices</em> and <em>topobathy</em> folders must be included to generate flood maps.</p>
+<p>The <em>misc</em> folder must contain a text file with the same name as the model name, containing the coordinates of the model outline.</p>
 </section>
 <section id="xbeach">
 <h3>XBeach<a class="headerlink" href="#xbeach" title="Permalink to this headline">¶</a></h3>
 <p><a class="reference external" href="https://xbeach.readthedocs.io/en/latest/">XBeach</a> model input files are located in the <em>input</em> folder of your XBeach model directory.
 In the <em>tiling</em> folder, an <em>indices</em> folder must be included to generate pre and post-storm bed level maps.</p>
+<p>The <em>misc</em> folder must contain a text file with the same name as the model name, containing the coordinates of the model outline.</p>
 </section>
 </section>
 </section>

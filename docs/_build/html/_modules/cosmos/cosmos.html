@@ -86,7 +86,7 @@
 
 <div class="viewcode-block" id="CoSMoS"><a class="viewcode-back" href="../../_generated/cosmos.cosmos.CoSMoS.html#cosmos.cosmos.CoSMoS">[docs]</a><span class="k">class</span> <span class="nc">CoSMoS</span><span class="p">:</span>
 
-    <span class="sd">&quot;&quot;&quot;This is the main CoSMoS class.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This is the main CoSMoS class.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -126,7 +126,7 @@
         <span class="c1"># self.storm_keeplist  = []</span>
 
 <div class="viewcode-block" id="CoSMoS.initialize"><a class="viewcode-back" href="../../_generated/cosmos.cosmos.CoSMoS.initialize.html#cosmos.cosmos.CoSMoS.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">main_path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Initialize CoSMoS configuration based on configuration file and input arguments.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize CoSMoS configuration based on configuration file and input arguments.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -200,7 +200,7 @@
 
 <div class="viewcode-block" id="CoSMoS.run"><a class="viewcode-back" href="../../_generated/cosmos.cosmos.CoSMoS.run.html#cosmos.cosmos.CoSMoS.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
 
-        <span class="sd">&quot;&quot;&quot;Run a CoSMoS scenario:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run a CoSMoS scenario:</span>
 <span class="sd">    </span>
 <span class="sd">        - Initialize cosmos_main_loop and cosmos_model_loop</span>
 <span class="sd">        - Start cosmos_main_loop</span>
@@ -329,13 +329,13 @@
 <span class="c1">#         self.main_loop.start(cycle=cycle)</span>
 
 <div class="viewcode-block" id="CoSMoS.stop"><a class="viewcode-back" href="../../_generated/cosmos.cosmos.CoSMoS.stop.html#cosmos.cosmos.CoSMoS.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
-        <span class="sd">&quot;&quot;&quot;Stop main loop and model loop.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stop main loop and model loop.</span>
 <span class="sd">        &quot;&quot;&quot;</span>  
         <span class="bp">self</span><span class="o">.</span><span class="n">model_loop</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">main_loop</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="CoSMoS.log"><a class="viewcode-back" href="../../_generated/cosmos.cosmos.CoSMoS.log.html#cosmos.cosmos.CoSMoS.log">[docs]</a>    <span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>  
-        <span class="sd">&quot;&quot;&quot;Write log message to cosmos.log</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write log message to cosmos.log</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -350,7 +350,7 @@
             <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="CoSMoS.make_webviewer"><a class="viewcode-back" href="../../_generated/cosmos.cosmos.CoSMoS.make_webviewer.html#cosmos.cosmos.CoSMoS.make_webviewer">[docs]</a>    <span class="k">def</span> <span class="nf">make_webviewer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sc_name</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>   
-        <span class="sd">&quot;&quot;&quot;Just make webviewer</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Just make webviewer</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -387,7 +387,7 @@
             <span class="n">wv</span><span class="o">.</span><span class="n">upload</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="CoSMoS.post_process"><a class="viewcode-back" href="../../_generated/cosmos.cosmos.CoSMoS.post_process.html#cosmos.cosmos.CoSMoS.post_process">[docs]</a>    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sc_name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cycle</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>   
-        <span class="sd">&quot;&quot;&quot;Just post-process model results. </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Just post-process model results. </span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>

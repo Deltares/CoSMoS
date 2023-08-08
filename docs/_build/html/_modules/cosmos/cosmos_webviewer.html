@@ -95,11 +95,11 @@
 <span class="kn">import</span> <span class="nn">cht.misc.misc_tools</span>
 
 <div class="viewcode-block" id="WebViewer"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_webviewer.WebViewer.html#cosmos.cosmos_webviewer.WebViewer">[docs]</a><span class="k">class</span> <span class="nc">WebViewer</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Cosmos webviewer class</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Cosmos webviewer class</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
 
 <div class="viewcode-block" id="WebViewer.__init__"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_webviewer.WebViewer.html#cosmos.cosmos_webviewer.WebViewer.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Initialize webviewer. </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize webviewer. </span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -115,7 +115,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">exists</span> <span class="o">=</span> <span class="kc">False</span></div>
     
     <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Make webviewer. </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make webviewer. </span>
 
 <span class="sd">        - Makes local copy of the webviewer from a template. If such a copy already exists, data will be copied to the existing webviewer.</span>
 <span class="sd">        - Updating the scenario.js with the current scenario.</span>
@@ -182,7 +182,7 @@
 
 
     <span class="k">def</span> <span class="nf">copy_timeseries</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Add available wave, water level, and runup timeseries to webviewer.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add available wave, water level, and runup timeseries to webviewer.</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
 
         <span class="c1"># Stations and buoys</span>
@@ -237,7 +237,7 @@
             <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">station</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">flow</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">station</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">station</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">station</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;tide_gauge&quot;</span> <span class="ow">and</span> <span class="n">station</span><span class="o">.</span><span class="n">upload</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">station</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;tide_gauge&quot;</span> <span class="ow">and</span> <span class="n">station</span><span class="o">.</span><span class="n">upload</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">ensemble</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
                             
                             <span class="n">point</span> <span class="o">=</span> <span class="n">Point</span><span class="p">((</span><span class="n">station</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span> <span class="n">station</span><span class="o">.</span><span class="n">latitude</span><span class="p">))</span>
                             <span class="n">name</span> <span class="o">=</span> <span class="n">station</span><span class="o">.</span><span class="n">long_name</span> <span class="o">+</span> <span class="s2">&quot; (&quot;</span> <span class="o">+</span> <span class="n">station</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
@@ -309,7 +309,7 @@
             <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">station</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">wave</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">station</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">station</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">station</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;wave_buoy&quot;</span> <span class="ow">and</span> <span class="n">station</span><span class="o">.</span><span class="n">upload</span><span class="p">:</span>                
+                        <span class="k">if</span> <span class="n">station</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;wave_buoy&quot;</span> <span class="ow">and</span> <span class="n">station</span><span class="o">.</span><span class="n">upload</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">ensemble</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>                
                             <span class="n">point</span> <span class="o">=</span> <span class="n">Point</span><span class="p">((</span><span class="n">station</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span> <span class="n">station</span><span class="o">.</span><span class="n">latitude</span><span class="p">))</span>
                             <span class="k">if</span> <span class="n">station</span><span class="o">.</span><span class="n">ndbc_id</span><span class="p">:</span>
                                 <span class="n">name</span> <span class="o">=</span> <span class="n">station</span><span class="o">.</span><span class="n">long_name</span> <span class="o">+</span> <span class="s2">&quot; (&quot;</span> <span class="o">+</span> <span class="n">station</span><span class="o">.</span><span class="n">ndbc_id</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
@@ -379,7 +379,7 @@
         <span class="c1">#         model.domain.write_to_csv(scenario_path, cosmos.scenario.name)</span>
 
     <span class="k">def</span> <span class="nf">copy_floodmap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Add available flood map tiles to webviewer.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add available flood map tiles to webviewer.</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
 
         <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Adding flood map tiles ...&quot;</span><span class="p">)</span>
@@ -521,7 +521,7 @@
             <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;An error occurred while making probabilistic flood maps!&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">copy_wave_maps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Add available wave map tiles to webviewer.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add available wave map tiles to webviewer.</span>
 <span class="sd">        &quot;&quot;&quot;</span>   
 
         <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Adding wave map tiles ...&quot;</span><span class="p">)</span>
@@ -671,7 +671,7 @@
 
                 
     <span class="k">def</span> <span class="nf">copy_sederomap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Add available sedimentation/erosion map tiles to webviewer.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add available sedimentation/erosion map tiles to webviewer.</span>
 <span class="sd">        &quot;&quot;&quot;</span>   
         <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Adding sedimentation/erosion map tiles ...&quot;</span><span class="p">)</span>
         
@@ -745,7 +745,7 @@
             <span class="n">cht</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">misc_tools</span><span class="o">.</span><span class="n">write_json_js</span><span class="p">(</span><span class="n">stations_file</span><span class="p">,</span> <span class="n">feature_collection</span><span class="p">,</span> <span class="s2">&quot;var xb_markers =&quot;</span><span class="p">)</span>
             
     <span class="k">def</span> <span class="nf">make_meteo_maps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Make wind and precipitation tiles for webviewer.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make wind and precipitation tiles for webviewer.</span>
 <span class="sd">        &quot;&quot;&quot;</span>   
 
         <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Making meteo map tiles ...&quot;</span><span class="p">)</span>
@@ -1041,7 +1041,7 @@
 <span class="c1">#             self.map_variables.append(dct)</span>
 
     <span class="k">def</span> <span class="nf">copy_bedlevelmaps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Add available bedlevel map tiles to webviewer folder.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add available bedlevel map tiles to webviewer folder.</span>
 <span class="sd">        &quot;&quot;&quot;</span>   
 
         <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Adding bed level map tiles ...&quot;</span><span class="p">)</span>
@@ -1144,7 +1144,7 @@
             
 
     <span class="k">def</span> <span class="nf">make_runup_map</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>        
-        <span class="sd">&quot;&quot;&quot;Make runup markers and timeseries for webviewer.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make runup markers and timeseries for webviewer.</span>
 <span class="sd">        &quot;&quot;&quot;</span>   
         <span class="n">output_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
                                      <span class="s2">&quot;data&quot;</span><span class="p">,</span>
@@ -1154,7 +1154,7 @@
 
         <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;beware&#39;</span><span class="p">:</span>
-                
+           
                 <span class="k">try</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">cycle_output_path</span><span class="p">,</span>
                                             <span class="s2">&quot;beware_his.nc&quot;</span><span class="p">)):</span>
@@ -1173,15 +1173,15 @@
                             <span class="n">point</span> <span class="o">=</span> <span class="n">Point</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
                             <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Loc nr: &#39;</span> <span class="o">+</span>  <span class="nb">str</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">filename</span><span class="p">[</span><span class="n">ip</span><span class="p">])</span>
                                         
-                            <span class="nb">id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">R2p</span><span class="p">[</span><span class="n">ip</span><span class="p">,:])</span>                                                                       
+                            <span class="nb">id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">R2</span><span class="p">[</span><span class="n">ip</span><span class="p">,:])</span>                                                                       
                             <span class="n">features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Feature</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="n">point</span><span class="p">,</span>
                                                     <span class="n">properties</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;model_name&quot;</span><span class="p">:</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                                                                 <span class="s2">&quot;LocNr&quot;</span><span class="p">:</span><span class="nb">int</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">filename</span><span class="p">[</span><span class="n">ip</span><span class="p">]),</span>
                                                                 <span class="s2">&quot;Lon&quot;</span><span class="p">:</span><span class="n">x</span><span class="p">,</span>
                                                                 <span class="s2">&quot;Lat&quot;</span><span class="p">:</span><span class="n">y</span><span class="p">,</span>                                                
-                                                                <span class="s2">&quot;Setup&quot;</span><span class="p">:</span><span class="nb">round</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">setup</span><span class="p">[</span><span class="n">ip</span><span class="p">,</span> <span class="nb">id</span><span class="p">],</span><span class="mi">2</span><span class="p">),</span>
+                                                                <span class="s2">&quot;Setup&quot;</span><span class="p">:</span><span class="nb">round</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">R2_setup</span><span class="p">[</span><span class="n">ip</span><span class="p">,</span> <span class="nb">id</span><span class="p">],</span><span class="mi">2</span><span class="p">),</span>
                                                                 <span class="s2">&quot;Swash&quot;</span><span class="p">:</span><span class="nb">round</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">swash</span><span class="p">[</span><span class="n">ip</span><span class="p">,</span> <span class="nb">id</span><span class="p">],</span><span class="mi">2</span><span class="p">),</span>
-                                                                <span class="s2">&quot;TWL&quot;</span><span class="p">:</span><span class="nb">round</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">R2p</span><span class="p">[</span><span class="n">ip</span><span class="p">,</span> <span class="nb">id</span><span class="p">],</span><span class="mi">2</span><span class="p">)}))</span>
+                                                                <span class="s2">&quot;TWL&quot;</span><span class="p">:</span><span class="nb">round</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">R2</span><span class="p">[</span><span class="n">ip</span><span class="p">,</span> <span class="nb">id</span><span class="p">],</span><span class="mi">2</span><span class="p">)}))</span>
                                             
                         <span class="k">if</span> <span class="n">features</span><span class="p">:</span>
                             <span class="n">feature_collection</span> <span class="o">=</span> <span class="n">FeatureCollection</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
@@ -1226,7 +1226,7 @@
                     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">cycle_output_path</span><span class="p">,</span>
                                                             <span class="s2">&quot;beware_his_ensemble.nc&quot;</span><span class="p">)):</span>
                         <span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">read_data</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">cycle_output_path</span><span class="p">,</span>
-                                                            <span class="s2">&quot;beware_his_ensemble.nc&quot;</span><span class="p">),</span> <span class="n">prcs</span><span class="o">=</span> <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">])</span>                
+                                                            <span class="s2">&quot;beware_his_ensemble.nc&quot;</span><span class="p">),</span> <span class="n">prcs</span><span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">95</span><span class="p">])</span>                
         
                         <span class="n">features</span> <span class="o">=</span> <span class="p">[]</span>
                         <span class="n">transformer</span> <span class="o">=</span> <span class="n">Transformer</span><span class="o">.</span><span class="n">from_crs</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
@@ -1239,15 +1239,15 @@
                             <span class="n">point</span> <span class="o">=</span> <span class="n">Point</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
                             <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Loc nr: &#39;</span> <span class="o">+</span>  <span class="nb">str</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">filename</span><span class="p">[</span><span class="n">ip</span><span class="p">])</span>
                                         
-                            <span class="nb">id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">R2p</span><span class="p">[</span><span class="n">ip</span><span class="p">,:])</span>                                                                       
+                            <span class="nb">id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">R2</span><span class="p">[</span><span class="n">ip</span><span class="p">,:])</span>                                                                       
                             <span class="n">features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Feature</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="n">point</span><span class="p">,</span>
                                                     <span class="n">properties</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;model_name&quot;</span><span class="p">:</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                                                                 <span class="s2">&quot;LocNr&quot;</span><span class="p">:</span><span class="nb">int</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">filename</span><span class="p">[</span><span class="n">ip</span><span class="p">]),</span>
                                                                 <span class="s2">&quot;Lon&quot;</span><span class="p">:</span><span class="n">x</span><span class="p">,</span>
                                                                 <span class="s2">&quot;Lat&quot;</span><span class="p">:</span><span class="n">y</span><span class="p">,</span>                                                
-                                                                <span class="s2">&quot;Setup&quot;</span><span class="p">:</span><span class="nb">round</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">setup_prc</span><span class="p">[</span><span class="s2">&quot;95&quot;</span><span class="p">][</span><span class="n">ip</span><span class="p">,</span> <span class="nb">id</span><span class="p">],</span><span class="mi">2</span><span class="p">),</span>
+                                                                <span class="s2">&quot;Setup&quot;</span><span class="p">:</span><span class="nb">round</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">R2_setup_prc</span><span class="p">[</span><span class="s2">&quot;95&quot;</span><span class="p">][</span><span class="n">ip</span><span class="p">,</span> <span class="nb">id</span><span class="p">],</span><span class="mi">2</span><span class="p">),</span>
                                                                 <span class="s2">&quot;Swash&quot;</span><span class="p">:</span><span class="nb">round</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">swash</span><span class="p">[</span><span class="n">ip</span><span class="p">,</span> <span class="nb">id</span><span class="p">],</span><span class="mi">2</span><span class="p">),</span>
-                                                                <span class="s2">&quot;TWL&quot;</span><span class="p">:</span><span class="nb">round</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">R2p_prc</span><span class="p">[</span><span class="s2">&quot;95&quot;</span><span class="p">][</span><span class="n">ip</span><span class="p">,</span> <span class="nb">id</span><span class="p">],</span><span class="mi">2</span><span class="p">)}))</span>
+                                                                <span class="s2">&quot;TWL&quot;</span><span class="p">:</span><span class="nb">round</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">R2_prc</span><span class="p">[</span><span class="s2">&quot;95&quot;</span><span class="p">][</span><span class="n">ip</span><span class="p">,</span> <span class="nb">id</span><span class="p">],</span><span class="mi">2</span><span class="p">)}))</span>
                                                 
                         <span class="k">if</span> <span class="n">features</span><span class="p">:</span>
                             <span class="n">feature_collection</span> <span class="o">=</span> <span class="n">FeatureCollection</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
@@ -1301,9 +1301,9 @@
                        
                         <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Loc nr: &#39;</span> <span class="o">+</span>  <span class="nb">str</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">filename</span><span class="p">[</span><span class="n">ip</span><span class="p">])</span>
                                     
-                        <span class="nb">id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">R2p</span><span class="p">[</span><span class="n">ip</span><span class="p">,:])</span>   
+                        <span class="nb">id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">R2</span><span class="p">[</span><span class="n">ip</span><span class="p">,:])</span>   
 
-                        <span class="n">id2</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">r2max</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">&gt;=</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">R2p</span><span class="p">[</span><span class="n">ip</span><span class="p">,</span><span class="nb">id</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">id2</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">r2max</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">&gt;=</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">R2</span><span class="p">[</span><span class="n">ip</span><span class="p">,</span><span class="nb">id</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
                         
                         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">dfx</span><span class="p">[</span><span class="n">r2max</span><span class="p">[</span><span class="n">id2</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">ip</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
                                                      <span class="n">dfy</span><span class="p">[</span><span class="n">r2max</span><span class="p">[</span><span class="n">id2</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">ip</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
@@ -1314,14 +1314,14 @@
                                                             <span class="s2">&quot;LocNr&quot;</span><span class="p">:</span><span class="nb">int</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">filename</span><span class="p">[</span><span class="n">ip</span><span class="p">]),</span>
                                                             <span class="s2">&quot;Lon&quot;</span><span class="p">:</span><span class="n">x</span><span class="p">,</span>
                                                             <span class="s2">&quot;Lat&quot;</span><span class="p">:</span><span class="n">y</span><span class="p">,</span>                                                
-                                                            <span class="s2">&quot;Setup&quot;</span><span class="p">:</span><span class="nb">round</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">setup</span><span class="p">[</span><span class="n">ip</span><span class="p">,</span> <span class="nb">id</span><span class="p">],</span><span class="mi">2</span><span class="p">),</span>
+                                                            <span class="s2">&quot;Setup&quot;</span><span class="p">:</span><span class="nb">round</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">R2_setup</span><span class="p">[</span><span class="n">ip</span><span class="p">,</span> <span class="nb">id</span><span class="p">],</span><span class="mi">2</span><span class="p">),</span>
                                                             <span class="s2">&quot;Swash&quot;</span><span class="p">:</span><span class="nb">round</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">swash</span><span class="p">[</span><span class="n">ip</span><span class="p">,</span> <span class="nb">id</span><span class="p">],</span><span class="mi">2</span><span class="p">),</span>
-                                                            <span class="s2">&quot;TWL&quot;</span><span class="p">:</span><span class="nb">round</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">R2p</span><span class="p">[</span><span class="n">ip</span><span class="p">,</span> <span class="nb">id</span><span class="p">],</span><span class="mi">2</span><span class="p">)}))</span>
+                                                            <span class="s2">&quot;TWL&quot;</span><span class="p">:</span><span class="nb">round</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">R2</span><span class="p">[</span><span class="n">ip</span><span class="p">,</span> <span class="nb">id</span><span class="p">],</span><span class="mi">2</span><span class="p">)}))</span>
 
                     <span class="k">if</span> <span class="n">features</span><span class="p">:</span>
                         <span class="n">feature_collection</span> <span class="o">=</span> <span class="n">FeatureCollection</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
                         <span class="n">output_path_runup</span> <span class="o">=</span>  <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s1">&#39;extreme_horizontal_runup_height</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">)</span>
-                        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">output_path_runup</span><span class="p">)</span>
+                        <span class="n">fo</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">output_path_runup</span><span class="p">)</span>
                         <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path_runup</span><span class="p">,</span>     
                                                 <span class="s2">&quot;extreme_horizontal_runup_height.geojson.js&quot;</span><span class="p">)</span>
                         <span class="n">cht</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">misc_tools</span><span class="o">.</span><span class="n">write_json_js</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">feature_collection</span><span class="p">,</span> <span class="s2">&quot;var runup_vert =&quot;</span><span class="p">)</span>
@@ -1357,6 +1357,7 @@
 
                     <span class="bp">self</span><span class="o">.</span><span class="n">map_variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dct</span><span class="p">)</span>                
 
+                    <span class="c1"># Offshore water level and wave height</span>
 
                     <span class="n">features</span> <span class="o">=</span> <span class="p">[]</span>
                         
@@ -1366,7 +1367,7 @@
                         <span class="n">point</span> <span class="o">=</span> <span class="n">Point</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
                         <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Loc nr: &#39;</span> <span class="o">+</span>  <span class="nb">str</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">filename</span><span class="p">[</span><span class="n">ip</span><span class="p">])</span>
                                     
-                        <span class="nb">id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">R2p</span><span class="p">[</span><span class="n">ip</span><span class="p">,:])</span>                                                               
+                        <span class="nb">id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">R2</span><span class="p">[</span><span class="n">ip</span><span class="p">,:])</span>                                                               
                         <span class="n">features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Feature</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="n">point</span><span class="p">,</span>
                                                 <span class="n">properties</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;model_name&quot;</span><span class="p">:</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                                                             <span class="s2">&quot;LocNr&quot;</span><span class="p">:</span><span class="nb">int</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">filename</span><span class="p">[</span><span class="n">ip</span><span class="p">]),</span>
@@ -1379,7 +1380,7 @@
                     <span class="k">if</span> <span class="n">features</span><span class="p">:</span>
                         <span class="n">feature_collection</span> <span class="o">=</span> <span class="n">FeatureCollection</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
                         <span class="n">output_path_waves</span> <span class="o">=</span>  <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s1">&#39;extreme_sea_level_and_wave_height</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">)</span>
-                        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">output_path_waves</span><span class="p">)</span>
+                        <span class="n">fo</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">output_path_waves</span><span class="p">)</span>
                         <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path_waves</span><span class="p">,</span>     
                                                 <span class="s2">&quot;extreme_sea_level_and_wave_height.geojson.js&quot;</span><span class="p">)</span>
                         <span class="n">cht</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">misc_tools</span><span class="o">.</span><span class="n">write_json_js</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">feature_collection</span><span class="p">,</span> <span class="s2">&quot;var swl =&quot;</span><span class="p">)</span>
@@ -1428,7 +1429,7 @@
 
 
     <span class="k">def</span> <span class="nf">upload</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>        
-        <span class="sd">&quot;&quot;&quot;Upload local webviewer to server.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Upload local webviewer to server.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">cht.misc.sftp</span> <span class="kn">import</span> <span class="n">SSHSession</span>
         

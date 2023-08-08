@@ -90,30 +90,24 @@
 <span id="configuration"></span><h1>Setting up your configuration file<a class="headerlink" href="#setting-up-your-configuration-file" title="Permalink to this headline">¶</a></h1>
 <p>The CoSMoS configuration file specifies the model and meteo database paths, the conda path, the model executable paths, and the webserver, webviewer, and cycle settings:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">model_database</span><span class="p">]</span>
-<span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;c:</span><span class="se">\\</span><span class="s2">work</span><span class="se">\\</span><span class="s2">cosmos</span><span class="se">\\</span><span class="s2">model_database&quot;</span>
+<span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;c:</span><span class="se">\\</span><span class="s2">cosmos_run_folder</span><span class="se">\\</span><span class="s2">model_database&quot;</span>
 
 <span class="p">[</span><span class="n">meteo_database</span><span class="p">]</span>
-<span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;p:</span><span class="se">\\</span><span class="s2">11204750-onr-westernpacific</span><span class="se">\\</span><span class="s2">Year2-3</span><span class="se">\\</span><span class="s2">cosmos</span><span class="se">\\</span><span class="s2">version03</span><span class="se">\\</span><span class="s2">cosmos</span><span class="se">\\</span><span class="s2">run_folder</span><span class="se">\\</span><span class="s2">meteo&quot;</span>
+<span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;c:</span><span class="se">\\</span><span class="s2">cosmos_run_folder</span><span class="se">\\</span><span class="s2">meteo_database&quot;</span>
 
 <span class="p">[</span><span class="n">conda</span><span class="p">]</span>
 <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;c:</span><span class="se">\\</span><span class="s2">Users</span><span class="se">\\</span><span class="si">%u</span><span class="s2">sername%</span><span class="se">\\</span><span class="s2">Anaconda3&quot;</span>
 
 <span class="p">[</span><span class="n">executables</span><span class="p">]</span>
-<span class="n">delft3dfm_path</span> <span class="o">=</span> <span class="s2">&quot;c:</span><span class="se">\\</span><span class="s2">Program Files (x86)</span><span class="se">\\</span><span class="s2">Deltares</span><span class="se">\\</span><span class="s2">Delft3D Flexible Mesh Suite HMWQ (2021.02)</span><span class="se">\\</span><span class="s2">plugins</span><span class="se">\\</span><span class="s2">DeltaShell.Dimr</span><span class="se">\\</span><span class="s2">kernels&quot;</span>
-<span class="n">sfincs_path</span>    <span class="o">=</span> <span class="s2">&quot;c:</span><span class="se">\\</span><span class="s2">work</span><span class="se">\\</span><span class="s2">checkouts</span><span class="se">\\</span><span class="s2">git</span><span class="se">\\</span><span class="s2">sfincs</span><span class="se">\\</span><span class="s2">source</span><span class="se">\\</span><span class="s2">sfincs</span><span class="se">\\</span><span class="s2">x64</span><span class="se">\\</span><span class="s2">Release&quot;</span>
-<span class="n">hurrywave_path</span> <span class="o">=</span> <span class="s2">&quot;c:</span><span class="se">\\</span><span class="s2">work</span><span class="se">\\</span><span class="s2">checkouts</span><span class="se">\\</span><span class="s2">git</span><span class="se">\\</span><span class="s2">hurrywave</span><span class="se">\\</span><span class="s2">source</span><span class="se">\\</span><span class="s2">hurrywave</span><span class="se">\\</span><span class="s2">x64</span><span class="se">\\</span><span class="s2">Release&quot;</span>
+<span class="n">delft3dfm_path</span> <span class="o">=</span> <span class="s2">&quot;c:</span><span class="se">\\</span><span class="s2">Program Files (x86)</span><span class="se">\\</span><span class="s2">Deltares</span><span class="se">\\</span><span class="s2">Delft3D Flexible Mesh Suite HMWQ (2021.03)</span><span class="se">\\</span><span class="s2">plugins</span><span class="se">\\</span><span class="s2">DeltaShell.Dimr</span><span class="se">\\</span><span class="s2">kernels&quot;</span>
+<span class="n">sfincs_path</span>    <span class="o">=</span> <span class="s2">&quot;c:</span><span class="se">\\</span><span class="s2">cosmos_run_folder</span><span class="se">\\</span><span class="s2">exe</span><span class="se">\\</span><span class="s2">sfincs&quot;</span>
+<span class="n">hurrywave_path</span> <span class="o">=</span> <span class="s2">&quot;c:</span><span class="se">\\</span><span class="s2">cosmos_run_folder</span><span class="se">\\</span><span class="s2">exe</span><span class="se">\\</span><span class="s2">hurrywave&quot;</span>
+<span class="n">beware_path</span>    <span class="o">=</span> <span class="s2">&quot;c:</span><span class="se">\\</span><span class="s2">cosmos_run_folder</span><span class="se">\\</span><span class="s2">exe</span><span class="se">\\</span><span class="s2">beware&quot;</span>
 <span class="n">xbeach_path</span>    <span class="o">=</span> <span class="s2">&quot;yourxbeachpath&quot;</span>
-<span class="n">xbeach_path</span>    <span class="o">=</span> <span class="s2">&quot;yourbewarepath&quot;</span>
-
-<span class="p">[</span><span class="n">webserver</span><span class="p">]</span>
-<span class="n">hostname</span> <span class="o">=</span> <span class="s2">&quot;c-oet0074.directory.intra&quot;</span>
-<span class="n">path</span>     <span class="o">=</span> <span class="s2">&quot;../../opt/websites/static/deltares/cosmos&quot;</span>
-<span class="n">username</span> <span class="o">=</span> <span class="s2">&quot;example&quot;</span>
-<span class="n">password</span> <span class="o">=</span> <span class="s2">&quot;example&quot;</span>
 
 <span class="p">[</span><span class="n">webviewer</span><span class="p">]</span>
-<span class="n">name</span>    <span class="o">=</span> <span class="s2">&quot;nopp_event_viewer&quot;</span>
-<span class="n">version</span> <span class="o">=</span> <span class="s2">&quot;version02&quot;</span>
+<span class="n">name</span>    <span class="o">=</span> <span class="s2">&quot;2psips_event_viewer&quot;</span>
+<span class="n">version</span> <span class="o">=</span> <span class="s2">&quot;version03&quot;</span>
 
 <span class="p">[</span><span class="n">cycle</span><span class="p">]</span>
 <span class="n">mode</span>            <span class="o">=</span> <span class="s2">&quot;single_shot&quot;</span>
@@ -121,8 +115,9 @@
 <span class="n">clean_up</span>        <span class="o">=</span> <span class="n">false</span>
 <span class="n">make_flood_maps</span> <span class="o">=</span> <span class="n">true</span>
 <span class="n">make_wave_maps</span>  <span class="o">=</span> <span class="n">true</span>
-<span class="n">upload</span>          <span class="o">=</span> <span class="n">true</span>
+<span class="n">upload</span>          <span class="o">=</span> <span class="n">false</span>
 <span class="n">get_meteo</span>       <span class="o">=</span> <span class="n">true</span>
+<span class="n">run_mode</span>        <span class="o">=</span> <span class="s2">&quot;serial&quot;</span>
 </pre></div>
 </div>
 <p>The following webviewer and cycle settings can be included in the configuration file. The cycle configurations can be overwritten when <a class="reference internal" href="running.html#running"><span class="std std-ref">initialing CoSMoS</span></a>.</p>
@@ -152,11 +147,11 @@
 <td><p><strong>default setting</strong></p></td>
 </tr>
 <tr class="row-odd"><td><p>mode</p></td>
-<td><p>Run mode. Options: single_shot ??</p></td>
+<td><p>Run in forecast or hindcast mode. Options: “single_shot” (hindcast, initiate main loop just once) or “continuous” (forecast, initiate main loop at x hours time interval (see next variable interval))</p></td>
 <td><p>“single_shot”</p></td>
 </tr>
 <tr class="row-even"><td><p>interval</p></td>
-<td><p>Cycle time interval (hours)</p></td>
+<td><p>Cycle time interval (hours) when running in forecast mode (mode = “continuous”)</p></td>
 <td><p>6</p></td>
 </tr>
 <tr class="row-odd"><td><p>clean_up</p></td>
@@ -180,7 +175,7 @@
 <td><p>True</p></td>
 </tr>
 <tr class="row-even"><td><p>run_mode</p></td>
-<td><p>??</p></td>
+<td><p>Method to run models. Options: “serial” (run on local pc), “parallel” (run on multiple local pcs), or “cloud” (run in the cloud)</p></td>
 <td><p>“serial”</p></td>
 </tr>
 </tbody>

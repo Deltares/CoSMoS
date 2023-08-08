@@ -17,9 +17,7 @@ When rerunning a scenario, any models that are marked as finished in the *job_li
 To rerun specific models or the entire selection for a particular scenario, it is necessary to delete these *finished* files.
 
 The *models* folder contains all model input and output.
-The *tiles* folder contains all tiles for the webviewer.
 The *restart* folder contains restart files for all models.
-The *timeseries* folder contains timeseries csv files with model output for observation locations defined in the *station* file (see :ref:`Observation stations <stations>`).
 
 .. _webviewer:
 

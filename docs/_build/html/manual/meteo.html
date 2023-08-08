@@ -180,7 +180,7 @@ The path to your meteo database must be specified in the <a class="reference int
 <td><p>Degree</p></td>
 </tr>
 <tr class="row-even"><td><p>xystride</p></td>
-<td><p>Optional: ??</p></td>
+<td><p>Optional: Reduce the resolution of the meteo dataset by a factor xystride.</p></td>
 <td><p>1</p></td>
 <td></td>
 </tr>
@@ -217,22 +217,22 @@ The path to your meteo database must be specified in the <a class="reference int
 <tr class="row-even"><td><p>wind_u</p></td>
 <td><p>Wind speed in x direction</p></td>
 <td><p>[lon, lat]</p></td>
-<td><p>??</p></td>
+<td><p>m/s</p></td>
 </tr>
 <tr class="row-odd"><td><p>wind_v</p></td>
 <td><p>Wind speed in y direction</p></td>
 <td><p>[lon, lat]</p></td>
-<td><p>??</p></td>
+<td><p>m/s</p></td>
 </tr>
 <tr class="row-even"><td><p>barometric_pressure</p></td>
 <td><p>Barometric pressure</p></td>
 <td><p>[lon, lat]</p></td>
-<td><p>??</p></td>
+<td><p>Pa</p></td>
 </tr>
 <tr class="row-odd"><td><p>precipitation</p></td>
 <td><p>Precipitation</p></td>
 <td><p>[lon, lat]</p></td>
-<td><p>??</p></td>
+<td><p>mm/hr</p></td>
 </tr>
 </tbody>
 </table>
@@ -305,7 +305,7 @@ For more information, see the <a class="reference external" href="https://public
 <li><p>There are two options for meteo ensemble forcing:</p>
 <ul>
 <li><p>The keyword <em>meteo_dataset</em> is defined in the scenario file: a cyclone track is estimated from regularly gridded wind field data. This track is then used to generate an ensemble of tracks.</p></li>
-<li><p>The keyword <em>meteo_track</em> is defined in the scneario file: a track ensemble is generated based on this best track file.</p></li>
+<li><p>The keyword <em>meteo_track</em> is defined in the scenario file: a track ensemble is generated based on this best track file.</p></li>
 </ul>
 </li>
 </ul>

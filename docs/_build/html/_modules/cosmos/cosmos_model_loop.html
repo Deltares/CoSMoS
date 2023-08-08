@@ -87,7 +87,7 @@
 <span class="kn">import</span> <span class="nn">cht.misc.fileops</span> <span class="k">as</span> <span class="nn">fo</span>
 
 <div class="viewcode-block" id="ModelLoop"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_model_loop.ModelLoop.html#cosmos.cosmos_model_loop.ModelLoop">[docs]</a><span class="k">class</span> <span class="nc">ModelLoop</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;Pre-process, submit, move, and post-process all models and initialize webviewer once all models are finished.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Pre-process, submit, move, and post-process all models and initialize webviewer once all models are finished.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -112,7 +112,7 @@
         <span class="k">pass</span></div>
         
 <div class="viewcode-block" id="ModelLoop.start"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_model_loop.ModelLoop.start.html#cosmos.cosmos_model_loop.ModelLoop.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Start cosmos_model_loop.run with scheduler.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start cosmos_model_loop.run with scheduler.</span>
 
 <span class="sd">        See Also</span>
 <span class="sd">        -------</span>
@@ -128,12 +128,12 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">run</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="ModelLoop.stop"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_model_loop.ModelLoop.stop.html#cosmos.cosmos_model_loop.ModelLoop.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Stop cosmos_model_loop.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stop cosmos_model_loop.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="ModelLoop.run"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_model_loop.ModelLoop.run.html#cosmos.cosmos_model_loop.ModelLoop.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Run all cosmos models defined in the scenario file.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Run all cosmos models defined in the scenario file.</span>
 
 <span class="sd">        - Check for finished simulations and move them to scenario folder</span>
 <span class="sd">        - Make waiting list, preprocess and submit these models</span>
@@ -290,7 +290,7 @@
             <span class="k">pass</span></div></div>
 
 <span class="k">def</span> <span class="nf">check_for_finished_simulations</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;Check if there finished simulations to be post-processed.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if there finished simulations to be post-processed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
     <span class="n">finished_list</span> <span class="o">=</span> <span class="p">[]</span>
     
@@ -304,7 +304,7 @@
     <span class="k">return</span> <span class="n">finished_list</span>
 
 <span class="k">def</span> <span class="nf">update_waiting_list</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;Check which models can be run next according to their status and prioritization level.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check which models can be run next according to their status and prioritization level.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check which models need to run next</span>
     

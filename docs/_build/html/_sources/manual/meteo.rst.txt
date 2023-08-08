@@ -41,7 +41,7 @@ The following attributes can be included in the meteo subsets:
      - Degree
 
    * - xystride
-     - Optional: ??
+     - Optional: Reduce the resolution of the meteo dataset by a factor xystride.
      - 1
      - 
 
@@ -74,23 +74,23 @@ Regularly gridded meteorological datasets contain *netcdf* files with the follow
    * - wind_u
      - Wind speed in x direction
      - [lon, lat]
-     - ??
+     - m/s
     
 
    * - wind_v
      - Wind speed in y direction
      - [lon, lat]
-     - ??
+     - m/s
 
    * - barometric_pressure
      - Barometric pressure
      - [lon, lat]
-     - ??
+     - Pa
 
    * - precipitation
      - Precipitation
      - [lon, lat]
-     - ??
+     - mm/hr
 
 The netcdf files must be named as follows:
 
@@ -152,7 +152,7 @@ For more information, see the `Advanced Tropical Cyclone Toolbox <https://public
 - There are two options for meteo ensemble forcing:
 
   - The keyword *meteo_dataset* is defined in the scenario file: a cyclone track is estimated from regularly gridded wind field data. This track is then used to generate an ensemble of tracks.
-  - The keyword *meteo_track* is defined in the scneario file: a track ensemble is generated based on this best track file.
+  - The keyword *meteo_track* is defined in the scenario file: a track ensemble is generated based on this best track file.
 
 CoSMoS determines which models to run in ensemble mode based on the cone of the generated tracks. All models that lie within this cone are run for the track ensemble.
 

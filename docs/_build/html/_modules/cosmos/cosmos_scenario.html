@@ -88,7 +88,7 @@
 <span class="c1"># from cht.misc import xmlkit as xml</span>
 
 <div class="viewcode-block" id="Scenario"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_scenario.Scenario.html#cosmos.cosmos_scenario.Scenario">[docs]</a><span class="k">class</span> <span class="nc">Scenario</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Scenario class to read scenario file and initialize models. </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Scenario class to read scenario file and initialize models. </span>
 
 <span class="sd">    See Also</span>
 <span class="sd">    ----------</span>
@@ -98,7 +98,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>  
 <div class="viewcode-block" id="Scenario.__init__"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_scenario.Scenario.html#cosmos.cosmos_scenario.Scenario.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Initialize cosmos scenario.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize cosmos scenario.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -130,7 +130,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">observations_path</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span></div>
 
     <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Read scenario file, set model paths and settings, initialize models and read model generic and model specific data. </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read scenario file, set model paths and settings, initialize models and read model generic and model specific data. </span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Read scenario file</span>
@@ -208,8 +208,6 @@
                         
         <span class="c1">### Clear model list</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="p">[]</span>
-
-        <span class="n">spinup_ensembles</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># Loop through models in scenario         </span>
         <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">models_in_scenario</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -361,7 +359,7 @@
         <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Finished reading scenario&quot;</span><span class="p">)</span>   
 
     <span class="k">def</span> <span class="nf">set_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set cycle paths.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set cycle paths.</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
         <span class="bp">self</span><span class="o">.</span><span class="n">cycle_path</span>            <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_string</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cycle_models_path</span>     <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_string</span><span class="p">,</span> <span class="s2">&quot;models&quot;</span><span class="p">)</span>

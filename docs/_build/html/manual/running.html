@@ -88,29 +88,79 @@
              
   <section id="running-cosmos">
 <span id="running"></span><h1>Running CoSMoS<a class="headerlink" href="#running-cosmos" title="Permalink to this headline">¶</a></h1>
-<p>The script below gives an example of how CoSMoS can be initialized.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Created on Mon May 10 14:36:35 2021</span>
+<p>With <em>run_cosmos.py</em>, CoSMoS can be initialized and run:</p>
+<pre class="literal-block"># -*- coding: utf-8 -*-
+&quot;&quot;&quot;
+run_cosmos.py
 
-<span class="sd">@author: ormondt</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">cosmos.cosmos</span> <span class="kn">import</span> <span class="n">cosmos</span>
+Created on Mon May 10 14:36:35 2021
 
-<span class="n">main_path</span> <span class="o">=</span> <span class="s2">&quot;c:</span><span class="se">\\</span><span class="s2">work</span><span class="se">\\</span><span class="s2">cosmos</span><span class="se">\\</span><span class="s2">run_folder&quot;</span>
+&#64;author: ormondt
+&quot;&quot;&quot;
+from cosmos.cosmos import cosmos
 
-<span class="c1"># Initialize CoSMoS configuration</span>
-<span class="n">cosmos</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">main_path</span><span class="p">,</span>
-                  <span class="n">config_file</span><span class="o">=</span><span class="s2">&quot;config_mvo.toml&quot;</span><span class="p">,</span>
-                  <span class="n">make_wave_maps</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+main_path = &quot;c:\\cosmos_run_folder\\run_folder&quot;
 
-<span class="n">cosmos</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;hurricane_laura&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
+# Initialize CoSMoS configuration
+cosmos.initialize(main_path,
+                  config_file=&quot;config.toml&quot;,
+                  make_wave_maps=False,
+                  get_meteo = False,
+                  ensemble = False,
+                  run_mode = &quot;serial&quot;)
+
+cosmos.run(&quot;hurricane_laura&quot;)
+</pre>
 <p>This <em>run_cosmos.py</em> script requires a <em>scenario_name</em> as input (here: <em>hurricane_laura</em>). The corresponding scenario file should be located in the folder:
 <em>scenarios/hurricane_laura/scenario.toml</em>.</p>
 <p>Input settings to the <em>initialize</em> function of CoSMoS will overwrite <a class="reference internal" href="configuration.html#configuration"><span class="std std-ref">*cycle* input settings defined in the configuration file</span></a>.
 All input settings are described in <a class="reference internal" href="../_generated/cosmos.cosmos.CoSMoS.html#cosmos.cosmos.CoSMoS" title="cosmos.cosmos.CoSMoS"><code class="xref py py-class docutils literal notranslate"><span class="pre">cosmos.cosmos.CoSMoS</span></code></a>.</p>
+<p>There are two options to execute model runs using CoSMoS:</p>
+<ol class="arabic">
+<li><p>Run all models locally on your PC (<strong>run_mode = “serial”</strong>).</p></li>
+<li><p>Run models on multiple local PCs (<strong>run_mode = “parallel”</strong>).
+On the main PC (where CoSMoS and the CoastalHazardsToolkit are installed) you need to run the script <em>run_cosmos.py</em>.
+The following script must be executed on other PCs that have access to the same CoSMoS run folder:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">run_parallel.py</span>
+
+<span class="sd">Created on Wed May 18 16:29:05 2022</span>
+
+<span class="sd">@author: goede_rl</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1"># either use single copy of cosmos_run_parallel and add path</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;c:</span><span class="se">\\</span><span class="s1">cosmos_run_folder&#39;</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">cosmos_run_parallel</span> <span class="kn">import</span> <span class="n">CosmosRunParallel</span>
+
+<span class="c1"># or use both from cosmos-package</span>
+<span class="c1"># from cosmos.cosmos_run_parallel import CosmosRunParallel</span>
+
+<span class="n">main_path</span> <span class="o">=</span> <span class="s2">&quot;p:</span><span class="se">\\</span><span class="s2">cosmos</span><span class="se">\\</span><span class="s2">run_folder</span><span class="se">\\</span><span class="s2">&quot;</span>
+<span class="c1"># scenario = &quot;hurricane_laura&quot;</span>
+<span class="n">scenario</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">job_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">main_path</span><span class="p">,</span><span class="s2">&quot;jobs&quot;</span><span class="p">)</span>
+
+<span class="n">local_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;c:</span><span class="se">\\</span><span class="s2">cosmos_run_folder&quot;</span><span class="p">,</span> <span class="s2">&quot;running&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">local_path</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">local_path</span><span class="p">)</span>
+
+<span class="n">runloop</span> <span class="o">=</span> <span class="n">CosmosRunParallel</span><span class="p">()</span>
+<span class="n">runloop</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">job_path</span><span class="p">,</span> <span class="n">local_path</span><span class="p">,</span> <span class="n">scenario</span><span class="p">)</span>
+
+</pre></div>
+</div>
+<p>This script <em>run_parallel.py</em> will try to run models in the <em>jobs</em> folder that contain the text file <em>ready.txt</em>.
+You can run the script for a specific scenario, or assign <em>None</em> to the scenario.
+In this case, it will try to run any model in the <em>jobs</em> folder that contains a <em>ready.txt</em> file.</p>
+</li>
+</ol>
+<p>The <em>run_mode</em> setting is defined in <a class="reference internal" href="configuration.html#configuration"><span class="std std-ref">*config.toml*</span></a>.
+Alternatively, you can overwrite settings in the configuration file when initializing CoSMoS (see <em>run_cosmos.py</em>).</p>
 </section>
 
 

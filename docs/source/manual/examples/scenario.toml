@@ -6,7 +6,6 @@ meteo_dataset = "gfs_anl_0p50_north_atlantic"
 lon           = -70.0
 lat           = 30.0
 zoom          = 5
-track_ensemble_nr_realizations = 2
 
 [[model]]
 name = "sfincs_gom_500m"

@@ -14,12 +14,6 @@ hurrywave_path = "c:\\cosmos_run_folder\\exe\\hurrywave"
 beware_path    = "c:\\cosmos_run_folder\\exe\\beware"
 xbeach_path    = "yourxbeachpath"
 
-[webserver]
-hostname = "c-oet0074.directory.intra"
-path     = "../../opt/websites/static/deltares/cosmos"
-username = "ormondt"
-password = "HurryWave2021!"
-
 [webviewer]
 name    = "2psips_event_viewer"
 version = "version03"
@@ -32,3 +26,4 @@ make_flood_maps = true
 make_wave_maps  = true
 upload          = false
 get_meteo       = true
+run_mode        = "serial"

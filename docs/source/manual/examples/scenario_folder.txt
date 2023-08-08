@@ -4,7 +4,4 @@ scenarios
     ├── 20170904_00z
         ├── job_list
         ├── models
-        ├── tiles
     ├── restart
-    ├── timeseries
-        ├── 20170904_00z

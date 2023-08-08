@@ -28,12 +28,12 @@ The following settings can be included in the model file:
      - unit
 
    * - longname
-     - Model long name
+     - Model long name (shown in webviewer)
      - name
      -
 
    * - runid
-     - Model id used in CoSMoS
+     - Model id used in CoSMoS.
      - None
      -
 
@@ -103,7 +103,7 @@ The following settings can be included in the model file:
      - m
 
    * - station
-     - Station xml file (located in cosmos//stations) added as observation points in model.
+     - List of station xml files (located in cosmos//stations) added as observation points in model.
      -
      -
 
@@ -178,13 +178,8 @@ The following settings can be included in the model file:
      - m
 
    * - zb_deshoal
-     - ?? Depth to which nearshore wave heights are deshoaled.
+     - Depth to which nearshore wave heights are deshoaled.
      - None
-     -
-
-   * - ensemble
-     - Run in ensemble mode.
-     - False
      -
 
 Model-specific input
@@ -246,6 +241,8 @@ The following settings in the *.mdw* are adjusted by CoSMoS:
   - LocationFile          = OBSFILEKEY
 - *dimr_config.xml* file that describes the working directories for the flow and wave models. The <time> (starttime of the simulation) is set by CoSMoS by replacing the keyword *TIMEKEY*.
 
+The *misc* folder must contain a text file with the same name as the model name, containing the coordinates of the model outline.
+
 HurryWave
 """""""""""""""
 HurryWave is a computationally efficient third generation spectral wave model, with physics similar to those of SWAN and WAVEWATCH III.
@@ -253,6 +250,7 @@ HurryWave is a computationally efficient third generation spectral wave model, w
 HurryWave model input files are located in the *input* folder of your HurryWave model directory. 
 In the *tiling* folder, *indices* and *topobathy* folders must be included to generate wave maps.
 
+The *misc* folder must contain a text file with the same name as the model name, containing the coordinates of the model outline.
 
 SFINCS
 """""""""""""""
@@ -260,9 +258,12 @@ SFINCS
 `SFINCS <https://sfincs.readthedocs.io/en/latest/>`_ model input files are located in the *input* folder of your SFINCS model directory. 
 In the *tiling* folder, *indices* and *topobathy* folders must be included to generate flood maps.
 
+The *misc* folder must contain a text file with the same name as the model name, containing the coordinates of the model outline.
 
 XBeach
 """""""""""""""
 
 `XBeach <https://xbeach.readthedocs.io/en/latest/>`_ model input files are located in the *input* folder of your XBeach model directory. 
 In the *tiling* folder, an *indices* folder must be included to generate pre and post-storm bed level maps.
+
+The *misc* folder must contain a text file with the same name as the model name, containing the coordinates of the model outline.

@@ -89,7 +89,7 @@
   <section id="setting-up-a-scenario">
 <span id="scenario"></span><h1>Setting up a scenario<a class="headerlink" href="#setting-up-a-scenario" title="Permalink to this headline">¶</a></h1>
 <p>A scenario file is a simple toml-structured text file that defines which models you want to run, for which hindcast or forecast period, and with which data sources.</p>
-<p>An example of a scenario file is given below:</p>
+<p>Below, two examples of scenario files are given. The first is a determininistic simulation of hurricane Laura, the second an ensemble run for hurricane Maria.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">long_name</span>     <span class="o">=</span> <span class="s2">&quot;Hurricane Laura&quot;</span>
 <span class="n">cycle</span>         <span class="o">=</span> <span class="mi">2020</span><span class="o">-</span><span class="mi">08</span><span class="o">-</span><span class="mi">26</span><span class="n">T00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span>
 <span class="n">runtime</span>       <span class="o">=</span> <span class="mi">24</span>
@@ -98,12 +98,31 @@
 <span class="n">lon</span>           <span class="o">=</span> <span class="o">-</span><span class="mf">70.0</span>
 <span class="n">lat</span>           <span class="o">=</span> <span class="mf">30.0</span>
 <span class="n">zoom</span>          <span class="o">=</span> <span class="mi">5</span>
-<span class="n">track_ensemble_nr_realizations</span> <span class="o">=</span> <span class="mi">2</span>
 
 <span class="p">[[</span><span class="n">model</span><span class="p">]]</span>
 <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;sfincs_gom_500m&quot;</span>
 <span class="p">[[</span><span class="n">model</span><span class="p">]]</span>
 <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;sfincs_gom_0002&quot;</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">long_name</span>     <span class="o">=</span> <span class="s2">&quot;Hurricane Maria ensemble&quot;</span>
+<span class="n">cycle</span>         <span class="o">=</span> <span class="mi">2017</span><span class="o">-</span><span class="mi">09</span><span class="o">-</span><span class="mi">19</span><span class="n">T00</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span>
+<span class="n">runtime</span>       <span class="o">=</span> <span class="mi">72</span>
+<span class="n">description</span>   <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="n">meteo_track</span> <span class="o">=</span> <span class="s2">&quot;maria&quot;</span>
+<span class="n">lon</span>           <span class="o">=</span> <span class="o">-</span><span class="mf">66.5</span>
+<span class="n">lat</span>           <span class="o">=</span> <span class="mf">18.2</span>
+<span class="n">zoom</span>          <span class="o">=</span> <span class="mi">10</span>
+<span class="n">observations_path</span> <span class="o">=</span> <span class="s2">&quot;hurricane_maria&quot;</span>
+<span class="n">track_ensemble_nr_realizations</span> <span class="o">=</span> <span class="mi">10</span>
+
+<span class="p">[[</span><span class="n">model</span><span class="p">]]</span>
+<span class="n">super_region</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;north_atlantic&quot;</span><span class="p">]</span>
+<span class="nb">type</span>         <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;hurrywave&quot;</span><span class="p">,</span> <span class="s2">&quot;sfincs&quot;</span><span class="p">,</span> <span class="s2">&quot;beware&quot;</span><span class="p">]</span>
+
+<span class="p">[[</span><span class="n">model</span><span class="p">]]</span>
+<span class="n">region</span> <span class="o">=</span> <span class="s2">&quot;puerto_rico3&quot;</span>
+<span class="nb">type</span>   <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;sfincs&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>The scenario file must always be named <em>scenario.toml</em>. CoSMoS assigns the scenario <em>name</em> based on the folder name
@@ -230,12 +249,12 @@
 <td></td>
 </tr>
 <tr class="row-odd"><td><p>region</p></td>
-<td><p>Instead of model name: region for which all models are run (with same settings).</p></td>
+<td><p>Instead of model name: region for which all models are run (with same settings). When using the keyword <em>region</em> to add models, you must specify the model <em>type</em> as indicated in the example scenario file.</p></td>
 <td></td>
 <td></td>
 </tr>
 <tr class="row-even"><td><p>super_region</p></td>
-<td><p>Instead of model name: super region for which all models are run (with same settings) (see <a class="reference internal" href="superregions.html#super-regions"><span class="std std-ref">Super regions</span></a>).</p></td>
+<td><p>Instead of model name: super region for which all models are run (with same settings) (see <a class="reference internal" href="superregions.html#super-regions"><span class="std std-ref">Super regions</span></a>). When using the keyword <em>super_region</em> to add models, you must specify the model <em>type</em> as indicated in the example scenario file.</p></td>
 <td></td>
 <td></td>
 </tr>
@@ -265,23 +284,23 @@
 <td></td>
 </tr>
 <tr class="row-even"><td><p>run_condition</p></td>
-<td><p>How to select mmodels within cluster to run conditionally. Option: topn</p></td>
-<td></td>
+<td><p>How to select mmodels within cluster to run conditionally. Option: “topn”</p></td>
+<td><p>“topn”</p></td>
 <td></td>
 </tr>
 <tr class="row-odd"><td><p>topn</p></td>
 <td><p>Top x number of models to run per cluster</p></td>
-<td></td>
+<td><p>10</p></td>
 <td></td>
 </tr>
 <tr class="row-even"><td><p>hm0fac</p></td>
 <td><p>Factor of Hm0 to add to TWL component.</p></td>
-<td></td>
+<td><p>0.2</p></td>
 <td></td>
 </tr>
 <tr class="row-odd"><td><p>boundary_twl_margin</p></td>
 <td><p>Boundary TWL margin for clustering models.</p></td>
-<td></td>
+<td><p>0.0</p></td>
 <td></td>
 </tr>
 </tbody>

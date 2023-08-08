@@ -141,7 +141,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">only_run_ensembles</span> <span class="o">=</span> <span class="kc">False</span>
 
 <div class="viewcode-block" id="Configuration"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_configuration.Configuration.html#cosmos.cosmos_configuration.Configuration">[docs]</a><span class="k">class</span> <span class="nc">Configuration</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;CoSMoS Configuration class.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;CoSMoS Configuration class.</span>
 
 <span class="sd">    Set configuration for:</span>
 
@@ -163,8 +163,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">cycle</span>          <span class="o">=</span> <span class="n">Cycle</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span>         <span class="o">=</span> <span class="p">{}</span></div>
     
-<div class="viewcode-block" id="Configuration.set"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_configuration.Configuration.set.html#cosmos.cosmos_configuration.Configuration.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set CoSMoS configuration settings.</span>
+    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set CoSMoS configuration settings.</span>
 <span class="sd">        </span>
 <span class="sd">        - Set configuration paths.</span>
 <span class="sd">        - Read configuration file.</span>
@@ -236,11 +236,11 @@
         <span class="n">super_region_list</span> <span class="o">=</span> <span class="n">fo</span><span class="o">.</span><span class="n">list_files</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">super_region_path</span><span class="p">,</span> <span class="s2">&quot;*.toml&quot;</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">super_file</span> <span class="ow">in</span> <span class="n">super_region_list</span><span class="p">:</span>
             <span class="n">name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">super_file</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">super_region</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">toml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">super_file</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">super_region</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">toml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">super_file</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Configuration.read_config_file"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_configuration.Configuration.read_config_file.html#cosmos.cosmos_configuration.Configuration.read_config_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_config_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Read configuration file (.toml file).</span>
+    <span class="k">def</span> <span class="nf">read_config_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read configuration file (.toml file).</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
         <span class="n">config_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">config</span><span class="p">,</span>
                                    <span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">)</span>     
@@ -252,7 +252,7 @@
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">config_dict</span><span class="p">:</span>
             <span class="n">obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">config_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div></div>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
         
         
         <span class="c1"># # Map contours</span>

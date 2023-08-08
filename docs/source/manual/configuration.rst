@@ -31,11 +31,11 @@ The following webviewer and cycle settings can be included in the configuration 
      - **default setting**
 
    * - mode
-     - Run mode. Options: single_shot ??
+     - Run in forecast or hindcast mode. Options: "single_shot" (hindcast, initiate main loop just once) or "continuous" (forecast, initiate main loop at x hours time interval (see next variable interval))
      - "single_shot"
 
    * - interval
-     - Cycle time interval (hours)
+     - Cycle time interval (hours) when running in forecast mode (mode = "continuous")
      - 6
 
    * - clean_up
@@ -59,7 +59,7 @@ The following webviewer and cycle settings can be included in the configuration 
      - True
 
    * - run_mode
-     - ??
+     - Method to run models. Options: "serial" (run on local pc), "parallel" (run on multiple local pcs), or "cloud" (run in the cloud)
      - "serial"
 
 
