@@ -43,6 +43,9 @@ def setup_track_ensemble():
         tc.estimate_missing_values()
         tc.include_rainfall = True
 
+        tc.spiderweb_radius = 400.0
+        tc.nr_radial_bins   = 100
+
         # Write *.cyc file
         tc.write_track("laura.cyc", "ddb_cyc")
     else:
@@ -70,7 +73,7 @@ def setup_track_ensemble():
 
     # Get outline of ensemble
     cone = cosmos.scenario.track_ensemble.get_outline(buffer=300000.0)
-
+    
     # Loop through all models and check if they fall within cone
     models_to_add = []
     for model in cosmos.scenario.model:
@@ -85,13 +88,39 @@ def setup_track_ensemble():
                 ensemble_model.wave_nested_name += "_ensemble"
             if ensemble_model.bw_nested_name:
                 ensemble_model.bw_nested_name += "_ensemble"
+
+            # # Delete meteo subsets from models (for memory)
+            # ensemble_model.meteo_subset = None
+            # for nested_list in [ensemble_model.wave_nested, ensemble_model.flow_nested, ensemble_model.bw_nested]:
+            #     if nested_list:
+            #         try:
+            #             for nested_item in nested_list:
+            #                 nested_item.meteo_subset = None
+            #         except:
+            #             nested_list.meteo_subset = None
+            # Set initial run status to 
             models_to_add.append(ensemble_model)
 
     cosmos.scenario.model = cosmos.scenario.model  + models_to_add
+    
+    # Get list of models that have already finished
+    finished_list = os.listdir(cosmos.scenario.cycle_job_list_path)
 
     for model in models_to_add:
         model.get_nested_models()
         model.set_paths()
+
+        # Check (again) for models if they are finished
+        model.status = "waiting"
+        # Check finished models
+        for file_name in finished_list:
+            model_name = file_name.split('.')[0]
+            if model.name.lower() == model_name.lower():
+                model.status = "finished"
+                model.run_simulation = False
+                break            
+        if model.priority == 0:
+            model.run_simulation = False
     
     if cosmos.config.cycle.only_run_ensembles:
         # Remove all models that are not ensembles       
