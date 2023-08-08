@@ -1,0 +1,109 @@
+metadata:
+  name: sfincs-deterministic-workflow
+  namespace: argo
+spec:
+  templates:
+    - name: run-sfincs
+      inputs: {}
+      outputs: {}
+      metadata: {}
+      steps:
+        - - name: preparesimulation
+            template: prepare-simulation
+        - - name: runsimulation
+            template: run-simulation
+    - name: prepare-simulation
+      inputs:
+        artifacts:
+          - name: my-art
+            path: /input
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.subfolder}}'
+            archive:
+              none: {}
+      outputs:
+        artifacts:
+          - name: my-art
+            path: /input
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.subfolder}}'
+            archive:
+              none: {}
+      metadata: {}
+      container:
+        name: ''
+        image: 012053003218.dkr.ecr.eu-west-1.amazonaws.com/run_job
+        command:
+          - python
+          - run_job_2.py
+          - prepare_single
+        resources: {}
+    - name: run-simulation
+      inputs:
+        artifacts:
+          - name: my-art
+            path: /data
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.subfolder}}'
+            archive:
+              none: {}
+      outputs:
+        artifacts:
+          - name: my-art
+            path: /data
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.subfolder}}'
+            archive:
+              none: {}
+      metadata: {}
+      container:
+        name: sfincs-cpu-argo
+        image: deltares/sfincs-cpu:latest
+        command:
+          - /bin/bash
+          - '-c'
+          - '--'
+        args:
+          - sfincs
+        resources: {}
+  entrypoint: run-sfincs
+  arguments:
+    parameters:
+      - name: subfolder
+        value: subfolder
