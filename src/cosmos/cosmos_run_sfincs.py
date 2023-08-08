@@ -81,7 +81,7 @@ def prepare_single(config, member=None):
         bucket_name = "cosmos-scenarios"
 
     if config["run_mode"] == "cloud":
-        # Copy base input
+        # Copy base input to member folder
         if config["ensemble"]:
             s3_key = config["scenario"] + "/" + "models" + "/" + config["model"] + "/" + "base_input" + "/"
         else:
@@ -96,7 +96,7 @@ def prepare_single(config, member=None):
                     continue
                 if "/" in key.replace(s3_key, ""):
                     continue
-                local_path = os.path.join(local_file_path, key)
+                local_path = os.path.join(local_file_path, os.path.basename(key))
                 print("Copying " + key + " to " + local_path) 
                 s3_client.download_file(bucket_name, key, local_path)
     else:

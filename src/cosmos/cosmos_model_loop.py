@@ -186,6 +186,11 @@ class ModelLoop():
                 cosmos.cloud.upload_folder("cosmos-scenarios",
                                            model.job_path,
                                            s3key)
+                if model.ensemble:
+                    # Should really make sure this all happens cosmos_cloud
+                    cosmos.cloud.upload_folder("cosmos-scenarios",
+                                               os.path.join(model.job_path, "base_input"),
+                                               s3key + "/base_input")
                 cosmos.log("Submitting to S3 : " + s3key)
                 if model.ensemble:
                     workflow_name = "ensemble-workflow"

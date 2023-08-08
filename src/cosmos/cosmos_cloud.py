@@ -57,6 +57,7 @@ class Cloud:
             print("Deleted " + os.path.basename(file))
 
     def upload_folder(self, bucket_name, local_folder, s3_folder, quiet=True):
+        # Should do this recursively so that every subfolder is also uploaded
         flist = fo.list_files(os.path.join(local_folder, "*"), full_path=True)
         for file in flist:
             s3_key = os.path.join(s3_folder, os.path.basename(file)).replace('\\', '/')
