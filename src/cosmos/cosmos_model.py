@@ -21,8 +21,9 @@ from .cosmos import cosmos
 from .cosmos_cluster import cluster_dict as cluster
 
 import cht.misc.xmlkit as xml
-from cht.nesting.nest1 import nest1
-from cht.nesting.nest2 import nest2
+import cht.misc.fileops as fo
+import cht.nesting.nesting as nesting
+from cht.misc.misc_tools import dict2yaml
 
 class Model:
     """Read generic model data from toml file, prepare model run paths, and submit jobs.
@@ -306,7 +307,32 @@ class Model:
         """Submit model.
         """
 
-        # First prepare batch file
+        # Copy the correct to run_job.py
+        git_pth = os.path.dirname(__file__)
+        fo.copy_file(os.path.join(git_pth, "cosmos_run_job.py"), os.path.join(self.job_path, "run_job.py"))
+        # fo.copy_file(os.path.join(git_pth, "cosmos_run_sfincs_member.py"), self.job_path)
+
+        # Write config file
+        config = {}
+        config["ensemble"] = self.ensemble
+        config["run_mode"] = cosmos.config.cycle.run_mode
+        if self.flow_nested:
+            config["flow_nested_path"] = self.flow_nested.cycle_output_path
+        if self.wave_nested:
+            config["wave_nested_path"] = self.wave_nested.cycle_output_path
+        if self.bw_nested: 
+            config["bw_nested_path"]   = self.bw_nested.cycle_output_path
+        config["spw_path"] = cosmos.scenario.cycle_track_ensemble_spw_path
+        
+        dict2yaml(os.path.join(self.job_path, "config.yml"), config)
+
+        if self.ensemble:
+            # Write ensemble members to file
+            with open(os.path.join(self.job_path, "ensemble_members.txt"), "w") as f:
+                for member in cosmos.scenario.ensemble_names:
+                    f.write(member + "\n")
+
+        # prepare batch file
 
         if cosmos.config.cycle.run_mode == "cloud":
             # Make sh file (run.sh) that activates the correct environment and runs run_job.py
@@ -479,7 +505,7 @@ class Model:
                 self.domain.tref  = self.flow_start_time
                 self.domain.tstop = self.flow_stop_time
 
-            z_max = nest2(self.flow_nested.domain,
+            z_max = nesting.nest2(self.flow_nested.domain,
                           self.domain,
                           output_path=self.flow_nested.cycle_output_path,
                           boundary_water_level_correction=zcor,
@@ -492,7 +518,7 @@ class Model:
     
                 # Get boundary conditions from overall model (Nesting 2)
 #                output_path = os.path.join(self.wave_nested.cycle_path, "output")                                   
-                hm0_max = nest2(self.wave_nested.domain,
+                hm0_max = nesting.nest2(self.wave_nested.domain,
                                 self.domain,
                                 output_path=self.wave_nested.cycle_output_path,
                                 option="timeseries",
