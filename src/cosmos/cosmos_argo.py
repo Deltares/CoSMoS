@@ -26,6 +26,7 @@ class Argo:
 
         cosmos.log("Cloud Workflow started")
         w.create()
+        # Put to sleep for a few seconds. Otherwise it crashes regularly at w.wait()
         time.sleep(3) 
         w.wait()
         cosmos.log("Cloud Workflow finished")
