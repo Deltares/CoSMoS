@@ -192,14 +192,23 @@ class CoSMoS_SFINCS(Model):
         config["cycle"]    = cosmos.cycle_string
         config["ensemble"] = self.ensemble
         config["run_mode"] = cosmos.config.cycle.run_mode
-        config["host"]     = cosmos.config.cloud_config.host
+        if cosmos.config.cycle.run_mode == "cloud":
+            config["cloud"] = {}
+            config["cloud"]["host"] = cosmos.config.cloud_config.host
+            config["cloud"]["access_key"] = cosmos.config.cloud_config.access_key
+            config["cloud"]["secret_key"] = cosmos.config.cloud_config.secret_key
+            config["cloud"]["region"] = cosmos.config.cloud_config.region
+            config["cloud"]["namespace"] = cosmos.config.cloud_config.namespace
         if self.flow_nested:
-            config["flow_nested_type"] = self.flow_nested.type
-            config["flow_nested_path"] = self.flow_nested.cycle_output_path
+            config["flow_nested_model"] = self.flow_nested.name
+            config["flow_nested_type"]  = self.flow_nested.type
+            config["flow_nested_path"]  = self.flow_nested.cycle_output_path
         if self.wave_nested:
+            config["wave_nested_model"] = self.wave_nested.name
             config["wave_nested_type"] = self.wave_nested.type
             config["wave_nested_path"] = self.wave_nested.cycle_output_path
         if self.bw_nested: 
+            config["bw_nested_model"] = self.bw_nested.name
             config["bw_nested_type"]   = self.bw_nested.type
             config["bw_nested_path"]   = self.bw_nested.cycle_output_path
         if self.ensemble:
@@ -220,9 +229,6 @@ class CoSMoS_SFINCS(Model):
             config["flood_map"]["stop_time"]  = cosmos.stop_time
             config["flood_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.flood_map_color_map]
             config["flood_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.flood_map_color_map]
-        if cosmos.config.cycle.run_mode == "cloud":
-            config["access_key"] = cosmos.config.cloud_config.access_key
-            config["secret_key"] = cosmos.config.cloud_config.secret_key
         
         dict2yaml(os.path.join(self.job_path, "config.yml"), config)
 
@@ -232,13 +238,21 @@ class CoSMoS_SFINCS(Model):
                 for member in cosmos.scenario.ensemble_names:
                     f.write(member + "\n")
 
-        # Make run batch file (only for windows)
-        batch_file = os.path.join(self.job_path, "run_sfincs.bat")
-        fid = open(batch_file, "w")
-        fid.write("@ echo off\n")
-        exe_path = os.path.join(cosmos.config.executables.sfincs_path, "sfincs.exe")
-        fid.write(exe_path + "\n")
-        fid.close()
+        if cosmos.config.cycle.run_mode != "cloud":
+            # Make run batch file (only for windows)
+            batch_file = os.path.join(self.job_path, "run_sfincs.bat")
+            fid = open(batch_file, "w")
+            fid.write("@ echo off\n")
+            exe_path = os.path.join(cosmos.config.executables.sfincs_path, "sfincs.exe")
+            fid.write(exe_path + "\n")
+            fid.close()
+ 
+        if cosmos.config.cycle.run_mode == "cloud":
+            # Set workflow names
+            if self.ensemble:
+                self.workflow_name = "sfincs-ensemble-workflow"
+            else:
+                self.workflow_name = "sfincs-deterministic-workflow"
 
         # Finally set the path back to the one in cosmos\models\etc.
         self.domain.path = pth

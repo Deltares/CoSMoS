@@ -192,11 +192,7 @@ class ModelLoop():
                                                os.path.join(model.job_path, "base_input"),
                                                s3key + "/base_input")
                 cosmos.log("Submitting to S3 : " + s3key)
-                if model.ensemble:
-                    workflow_name = "ensemble-workflow"
-                else:
-                    workflow_name = "deterministic-workflow"
-                model.cloud_job = cosmos.argo.submit_template_job(workflow_name, s3key)
+                model.cloud_job = cosmos.argo.submit_template_job(model.workflow_name, s3key)
 
             else:
                 # Model will be run on WCP node
