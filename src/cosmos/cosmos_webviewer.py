@@ -164,7 +164,7 @@ class WebViewer:
             for model in cosmos.scenario.model:
                 if model.station and model.flow:
                     for station in model.station:
-                        if station.type == "tide_gauge" and station.upload:
+                        if station.type == "tide_gauge" and station.upload and model.ensemble == False:
                             
                             point = Point((station.longitude, station.latitude))
                             name = station.long_name + " (" + station.id + ")"
@@ -236,7 +236,7 @@ class WebViewer:
             for model in cosmos.scenario.model:
                 if model.station and model.wave:
                     for station in model.station:
-                        if station.type == "wave_buoy" and station.upload:                
+                        if station.type == "wave_buoy" and station.upload and model.ensemble == False:                
                             point = Point((station.longitude, station.latitude))
                             if station.ndbc_id:
                                 name = station.long_name + " (" + station.ndbc_id + ")"
@@ -1081,7 +1081,7 @@ class WebViewer:
 
         for model in cosmos.scenario.model:
             if model.type == 'beware':
-                
+           
                 try:
                     if os.path.exists(os.path.join(model.cycle_output_path,
                                             "beware_his.nc")):
@@ -1100,15 +1100,15 @@ class WebViewer:
                             point = Point((x, y))
                             name = 'Loc nr: ' +  str(model.domain.filename[ip])
                                         
-                            id = np.argmax(model.domain.R2p[ip,:])                                                                       
+                            id = np.argmax(model.domain.R2[ip,:])                                                                       
                             features.append(Feature(geometry=point,
                                                     properties={"model_name":model.name,
                                                                 "LocNr":int(model.domain.filename[ip]),
                                                                 "Lon":x,
                                                                 "Lat":y,                                                
-                                                                "Setup":round(model.domain.setup[ip, id],2),
+                                                                "Setup":round(model.domain.R2_setup[ip, id],2),
                                                                 "Swash":round(model.domain.swash[ip, id],2),
-                                                                "TWL":round(model.domain.R2p[ip, id],2)}))
+                                                                "TWL":round(model.domain.R2[ip, id],2)}))
                                             
                         if features:
                             feature_collection = FeatureCollection(features)
@@ -1153,7 +1153,7 @@ class WebViewer:
                     if os.path.exists(os.path.join(model.cycle_output_path,
                                                             "beware_his_ensemble.nc")):
                         model.domain.read_data(os.path.join(model.cycle_output_path,
-                                                            "beware_his_ensemble.nc"), prcs= [0.05, 0.5, 0.95])                
+                                                            "beware_his_ensemble.nc"), prcs= [5, 50, 95])                
         
                         features = []
                         transformer = Transformer.from_crs(model.crs,
@@ -1166,15 +1166,15 @@ class WebViewer:
                             point = Point((x, y))
                             name = 'Loc nr: ' +  str(model.domain.filename[ip])
                                         
-                            id = np.argmax(model.domain.R2p[ip,:])                                                                       
+                            id = np.argmax(model.domain.R2[ip,:])                                                                       
                             features.append(Feature(geometry=point,
                                                     properties={"model_name":model.name,
                                                                 "LocNr":int(model.domain.filename[ip]),
                                                                 "Lon":x,
                                                                 "Lat":y,                                                
-                                                                "Setup":round(model.domain.setup_prc["95"][ip, id],2),
+                                                                "Setup":round(model.domain.R2_setup_prc["95"][ip, id],2),
                                                                 "Swash":round(model.domain.swash[ip, id],2),
-                                                                "TWL":round(model.domain.R2p_prc["95"][ip, id],2)}))
+                                                                "TWL":round(model.domain.R2_prc["95"][ip, id],2)}))
                                                 
                         if features:
                             feature_collection = FeatureCollection(features)
@@ -1228,9 +1228,9 @@ class WebViewer:
                        
                         name = 'Loc nr: ' +  str(model.domain.filename[ip])
                                     
-                        id = np.argmax(model.domain.R2p[ip,:])   
+                        id = np.argmax(model.domain.R2[ip,:])   
 
-                        id2= np.argwhere(r2max.astype(float)>=model.domain.R2p[ip,id])[0]
+                        id2= np.argwhere(r2max.astype(float)>=model.domain.R2[ip,id])[0]
                         
                         x, y = transformer.transform(dfx[r2max[id2]].values[ip][0],
                                                      dfy[r2max[id2]].values[ip][0])
@@ -1241,14 +1241,14 @@ class WebViewer:
                                                             "LocNr":int(model.domain.filename[ip]),
                                                             "Lon":x,
                                                             "Lat":y,                                                
-                                                            "Setup":round(model.domain.setup[ip, id],2),
+                                                            "Setup":round(model.domain.R2_setup[ip, id],2),
                                                             "Swash":round(model.domain.swash[ip, id],2),
-                                                            "TWL":round(model.domain.R2p[ip, id],2)}))
+                                                            "TWL":round(model.domain.R2[ip, id],2)}))
 
                     if features:
                         feature_collection = FeatureCollection(features)
                         output_path_runup =  os.path.join(output_path, 'extreme_horizontal_runup_height\\')
-                        os.mkdir(output_path_runup)
+                        fo.mkdir(output_path_runup)
                         file_name = os.path.join(output_path_runup,     
                                                 "extreme_horizontal_runup_height.geojson.js")
                         cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var runup_vert =")
@@ -1284,6 +1284,7 @@ class WebViewer:
 
                     self.map_variables.append(dct)                
 
+                    # Offshore water level and wave height
 
                     features = []
                         
@@ -1293,7 +1294,7 @@ class WebViewer:
                         point = Point((x, y))
                         name = 'Loc nr: ' +  str(model.domain.filename[ip])
                                     
-                        id = np.argmax(model.domain.R2p[ip,:])                                                               
+                        id = np.argmax(model.domain.R2[ip,:])                                                               
                         features.append(Feature(geometry=point,
                                                 properties={"model_name":model.name,
                                                             "LocNr":int(model.domain.filename[ip]),
@@ -1306,7 +1307,7 @@ class WebViewer:
                     if features:
                         feature_collection = FeatureCollection(features)
                         output_path_waves =  os.path.join(output_path, 'extreme_sea_level_and_wave_height\\')
-                        os.mkdir(output_path_waves)
+                        fo.mkdir(output_path_waves)
                         file_name = os.path.join(output_path_waves,     
                                                 "extreme_sea_level_and_wave_height.geojson.js")
                         cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var swl =")
