@@ -79,7 +79,7 @@ class ModelLoop():
         
         """
 
-        # First check for finished simulations
+        # First check for finished simulations (returns a list with model objects that just finished)
         finished_list = check_for_finished_simulations()
     
         # If there are simulations ready ...
@@ -100,13 +100,13 @@ class ModelLoop():
                 # First make folders
                 fo.mkdir(model.cycle_input_path)
                 fo.mkdir(model.cycle_output_path)
-#                fo.mkdir(model.cycle_figures_path)
+                # fo.mkdir(model.cycle_figures_path)
                 fo.mkdir(model.cycle_post_path)
                 # Call model specific move function (this will move new restart files to restart folder, inputs to input folder, and outputs to output folder)
                 model.move()
                 model.status = "simulation_finished"
     
-        # Now prepare new models ready to run        
+        # Now prepare new models ready to run (returns a list with model objects that are ready to run)        
         waiting_list = update_waiting_list()
 
         # Pre process all waiting simulations
@@ -121,11 +121,12 @@ class ModelLoop():
             fo.mkdir(model.restart_flow_path)
             fo.mkdir(model.restart_wave_path)
 
-            # Copy base inputs to job/input folder
+            # Copy base inputs to job folder
             src = os.path.join(model.path, "input", "*")
             fo.copy_file(src, model.job_path)
 
             model.pre_process()  # Adjust model input (this happens in model.job_path)
+
             cosmos.log("Submitting " + model.long_name + " ...")
             model.status = "running"
 
@@ -236,7 +237,6 @@ class ModelLoop():
                 fid = open(file_name, "w")
                 fid.write("finished")
                 fid.close()
-
         
         # Now check if all simulations are completely finished    
         all_finished = True
@@ -281,14 +281,14 @@ def check_for_finished_simulations():
     
     for model in cosmos.scenario.model:
         if model.status == "running":
-            if cosmos.config.cycle.run_mode == "serial":
+            if cosmos.config.cycle.run_mode == "cloud":
+                #cosmos.log(model.cloud_job)
+                if Argo.get_task_status(model.cloud_job):
+                    finished_list.append(model)
+            else:
                 file_name = os.path.join(model.job_path,
                                         "finished.txt")
                 if os.path.exists(file_name):
-                    finished_list.append(model)
-            elif cosmos.config.cycle.run_mode == "cloud":
-                #cosmos.log(model.cloud_job)
-                if Argo.get_task_status(model.cloud_job):
                     finished_list.append(model)
                               
     return finished_list

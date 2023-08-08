@@ -39,45 +39,13 @@ def prepare_ensemble(config):
         print('Making folder for ensemble member ' + member)
         # Make folder for ensemble member and copy all input files
         fo.mkdir(member)            
-        # # Write something to this folder (or it won't be uploaded in the cloud)
-        # fname = os.path.join(member, "dummy.txt")
-        # f = open(fname, "w")
-        # f.write(member)
-        # f.close()
         fo.copy_file(os.path.join("base_input", "run_job_2.py"), member)
         fo.copy_file(os.path.join("base_input", "config.yml"), member)
         fo.copy_file(os.path.join("base_input", "ensemble_members.txt"), member)
-        # if config["run_mode"] != "cloud":
-        #     # If not cloud mode, copy all input files
-        #     # If cloud mode, the input files will be copied in the workflow
-        #     # TODO: check if this is still needed in the cloud
-        # fo.copy_file("*.*", member)
-
-# def simulate_ensemble(config):
-#     # Never called in cloud mode
-#     # Read in the list of ensemble members
-#     ensemble_members = read_ensemble_members()
-#     # Loop through members
-#     curdir = os.getcwd()
-#     for member in ensemble_members:
-#         print('Running ensemble member ' + member)
-#         os.chdir(member)
-#         # Run the SFINCS model
-#         prepare_single(config, member=member)
-#         run_single(config, member=member)
-#         os.chdir(curdir)
-
-#def simulate_single(config, member=None):
-    # subfolder = config["scenario"] + "/" + config["model"]
-    # if config["ensemble"]:
-    #     subfolder += "/" + member
-    # w = Argo(config["host"], "cosmos-sfincs", wait=True)
-    # w.submit_job(bucket_name="cosmos-scenarios", subfolder=subfolder)
 
 def prepare_single(config, member=None):
     # Copying, nesting, spiderweb
     # We're already in the correct folder
-
     if config["run_mode"] == "cloud":
         # Initialize S3 client
         s3_client = get_s3_client(config)
@@ -138,8 +106,7 @@ def prepare_single(config, member=None):
         # Correct boundary water levels. Assuming that output from overall
         # model is in MSL !!!
         zcor = config["boundary_water_level_correction"] - config["vertical_reference_level_difference_with_msl"]
-
-        # if cloud mode, copy boundary files from S3
+        # If cloud mode, copy boundary files from S3
         if config["run_mode"] == "cloud":
             if config["flow_nested_type"] == "sfincs":
                 file_name = "sfincs_his.nc"
@@ -220,10 +187,8 @@ def merge_ensemble(config):
         folder_path = './'
         his_output_file_name = "./sfincs_his.nc"
         map_output_file_name = "./sfincs_map.nc"
-
     # Read in the list of ensemble members
     ensemble_members = read_ensemble_members()
-
     # Merge output files
     his_files = []
     map_files = []
@@ -233,7 +198,6 @@ def merge_ensemble(config):
     merge_nc_his(his_files, ["point_zs"], output_file_name=his_output_file_name)
     if "flood_map" in config:
         merge_nc_map(map_files, ["zsmax"], output_file_name=map_output_file_name)
-
     # Copy restart files from the first ensemble member (restart files are the same for all members)
     fo.copy_file(os.path.join(folder_path, ensemble_members[0], 'sfincs.*.rst'), folder_path)    
 
