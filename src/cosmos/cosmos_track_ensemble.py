@@ -85,11 +85,16 @@ def setup_track_ensemble():
     for model in cosmos.scenario.model:
         if shapely.intersects(cone.loc[0]["geometry"], model.outline.loc[0]["geometry"]):
             # Add model
-            ensemble_model = copy.deepcopy(model)
+            # Make a shallow copy of the original model
+            ensemble_model = copy.copy(model)
+            # Change name and long name
             ensemble_model.name = model.name + "_ensemble"
             ensemble_model.long_name = model.long_name + " (ensemble)"
-            ensemble_model.domain.name = model.name + "_ensemble"
+            # Re-initialize the model domain
+            ensemble_model.read_model_specific()
+            # Set ensemble flag
             ensemble_model.ensemble = True
+            # Change nesting (new nested models will be set later in this function)
             ensemble_model.nested_flow_models = []
             ensemble_model.nested_wave_models = []
             if ensemble_model.flow_nested_name:
@@ -98,12 +103,16 @@ def setup_track_ensemble():
                 ensemble_model.wave_nested_name += "_ensemble"
             if ensemble_model.bw_nested_name:
                 ensemble_model.bw_nested_name += "_ensemble"
+            # Add to list of models to add    
             models_to_add.append(ensemble_model)
 
+    # Add models to add to scenario
     cosmos.scenario.model = cosmos.scenario.model  + models_to_add
 
     for model in models_to_add:
+        # Get nested models for ensemble models
         model.get_nested_models()
+        # Set and make paths for ensemble models
         model.set_paths()
     
     if cosmos.config.cycle.only_run_ensemble:
