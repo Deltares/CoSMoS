@@ -85,7 +85,7 @@ def setup_track_ensemble():
     for model in cosmos.scenario.model:
         if shapely.intersects(cone.loc[0]["geometry"], model.outline.loc[0]["geometry"]):
             # Add model
-            ensemble_model = copy.deepcopy(model)
+            ensemble_model = copy.copy(model)
             ensemble_model.name = model.name + "_ensemble"
             ensemble_model.long_name = model.long_name + " (ensemble)"
             ensemble_model.domain.name = model.name + "_ensemble"
@@ -100,7 +100,7 @@ def setup_track_ensemble():
                 ensemble_model.bw_nested_name += "_ensemble"
             models_to_add.append(ensemble_model)
 
-    cosmos.scenario.model = cosmos.scenario.model  + models_to_add
+    cosmos.scenario.model = cosmos.scenario.model + models_to_add
 
     for model in models_to_add:
         model.get_nested_models()

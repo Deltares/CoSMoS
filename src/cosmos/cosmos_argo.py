@@ -26,9 +26,9 @@ class Argo:
 
         cosmos.log("Cloud Workflow started")
         w.create()
-        cosmos.log("Cloud Workflow finished")
         time.sleep(3) 
         w.wait()
+        cosmos.log("Cloud Workflow finished")
         return w
 
     def submit_single_job(model):
