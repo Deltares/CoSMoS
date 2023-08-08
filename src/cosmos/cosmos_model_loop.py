@@ -89,13 +89,20 @@ class ModelLoop():
             # Post-processing will happen later
             if not model.status == 'failed':
                 if cosmos.config.cycle.run_mode == "cloud":
-                    # Download job folder from cloud storage
+                    # Download job folder from cloud storage (ideally we do not need to do this, but then extraction of time series data needs to be done in the cloud as well)
+                    # Alternatively, we could just download the his file for local post-processing
                     subfolder = cosmos.scenario.name + "/" + "models" + "/" + model.name + "/"
                     cosmos.cloud.download_folder("cosmos-scenarios",
                                                  subfolder,
                                                  model.job_path)
                 # Moving files to input, output and restart folders
                 cosmos.log("Moving model " + model.long_name)
+                # First make folders
+                fo.mkdir(model.cycle_input_path)
+                fo.mkdir(model.cycle_output_path)
+#                fo.mkdir(model.cycle_figures_path)
+                fo.mkdir(model.cycle_post_path)
+                # Call model specific move function (this will move new restart files to restart folder, inputs to input folder, and outputs to output folder)
                 model.move()
                 model.status = "simulation_finished"
     
@@ -110,22 +117,34 @@ class ModelLoop():
             # Make job path and copy inputs
             fo.rmdir(model.job_path)
             fo.mkdir(model.job_path)
+            # Also make restart paths in scenario folder
+            fo.mkdir(model.restart_flow_path)
+            fo.mkdir(model.restart_wave_path)
+
+            # Copy base inputs to job/input folder
             src = os.path.join(model.path, "input", "*")
             fo.copy_file(src, model.job_path)
-            # Also make model cycle paths in scenario folder
-            model.make_paths()
 
-            model.pre_process()  # Adjust model input
+            model.pre_process()  # Adjust model input (this happens in model.job_path)
             cosmos.log("Submitting " + model.long_name + " ...")
             model.status = "running"
-            
-            # Submit the job
 
+            if model.ensemble:
+                # In case of ensemble, we move all inputs to base_input subfolder
+                fo.mkdir(os.path.join(model.job_path, "base_input"))
+                fo.move_file(os.path.join(model.job_path, "*"), os.path.join(model.job_path, "base_input"))
+                # Copy ensemble members file to job folder
+                fo.copy_file(os.path.join(model.job_path, "base_input", "ensemble_members.txt"), model.job_path)
+                # Copy run_job_2.py to job folder
+                fo.copy_file(os.path.join(model.job_path, "base_input", "run_job_2.py"), model.job_path)
+                # Copy config.yml to job folder
+                fo.copy_file(os.path.join(model.job_path, "base_input", "config.yml"), model.job_path)
+            
+            # Time to submit the job
             # First prepare batch file
             if cosmos.config.cycle.run_mode == "cloud":
-                # No need to do anything here. Workflow template will take care of this.
+                # No need for a bach file. Workflow template will take care of different steps.
                 pass
-
             else:
                 # Make windows batch file (run.bat) that activates the correct environment and runs run_job.py   
                 fid = open(os.path.join(model.job_path, "run.bat"), "w")
@@ -157,8 +176,6 @@ class ModelLoop():
                 fid.write("exit\n")
                 fid.close()
                 os.system('start tmp.bat')
-                pass
-
             elif cosmos.config.cycle.run_mode == "cloud":
                 cosmos.log("Ready to submit to Argo - " + model.long_name + " ...")
                 s3key = cosmos.scenario.name + "/" + "models" + "/" + model.name
@@ -166,25 +183,15 @@ class ModelLoop():
                 cosmos.log("Deleting model folder on S3 : " + model.name)                
                 cosmos.cloud.delete_folder("cosmos-scenarios", s3key)
                 # Upload job folder to cloud storage
-                inpkey = cosmos.scenario.name + "/" + "models" + "/" + model.name + "/" + "input"
-#                inpkey = cosmos.scenario.name + "/" + "models" + "/" + model.name
-                cosmos.log("Uploading model input to S3 : " + inpkey)                
                 cosmos.cloud.upload_folder("cosmos-scenarios",
                                            model.job_path,
-                                           inpkey)
-                # Upload run_job_2.py etc.
-                cosmos.cloud.upload_file("cosmos-scenarios",
-                                         os.path.join(model.job_path, "run_job_2.py"),
-                                         s3key)
-                cosmos.cloud.upload_file("cosmos-scenarios",
-                                         os.path.join(model.job_path, "config.yml"),
-                                         s3key)
+                                           s3key)
+                cosmos.log("Submitting to S3 : " + s3key)
                 if model.ensemble:
-                    cosmos.cloud.upload_file("cosmos-scenarios",
-                                            os.path.join(model.job_path, "ensemble_members.txt"),
-                                            s3key)
-                cosmos.log("Submitting to S3 : " + s3key)                
-                model.cloud_job = cosmos.argo.submit_template_job("ensemble-workflow", s3key)
+                    workflow_name = "ensemble-workflow"
+                else:
+                    workflow_name = "deterministic-workflow"
+                model.cloud_job = cosmos.argo.submit_template_job(workflow_name, s3key)
 
             else:
                 # Model will be run on WCP node
@@ -200,9 +207,9 @@ class ModelLoop():
 
         # Now do post-processing on simulations that were finished
         for model in finished_list:
-
+            # For now, only extract time series data
             cosmos.log("Post-processing " + model.long_name + " ...")
-            # Make plots etc.
+
             model.post_process()
             model.status = "finished"
             
@@ -255,6 +262,7 @@ class ModelLoop():
                                    cosmos.scenario.name)
                 fo.rmdir(pth)
 
+            # Check if we need to start a new cycle
             if cosmos.config.cycle.mode == "continuous" and cosmos.next_cycle_time:
                 # Start new main loop
                 cosmos.main_loop.start(cycle_time=cosmos.next_cycle_time)

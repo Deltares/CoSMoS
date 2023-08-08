@@ -224,10 +224,10 @@ class Model:
     def make_paths(self):
         # Make model cycle paths
         fo.mkdir(self.cycle_path)
-        fo.mkdir(self.cycle_input_path)
-        fo.mkdir(self.cycle_output_path)
-        fo.mkdir(self.cycle_figures_path)
-        fo.mkdir(self.cycle_post_path)
+        # fo.mkdir(self.cycle_input_path)
+        # fo.mkdir(self.cycle_output_path)
+        # fo.mkdir(self.cycle_figures_path)
+        # fo.mkdir(self.cycle_post_path)
         fo.mkdir(self.restart_flow_path)
         fo.mkdir(self.restart_wave_path)
 
