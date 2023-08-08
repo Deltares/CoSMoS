@@ -264,7 +264,7 @@ class MainLoop:
 
         if self.just_initialize:
             # No need to do anything else here 
-            return
+            pass#return
             
         # Get meteo data (in case of forcing with track file, this is also where the spiderweb is generated)
         download_and_collect_meteo()
