@@ -136,8 +136,6 @@ class Scenario:
         ### Clear model list
         self.model = []
 
-        spinup_ensembles = []
-
         # Loop through models in scenario         
         for name in models_in_scenario.keys():
             
