@@ -24,8 +24,7 @@ import cosmos.cosmos_meteo as meteo
 
 #import xmlkit as xml
 
-from cht.nesting.nest1 import nest1
-from cht.nesting.nest2 import nest2
+import cht.nesting.nesting as nesting
 
 
 class CoSMoS_SFINCS(Model):
@@ -109,7 +108,7 @@ class CoSMoS_SFINCS(Model):
                 self.domain.input.obsfile = "sfincs.obs"
             
             for nested_model in self.nested_flow_models:
-                nest1(self.domain, nested_model.domain)
+                nesting.nest1(self.domain, nested_model.domain)
 
         # Add other observation stations 
         if self.nested_flow_models or len(self.station)>0:
@@ -150,23 +149,22 @@ class CoSMoS_SFINCS(Model):
                 # Loop through ensemble members
                 for iens in range(cosmos.scenario.track_ensemble_nr_realizations):
                     name = cosmos.scenario.ensemble_names[iens]
-                    nest2(self.flow_nested.domain,
+                    nesting.nest2(self.flow_nested.domain,
                           self.domain,
                           output_path=os.path.join(self.flow_nested.cycle_output_path, name),
                           output_file= 'sfincs_his.nc',
                           boundary_water_level_correction=zcor,
                           option="flow",
-                          bc_path=os.path.join(self.job_path, name))
+                          bc_file=os.path.join(self.job_path, name, self.domain.input.bzsfile))
             else:
                 # Deterministic    
-                nest2(self.flow_nested.domain,
+                nesting.nest2(self.flow_nested.domain,
                         self.domain,
                         output_path=self.flow_nested.cycle_output_path,
                         output_file='sfincs_his.nc',
                         boundary_water_level_correction=zcor,
                         option="flow",
-                        bc_path=self.job_path)
-           
+                        bc_file= os.path.join(self.job_path,self.domain.input.bzsfile))
             
         elif self.domain.input.bcafile:
             
@@ -212,14 +210,14 @@ class CoSMoS_SFINCS(Model):
                 # Loop through ensemble members
                 for iens in range(cosmos.scenario.track_ensemble_nr_realizations):
                     name = cosmos.scenario.ensemble_names[iens]
-                    nest2(self.wave_nested.domain,
+                    nesting.nest2(self.wave_nested.domain,
                           self.domain,
                           output_path=os.path.join(self.wave_nested.cycle_output_path, name),
                           option="wave",
                           bc_path=os.path.join(self.job_path, name))
             else:
                 # Deterministic    
-                nest2(self.wave_nested.domain,
+                nesting.nest2(self.wave_nested.domain,
                         self.domain,
                         output_path=self.wave_nested.cycle_output_path,
                         option="wave",
@@ -237,14 +235,14 @@ class CoSMoS_SFINCS(Model):
                 # Loop through ensemble members
                 for iens in range(cosmos.scenario.track_ensemble_nr_realizations):
                     name = cosmos.scenario.ensemble_names[iens]
-                    nest2(self.bw_nested.domain,
+                    nesting.nest2(self.bw_nested.domain,
                           self.domain,
                           output_path=os.path.join(self.bw_nested.cycle_output_path, name),
                           option="wave",
                           bc_path=os.path.join(self.job_path, name))
             else:
                 # Deterministic    
-                nest2(self.bw_nested.domain,
+                nesting.nest2(self.bw_nested.domain,
                       self.domain,
                       output_path=self.bw_nested.cycle_output_path,
                       option="wave",
@@ -306,40 +304,16 @@ class CoSMoS_SFINCS(Model):
         if self.ensemble or self.meteo_spiderweb or self.meteo_track:
             self.domain.input.baro    = 1
             self.domain.input.utmzone = self.crs.utm_zone
-            self.domain.input.amufile = None
-            self.domain.input.amvfile = None
-            self.domain.input.ampfile = None
-            self.domain.input.amprfile = None
+            if self.meteo_spiderweb or self.meteo_track:
+                self.domain.input.amufile = None
+                self.domain.input.amvfile = None
+                self.domain.input.ampfile = None
+                self.domain.input.amprfile = None
 #            self.domain.input.variables.amufile = None
 #            self.domain.input.variables.amvfile = None
 
         # Now write input file (sfincs.inp)
         self.domain.write_input_file()
-
-        # Copy the correct to run_job.py
-        git_pth = os.path.dirname(__file__)
-        fo.copy_file(os.path.join(git_pth, "cosmos_run_job.py"), os.path.join(self.job_path, "run_job.py"))
-        # fo.copy_file(os.path.join(git_pth, "cosmos_run_sfincs_member.py"), self.job_path)
-
-        # Write config file
-        config = {}
-        config["ensemble"] = self.ensemble
-        config["run_mode"] = cosmos.config.cycle.run_mode
-        if self.flow_nested:
-            config["flow_nested_path"] = self.flow_nested.cycle_output_path
-        if self.wave_nested:
-            config["wave_nested_path"] = self.wave_nested.cycle_output_path
-        if self.bw_nested: 
-            config["bw_nested_path"]   = self.bw_nested.cycle_output_path
-        config["spw_path"] = cosmos.scenario.cycle_track_ensemble_spw_path
-        
-        dict2yaml(os.path.join(self.job_path, "config.yml"), config)
-
-        if self.ensemble:
-            # Write ensemble members to file
-            with open(os.path.join(self.job_path, "ensemble_members.txt"), "w") as f:
-                for member in cosmos.scenario.ensemble_names:
-                    f.write(member + "\n")
 
         # Make run batch file
         batch_file = os.path.join(self.job_path, "run.bat")

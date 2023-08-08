@@ -140,7 +140,7 @@ class CoSMoS_HurryWave(Model):
             fname1 = os.path.join(self.job_path, "hurrywave.spw")
             fo.copy_file(fname0, fname1)
 
-        if self.ensemble or self.meteo_spiderweb or self.meteo_track:
+        if self.meteo_spiderweb or self.meteo_track:
             self.domain.input.variables.amufile = None
             self.domain.input.variables.amvfile = None
 
@@ -205,31 +205,6 @@ class CoSMoS_HurryWave(Model):
         # Now write input file (sfincs.inp)
         self.domain.input.write()
 
-        # Copy the correct to run_job.py
-        git_pth = os.path.dirname(__file__)
-        fo.copy_file(os.path.join(git_pth, "cosmos_run_job.py"), os.path.join(self.job_path, "run_job.py"))
-        # fo.copy_file(os.path.join(git_pth, "cosmos_run_sfincs_member.py"), self.job_path)
-
-        # Write config file
-        config = {}
-        config["ensemble"] = self.ensemble
-        config["run_mode"] = cosmos.config.cycle.run_mode
-        if self.flow_nested:
-            config["flow_nested_path"] = self.flow_nested.cycle_output_path
-        if self.wave_nested:
-            config["wave_nested_path"] = self.wave_nested.cycle_output_path
-        if self.bw_nested: 
-            config["bw_nested_path"]   = self.bw_nested.cycle_output_path
-        config["spw_path"] = cosmos.scenario.cycle_track_ensemble_spw_path
-        
-        dict2yaml(os.path.join(self.job_path, "config.yml"), config)
-
-        if self.ensemble:
-            # Write ensemble members to file
-            with open(os.path.join(self.job_path, "ensemble_members.txt"), "w") as f:
-                for member in cosmos.scenario.ensemble_names:
-                    f.write(member + "\n")
-
         # Make run batch file
         batch_file = os.path.join(self.job_path, "run.bat")
         fid = open(batch_file, "w")
@@ -240,64 +215,6 @@ class CoSMoS_HurryWave(Model):
         fid.write("move running.txt finished.txt\n")
         # fid.write("exit\n")
         fid.close()
-
-        # # Now loop through ensemble members
-        # if cosmos.scenario.track_ensemble and self.ensemble:
-            
-        #     # Use main folder as best_track folder with spiderweb forcing
-        #     # os.rename(self.job_path, self.job_path + "_besttrack")
-        #     fo.copy_file(cosmos.scenario.best_track_file, os.path.join(self.job_path, "hurrywave.spw"))
-        #     self.domain.input.variables.spwfile = "hurrywave.spw"
-        #     self.domain.input.variables.amufile = None
-        #     self.domain.input.variables.amvfile = None
-        #     self.domain.input.write()
-
-        #     for member_name in cosmos.scenario.member_names:
-                
-        #         # Job path for this ensemble member
-        #         member_path = self.job_path + "_" + member_name
-        #         fo.mkdir(member_path)
-        #         self.domain.path = member_path
-
-        #         # Boundary conditions 
-        #         zcor = self.boundary_water_level_correction - self.vertical_reference_level_difference_with_msl
-       
-        #         if self.wave_nested:
-        #             # Get boundary conditions from overall model (Nesting 2)
-        #             if self.wave_nested.ensemble:
-        #                  output_file = "hurrywave_sp2_" + member_name + '.nc'
-        #             else:
-        #                 output_file = None
-
-        #             nesting.nest2(self.wave_nested.domain,
-        #                 self.domain,
-        #                 output_path=self.wave_nested.cycle_output_path,
-        #                 output_file= output_file,
-        #                 boundary_water_level_correction=zcor)
-
-        #             self.domain.input.variables.bspfile = "hurrywave.bsp"
-        #             self.domain.input.variables.bndfile = r"..\\" + os.path.basename(self.job_path) + r"\\hurrywave.bnd"
-        #             self.domain.boundary_conditions.write()
-                
-        #         # Copy spw file to member path
-        #         meteo_path = os.path.join(cosmos.config.main_path, "meteo")
-        #         spwfile = os.path.join(meteo_path,
-        #                                cosmos.scenario.track_ensemble,
-        #                                member_name + ".spw")
-        #         fo.copy_file(spwfile, os.path.join(member_path, "hurrywave.spw"))
-                
-        #         # Adjust input and save to .inp file
-        #         self.domain.input.variables.spwfile = "hurrywave.spw"  
-        #         self.domain.input.variables.amufile = None
-        #         self.domain.input.variables.amvfile = None
-        #         self.domain.input.variables.depfile = r"..\\" + os.path.basename(self.job_path) + r"\\hurrywave.dep"
-        #         self.domain.input.variables.mskfile = r"..\\" + os.path.basename(self.job_path) + r"\\hurrywave.msk"
-        #         self.domain.input.variables.obsfile = r"..\\" + os.path.basename(self.job_path) + r"\\hurrywave.obs"
-        #         self.domain.input.variables.ospfile = r"..\\" + os.path.basename(self.job_path) + r"\\hurrywave.osp"
-
-
-        #         self.domain.input.write()
-        #         fo.copy_file(os.path.join(self.job_path, 'run.bat'), member_path)
 
         # Set the path back to the one in cosmos\models\etc.
         self.domain.path = pth
@@ -502,11 +419,12 @@ class CoSMoS_HurryWave(Model):
                     #     shutil.rmtree(os.path.join(post_path, "hm0_95"))
 
                     file_name = os.path.join(self.cycle_output_path, "hurrywave_map_ensemble.nc")
-                    hm0max = self.domain.read_hm0max(hm0max_file=file_name,
-                                time_range=[t - dt + dt1, t + dt1])         
+   
                     hm0_map_path = os.path.join(post_path,
                                                 "hm0_95", 
-                                                pathstr[-1])                    
+                                                pathstr[-1])     
+                    hm0max = self.domain.read_hm0max(hm0max_file=file_name,
+                                time_range=[t0, t1 + dt1], parameter = 'hm0_95')                     
                     make_wave_map_tiles(np.transpose(hm0max), index_path, hm0_map_path, contour_set)
 
 

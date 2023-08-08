@@ -22,7 +22,7 @@ from .cosmos import cosmos
 from .cosmos_model import Model
 from .cosmos_tiling import make_flood_map_tiles
 
-from cht.nesting.nest2 import nest2
+import cht.nesting.nesting as nesting
 
 class CoSMoS_BEWARE(Model):
     """Cosmos class for BEWARE model.
@@ -94,151 +94,58 @@ class CoSMoS_BEWARE(Model):
                 # Loop through ensemble members
                 for iens in range(cosmos.scenario.track_ensemble_nr_realizations):
                     name = cosmos.scenario.ensemble_names[iens]
-                    nest2(self.flow_nested.domain,
+                    nesting.nest2(self.flow_nested.domain,
                           self.domain,
                           output_path=os.path.join(self.flow_nested.cycle_output_path, name),
                           boundary_water_level_correction=zcor,
                           option="flow",
-                          bc_path=os.path.join(self.job_path, name))
-                    self.domain.write_flow_boundary_conditions(file_name = os.path.join(self.job_path, name, 'beware.bzs'))
+                          bc_file=os.path.join(self.job_path, name, self.domain.input.bzsfile))
 
             else:
-                nest2(self.flow_nested.domain,
+                nesting.nest2(self.flow_nested.domain,
                     self.domain,
                     output_path=self.flow_nested.cycle_output_path,
                     boundary_water_level_correction=zcor,
                     option = 'flow',
-                    bc_path=self.job_path)
-                self.domain.write_flow_boundary_conditions()
-
+                    bc_file=os.path.join(self.job_path, self.domain.input.bzsfile))
 
             self.domain.input.bndfile = 'beware.bnd'
             self.domain.write_flow_boundary_points()
 
 
         if self.wave and self.wave_nested:
+            self.domain.input.btpfile = 'beware.btp'
+            self.domain.input.bhsfile = 'beware.bhs'
+            self.domain.input.bwvfile = 'beware.bwv'
             
             # Get boundary conditions from overall model (Nesting 2)
             if self.ensemble:
                 # Loop through ensemble members
                 for iens in range(cosmos.scenario.track_ensemble_nr_realizations):
                     name = cosmos.scenario.ensemble_names[iens]
-                    nest2(self.wave_nested.domain,
+                    nesting.nest2(self.wave_nested.domain,
                         self.domain,
                         output_path=os.path.join(self.wave_nested.cycle_output_path, name),
-                        option= 'wave')
-                    self.domain.write_bhs_file(file_name = os.path.join(self.job_path, name, 'beware.bhs'))
-                    self.domain.write_btp_file(file_name = os.path.join(self.job_path, name, 'beware.btp'))
+                        option= 'wave',
+                        bc_path =  os.path.join(self.job_path, name))
 
             else:
-                self.domain.input.bwvfile = 'beware.bwv'
-                self.domain.write_wave_boundary_conditions()
-                self.domain.write_wave_boundary_points()
+                nesting.nest2(self.wave_nested.domain,
+                    self.domain,
+                    output_path=self.wave_nested.cycle_output_path,
+                    option= 'wave',
+                    bc_path = self.job_path)
+
+            self.domain.write_wave_boundary_points()
         
         # Now write input file (sfincs.inp)
         self.domain.write_input_file()
 
-        # Copy the correct to run_job.py
-        git_pth = os.path.dirname(__file__)
-        fo.copy_file(os.path.join(git_pth, "cosmos_run_job.py"), os.path.join(self.job_path, "run_job.py"))
-        # fo.copy_file(os.path.join(git_pth, "cosmos_run_sfincs_member.py"), self.job_path)
-
-        # Write config file
-        config = {}
-        config["ensemble"] = self.ensemble
-        config["run_mode"] = cosmos.config.cycle.run_mode
-        if self.flow_nested:
-            config["flow_nested_path"] = self.flow_nested.cycle_output_path
-        if self.wave_nested:
-            config["wave_nested_path"] = self.wave_nested.cycle_output_path
-        if self.bw_nested: 
-            config["bw_nested_path"]   = self.bw_nested.cycle_output_path
-        config["spw_path"] = cosmos.scenario.cycle_track_ensemble_spw_path
-        
-        dict2yaml(os.path.join(self.job_path, "config.yml"), config)
-
-        if self.ensemble:
-            # Write ensemble members to file
-            with open(os.path.join(self.job_path, "ensemble_members.txt"), "w") as f:
-                for member in cosmos.scenario.ensemble_names:
-                    f.write(member + "\n")
-
         # Make run batch file
         src = os.path.join(cosmos.config.executables.beware_path, "run_bw.bas")
         batch_file = os.path.join(self.job_path, "run.bat")
-
         shutil.copyfile(src, batch_file)
-        # findreplace(batch_file, "DISKKEY", 'P')
         findreplace(batch_file, "EXEPATHKEY", cosmos.config.executables.beware_path)
-
-
-        # if cosmos.scenario.track_ensemble and self.ensemble:
-        #     profsfile = self.domain.input.profsfile
-        #     if self.domain.input.r2matchfile is not None:
-        #         r2matchfile = self.domain.input.r2matchfile
-
-        #     if self.domain.input.flmatchfile is not None:
-        #         flmatchfile = self.domain.input.flmatchfile
-
-        #     for member_name in cosmos.scenario.member_names:
-
-        #         # Job path for this ensemble member
-        #         member_path = self.job_path + "_" + member_name
-        #         fo.mkdir(member_path)
-
-        #          # Boundary conditions        
-        #         if self.flow_nested:
-        #             # Get boundary conditions from overall model (Nesting 2)
-
-        #             # Correct boundary water levels. Assuming that output from overall
-        #             # model is in MSL !!!
-        #             zcor = self.boundary_water_level_correction - self.vertical_reference_level_difference_with_msl       
-
-        #             if self.flow_nested.ensemble:
-        #                 if self.flow_nested.type == "sfincs":
-        #                     output_file = "sfincs_his_" + member_name + '.nc'
-        #             else:
-        #                 output_file= None
-
-        #             nest2(self.flow_nested.domain,
-        #                 self.domain,
-        #                 output_path=self.flow_nested.cycle_output_path,
-        #                 output_file= output_file,
-        #                 option = 'flow',
-        #                 boundary_water_level_correction=zcor)
-        #             self.domain.input.bzsfile = 'beware.bzs'
-        #             self.domain.write_flow_boundary_conditions(file_name= os.path.join(member_path, self.domain.input.bzsfile))
-        #             self.domain.input.bndfile = r"..\\" + os.path.basename(self.domain.path) + r"\\beware.bnd"
-
-        #         if self.wave and self.wave_nested:
-        
-        #             # Get wave boundary conditions from overall model (Nesting 2)
-        #             if self.flow_nested.ensemble:
-        #                 if self.wave_nested.type == "hurrywave":
-        #                     output_file = "hurrywave_his_" + member_name + '.nc'
-        #                 else:
-        #                     output_file= None
-
-        #             nest2(self.wave_nested.domain,
-        #                 self.domain,
-        #                 output_path=self.wave_nested.cycle_output_path,
-        #                 output_file= output_file,
-        #                 option= 'wave')
-
-        #             self.domain.input.btpfile = 'beware.btp'
-        #             self.domain.input.bhsfile = 'beware.bhs'
-        #             self.domain.write_bhs_file(file_name = os.path.join(member_path, self.domain.input.bhsfile))
-        #             self.domain.write_btp_file(file_name = os.path.join(member_path, self.domain.input.btpfile))
-        #             self.domain.input.bwvfile = r"..\\" + os.path.basename(self.domain.path) + r"\\beware.bwv"
-
-        #         # Copy inp & run.bat files to member folder
-        #         fo.copy_file(os.path.join(self.job_path, 'run.bat'), member_path)
-        #         self.domain.input.profsfile = r"..\\" + os.path.basename(self.domain.path) + r"\\" + profsfile
-        #         if self.domain.input.r2matchfile is not None:
-        #             self.domain.input.r2matchfile = r"..\\" + os.path.basename(self.domain.path) + r"\\" + r2matchfile
-        #         if self.domain.input.flmatchfile is not None:
-        #             self.domain.input.flmatchfile = r"..\\" + os.path.basename(self.domain.path) + r"\\" + flmatchfile
-        #         self.domain.write_input_file(input_file= os.path.join(member_path, "beware.inp"))
 
         # Set the path back to the one in cosmos\models\etc.
         self.domain.path = pth           
@@ -295,7 +202,7 @@ class CoSMoS_BEWARE(Model):
             for member in cosmos.scenario.ensemble_names:
                 file_list.append(os.path.join(output_path, member, "beware_his.nc"))
             prcs= [5, 50, 95]
-            vars= ["R2_tot", "R2_set", "WL"]
+            vars= ["R2", "R2_setup", "WL"]
             output_file_name = os.path.join(output_path, "beware_his_ensemble.nc")
             pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
 
@@ -304,16 +211,15 @@ class CoSMoS_BEWARE(Model):
 
             for ip in range(len(self.domain.filename)):
                 
-                d= {'WL': self.domain.WL[ip,:],'Setup': self.domain.setup[ip,:], 'Swash': self.domain.swash[ip,:], 'Runup': self.domain.R2p[ip,:],
-                        'Setup_5': self.domain.setup_prc["5"][ip,:],'Setup_50': self.domain.setup_prc["50"][ip,:],'Setup_95': self.domain.setup_prc["95"][ip,:],
-                        'Runup_5': self.domain.R2p_prc["5"][ip,:],'Runup_50': self.domain.R2p_prc["50"][ip,:],'Runup_95': self.domain.R2p_prc["95"][ip,:],}    
+                d= {'WL': self.domain.WL[ip,:],'Setup': self.domain.R2_setup[ip,:], 'Swash': self.domain.swash[ip,:], 'Runup': self.domain.R2[ip,:],
+                        'Setup_5': self.domain.R2_setup_prc["5"][ip,:],'Setup_50': self.domain.R2_setup_prc["50"][ip,:],'Setup_95': self.domain.R2_setup_prc["95"][ip,:],
+                        'Runup_5': self.domain.R2_prc["5"][ip,:],'Runup_50': self.domain.R2_prc["50"][ip,:],'Runup_95': self.domain.R2_prc["95"][ip,:],}    
 
                 v= pd.DataFrame(data=d, index =  pd.date_range(self.domain.input.tstart, periods=len(self.domain.swash[ip,:]), freq= '0.5H'))
-                obs_file = "extreme_runup_height." + self.domain.runid + "." +str(self.domain.filename[ip]) + ".csv.js"
-
-    
-                local_file_path = os.path.join(post_path,  "timeseries",
-                                                    obs_file)
+                local_file_path = os.path.join(post_path,  
+                                                "timeseries",
+                                                     "extreme_runup_height." + self.name + "." + str(self.domain.filename[ip]) + ".csv.js")
+                                                     
                 s= v.to_csv(path_or_buf=None,
                                 date_format='%Y-%m-%dT%H:%M:%S',
                                 float_format='%.3f',
@@ -324,7 +230,7 @@ class CoSMoS_BEWARE(Model):
         else:
             self.domain.read_data(os.path.join(output_path, "beware_his.nc"))       
             for ip in range(len(self.domain.filename)):
-                d= {'WL': self.domain.WL[ip,:],'Setup': self.domain.setup[ip,:], 'Swash': self.domain.swash[ip,:], 'Runup': self.domain.R2p[ip,:]}       
+                d= {'WL': self.domain.WL[ip,:],'Setup': self.domain.R2_setup[ip,:], 'Swash': self.domain.swash[ip,:], 'Runup': self.domain.R2[ip,:]}       
         
                 v= pd.DataFrame(data=d, index =  pd.date_range(self.domain.input.tstart, periods=len(self.domain.swash[ip,:]), freq= '0.5H'))
                 local_file_path = os.path.join(post_path,  
