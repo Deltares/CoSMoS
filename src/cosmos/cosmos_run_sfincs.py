@@ -399,18 +399,18 @@ elif option == "prepare_single":
     # Only occurs in cloud mode (running single is done in workflow)
     prepare_single(config, member=member)
 
-elif option == "simulate_single":
-    # Only called in cloud mode (should move this back to container?)
-    # Kick off cosmos-sfincs workflow (which runs this script with prepare_single, and then runs the sfincs docker)
-    # So effectively, it does the same as run consecutively running prepare_single and run_single
-    subfolder = config["scenario"] + "/" + "models" + "/" + config["model"]
-    if config["ensemble"]:
-        subfolder += "/" + member
-    print("Submitting member in " + subfolder)    
-    w = Argo(config["cloud"]["host"], "sfincs-workflow")
-    w.submit_job(bucket_name="cosmos-scenarios",
-                 subfolder=subfolder,
-                 member=member)
+# elif option == "simulate_single":
+#     # Only called in cloud mode (should move this back to container?)
+#     # Kick off cosmos-sfincs workflow (which runs this script with prepare_single, and then runs the sfincs docker)
+#     # So effectively, it does the same as run consecutively running prepare_single and run_single
+#     subfolder = config["scenario"] + "/" + "models" + "/" + config["model"]
+#     if config["ensemble"]:
+#         subfolder += "/" + member
+#     print("Submitting member in " + subfolder)    
+#     w = Argo(config["cloud"]["host"], "sfincs-workflow")
+#     w.submit_job(bucket_name="cosmos-scenarios",
+#                  subfolder=subfolder,
+#                  member=member)
 
 elif option == "merge_ensemble":
     # Merge his and map files from ensemble members
