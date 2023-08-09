@@ -13,9 +13,8 @@ from cht.misc.prob_maps import merge_nc_his
 from cht.misc.prob_maps import merge_nc_map
 from cht.tiling.tiling import make_floodmap_tiles
 from cht.tiling.tiling import make_png_tiles
-from cht.sfincs.sfincs import SFINCS
+from cht.hurrywave.hurrywave import HurryWave
 from cht.nesting.nest2 import nest2
-#from cht.misc.argo import Argo
 
 def read_ensemble_members():
     with open('ensemble_members.txt') as f:
@@ -82,7 +81,7 @@ def prepare_single(config, member=None):
         print("Copying spiderweb file ...")
         if config["run_mode"] == "cloud":
             s3_key = config["scenario"] + "/" + "track_ensemble" + "/" + "spw" + "/ensemble" + member + ".spw"
-            local_file_path = f'/input/sfincs.spw'  # Replace with the local path where you want to save the file
+            local_file_path = f'/input/hurrywave.spw'  # Replace with the local path where you want to save the file
             # Download the file from S3
             try:
                 s3_client.download_file(bucket_name, s3_key, local_file_path)
@@ -92,21 +91,18 @@ def prepare_single(config, member=None):
         else:
             # Copy all spiderwebs to jobs folder
             fname0 = os.path.join(config["spw_path"], "ensemble" + member + ".spw")
-            fo.copy_file(fname0, "sfincs.spw")
+            fo.copy_file(fname0, "hurrywave.spw")
 
     # Read SFINCS model (necessary for nesting)
-    sf = SFINCS("sfincs.inp")
-    sf.name = config["model"]
-    sf.type = "sfincs"
-    sf.path = "."
+    hw = HurryWave("hurrywave.inp")
+    hw.name = config["model"]
+    hw.type = "hurrywave"
+    hw.path = "."
 
     # Nesting
-    if "flow_nested" in config:
-        print("Nesting flow ...")
+    if "wave_nested" in config:
+        print("Nesting wave ...")
         # Get boundary conditions from overall model (Nesting 2)
-        # Correct boundary water levels. Assuming that output from overall
-        # model is in MSL !!!
-        zcor = config["flow_nested"]["boundary_water_level_correction"] - config["vertical_reference_level_difference_with_msl"]
         # If cloud mode, copy boundary files from S3
         if config["run_mode"] == "cloud":
             file_name = config["flow_nested"]["overall_file"]    
@@ -116,90 +112,49 @@ def prepare_single(config, member=None):
             # Download the file from S3
             s3_client.download_file(bucket_name, s3_key, os.path.join(local_file_path, os.path.basename(s3_key)))
             # Change path in config
-            config["flow_nested"]["overall_path"] = local_file_path   
+            config["wave_nested"]["overall_path"] = local_file_path   
 
         # Get boundary conditions from overall model (Nesting 2)
         if config["ensemble"]:
-            nest2(config["flow_nested"]["overall_type"],
-                sf,
-                output_path=config["flow_nested"]["overall_path"],
-                boundary_water_level_correction=zcor,
-                option="flow",
+            nest2(config["wave_nested"]["overall_type"],
+                hw,
+                output_path=config["wave_nested"]["overall_path"],
                 bc_path=".",
                 ensemble_member_index=int(member))
         else:
             # Deterministic    
-            nest2(config["flow_nested"]["overall_type"],
-                sf,
-                output_path=config["flow_nested"]["overall_path"],
-                boundary_water_level_correction=zcor,
+            nest2(config["wave_nested"]["overall_type"],
+                hw,
+                output_path=config["wave_nested"]["overall_path"],
                 option="flow",
                 bc_path=".")
         
-    if "wave_nested_path" in config:
-        print("Nesting wave ...")
-        # Get boundary conditions from overall model (Nesting 2)
-        if config["ensemble"]:
-            # Loop through ensemble members
-            nest2(self.wave_nested.domain,
-                    self.domain,
-                    output_path=os.path.join(self.wave_nested.cycle_output_path, member),
-                    option="wave",
-                    bc_path=os.path.join(self.job_path, ensemble_member_name))
-        else:
-            # Deterministic    
-            nest2(self.wave_nested.domain,
-                    self.domain,
-                    output_path=self.wave_nested.cycle_output_path,
-                    option="wave",
-                    bc_path=self.job_path)
-
-    # If SFINCS nested in Hurrywave for SNAPWAVE setup, separately run BEWARE nesting for LF waves
-    if "bw_nested_path" in config:
-        print("Nesting bw ...")
-        # Get wave maker conditions from overall model (Nesting 2)
-        if config["ensemble"]:
-            # Loop through ensemble members
-            nest2(self.bw_nested.domain,
-                    self.domain,
-                    output_path=os.path.join(self.bw_nested.cycle_output_path, ensemble_member_name),
-                    option="wave",
-                    bc_path=os.path.join(self.job_path, name))
-        else:
-            # Deterministic    
-            nest2(self.bw_nested.domain,
-                    self.domain,
-                    output_path=self.bw_nested.cycle_output_path,
-                    option="wave",
-                    bc_path=self.job_path)
-
-        sf.write_wavemaker_forcing_points()
 
 def merge_ensemble(config):
     print("Merging ...")
     if config["run_mode"] == "cloud":
         folder_path = '/input'
-        his_output_file_name = os.path.join("/output/sfincs_his.nc")
-        map_output_file_name = os.path.join("/output/sfincs_map.nc")
+        his_output_file_name = os.path.join("/output/hurrywave_his.nc")
+#        map_output_file_name = os.path.join("/output/hurrywave_map.nc")
         # Make output folder_path
         os.mkdir("output")
     else:
         folder_path = './'
-        his_output_file_name = "./sfincs_his.nc"
-        map_output_file_name = "./sfincs_map.nc"
+        his_output_file_name = "./hurrywave_his.nc"
+        map_output_file_name = "./hurrywave_map.nc"
     # Read in the list of ensemble members
     ensemble_members = read_ensemble_members()
     # Merge output files
     his_files = []
     map_files = []
     for member in ensemble_members:
-        his_files.append(os.path.join(folder_path, member, "sfincs_his.nc"))
-        map_files.append(os.path.join(folder_path, member, "sfincs_map.nc"))
+        his_files.append(os.path.join(folder_path, member, "hurrywave_his.nc"))
+        map_files.append(os.path.join(folder_path, member, "hurrywave_map.nc"))
     merge_nc_his(his_files, ["point_zs"], output_file_name=his_output_file_name)
-    if "flood_map" in config:
-        merge_nc_map(map_files, ["zsmax"], output_file_name=map_output_file_name)
+    # if "hm0_map" in config:
+    #     merge_nc_map(map_files, ["zsmax"], output_file_name=map_output_file_name)
     # Copy restart files from the first ensemble member (restart files are the same for all members)
-    fo.copy_file(os.path.join(folder_path, ensemble_members[0], 'sfincs.*.rst'), folder_path)    
+    fo.copy_file(os.path.join(folder_path, ensemble_members[0], 'hurrywave.*.rst'), folder_path)    
 
 def map_tiles(config):
 
@@ -350,13 +305,13 @@ elif option == "simulate":
         for member in ensemble_members:
             print('Running ensemble member ' + member)
             os.chdir(member)
-            # Run the SFINCS model
+            # Run the Hurrywave model
             prepare_single(config, member=member)
-            os.system("call run_sfincs.bat\n")
+            os.system("call run_hurrywave.bat\n")
             os.chdir(curdir)
     else:
         prepare_single(config)
-        os.system("call run_sfincs.bat\n")
+        os.system("call run_hurrywave.bat\n")
 
 elif option == "prepare_single":
     # Only occurs in cloud mode (running single is done in workflow)
@@ -380,7 +335,7 @@ elif option == "merge_ensemble":
     merge_ensemble(config)
 
 elif option == "map_tiles":
-    # Make flood map tiles
+    # Make map tiles
     map_tiles(config)
 
 elif option == "clean_up":

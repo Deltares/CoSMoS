@@ -157,10 +157,11 @@ class ModelLoop():
                     fid.write("python run_job_2.py prepare_ensemble\n")
                     fid.write("python run_job_2.py simulate\n")
                     fid.write("python run_job_2.py merge_ensemble\n")
+                    fid.write("python run_job_2.py map_tiles\n")   
+                    fid.write("python run_job_2.py clean_up\n")   
                 else:
                     fid.write("python run_job_2.py simulate\n")
-#                fid.write("python run_job_2.py map_tiles\n")   
-                fid.write("python run_job_2.py clean_up\n")   
+                    fid.write("python run_job_2.py map_tiles\n")   
                 fid.write("move running.txt finished.txt\n")
                 fid.write("exit\n")
                 fid.close()
@@ -212,7 +213,12 @@ class ModelLoop():
             # For now, only extract time series data
             cosmos.log("Post-processing " + model.long_name + " ...")
 
-            model.post_process()
+            try:
+                model.post_process()
+            except Exception as e:
+                print("An error occured while post-processing : " + model.name)
+                print(f"Error: {e}")
+
             model.status = "finished"
             
             # Write finished file
@@ -249,7 +255,13 @@ class ModelLoop():
             cosmos.log("All models finished!")
 
             # Post process data (making floodmaps, uploading to server etc.)
-            post_process()
+            # Try to run post-processing. If it fails, print error message and continue.
+
+            try:
+                post_process()
+            except Exception as e:
+                print("An error occured while post-processing !")
+                print(f"Error: {e}")
 
             self.status = "done"
                                     

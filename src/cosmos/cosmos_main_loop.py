@@ -21,6 +21,7 @@ from .cosmos_scenario import Scenario
 from .cosmos_cloud import Cloud
 from .cosmos_argo import Argo
 #from .cosmos_tiling import tile_layer
+from .cosmos_webviewer import WebViewer
 
 import cht.misc.fileops as fo
 #import cht.misc.xmlkit as xml
@@ -107,6 +108,12 @@ class MainLoop:
         # Cycle string (used for file and folder names)                   
         cosmos.cycle_string = cosmos.cycle.strftime("%Y%m%d_%Hz")
 
+        # Web viewer
+        if cosmos.config.webviewer:
+            # Prepare new web viewer, or copy scenario data to existing viewer        
+            # Add scenario folder, cycle folder to web viewer
+            cosmos.webviewer = WebViewer(cosmos.config.webviewer.name)
+
         # Set scenario paths
         cosmos.scenario.set_paths()
         
@@ -128,9 +135,8 @@ class MainLoop:
         self.scheduler = sched.scheduler(time.time, time.sleep)
         dt = start_time - tnow
         
-        cosmos.log("Next cycle " + cosmos.cycle_string + " will start at " + start_time.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
-        
         # Kick off main_loop run
+        cosmos.log("Next cycle " + cosmos.cycle_string + " will start at " + start_time.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
         self.scheduler.enter(dt.seconds, 1, self.run, ())
         self.scheduler.run()
 
@@ -238,13 +244,9 @@ class MainLoop:
                            model.wave_start_time.strftime("%Y%m%d %H%M%S") + " - " + \
                            model.wave_stop_time.strftime("%Y%m%d %H%M%S"))
 
-        # # Initialize tile layers
-        # tile_layer              = {}
-        # tile_layer["flood_map"] = TileLayer("flood_map")
-
-        if self.just_initialize:
-            # No need to do anything else here 
-            return
+        # if self.just_initialize:
+        #     # No need to do anything else here 
+        #     return
             
         # Get meteo data (in case of forcing with track file, this is also where the spiderweb is generated)
         download_and_collect_meteo()

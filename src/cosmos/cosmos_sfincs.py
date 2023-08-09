@@ -40,8 +40,8 @@ class CoSMoS_SFINCS(Model):
         self.domain.input.tref     = cosmos.scenario.ref_date
         self.domain.input.tstart   = self.flow_start_time
         self.domain.input.tstop    = self.flow_stop_time
-        self.domain.input.dtmapout = 21600.0
-        self.domain.input.dtmaxout = 21600.0
+        self.domain.input.dtmapout = 21600.0 # should this not be configurable?
+        self.domain.input.dtmaxout = 21600.0 # should this not be configurable?
         self.domain.input.outputformat = "net"
         self.domain.input.bzsfile  = "sfincs.bzs"
         self.domain.input.storecumprcp = 1
@@ -214,9 +214,7 @@ class CoSMoS_SFINCS(Model):
         # Extract water levels
         output_path = self.cycle_output_path
         post_path   = self.cycle_post_path
-
         if self.station:
-
             # Read in data for all stations
             data = {}
             if self.ensemble:
@@ -227,7 +225,6 @@ class CoSMoS_SFINCS(Model):
                                                           parameter= "point_zs_" + str(round(v*100)))
             else:    
                 data["wl"] = self.domain.read_timeseries_output(path=output_path,  parameter="point_zs")
-
             # Loop through stations 
             for station in self.station:                
                 if self.ensemble:

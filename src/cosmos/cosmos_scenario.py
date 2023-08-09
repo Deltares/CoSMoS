@@ -118,7 +118,6 @@ class Scenario:
         # Loop through models in scenario         
         for name in models_in_scenario.keys():
             
-            print(name)            
             tp     = models_in_scenario[name]["type"]
             
             # Initialize models
@@ -274,60 +273,3 @@ class Scenario:
         self.restart_path          = os.path.join(self.path, "restart")
         self.timeseries_path       = os.path.join(self.path, "timeseries")
         self.cycle_timeseries_path = os.path.join(self.path, "timeseries", cosmos.cycle_string)
-
-        # cluster_dict[name] = cl                
-         
-        # ### Ensemble
-
-        # if hasattr(xml_obj, "track_ensemble"):
-        #     self.track_ensemble = xml_obj.track_ensemble[0].value
-        #     cosmos.scenario.member_names = []
-        #     ensemble_path = os.path.join(cosmos.config.main_path,
-        #                                  "meteo",
-        #                                  self.track_ensemble)
-
-        #     # If nr of tracks indicated in scenario file, generate new spw files based on .cyc file in ensemble folder
-        #     if hasattr(xml_obj, "ensemble_nrtracks"):
-        #         fo.delete_file(fo.list_files(os.path.join(ensemble_path, "*.spw")))
-
-        #         from cht.tropical_cyclone.tropical_cyclone import TropicalCyclone
-        #         from cht.tropical_cyclone.tropical_cyclone import TropicalCycloneEnsemble
-        #         from cht.tropical_cyclone.tropical_cyclone import holland2010, wind_radii_nederhoff
-        #         from datetime import datetime, timedelta
-
-        #         tc= TropicalCyclone()
-        #         file_name_cyc =fo.list_files(os.path.join(ensemble_path, "*.cyc"))
-        #         cycname = os.path.basename(file_name_cyc[0]).split('.')[0]
-
-        #         tc.from_ddb_cyc(file_name_cyc[0])
-        #         tc.account_for_forward_speed()
-        #         tc.estimate_missing_values()
-        #         tc.include_rainfall = True
-
-        #         self.ensemble_nrtracks = xml_obj.ensemble_nrtracks[0].value
-        #         tc2= TropicalCycloneEnsemble(name= cycname, TropicalCyclone= tc)
-        #         tc2.tstart  = xml_obj.cycle[0].value-timedelta(hours=max(spinup_ensembles)+3)
-        #         tc2.tstart_ensemble  = xml_obj.cycle[0].value
-        #         tc2.tend    = xml_obj.cycle[0].value+timedelta(hours=self.run_duration)
-        #         tc2.compute_ensemble(number_of_realizations= self.ensemble_nrtracks)
-
-        #         tc2.to_shapefile(folder_path=ensemble_path)
-        #         tc2.to_spiderweb(folder_path=ensemble_path)
-
-        #     file_names = fo.list_files(os.path.join(ensemble_path, "*.spw"))
-
-        #     # Loop through file names
-        #     for file_name in file_names:                
-        #         if file_name[-9:-4]=="00000":
-        #             cosmos.scenario.best_track_file = os.path.join(ensemble_path,
-        #                                                         file_name)
-        #         else:
-        #             cosmos.scenario.member_names.append(os.path.split(file_name)[1][0:-4])
-        
-        # else:
-        #     self.track_ensemble = None
-
-
-        cosmos.log("Finished reading scenario")    
-
-

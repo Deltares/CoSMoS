@@ -20,10 +20,11 @@ import shapely
 from .cosmos import cosmos
 from .cosmos_cluster import cluster_dict as cluster
 
-import cht.misc.xmlkit as xml
+#import cht.misc.xmlkit as xml
 #from cht.nesting.nest1 import nest1
 from cht.nesting.nest2 import nest2
 import cht.misc.fileops as fo
+from cht.misc.misc_tools import dict2yaml
 
 class Model:
     """Read generic model data from xml file, prepare model run paths, and submit jobs.
@@ -95,57 +96,8 @@ class Model:
         self.bw_nested_name   = self.bw_nested    
 
         self.crs = CRS(self.crs)
-        
-#         self.long_name = xml_obj.longname[0].value
-#         self.type      = xml_obj.type[0].value.lower()
-#         self.runid     = xml_obj.runid[0].value
                 
-#         if hasattr(xml_obj, "flownested"):
-#             if not xml_obj.flownested[0].value == "none":
-# #                self.flow_nested = True
-#                 self.flow_nested_name = xml_obj.flownested[0].value
-#         if hasattr(xml_obj, "wavenested"):
-#             if not xml_obj.wavenested[0].value == "none":
-# #                self.wave_nested = True
-#                 self.wave_nested_name = xml_obj.wavenested[0].value
-#         coordsys     = xml_obj.coordsys[0].value
-#         self.crs = CRS(coordsys)        
-#         if hasattr(xml_obj, "xlim1") and hasattr(xml_obj, "xlim2") and hasattr(xml_obj, "ylim1")  and hasattr(xml_obj, "ylim2"):
-#             self.xlim = [xml_obj.xlim1[0].value, xml_obj.xlim2[0].value]
-#             self.ylim = [xml_obj.ylim1[0].value, xml_obj.ylim2[0].value]
-#         if hasattr(xml_obj, "flowspinup"):
-#             self.flow_spinup_time = xml_obj.flowspinup[0].value
-#         if hasattr(xml_obj, "wavespinup"):
-#             self.wave_spinup_time = xml_obj.wavespinup[0].value
-#         if hasattr(xml_obj, "vertical_reference_level_name"):
-#             self.vertical_reference_level_name = xml_obj.vertical_reference_level_name[0].value
-#         if hasattr(xml_obj, "vertical_reference_level_difference_with_msl"):
-#             self.vertical_reference_level_difference_with_msl = xml_obj.vertical_reference_level_difference_with_msl[0].value
-#         if hasattr(xml_obj, "boundary_water_level_correction"):
-#             self.boundary_water_level_correction = xml_obj.boundary_water_level_correction[0].value
-#         if hasattr(xml_obj, "make_flood_map"):
-#             if xml_obj.make_flood_map[0].value[0].lower() == "y":
-#                 self.make_flood_map = True
-#         if hasattr(xml_obj, "make_wave_map"):
-#             if xml_obj.make_wave_map[0].value[0].lower() == "y":
-#                 self.make_wave_map = True
-#         if hasattr(xml_obj, "make_sedero_map"):
-#             if xml_obj.make_sedero_map[0].value[0].lower() == "y":
-#                 self.make_sedero_map = True
-#         if hasattr(xml_obj, "sa_correction"):
-#             self.sa_correction = xml_obj.sa_correction[0].value
-#         if hasattr(xml_obj, "ssa_correction"):
-#             self.ssa_correction = xml_obj.ssa_correction[0].value
-#         if hasattr(xml_obj, "wave"):
-#             if xml_obj.wave[0].value[0].lower() == "y":
-#                 self.wave = True
-#         if hasattr(xml_obj, "cluster"):
-#             self.cluster = xml_obj.cluster[0].value[0].lower()
-#         if hasattr(xml_obj, "boundary_twl_treshold"):
-#             self.boundary_twl_treshold = xml_obj.boundary_twl_treshold[0].value
-            
-                
-        # Read polygon around model
+        # Read polygon around model (should really use geojson file for this)
         polygon_file  = os.path.join(self.path, "misc", self.name + ".txt")
         if os.path.exists(polygon_file):
             df = pd.read_csv(polygon_file, index_col=False, header=None,
@@ -178,6 +130,9 @@ class Model:
         config["cycle"]    = cosmos.cycle_string
         config["ensemble"] = self.ensemble
         config["run_mode"] = cosmos.config.cycle.run_mode
+        config["vertical_reference_level_difference_with_msl"] = self.vertical_reference_level_difference_with_msl        
+        if self.ensemble:
+            config["spw_path"] = cosmos.scenario.cycle_track_ensemble_spw_path
         if cosmos.config.cycle.run_mode == "cloud":
             config["cloud"] = {}
             config["cloud"]["host"] = cosmos.config.cloud_config.host
@@ -186,21 +141,38 @@ class Model:
             config["cloud"]["region"] = cosmos.config.cloud_config.region
             config["cloud"]["namespace"] = cosmos.config.cloud_config.namespace
         if self.flow_nested:
-            config["flow_nested_model"] = self.flow_nested.name
-            config["flow_nested_type"]  = self.flow_nested.type
-            config["flow_nested_path"]  = self.flow_nested.cycle_output_path
+            # Water level forcing
+            config["flow_nested"] = {}
+            config["flow_nested"]["overall_model"] = self.flow_nested.name
+            config["flow_nested"]["overall_type"]  = self.flow_nested.type
+            config["flow_nested"]["overall_path"]  = self.flow_nested.cycle_output_path
+            # This bit is needed for cloud mode (file needs to be downloaded from S3)
+            if self.flow_nested.type == "sfincs":
+                file_name = "sfincs_his.nc"
+            elif self.flow_nested.type == "xbeach":
+                file_name = "xbeach_his.nc"
+            elif self.flow_nested.type == "dflowfm":
+                file_name = "dflowfm_his.nc"
+            elif self.flow_nested.type == "delft3d":
+                file_name = "delft3d_his.nc"
+            config["flow_nested"]["overall_file"]  = file_name
+            config["flow_nested"]["boundary_water_level_correction"] = self.boundary_water_level_correction
         if self.wave_nested:
-            config["wave_nested_model"] = self.wave_nested.name
-            config["wave_nested_type"] = self.wave_nested.type
-            config["wave_nested_path"] = self.wave_nested.cycle_output_path
+            # Wave forcing
+            config["wave_nested"] = {}
+            config["wave_nested"]["overall_model"] = self.wave_nested.name
+            config["wave_nested"]["overall_type"]  = self.wave_nested.type
+            config["wave_nested"]["overall_path"]  = self.wave_nested.cycle_output_path
+            # This bit is needed for cloud mode (file needs to be downloaded from S3)
+            if self.wave_nested.type == "hurrywave":
+                file_name = "hurrywave_sp2.nc"
+            config["wave_nested"]["overall_file"]  = file_name
         if self.bw_nested: 
-            config["bw_nested_model"] = self.bw_nested.name
-            config["bw_nested_type"]   = self.bw_nested.type
-            config["bw_nested_path"]   = self.bw_nested.cycle_output_path
-        if self.ensemble:
-            config["spw_path"] = cosmos.scenario.cycle_track_ensemble_spw_path
-        config["boundary_water_level_correction"] = self.boundary_water_level_correction
-        config["vertical_reference_level_difference_with_msl"] = self.vertical_reference_level_difference_with_msl        
+            # Beware forcing
+            config["bw_nested"] = {}
+            config["bw_nested"]["overall_model"] = self.bw_nested.name
+            config["bw_nested"]["overall_type"]  = self.bw_nested.type
+            config["bw_nested"]["overall_path"]  = self.bw_nested.cycle_output_path
         if cosmos.config.cycle.make_flood_maps and self.make_flood_map:
             config["flood_map"] = {}
             if self.ensemble:
@@ -213,8 +185,7 @@ class Model:
             config["flood_map"]["topo_path"]  = os.path.join(self.path, "tiling", "topobathy")
             config["flood_map"]["start_time"] = cosmos.cycle
             config["flood_map"]["stop_time"]  = cosmos.stop_time
-            config["flood_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.flood_map_color_map]
-            config["flood_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.flood_map_color_map]
+            config["flood_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["flood_map"]["color_map"]]
         
         dict2yaml(os.path.join(self.job_path, "config.yml"), config)
         

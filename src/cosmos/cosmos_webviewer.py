@@ -15,7 +15,7 @@ from pyproj import Transformer
 
 from .cosmos import cosmos
 from .cosmos_timeseries import merge_timeseries as merge
-from .cosmos_tiling import make_wave_map_tiles
+#from .cosmos_tiling import make_wave_map_tiles
 from .cosmos_tiling import make_precipitation_tiles
 
 import cht.misc.fileops as fo
@@ -24,6 +24,10 @@ import cht.misc.misc_tools
 class WebViewer:
     
     def __init__(self, name):
+        # Makes local copy of the web viewer
+        # If such a copy already exists, data will be copied to the existing web viewer
+
+        cosmos.log("Preparing web viewer " + name + " ...")
 
         self.name    = name
         self.path    = os.path.join(cosmos.config.path.main, "webviewers", name)
@@ -32,14 +36,6 @@ class WebViewer:
             self.exists = True
         else:
             self.exists = False
-    
-    def make(self):
-        
-        # Makes local copy of the web viewer
-        # If such a copy already exists, data will be copied to the existing web viewer
-
-        cosmos.log("")
-        cosmos.log("Starting web viewer " + self.name +" ...")
         
         # Check whether web viewer already exists
         # If not, copy empty web viewer from templates
@@ -56,10 +52,11 @@ class WebViewer:
                                          "*")
             fo.copy_file(template_path, self.path)
 
-            # Change the title string in index.html to the scenario long name
-            cht.misc.misc_tools.findreplace(os.path.join(self.path, "index.html"),
-                                       "COSMOS_VIEWER",
-                                       cosmos.scenario.long_name)
+        # Make scenario folder and cycle folder 
+        fo.mkdir(os.path.join(self.path, "data", cosmos.scenario.name))
+        fo.mkdir(os.path.join(self.path, "data", cosmos.scenario.name, cosmos.cycle_string))
+
+    def make(self):
 
         cosmos.log("Updating scenario.js ...")
 
@@ -76,19 +73,48 @@ class WebViewer:
 
         cosmos.log("Removing old scenario folder from web viewer ...")
 
-#        fo.rmdir(scenario_path)
         fo.mkdir(os.path.join(scenario_path))
         
         # Map variables
         self.map_variables = []
-  
+        self.set_map_tile_variables("flood_map",
+                                    "Flood map",
+                                    "This is a flood map. It can tell if you will drown.",
+                                    cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["flood_map"]["color_map"]],
+                                    13)
+        self.set_map_tile_variables("flood_map_90",
+                                    "Flood map (90)",
+                                    "This is a worst case flood map. It can tell if you will drown.",
+                                    cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["flood_map"]["color_map"]],
+                                    13)
+        self.set_map_tile_variables("hm0",
+                                    "Wave height",
+                                    "These are Hm0 wave heights.",
+                                    cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["hm0"]["color_map"]],
+                                    9)
+        # self.set_map_tile_variables("sedero",
+        #                             "Sedimentation/erosion",
+        #                             "This is a sedimentation/erosion map. It can tell if your house will wash away.",
+        #                             cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["sedero"]["color_map"]],
+        #                             16)
+        # self.set_map_tile_variables("zb0",
+        #                             "Pre-storm bed level",
+        #                             "These were the bed levels prior to the storm.",
+        #                             cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["bed_level_pre"]["color_map"]],
+        #                             16)
+        # self.set_map_tile_variables("zbend",
+        #                             "Post-storm bed level",
+        #                             "These were the bed levels after the storm.",
+        #                             cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["bed_level_pre"]["color_map"]],
+        #                             16)
+
         self.copy_timeseries()
-        self.copy_floodmap()        
-        self.copy_wave_maps()
-        self.copy_sederomap()
-        # self.copy_bedlevelmaps()
+
         self.make_runup_map()
-        # self.make_meteo_maps()
+        self.make_xb_markers()
+
+        self.make_meteo_maps()
+
         mv_file = os.path.join(scenario_path,
                                "variables.js")
         
@@ -297,22 +323,17 @@ class WebViewer:
         #         model.domain.write_to_geojson(scenario_path, cosmos.scenario.name)
         #         model.domain.write_to_csv(scenario_path, cosmos.scenario.name)
 
-    def copy_floodmap(self):
-
-        cosmos.log("Copying flood map tiles ...")
+    def set_map_tile_variables(self, name, long_name, description, color_map, max_native_zoom):
 
         scenario_path = os.path.join(self.path,
                                      "data",
                                      cosmos.scenario.name,
                                      cosmos.cycle_string)
 
-        # Flood maps
-        
         # Check if flood maps are available
-        flood_map_path = os.path.join(scenario_path,
-                                      "flood_map_90")
+        tile_path = os.path.join(scenario_path, name)
         
-        if fo.exists(flood_map_path):
+        if fo.exists(tile_path):
             
             # 24 hour increments  
             dtinc = 24
@@ -324,31 +345,41 @@ class WebViewer:
 
             pathstr = []
             namestr = []
-            
-            # 24-hour increments
-            requested_times = pd.date_range(start=t0 + dt,
-                                            end=t1,
-                                            freq=str(dtinc)+"H").to_pydatetime().tolist()
+            hrstr = "48"
+            # Check times
+            folders = fo.list_folders(os.path.join(tile_path, "*"), basename=True)
+            for folder in folders:
+                pathstr.append(folder)
+                if folder[0:3] == "com":
+                    namestr.append("Combined " + hrstr + "-hour forecast")
+                else:
+                    namestr.append(folder)
 
-            for it, t in enumerate(requested_times):
-                pathstr.append((t - dt).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
-                namestr.append((t - dt).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC")
 
-            pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
-            td = t1 - t0
-            hrstr = str(int(td.days * 24 + td.seconds/3600))
-            namestr.append("Combined " + hrstr + "-hour forecast")
+            # # 24-hour increments
+            # requested_times = pd.date_range(start=t0 + dt,
+            #                                 end=t1,
+            #                                 freq=str(dtinc)+"H").to_pydatetime().tolist()
 
-            if os.path.exists(os.path.join(flood_map_path, "combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ") + "_95")):
-                pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ") + "_95")
-                namestr.append("Combined " + hrstr + "-hour forecast 95 %")
+            # for it, t in enumerate(requested_times):
+            #     pathstr.append((t - dt).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
+            #     namestr.append((t - dt).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC")
+
+            # pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
+            # td = t1 - t0
+            # hrstr = str(int(td.days * 24 + td.seconds/3600))
+            # namestr.append("Combined " + hrstr + "-hour forecast")
+
+            # if os.path.exists(os.path.join(flood_map_path, "combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ") + "_95")):
+            #     pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ") + "_95")
+            #     namestr.append("Combined " + hrstr + "-hour forecast 95 %")
 
             # wvpath = os.path.join(scenario_path)
             # fo.copy_file(flood_map_path, wvpath)
             dct={}
-            dct["name"]        = "flood_map_90"
-            dct["long_name"]   = "Flood map_90"
-            dct["description"] = "This is a flood map. It can tell if you will drown."
+            dct["name"]        = name
+            dct["long_name"]   = long_name
+            dct["description"] = description
             dct["format"]      = "xyz_tile_layer"
             dct["max_native_zoom"]  = 13
 
@@ -359,13 +390,11 @@ class WebViewer:
                 tm["string"] = namestr[it]
                 tms.append(tm)
             dct["times"]        = tms  
-
-            mp = cosmos.config.map_contours["flood_map"]
             
             lgn = {}
-            lgn["text"] = mp["string"]
+            lgn["text"] = color_map["string"]
 
-            cntrs = mp["contours"]
+            cntrs = color_map["contours"]
 
             contours = []
             
@@ -380,141 +409,225 @@ class WebViewer:
             
             self.map_variables.append(dct)
 
-    def copy_wave_maps(self):
-            
-        # Wave maps
-        scenario_path = os.path.join(self.path,
-                                     "data",
-                                     cosmos.scenario.name,
-                                     cosmos.cycle_string)
 
-        # 24 hour increments  
-        dtinc = 24
+    # def copy_floodmap(self):
 
-        # Wave map for the entire simulation
-        dt  = datetime.timedelta(hours=dtinc)
-        t0  = cosmos.cycle.replace(tzinfo=None)    
-        t1  = cosmos.stop_time
+    #     cosmos.log("Copying flood map tiles ...")
+
+    #     scenario_path = os.path.join(self.path,
+    #                                  "data",
+    #                                  cosmos.scenario.name,
+    #                                  cosmos.cycle_string)
+
+    #     # Flood maps
         
-        okay  = False
-        for model in cosmos.scenario.model:
-            if model.type=="hurrywave":
-                index_path = os.path.join(model.path, "tiling", "indices")
-                if model.make_wave_map and os.path.exists(index_path):            
-                    okay = True
-
-        if okay:
+    #     # Check if flood maps are available
+    #     flood_map_path = os.path.join(scenario_path,
+    #                                   "flood_map_90")
+        
+    #     if fo.exists(flood_map_path):
             
-            cosmos.log("Copying wave map tiles ...")
-            
-            pathstr = []
-            namestr = []
-            
-            # 6-hour increments
-            requested_times = pd.date_range(start=t0 + dt,
-                                            end=t1,
-                                            freq=str(dtinc)+"H").to_pydatetime().tolist()
-
-            for it, t in enumerate(requested_times):
-                pathstr.append((t - dt).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
-                namestr.append((t - dt).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC")
-
-            pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
-            td = t1 - t0
-            hrstr = str(int(td.days * 24 + td.seconds/3600))
-            namestr.append("Combined " + hrstr + "-hour forecast")
-
-            # Check if wave maps are available
-            wave_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-                                          "hm0")
-            if os.path.exists(os.path.join(wave_map_path, "combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ") + "_95")):
-                pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ") + "_95")
-                namestr.append("Combined " + hrstr + "-hour forecast 95 %")          
-
-            
-            wvpath = os.path.join(scenario_path)
-            fo.copy_file(wave_map_path, wvpath)
-            dct={}
-            dct["name"]        = "hm0" 
-            dct["long_name"]   = "Wave height"
-            dct["description"] = "These are Hm0 wave heights."
-            dct["format"]      = "xyz_tile_layer"
-            dct["max_native_zoom"] = 9
-            
-            tms = []            
-            for it, pth in enumerate(pathstr):
-                tm = {}
-                tm["name"]   = pth
-                tm["string"] = namestr[it]
-                tms.append(tm)
-
-            dct["times"]        = tms  
-
-            contour_set = "Hm0"    
-            
-            mp = cosmos.config.map_contours["Hm0"]
-            
-            lgn = {}
-            lgn["text"] = mp["string"]
-
-            cntrs = mp["contours"]
-
-            contours = []                
-            for cntr in cntrs:    
-                contour = {}
-                contour["text"]  = cntr["string"]
-                contour["color"] = "#" + cntr["hex"]
-                contours.append(contour)
+    #         # 24 hour increments  
+    #         dtinc = 24
     
-            lgn["contours"] = contours
-            dct["legend"]   = lgn
+    #         # Wave map for the entire simulation
+    #         dt  = datetime.timedelta(hours=dtinc)
+    #         t0  = cosmos.cycle.replace(tzinfo=None)    
+    #         t1  = cosmos.stop_time
+
+    #         pathstr = []
+    #         namestr = []
             
-            self.map_variables.append(dct)
+    #         # 24-hour increments
+    #         requested_times = pd.date_range(start=t0 + dt,
+    #                                         end=t1,
+    #                                         freq=str(dtinc)+"H").to_pydatetime().tolist()
+
+    #         for it, t in enumerate(requested_times):
+    #             pathstr.append((t - dt).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
+    #             namestr.append((t - dt).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC")
+
+    #         pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
+    #         td = t1 - t0
+    #         hrstr = str(int(td.days * 24 + td.seconds/3600))
+    #         namestr.append("Combined " + hrstr + "-hour forecast")
+
+    #         if os.path.exists(os.path.join(flood_map_path, "combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ") + "_95")):
+    #             pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ") + "_95")
+    #             namestr.append("Combined " + hrstr + "-hour forecast 95 %")
+
+    #         # wvpath = os.path.join(scenario_path)
+    #         # fo.copy_file(flood_map_path, wvpath)
+    #         dct={}
+    #         dct["name"]        = "flood_map_90"
+    #         dct["long_name"]   = "Flood map (10 %)"
+    #         dct["description"] = "This is a flood map. It can tell if you will drown."
+    #         dct["format"]      = "xyz_tile_layer"
+    #         dct["max_native_zoom"]  = max_native_zoom
+
+    #         tms = []            
+    #         for it, pth in enumerate(pathstr):
+    #             tm = {}
+    #             tm["name"]   = pth
+    #             tm["string"] = namestr[it]
+    #             tms.append(tm)
+    #         dct["times"]        = tms  
+
+    #         mp = cosmos.config.map_contours["flood_map"]
+            
+    #         lgn = {}
+    #         lgn["text"] = mp["string"]
+
+    #         cntrs = mp["contours"]
+
+    #         contours = []
+            
+    #         for cntr in cntrs:
+    #             contour = {}
+    #             contour["text"]  = cntr["string"]
+    #             contour["color"] = "#" + cntr["hex"]
+    #             contours.append(contour)
+    
+    #         lgn["contours"] = contours
+    #         dct["legend"]   = lgn
+            
+    #         self.map_variables.append(dct)
+
+    # def copy_wave_maps(self):
+            
+    #     # Wave maps
+    #     scenario_path = os.path.join(self.path,
+    #                                  "data",
+    #                                  cosmos.scenario.name,
+    #                                  cosmos.cycle_string)
+
+    #     # 24 hour increments  
+    #     dtinc = 24
+
+    #     # Wave map for the entire simulation
+    #     dt  = datetime.timedelta(hours=dtinc)
+    #     t0  = cosmos.cycle.replace(tzinfo=None)    
+    #     t1  = cosmos.stop_time
+        
+    #     okay  = False
+    #     for model in cosmos.scenario.model:
+    #         if model.type=="hurrywave":
+    #             index_path = os.path.join(model.path, "tiling", "indices")
+    #             if model.make_wave_map and os.path.exists(index_path):            
+    #                 okay = True
+
+    #     if okay:
+            
+    #         cosmos.log("Copying wave map tiles ...")
+            
+    #         pathstr = []
+    #         namestr = []
+            
+    #         # 6-hour increments
+    #         requested_times = pd.date_range(start=t0 + dt,
+    #                                         end=t1,
+    #                                         freq=str(dtinc)+"H").to_pydatetime().tolist()
+
+    #         for it, t in enumerate(requested_times):
+    #             pathstr.append((t - dt).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
+    #             namestr.append((t - dt).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC")
+
+    #         pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
+    #         td = t1 - t0
+    #         hrstr = str(int(td.days * 24 + td.seconds/3600))
+    #         namestr.append("Combined " + hrstr + "-hour forecast")
+
+    #         # Check if wave maps are available
+    #         wave_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+    #                                       "hm0")
+    #         if os.path.exists(os.path.join(wave_map_path, "combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ") + "_95")):
+    #             pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ") + "_95")
+    #             namestr.append("Combined " + hrstr + "-hour forecast 95 %")          
+
+            
+    #         wvpath = os.path.join(scenario_path)
+    #         fo.copy_file(wave_map_path, wvpath)
+    #         dct={}
+    #         dct["name"]        = "hm0" 
+    #         dct["long_name"]   = "Wave height"
+    #         dct["description"] = "These are Hm0 wave heights."
+    #         dct["format"]      = "xyz_tile_layer"
+    #         dct["max_native_zoom"] = 9
+            
+    #         tms = []            
+    #         for it, pth in enumerate(pathstr):
+    #             tm = {}
+    #             tm["name"]   = pth
+    #             tm["string"] = namestr[it]
+    #             tms.append(tm)
+
+    #         dct["times"]        = tms  
+
+    #         contour_set = "Hm0"    
+            
+    #         mp = cosmos.config.map_contours["Hm0"]
+            
+    #         lgn = {}
+    #         lgn["text"] = mp["string"]
+
+    #         cntrs = mp["contours"]
+
+    #         contours = []                
+    #         for cntr in cntrs:    
+    #             contour = {}
+    #             contour["text"]  = cntr["string"]
+    #             contour["color"] = "#" + cntr["hex"]
+    #             contours.append(contour)
+    
+    #         lgn["contours"] = contours
+    #         dct["legend"]   = lgn
+            
+    #         self.map_variables.append(dct)
 
                 
-    def copy_sederomap(self):
+    def make_xb_markers(self):
 
-        cosmos.log("Copying sedimentation/erosion map tiles ...")
+        # cosmos.log("Copying sedimentation/erosion map tiles ...")
         
-        scenario_path = os.path.join(self.path,
-                                     "data",
-                                     cosmos.scenario.name,
-                                     cosmos.cycle_string)
+        # scenario_path = os.path.join(self.path,
+        #                              "data",
+        #                              cosmos.scenario.name,
+        #                              cosmos.cycle_string)
              
-        # Check if sedero maps are available
-        sedero_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-                                      "sedero")
+        # # Check if sedero maps are available
+        # sedero_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+        #                               "sedero")
         
-        if fo.exists(sedero_path):
+        # if fo.exists(sedero_path):
 
-            wvpath = os.path.join(scenario_path)
-            fo.copy_file(sedero_path, wvpath)
-            dct={}
-            dct["name"]        = "sedero"
-            dct["long_name"]   = "Sedimentation/erosion"
-            dct["description"] = "This is a sedimentation/erosion map. It can tell if your house will wash away."
-            dct["format"]      = "xyz_tile_layer"
-            dct["max_native_zoom"]  = 16
+        #     wvpath = os.path.join(scenario_path)
+        #     fo.copy_file(sedero_path, wvpath)
+        #     dct={}
+        #     dct["name"]        = "sedero"
+        #     dct["long_name"]   = "Sedimentation/erosion"
+        #     dct["description"] = "This is a sedimentation/erosion map. It can tell if your house will wash away."
+        #     dct["format"]      = "xyz_tile_layer"
+        #     dct["max_native_zoom"]  = 16
 
-            mp = cosmos.config.map_contours["sedero"]
+        #     mp = cosmos.config.map_contours["sedero"]
             
-            lgn = {}
-            lgn["text"] = mp["string"]
+        #     lgn = {}
+        #     lgn["text"] = mp["string"]
 
-            cntrs = mp["contours"]
+        #     cntrs = mp["contours"]
 
-            contours = []
+        #     contours = []
             
-            for cntr in cntrs:
-                contour = {}
-                contour["text"]  = cntr["string"]
-                contour["color"] = "#" + cntr["hex"]
-                contours.append(contour)
+        #     for cntr in cntrs:
+        #         contour = {}
+        #         contour["text"]  = cntr["string"]
+        #         contour["color"] = "#" + cntr["hex"]
+        #         contours.append(contour)
     
-            lgn["contours"] = contours
-            dct["legend"]   = lgn
+        #     lgn["contours"] = contours
+        #     dct["legend"]   = lgn
             
-            self.map_variables.append(dct)
+        #     self.map_variables.append(dct)
 
 
         # Markers for XBeach models that ran
@@ -559,9 +672,10 @@ class WebViewer:
                                      cosmos.cycle_string)
 
         # Wind
-        xml_obj = xml.xml2obj(cosmos.scenario.file_name)
-        if hasattr(xml_obj, "meteo_dataset"):
-            meteo_dataset = xml_obj.meteo_dataset[0].value
+        # xml_obj = xml.xml2obj(cosmos.scenario.file_name)
+        # if hasattr(xml_obj, "meteo_dataset"):
+        #     meteo_dataset = xml_obj.meteo_dataset[0].value
+        meteo_dataset = cosmos.scenario.meteo_dataset
 
         for meteo_subset in cosmos.meteo_subset:
             if meteo_dataset == meteo_subset.name:
@@ -625,11 +739,6 @@ class WebViewer:
                     self.map_variables.append(dct)
                     
                     # Cyclone track(s)
-
-                    # subset = meteo_subset.subset(time_range=[],
-                    #                              stride=1,
-                    #                              tstride=tstride)
-    
                     tracks = meteo_subset.find_cyclone_tracks(xlim=[-110.0,-30.0],
                                                               ylim=[5.0, 45.0],
                                                               pcyc=99500.0,
@@ -637,33 +746,37 @@ class WebViewer:
                     
                     if tracks:
                         features = []
-                        for track in tracks:
-                            
+                        for track in tracks:                            
                             points=[]
-                        
-                            for ip in range(np.size(track.lon)):
-                                point = Point((track.lon[ip], track.lat[ip]))               
-                                if track.vmax[ip]<64.0:
+                            # Loop through items in geodataframe
+                            for index, row in track.track.iterrows():
+                                time = row['datetime']
+                                lon = row['geometry'].x
+                                lat = row['geometry'].y
+                                vmax = row['vmax']
+                                pc = row['pc']
+                                point = Point((lon, lat))               
+                                if vmax<64.0:
                                     cat = "TS"
-                                elif track.vmax[ip]<83.0:
+                                elif vmax<83.0:
                                     cat = "1"
-                                elif track.vmax[ip]<96.0:    
+                                elif vmax<96.0:    
                                     cat = "2"
-                                elif track.vmax[ip]<113.0:    
+                                elif vmax<113.0:    
                                     cat = "3"
-                                elif track.vmax[ip]<137.0:    
+                                elif vmax<137.0:    
                                     cat = "4"
                                 else:    
                                     cat = "5"
                                 features.append(Feature(geometry=point,
-                                                        properties={"time":track.time[ip].strftime("%Y/%m/%d %H:%M") + " UTC",
-                                                                    "lon":track.lon[ip],
-                                                                    "lat":track.lat[ip],
-                                                                    "vmax":track.vmax[ip],
-                                                                    "pc":track.pc[ip],
+                                                        properties={"time":time + " UTC",
+                                                                    "lon":lon,
+                                                                    "lat":lat,
+                                                                    "vmax":vmax,
+                                                                    "pc":pc,
                                                                     "category":cat}))
                                 
-                                points.append([track.lon[ip], track.lat[ip]])
+                                points.append([lon, lat])
                             
                             trk = LineString(coordinates=points)
                             features.append(Feature(geometry=trk,
@@ -675,7 +788,7 @@ class WebViewer:
                                                           feature_collection,
                                                           "var track_data =")
                                 
-        
+        return
         # Cumulative rainfall
         
         # Rainfall map for the entire simulation
@@ -794,106 +907,109 @@ class WebViewer:
             
             self.map_variables.append(dct)
 
-    def copy_bedlevelmaps(self):
 
-        cosmos.log("Copying bed level map tiles ...")
+
+
+    # def copy_bedlevelmaps(self):
+
+    #     cosmos.log("Copying bed level map tiles ...")
         
-        scenario_path = os.path.join(self.path,
-                                     "data",
-                                     cosmos.scenario.name)
+    #     scenario_path = os.path.join(self.path,
+    #                                  "data",
+    #                                  cosmos.scenario.name)
              
-        # Check if sedero maps are available
-        zb0_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-                                      "zb0")
-        zbend_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-                              "zbend")
+    #     # Check if sedero maps are available
+    #     zb0_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+    #                                   "zb0")
+    #     zbend_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+    #                           "zbend")
         
-        if fo.exists(zb0_path):
+    #     if fo.exists(zb0_path):
 
-            wvpath = os.path.join(scenario_path)
-            fo.copy_file(zb0_path, wvpath)
-            dct={}
-            dct["name"]        = "zb0"
-            dct["long_name"]   = "Pre-storm bed level"
-            dct["description"] = "These were the bed levels prior to the storm"
-            dct["format"]      = "xyz_tile_layer"
+    #         wvpath = os.path.join(scenario_path)
+    #         fo.copy_file(zb0_path, wvpath)
+    #         dct={}
+    #         dct["name"]        = "zb0"
+    #         dct["long_name"]   = "Pre-storm bed level"
+    #         dct["description"] = "These were the bed levels prior to the storm"
+    #         dct["format"]      = "xyz_tile_layer"
 
-            mp = next((x for x in cosmos.config.map_contours if x["name"] == "bed_levels"), None)    
+    #         mp = next((x for x in cosmos.config.map_contours if x["name"] == "bed_levels"), None)    
             
-            lgn = {}
-            lgn["text"] = mp["string"]
+    #         lgn = {}
+    #         lgn["text"] = mp["string"]
 
-            cntrs = mp["contours"]
+    #         cntrs = mp["contours"]
 
-            contours = []
+    #         contours = []
 
-            for cntr in cntrs:
-                contour = {}
-                contour["text"]  = cntr["string"]
-                contour["color"] = "#" + cntr["hex"]
-                contours.append(contour)    
-            lgn["contours"] = contours
-            dct["legend"]   = lgn
+    #         for cntr in cntrs:
+    #             contour = {}
+    #             contour["text"]  = cntr["string"]
+    #             contour["color"] = "#" + cntr["hex"]
+    #             contours.append(contour)    
+    #         lgn["contours"] = contours
+    #         dct["legend"]   = lgn
             
-            # for icntr,cntr in enumerate(cntrs):
-            #     if icntr in np.arange(0, 101,10):
-            #         contour = {}
-            #         contour["text"]  = cntr["string"]
-            #         contour["color"] = "#" + cntr["hex"]
-            #         contours.append(contour)
+    #         # for icntr,cntr in enumerate(cntrs):
+    #         #     if icntr in np.arange(0, 101,10):
+    #         #         contour = {}
+    #         #         contour["text"]  = cntr["string"]
+    #         #         contour["color"] = "#" + cntr["hex"]
+    #         #         contours.append(contour)
         
-            #         lgn["contours"] = contours
-            #         dct["legend"]   = lgn
-            #     else:
-            #         continue
+    #         #         lgn["contours"] = contours
+    #         #         dct["legend"]   = lgn
+    #         #     else:
+    #         #         continue
             
-            self.map_variables.append(dct)
+    #         self.map_variables.append(dct)
             
-        if fo.exists(zbend_path):
+    #     if fo.exists(zbend_path):
 
-            wvpath = os.path.join(scenario_path)
-            fo.copy_file(zbend_path, wvpath)
-            dct={}
-            dct["name"]        = "zbend"
-            dct["long_name"]   = "Post-storm bed level"
-            dct["description"] = "These are the predicted bed levels after the storm"
-            dct["format"]      = "xyz_tile_layer"
+    #         wvpath = os.path.join(scenario_path)
+    #         fo.copy_file(zbend_path, wvpath)
+    #         dct={}
+    #         dct["name"]        = "zbend"
+    #         dct["long_name"]   = "Post-storm bed level"
+    #         dct["description"] = "These are the predicted bed levels after the storm"
+    #         dct["format"]      = "xyz_tile_layer"
 
-            mp = next((x for x in cosmos.config.map_contours if x["name"] == "bed_levels"), None)    
+    #         mp = next((x for x in cosmos.config.map_contours if x["name"] == "bed_levels"), None)    
             
-            lgn = {}
-            lgn["text"] = mp["string"]
+    #         lgn = {}
+    #         lgn["text"] = mp["string"]
 
-            cntrs = mp["contours"]
+    #         cntrs = mp["contours"]
 
-            contours = []
+    #         contours = []
             
-            for cntr in cntrs:
-                contour = {}
-                contour["text"]  = cntr["string"]
-                contour["color"] = "#" + cntr["hex"]
-                contours.append(contour)    
-            lgn["contours"] = contours
-            dct["legend"]   = lgn
+    #         for cntr in cntrs:
+    #             contour = {}
+    #             contour["text"]  = cntr["string"]
+    #             contour["color"] = "#" + cntr["hex"]
+    #             contours.append(contour)    
+    #         lgn["contours"] = contours
+    #         dct["legend"]   = lgn
 
 
-            # cntrs = mp["contours"]
+    #         # cntrs = mp["contours"]
 
-            # contours = []
+    #         # contours = []
             
-            # for icntr,cntr in enumerate(cntrs):
-            #     if icntr in np.arange(0, 101,10):
-            #         contour = {}
-            #         contour["text"]  = cntr["string"]
-            #         contour["color"] = "#" + cntr["hex"]
-            #         contours.append(contour)
+    #         # for icntr,cntr in enumerate(cntrs):
+    #         #     if icntr in np.arange(0, 101,10):
+    #         #         contour = {}
+    #         #         contour["text"]  = cntr["string"]
+    #         #         contour["color"] = "#" + cntr["hex"]
+    #         #         contours.append(contour)
         
-            #         lgn["contours"] = contours
-            #         dct["legend"]   = lgn
-            #     else:
-            #         continue
+    #         #         lgn["contours"] = contours
+    #         #         dct["legend"]   = lgn
+    #         #     else:
+    #         #         continue
             
-            self.map_variables.append(dct)
+    #         self.map_variables.append(dct)
             
 
     def make_runup_map(self):        

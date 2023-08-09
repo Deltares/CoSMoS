@@ -22,13 +22,14 @@ def post_process():
     if cosmos.config.webviewer:
         # Build new web viewer, or copy scenario data to existing viewer
         
-        wv = WebViewer(cosmos.config.webviewer.name)
-        wv.make()
+#        wv = WebViewer(cosmos.config.webviewer.name)
+
+        cosmos.webviewer.make()
         
         if cosmos.config.cycle.upload:
             current_path = os.getcwd()
             try:
-                wv.upload()
+                cosmos.webviewer.upload()
             except:
                 print("An error occurred when uploading web viewer to server !!!")
             os.chdir(current_path)
