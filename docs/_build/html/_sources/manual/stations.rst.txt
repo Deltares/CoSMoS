@@ -43,7 +43,7 @@ The following attributes can be described in the station file:
      - Optional: Water level correction.
 
    * - mllw
-     - ??
+     - Mean lower low water level (m).
 
 The default *cosmos_run_folder* contains xml files with locations of the NDBC wave buoys and the NOAA CO-OPS water level stations. 
 Other observation locations can be added manually. 

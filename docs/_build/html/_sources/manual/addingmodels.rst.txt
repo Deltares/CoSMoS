@@ -107,36 +107,6 @@ The following settings can be included in the model file:
      -
      -
 
-   * - meteo_dataset
-     - Meteo dataset to use from meteo\\meteo_subsets.xml (see :ref:`Meteo <meteo>`).
-     - None
-     -
-
-   * - meteo_spiderweb
-     - Meteo spiderweb to use from meteo\\spiderwebs (see :ref:`Meteo <meteo>`).
-     - None
-     -
-
-   * - meteo_wind
-     - Add wind forcing.
-     - True
-     -
-
-   * - meteo_atmospheric_pressure
-     - Add atmospheric pressure forcing.
-     - True
-     -
-
-   * - meteo_precipitation
-     - Add precipitation.
-     - True
-     -
-
-   * - polygon
-     - ??
-     - None   
-     -      
-
    * - make_wave_map
      - Make wave maps 
      - False 
@@ -152,35 +122,11 @@ The following settings can be included in the model file:
      - False
      -
 
-   * - sa_correction
-     - Solar annual correction for tidal constituents. 
-     - None
-     -
-
-   * - ssa_correction
-     - Solar semiannual correction for tidal constituents.
-     - None
-     -
-
    * - mhhw
-     - Mean Higher High Water to estimate total water level
+     - Mean Higher High Water to estimate total water level for clustering of models.
      - 0
      - m
 
-   * - cluster
-     - ?? Name of cluster that model belongs to.
-     - None
-     -
-
-   * - boundary_twl_threshold
-     - Total water level threshold to cluster models.
-     - 999
-     - m
-
-   * - zb_deshoal
-     - Depth to which nearshore wave heights are deshoaled.
-     - None
-     -
 
 Model-specific input
 ^^^^^^^^^^^^
