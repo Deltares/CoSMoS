@@ -136,43 +136,64 @@ def prepare_single(config, member=None):
                 option="flow",
                 bc_path=".")
         
-    if "wave_nested_path" in config:
+    if "wave_nested" in config:
         print("Nesting wave ...")
         # Get boundary conditions from overall model (Nesting 2)
+        if config["run_mode"] == "cloud":
+            file_name = config["wave_nested"]["overall_file"]    
+            s3_key = config["scenario"] + "/" + "models" + "/" + config["wave_nested"]["overall_model"] + "/" + file_name
+            local_file_path = f'/input/boundary'
+            fo.mkdir(local_file_path)
+            # Download the file from S3
+            s3_client.download_file(bucket_name, s3_key, os.path.join(local_file_path, os.path.basename(s3_key)))
+            # Change path in config
+            config["flow_nested"]["overall_path"] = local_file_path   
+
+        # Get boundary conditions from overall model (Nesting 2)
         if config["ensemble"]:
-            # Loop through ensemble members
-            nest2(self.wave_nested.domain,
-                    self.domain,
-                    output_path=os.path.join(self.wave_nested.cycle_output_path, member),
-                    option="wave",
-                    bc_path=os.path.join(self.job_path, ensemble_member_name))
+            nest2(config["wave_nested"]["overall_type"],
+                sf,
+                output_path=config["wave_nested"]["overall_path"],
+                option="wave",
+                bc_path=".",
+                ensemble_member_index=int(member))
         else:
             # Deterministic    
-            nest2(self.wave_nested.domain,
-                    self.domain,
-                    output_path=self.wave_nested.cycle_output_path,
-                    option="wave",
-                    bc_path=self.job_path)
+            nest2(config["wave_nested"]["overall_type"],
+                sf,
+                output_path=config["wave_nested"]["overall_path"],
+                option="wave",
+                bc_path=".")
 
     # If SFINCS nested in Hurrywave for SNAPWAVE setup, separately run BEWARE nesting for LF waves
-    if "bw_nested_path" in config:
+    if "bw_nested" in config:
         print("Nesting bw ...")
-        # Get wave maker conditions from overall model (Nesting 2)
+        if config["run_mode"] == "cloud":
+            file_name = config["bw_nested"]["overall_file"]    
+            s3_key = config["scenario"] + "/" + "models" + "/" + config["bw_nested"]["overall_model"] + "/" + file_name
+            local_file_path = f'/input/boundary'
+            fo.mkdir(local_file_path)
+            # Download the file from S3
+            s3_client.download_file(bucket_name, s3_key, os.path.join(local_file_path, os.path.basename(s3_key)))
+            # Change path in config
+            config["bw_nested"]["overall_path"] = local_file_path   
+        # Get boundary conditions from overall model (Nesting 2)
         if config["ensemble"]:
-            # Loop through ensemble members
-            nest2(self.bw_nested.domain,
-                    self.domain,
-                    output_path=os.path.join(self.bw_nested.cycle_output_path, ensemble_member_name),
-                    option="wave",
-                    bc_path=os.path.join(self.job_path, name))
+            nest2(config["bw_nested"]["overall_type"],
+                sf,
+                output_path=config["wave_nested"]["overall_path"],
+                option="wave",
+                bc_path=".",
+                ensemble_member_index=int(member))
         else:
             # Deterministic    
-            nest2(self.bw_nested.domain,
-                    self.domain,
-                    output_path=self.bw_nested.cycle_output_path,
-                    option="wave",
-                    bc_path=self.job_path)
-
+            nest2(config["bw_nested"]["overall_type"],
+                sf,
+                output_path=config["bw_nested"]["overall_path"],
+                option="wave",
+                bc_path=".",
+                detail_crs=config["bw_nested"]["detail_crs"],
+                overall_crs=config["bw_nested"]["overall_crs"])
         sf.write_wavemaker_forcing_points()
 
 def merge_ensemble(config):

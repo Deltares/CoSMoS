@@ -93,8 +93,8 @@ def prepare_single(config, member=None):
             fname0 = os.path.join(config["spw_path"], "ensemble" + member + ".spw")
             fo.copy_file(fname0, "hurrywave.spw")
 
-    # Read SFINCS model (necessary for nesting)
-    hw = HurryWave("hurrywave.inp")
+    # Read HurryWave model (necessary for nesting)
+    hw = HurryWave()
     hw.name = config["model"]
     hw.type = "hurrywave"
     hw.path = "."
@@ -106,7 +106,7 @@ def prepare_single(config, member=None):
         # If cloud mode, copy boundary files from S3
         if config["run_mode"] == "cloud":
             file_name = config["flow_nested"]["overall_file"]    
-            s3_key = config["scenario"] + "/" + "models" + "/" + config["flow_nested"]["overall_model"] + "/" + file_name
+            s3_key = config["scenario"] + "/" + "models" + "/" + config["wave_nested"]["overall_model"] + "/" + file_name
             local_file_path = f'/input/boundary'
             fo.mkdir(local_file_path)
             # Download the file from S3
@@ -159,18 +159,17 @@ def merge_ensemble(config):
 def map_tiles(config):
 
     # Make flood map tiles
-    if "flood_map" in config:
+    if "hm0_map" in config:
 
         # Make SFINCS object
-        sf = SFINCS()
+        hw = HurryWave()
 
-        print("Making flood map ...")
+        print("Making Hm0 map ...")
 
-        flood_map_path = config["flood_map"]["png_path"]
-        index_path     = config["flood_map"]["index_path"]
-        topo_path      = config["flood_map"]["topo_path"]
+        hm0_path       = config["hm0_map"]["png_path"]
+        index_path     = config["hm0_map"]["index_path"]
                 
-        if os.path.exists(index_path) and os.path.exists(topo_path):
+        if os.path.exists(index_path):
             
             print("Making flood map tiles for model " + config["model"] + " ...")                
 
@@ -180,14 +179,14 @@ def map_tiles(config):
             # Wave map for the entire simulation
             dt1 = datetime.timedelta(hours=1)
             dt  = datetime.timedelta(hours=dtinc)
-            t0  = config["flood_map"]["start_time"].replace(tzinfo=None)
-            t1  = config["flood_map"]["stop_time"].replace(tzinfo=None)
+            t0  = config["hm0_map"]["start_time"].replace(tzinfo=None)
+            t1  = config["hm0_map"]["stop_time"].replace(tzinfo=None)
                 
             requested_times = pd.date_range(start=t0 + dt,
                                             end=t1,
                                             freq=str(dtinc) + "H").to_pydatetime().tolist()
 
-            color_values = config["flood_map"]["color_map"]["contours"]
+            color_values = config["hm0_map"]["color_map"]["contours"]
 
             pathstr = []
             for it, t in enumerate(requested_times):
@@ -195,56 +194,52 @@ def map_tiles(config):
 
             pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
 
-            zsmax_file = "./sfincs_map.nc"
+            hm0max_file = "./hurrywave_map.nc"
             if config["ensemble"]:
-                varname = "zsmax_90"
+                varname = "hm0max_90"
             else:
-                varname = "zsmax"    
+                varname = "hm0max"    
 
             try:
 
                 # Inundation map over dt-hour increments                    
                 for it, t in enumerate(requested_times):
 
-                    zsmax = sf.read_zsmax(zsmax_file=zsmax_file,
-                                        time_range=[t - dt + dt1, t + dt1],
-                                        varname=varname)
-                    # Difference between MSL and NAVD88 (used in topo data)
-                    zsmax += config["vertical_reference_level_difference_with_msl"]
-                    zsmax = np.transpose(zsmax)
+                    hm0max = hw.read_hm0max(time_range=[t - dt + dt1, t + dt1],
+                                            hm0max_file=hm0max_file,
+                                            parameter=varname)                    
+                    hm0max = np.transpose(hm0max)
 
-                    png_path = os.path.join(flood_map_path,
+                    png_path = os.path.join(hm0_path,
                                             config["scenario"],
                                             config["cycle"],
-                                            config["flood_map"]["name"],
+                                            config["hm0_map"]["name"],
                                             pathstr[it])                                            
 
-                    make_png_tiles(zsmax, index_path, png_path,
-                                   option="floodmap",
-                                   topo_path=topo_path,
+                    make_png_tiles(hm0max, index_path, png_path,
                                    color_values=color_values,
                                    zoom_range=[0, 13],
                                    zbmax=1.0,
                                    quiet=True)
 
                 # Full simulation        
-                zsmax = sf.read_zsmax(zsmax_file=zsmax_file,
-                                    time_range=[t0 + dt1, t1 + dt1],
-                                    varname=varname)
-                zsmax += config["vertical_reference_level_difference_with_msl"]
-                zsmax = np.transpose(zsmax)
+                hm0max = hw.read_hm0max(time_range=[t - dt + dt1, t + dt1],
+                                        hm0max_file=hm0max_file,
+                                        parameter=varname)                    
+                hm0max = np.transpose(hm0max)
 
-                png_path = os.path.join(flood_map_path,
+                png_path = os.path.join(hm0_path,
                                         config["scenario"],
                                         config["cycle"],
-                                        config["flood_map"]["name"],
+                                        config["hm0_map"]["name"],
                                         pathstr[-1]) 
 
-                make_floodmap_tiles(zsmax, index_path, png_path, topo_path,
-                                    color_values=color_values,
-                                    zoom_range=[0, 13],
-                                    zbmax=1.0,
-                                    quiet=True)
+                make_png_tiles(hm0max, index_path, png_path,
+                                color_values=color_values,
+                                zoom_range=[0, 13],
+                                zbmax=1.0,
+                                quiet=True)
+
             except:
                 print("An error occured while making flood map tiles")
 

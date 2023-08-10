@@ -52,6 +52,11 @@ class WebViewer:
                                          "*")
             fo.copy_file(template_path, self.path)
 
+            # Change the title string in index.html to the scenario long name
+            cht.misc.misc_tools.findreplace(os.path.join(self.path, "index.html"),
+                                            "COSMOS_VIEWER",
+                                            cosmos.scenario.long_name)
+
         # Make scenario folder and cycle folder 
         fo.mkdir(os.path.join(self.path, "data", cosmos.scenario.name))
         fo.mkdir(os.path.join(self.path, "data", cosmos.scenario.name, cosmos.cycle_string))
@@ -60,20 +65,17 @@ class WebViewer:
 
         cosmos.log("Updating scenario.js ...")
 
-        # Check if there is a scenarios.js file
-        # If so, append it with the current scenario
-        sc_file = os.path.join(self.path, "data", "scenarios.js")
-        update_scenarios_js(sc_file)
+        # Update scenario.js
+        self.update_scenarios_js()
         
         # Make scenario folder in web viewer
-        scenario_path = os.path.join(self.path,
-                                     "data",
-                                     cosmos.scenario.name,
-                                     cosmos.cycle_string)
+        self.cycle_path = os.path.join(self.path,
+                                       "data",
+                                       cosmos.scenario.name,
+                                       cosmos.cycle_string)
 
-        cosmos.log("Removing old scenario folder from web viewer ...")
-
-        fo.mkdir(os.path.join(scenario_path))
+        cosmos.log("Making new cycle folder on web viewer ...")
+        fo.mkdir(os.path.join(self.cycle_path))
         
         # Map variables
         self.map_variables = []
@@ -108,236 +110,30 @@ class WebViewer:
         #                             cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["bed_level_pre"]["color_map"]],
         #                             16)
 
-        self.copy_timeseries()
-
-        self.make_runup_map()
-        self.make_xb_markers()
-
-        self.make_meteo_maps()
-
-        mv_file = os.path.join(scenario_path,
-                               "variables.js")
-        
-        cht.misc.misc_tools.write_json_js(mv_file, self.map_variables, "var map_variables =")
-
-
-    def copy_timeseries(self):
-
-        # web viewer scenario path
-        scenario_path = os.path.join(self.path,
-                                     "data",
-                                     cosmos.scenario.name,
-                                     cosmos.cycle_string)
-
         # Stations and buoys
-        cosmos.log("Copying time series ...")
-                
-        fo.mkdir(os.path.join(scenario_path, "timeseries"))
-        
+        cosmos.log("Copying time series ...")                
+        fo.mkdir(os.path.join(self.cycle_path, "timeseries"))        
         # Set stations to upload (only upload for high-res nested models)
         for model in cosmos.scenario.model:
-            
-            all_nested_models = model.get_all_nested_models("flow")
-            if model.type=='beware':
-                for station in model.station:
-                    station.upload = False 
+            model.set_stations_to_upload()
+        self.make_timeseries("wl")
+        self.make_timeseries("waves")
 
-            if all_nested_models:
-                all_nested_stations = []
-                if all_nested_models[0].type == 'beware':
-                    all_nested_models= [model]
-                    bw=1
-                else:
-                    bw=0
-                for mdl in all_nested_models:
-                    for st in mdl.station:
-                        all_nested_stations.append(st.name)
-                for station in model.station:
-                    if station.type == "tide_gauge":
-                        if station.name in all_nested_stations and bw==0:                            
-                            station.upload = False 
-    
-            all_nested_models = model.get_all_nested_models("wave")
-            if all_nested_models:
-                all_nested_stations = []
-                if all_nested_models[0].type == 'beware':
-                    all_nested_models= [model]
-                    bw=1
-                else:
-                    bw=0
-                for mdl in all_nested_models:
-                    for st in mdl.station:
-                        all_nested_stations.append(st.name)
-                for station in model.station:
-                    if station.type == "wave_buoy":
-                        if station.name in all_nested_stations and bw==0:
-                            station.upload = False 
-        
-        # Tide stations
+        cosmos.log("Making run-up maps ...")                
+        self.make_runup_map()
+        self.make_xb_markers()
+        self.make_meteo_maps()
 
-        features = []
-
-        for model in cosmos.scenario.model:
-            if model.station and model.flow:
-                for station in model.station:
-                    if station.type == "tide_gauge" and station.upload:
-                        
-                        point = Point((station.longitude, station.latitude))
-                        name = station.long_name + " (" + station.id + ")"
-                        
-                        # Check if there is a file in the observations that matches this station
-                        obs_file = None
-                        if cosmos.scenario.observations_path and station.id:
-                            obs_pth = os.path.join(cosmos.config.path.main,
-                                               "observations",
-                                               cosmos.scenario.observations_path,
-                                               "water_levels")                        
-                            fname = "waterlevel." + station.id + ".observed.csv.js"
-                            if os.path.exists(os.path.join(obs_pth, fname)):
-                                obs_file = fname
-                                                                        
-                        features.append(Feature(geometry=point,
-                                                properties={"name":station.name,
-                                                            "long_name":name,
-                                                            "id": station.id,
-                                                            "mllw":station.mllw,
-                                                            "model_name":model.name,
-                                                            "model_type":model.type,
-                                                            "model_ensemble": model.ensemble,
-                                                            "cycle": cosmos.cycle_string,
-                                                            "obs_file":obs_file,
-                                                            "obs_folder": cosmos.scenario.observations_path}))
-                        
-                        # Merge time series from previous cycles
-                        # Go two days back
-#                        path = cosmos.scenario.timeseries_path
-                        path = cosmos.scenario.path
-#                        path = model.archive_path
-                        t0 = cosmos.cycle - datetime.timedelta(hours=48)
-                        t1 = cosmos.cycle
-                        v  = merge(path,
-                                   model.name,
-                                   model.region,
-                                   model.type,
-                                   station.name,
-                                   t0=t0.replace(tzinfo=None),
-                                   t1=t1.replace(tzinfo=None),
-                                   prefix='wl')
-                        
-                        # Check if merge returned values
-                        if v is not None:                            
-                            # Here we correct for NAVD88 to MSL !!!
-                            v += model.vertical_reference_level_difference_with_msl                            
-                            csv_file = "waterlevel." + model.name + "." + station.name + ".csv.js"
-                            csv_file = os.path.join(scenario_path,
-                                                    "timeseries",
-                                                    csv_file)
-                            s = v.to_csv(date_format='%Y-%m-%dT%H:%M:%S',
-                                         float_format='%.3f',
-                                         header=False)
-                            if model.ensemble:                             
-                                cht.misc.misc_tools.write_csv_js(csv_file, s, 'var csv = `date_time,wl_10,wl_50,wl_90')
-                            else:    
-                                cht.misc.misc_tools.write_csv_js(csv_file, s, 'var csv = `date_time,wl')
-        
-        # Save stations geojson file
-        if features:
-            feature_collection = FeatureCollection(features)
-            stations_file = os.path.join(scenario_path,
-                                    "stations.geojson.js")
-            cht.misc.misc_tools.write_json_js(stations_file, feature_collection, "var stations =")
-                        
-
-        # Wave buoys
-    
-        features = []
-    
-        for model in cosmos.scenario.model:
-            if model.station and model.wave:
-                for station in model.station:
-                    if station.type == "wave_buoy" and station.upload:                
-                        point = Point((station.longitude, station.latitude))
-                        if station.ndbc_id:
-                            name = station.long_name + " (" + station.ndbc_id + ")"
-                        else:
-                            name = station.long_name
-
-                        # Check if there is a file in the observations that matches this station
-                        obs_file = None
-                        if cosmos.scenario.observations_path and station.id:
-                            obs_pth = os.path.join(cosmos.config.main_path,
-                                               "observations",
-                                               cosmos.scenario.observations_path,
-                                               "waves")                        
-                            fname = "waves." + station.id + ".observed.csv.js"
-                            if os.path.exists(os.path.join(obs_pth, fname)):
-                                obs_file = fname
-
-                        features.append(Feature(geometry=point,
-                                                properties={"name":station.name,
-                                                            "long_name":name,
-                                                            "id": station.ndbc_id,
-                                                            "model_name":model.name,
-                                                            "model_type":model.type,
-                                                            "cycle": cosmos.cycle_string,
-                                                             "obs_file":obs_file,
-                                                             "obs_folder": cosmos.scenario.observations_path}))
-    
-                        path = cosmos.scenario.timeseries_path
-                        t0 = cosmos.cycle - datetime.timedelta(hours=48)
-                        t1 = cosmos.cycle
-                        
-                        # Hm0
-                        v  = merge(path,
-                                   model.name,
-                                   model.region,
-                                   model.type,
-                                   station.name,
-                                   t0=t0.replace(tzinfo=None),
-                                   t1=t1.replace(tzinfo=None),
-                                   prefix='waves')
-                        
-                        # Check if merge returned values
-                        if v is not None:                            
-                            # Write csv js file
-                            csv_file = "waves." + model.name + "." + station.name + ".csv.js"
-                            csv_file = os.path.join(scenario_path,
-                                                    "timeseries",
-                                                    csv_file)
-                            s = v.to_csv(date_format='%Y-%m-%dT%H:%M:%S',
-                                         float_format='%.3f',
-                                         header=False) 
-                            cht.misc.misc_tools.write_csv_js(csv_file, s, "var csv = `date_time,hm0,tp")
-    
-        if features:
-            feature_collection = FeatureCollection(features)
-            buoys_file = os.path.join(scenario_path,
-                                    "wavebuoys.geojson.js")
-            cht.misc.misc_tools.write_json_js(buoys_file, feature_collection, "var buoys =")
-        
-        # # Extreme runup height
-        # for model in cosmos.scenario.model:
-        #     if model.type == 'beware':
-        #         model.domain.read_data(os.path.join(model.cycle_output_path,
-        #                                             "BW_output.nc"))                
-        #         model.domain.write_to_geojson(scenario_path, cosmos.scenario.name)
-        #         model.domain.write_to_csv(scenario_path, cosmos.scenario.name)
+        # Write map variables to file
+        mv_file = os.path.join(self.cycle_path, "variables.js")        
+        cht.misc.misc_tools.write_json_js(mv_file, self.map_variables, "var map_variables =")
 
     def set_map_tile_variables(self, name, long_name, description, color_map, max_native_zoom):
-
-        scenario_path = os.path.join(self.path,
-                                     "data",
-                                     cosmos.scenario.name,
-                                     cosmos.cycle_string)
-
         # Check if flood maps are available
-        tile_path = os.path.join(scenario_path, name)
-        
+        tile_path = os.path.join(self.cycle_path, name)
         if fo.exists(tile_path):
-            
             # 24 hour increments  
             dtinc = 24
-    
             # Wave map for the entire simulation
             dt  = datetime.timedelta(hours=dtinc)
             t0  = cosmos.cycle.replace(tzinfo=None)    
@@ -354,8 +150,6 @@ class WebViewer:
                     namestr.append("Combined " + hrstr + "-hour forecast")
                 else:
                     namestr.append(folder)
-
-
             # # 24-hour increments
             # requested_times = pd.date_range(start=t0 + dt,
             #                                 end=t1,
@@ -390,273 +184,44 @@ class WebViewer:
                 tm["string"] = namestr[it]
                 tms.append(tm)
             dct["times"]        = tms  
-            
+
             lgn = {}
             lgn["text"] = color_map["string"]
-
             cntrs = color_map["contours"]
-
             contours = []
-            
             for cntr in cntrs:
                 contour = {}
                 contour["text"]  = cntr["string"]
                 contour["color"] = "#" + cntr["hex"]
                 contours.append(contour)
-    
             lgn["contours"] = contours
             dct["legend"]   = lgn
-            
             self.map_variables.append(dct)
 
 
-    # def copy_floodmap(self):
-
-    #     cosmos.log("Copying flood map tiles ...")
-
-    #     scenario_path = os.path.join(self.path,
-    #                                  "data",
-    #                                  cosmos.scenario.name,
-    #                                  cosmos.cycle_string)
-
-    #     # Flood maps
-        
-    #     # Check if flood maps are available
-    #     flood_map_path = os.path.join(scenario_path,
-    #                                   "flood_map_90")
-        
-    #     if fo.exists(flood_map_path):
-            
-    #         # 24 hour increments  
-    #         dtinc = 24
-    
-    #         # Wave map for the entire simulation
-    #         dt  = datetime.timedelta(hours=dtinc)
-    #         t0  = cosmos.cycle.replace(tzinfo=None)    
-    #         t1  = cosmos.stop_time
-
-    #         pathstr = []
-    #         namestr = []
-            
-    #         # 24-hour increments
-    #         requested_times = pd.date_range(start=t0 + dt,
-    #                                         end=t1,
-    #                                         freq=str(dtinc)+"H").to_pydatetime().tolist()
-
-    #         for it, t in enumerate(requested_times):
-    #             pathstr.append((t - dt).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
-    #             namestr.append((t - dt).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC")
-
-    #         pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
-    #         td = t1 - t0
-    #         hrstr = str(int(td.days * 24 + td.seconds/3600))
-    #         namestr.append("Combined " + hrstr + "-hour forecast")
-
-    #         if os.path.exists(os.path.join(flood_map_path, "combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ") + "_95")):
-    #             pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ") + "_95")
-    #             namestr.append("Combined " + hrstr + "-hour forecast 95 %")
-
-    #         # wvpath = os.path.join(scenario_path)
-    #         # fo.copy_file(flood_map_path, wvpath)
-    #         dct={}
-    #         dct["name"]        = "flood_map_90"
-    #         dct["long_name"]   = "Flood map (10 %)"
-    #         dct["description"] = "This is a flood map. It can tell if you will drown."
-    #         dct["format"]      = "xyz_tile_layer"
-    #         dct["max_native_zoom"]  = max_native_zoom
-
-    #         tms = []            
-    #         for it, pth in enumerate(pathstr):
-    #             tm = {}
-    #             tm["name"]   = pth
-    #             tm["string"] = namestr[it]
-    #             tms.append(tm)
-    #         dct["times"]        = tms  
-
-    #         mp = cosmos.config.map_contours["flood_map"]
-            
-    #         lgn = {}
-    #         lgn["text"] = mp["string"]
-
-    #         cntrs = mp["contours"]
-
-    #         contours = []
-            
-    #         for cntr in cntrs:
-    #             contour = {}
-    #             contour["text"]  = cntr["string"]
-    #             contour["color"] = "#" + cntr["hex"]
-    #             contours.append(contour)
-    
-    #         lgn["contours"] = contours
-    #         dct["legend"]   = lgn
-            
-    #         self.map_variables.append(dct)
-
-    # def copy_wave_maps(self):
-            
-    #     # Wave maps
-    #     scenario_path = os.path.join(self.path,
-    #                                  "data",
-    #                                  cosmos.scenario.name,
-    #                                  cosmos.cycle_string)
-
-    #     # 24 hour increments  
-    #     dtinc = 24
-
-    #     # Wave map for the entire simulation
-    #     dt  = datetime.timedelta(hours=dtinc)
-    #     t0  = cosmos.cycle.replace(tzinfo=None)    
-    #     t1  = cosmos.stop_time
-        
-    #     okay  = False
-    #     for model in cosmos.scenario.model:
-    #         if model.type=="hurrywave":
-    #             index_path = os.path.join(model.path, "tiling", "indices")
-    #             if model.make_wave_map and os.path.exists(index_path):            
-    #                 okay = True
-
-    #     if okay:
-            
-    #         cosmos.log("Copying wave map tiles ...")
-            
-    #         pathstr = []
-    #         namestr = []
-            
-    #         # 6-hour increments
-    #         requested_times = pd.date_range(start=t0 + dt,
-    #                                         end=t1,
-    #                                         freq=str(dtinc)+"H").to_pydatetime().tolist()
-
-    #         for it, t in enumerate(requested_times):
-    #             pathstr.append((t - dt).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
-    #             namestr.append((t - dt).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC")
-
-    #         pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
-    #         td = t1 - t0
-    #         hrstr = str(int(td.days * 24 + td.seconds/3600))
-    #         namestr.append("Combined " + hrstr + "-hour forecast")
-
-    #         # Check if wave maps are available
-    #         wave_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-    #                                       "hm0")
-    #         if os.path.exists(os.path.join(wave_map_path, "combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ") + "_95")):
-    #             pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ") + "_95")
-    #             namestr.append("Combined " + hrstr + "-hour forecast 95 %")          
-
-            
-    #         wvpath = os.path.join(scenario_path)
-    #         fo.copy_file(wave_map_path, wvpath)
-    #         dct={}
-    #         dct["name"]        = "hm0" 
-    #         dct["long_name"]   = "Wave height"
-    #         dct["description"] = "These are Hm0 wave heights."
-    #         dct["format"]      = "xyz_tile_layer"
-    #         dct["max_native_zoom"] = 9
-            
-    #         tms = []            
-    #         for it, pth in enumerate(pathstr):
-    #             tm = {}
-    #             tm["name"]   = pth
-    #             tm["string"] = namestr[it]
-    #             tms.append(tm)
-
-    #         dct["times"]        = tms  
-
-    #         contour_set = "Hm0"    
-            
-    #         mp = cosmos.config.map_contours["Hm0"]
-            
-    #         lgn = {}
-    #         lgn["text"] = mp["string"]
-
-    #         cntrs = mp["contours"]
-
-    #         contours = []                
-    #         for cntr in cntrs:    
-    #             contour = {}
-    #             contour["text"]  = cntr["string"]
-    #             contour["color"] = "#" + cntr["hex"]
-    #             contours.append(contour)
-    
-    #         lgn["contours"] = contours
-    #         dct["legend"]   = lgn
-            
-    #         self.map_variables.append(dct)
-
                 
     def make_xb_markers(self):
-
-        # cosmos.log("Copying sedimentation/erosion map tiles ...")
-        
-        # scenario_path = os.path.join(self.path,
-        #                              "data",
-        #                              cosmos.scenario.name,
-        #                              cosmos.cycle_string)
-             
-        # # Check if sedero maps are available
-        # sedero_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-        #                               "sedero")
-        
-        # if fo.exists(sedero_path):
-
-        #     wvpath = os.path.join(scenario_path)
-        #     fo.copy_file(sedero_path, wvpath)
-        #     dct={}
-        #     dct["name"]        = "sedero"
-        #     dct["long_name"]   = "Sedimentation/erosion"
-        #     dct["description"] = "This is a sedimentation/erosion map. It can tell if your house will wash away."
-        #     dct["format"]      = "xyz_tile_layer"
-        #     dct["max_native_zoom"]  = 16
-
-        #     mp = cosmos.config.map_contours["sedero"]
-            
-        #     lgn = {}
-        #     lgn["text"] = mp["string"]
-
-        #     cntrs = mp["contours"]
-
-        #     contours = []
-            
-        #     for cntr in cntrs:
-        #         contour = {}
-        #         contour["text"]  = cntr["string"]
-        #         contour["color"] = "#" + cntr["hex"]
-        #         contours.append(contour)
-    
-        #     lgn["contours"] = contours
-        #     dct["legend"]   = lgn
-            
-        #     self.map_variables.append(dct)
-
-
+        """Make geojson file with markers for XBeach models that ran."""
         # Markers for XBeach models that ran
-
         features = []
         wgs84 = CRS.from_epsg(4326)
-
-        for model in cosmos.scenario.model:
-            
+        for model in cosmos.scenario.model:            
             if model.type == "xbeach":
-                
                 # Use wave nesting point to put the marker
                 xp = model.domain.wave_boundary_point[0].geometry.x
                 yp = model.domain.wave_boundary_point[0].geometry.y            
                 transformer = Transformer.from_crs(model.crs, wgs84, always_xy=True)
                 lon, lat = transformer.transform(xp, yp)
-                
                 point = Point((lon, lat))
-                
                 features.append(Feature(geometry=point,
                                         properties={"name": model.name,
                                                     "long_name": model.long_name,
                                                     "flow_nested": model.flow_nested_name,
                                                     "wave_nested": model.wave_nested_name}))
-                        
         # Save xbeach geojson file
         if features:
             feature_collection = FeatureCollection(features)
-            stations_file = os.path.join(scenario_path,
+            stations_file = os.path.join(self.cycle_path,
                                     "xbeach.geojson.js")
             cht.misc.misc_tools.write_json_js(stations_file, feature_collection, "var xb_markers =")
             
@@ -665,11 +230,6 @@ class WebViewer:
         from cht.misc import xmlkit as xml
 
         cosmos.log("Making meteo map tiles ...")
-
-        scenario_path = os.path.join(self.path,
-                                     "data",
-                                     cosmos.scenario.name,
-                                     cosmos.cycle_string)
 
         # Wind
         # xml_obj = xml.xml2obj(cosmos.scenario.file_name)
@@ -696,7 +256,7 @@ class WebViewer:
                     vmag = np.sqrt(u*u + v*v)
                     wndmx = np.max(vmag)
                     
-                    file_name = os.path.join(scenario_path, "wind.json.js")
+                    file_name = os.path.join(self.cycle_path, "wind.json.js")
                     subset.write_wind_to_json(file_name, time_range=None, js=True)
                     
                     # Add wind to map variables
@@ -783,7 +343,7 @@ class WebViewer:
                                                     properties={"name":"No name"}))
                         
                         feature_collection = FeatureCollection(features)
-                        file_name = os.path.join(scenario_path, "track.geojson.js")
+                        file_name = os.path.join(self.cycle_path, "track.geojson.js")
                         cht.misc.misc_tools.write_json_js(file_name,
                                                           feature_collection,
                                                           "var track_data =")
@@ -909,115 +469,11 @@ class WebViewer:
 
 
 
-
-    # def copy_bedlevelmaps(self):
-
-    #     cosmos.log("Copying bed level map tiles ...")
-        
-    #     scenario_path = os.path.join(self.path,
-    #                                  "data",
-    #                                  cosmos.scenario.name)
-             
-    #     # Check if sedero maps are available
-    #     zb0_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-    #                                   "zb0")
-    #     zbend_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-    #                           "zbend")
-        
-    #     if fo.exists(zb0_path):
-
-    #         wvpath = os.path.join(scenario_path)
-    #         fo.copy_file(zb0_path, wvpath)
-    #         dct={}
-    #         dct["name"]        = "zb0"
-    #         dct["long_name"]   = "Pre-storm bed level"
-    #         dct["description"] = "These were the bed levels prior to the storm"
-    #         dct["format"]      = "xyz_tile_layer"
-
-    #         mp = next((x for x in cosmos.config.map_contours if x["name"] == "bed_levels"), None)    
-            
-    #         lgn = {}
-    #         lgn["text"] = mp["string"]
-
-    #         cntrs = mp["contours"]
-
-    #         contours = []
-
-    #         for cntr in cntrs:
-    #             contour = {}
-    #             contour["text"]  = cntr["string"]
-    #             contour["color"] = "#" + cntr["hex"]
-    #             contours.append(contour)    
-    #         lgn["contours"] = contours
-    #         dct["legend"]   = lgn
-            
-    #         # for icntr,cntr in enumerate(cntrs):
-    #         #     if icntr in np.arange(0, 101,10):
-    #         #         contour = {}
-    #         #         contour["text"]  = cntr["string"]
-    #         #         contour["color"] = "#" + cntr["hex"]
-    #         #         contours.append(contour)
-        
-    #         #         lgn["contours"] = contours
-    #         #         dct["legend"]   = lgn
-    #         #     else:
-    #         #         continue
-            
-    #         self.map_variables.append(dct)
-            
-    #     if fo.exists(zbend_path):
-
-    #         wvpath = os.path.join(scenario_path)
-    #         fo.copy_file(zbend_path, wvpath)
-    #         dct={}
-    #         dct["name"]        = "zbend"
-    #         dct["long_name"]   = "Post-storm bed level"
-    #         dct["description"] = "These are the predicted bed levels after the storm"
-    #         dct["format"]      = "xyz_tile_layer"
-
-    #         mp = next((x for x in cosmos.config.map_contours if x["name"] == "bed_levels"), None)    
-            
-    #         lgn = {}
-    #         lgn["text"] = mp["string"]
-
-    #         cntrs = mp["contours"]
-
-    #         contours = []
-            
-    #         for cntr in cntrs:
-    #             contour = {}
-    #             contour["text"]  = cntr["string"]
-    #             contour["color"] = "#" + cntr["hex"]
-    #             contours.append(contour)    
-    #         lgn["contours"] = contours
-    #         dct["legend"]   = lgn
-
-
-    #         # cntrs = mp["contours"]
-
-    #         # contours = []
-            
-    #         # for icntr,cntr in enumerate(cntrs):
-    #         #     if icntr in np.arange(0, 101,10):
-    #         #         contour = {}
-    #         #         contour["text"]  = cntr["string"]
-    #         #         contour["color"] = "#" + cntr["hex"]
-    #         #         contours.append(contour)
-        
-    #         #         lgn["contours"] = contours
-    #         #         dct["legend"]   = lgn
-    #         #     else:
-    #         #         continue
-            
-    #         self.map_variables.append(dct)
             
 
     def make_runup_map(self):        
 
-        output_path = os.path.join(self.path,
-                                   "data",
-                                   cosmos.scenario.name,
-                                   cosmos.cycle_string)
+        output_path = self.cycle_path
 
         # Extreme runup height
 
@@ -1040,15 +496,15 @@ class WebViewer:
                         point = Point((x, y))
                         name = 'Loc nr: ' +  str(model.domain.filename[ip])
                                     
-                        id = np.argmax(model.domain.R2p[ip,:])                                                                       
+                        id = np.argmax(model.domain.R2[ip,:])                                                                       
                         features.append(Feature(geometry=point,
                                                 properties={"model_name":model.name,
                                                             "LocNr":int(model.domain.filename[ip]),
                                                             "Lon":x,
                                                             "Lat":y,                                                
-                                                            "Setup":round(model.domain.setup[ip, id],2),
+                                                            "Setup":round(model.domain.R2_setup[ip, id],2),
                                                             "Swash":round(model.domain.swash[ip, id],2),
-                                                            "TWL":round(model.domain.R2p[ip, id],2)}))
+                                                            "TWL":round(model.domain.R2[ip, id],2)}))
                     
                     feature_collection = FeatureCollection(features)
                     
@@ -1066,8 +522,8 @@ class WebViewer:
                     dct["description"] = "These are the predicted total water levels"
                     dct["format"]      = "geojson"
     
-    
-                    mp = next((x for x in cosmos.config.map_contours if x["name"] == "run_up"), None)                    
+                    mp = cosmos.config.map_contours["run_up"]    
+#                    mp = next((x for x in cosmos.config.map_contours if x["name"] == "run_up"), None)                    
      
                     lgn = {}
                     lgn["text"] = mp["string"]
@@ -1132,7 +588,7 @@ class WebViewer:
                         dct["description"] = "These are the predicted extreme run-up heights"
                         dct["format"]      = "geojson"
         
-                        mp = next((x for x in cosmos.config.map_contours if x["name"] == "run_up"), None)                    
+                        mp = cosmos.config.map_contours["run_up"]    
         
                         lgn = {}
                         lgn["text"] = mp["string"]
@@ -1167,9 +623,9 @@ class WebViewer:
                        
                         name = 'Loc nr: ' +  str(model.domain.filename[ip])
                                     
-                        id = np.argmax(model.domain.R2p[ip,:])   
+                        id = np.argmax(model.domain.R2[ip,:])   
 
-                        id2= np.argwhere(r2max.astype(float)>=model.domain.R2p[ip,id])[0]
+                        id2= np.argwhere(r2max.astype(float)>=model.domain.R2[ip,id])[0]
                         
                         x, y = transformer.transform(dfx[r2max[id2]].values[ip][0],
                                                      dfy[r2max[id2]].values[ip][0])
@@ -1180,15 +636,15 @@ class WebViewer:
                                                             "LocNr":int(model.domain.filename[ip]),
                                                             "Lon":x,
                                                             "Lat":y,                                                
-                                                            "Setup":round(model.domain.setup[ip, id],2),
+                                                            "Setup":round(model.domain.R2_setup[ip, id],2),
                                                             "Swash":round(model.domain.swash[ip, id],2),
-                                                            "TWL":round(model.domain.R2p[ip, id],2)}))
+                                                            "TWL":round(model.domain.R2[ip, id],2)}))
                     feature_collection = FeatureCollection(features)
 
                     if features:
                         feature_collection = FeatureCollection(features)
-                        output_path_runup =  os.path.join(output_path, 'extreme_horizontal_runup_height\\')
-                        os.mkdir(output_path_runup)
+                        output_path_runup =  os.path.join(output_path, 'extreme_horizontal_runup_height')
+                        fo.mkdir(output_path_runup)
                         file_name = os.path.join(output_path_runup,     
                                                 "extreme_horizontal_runup_height.geojson.js")
                         cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var runup_vert =")
@@ -1201,7 +657,7 @@ class WebViewer:
                     dct["format"]      = "geojson"
                     # dct["legend"]      = {"text": "Offshore WL", "contours": [{"text": " 0.0&nbsp-&nbsp;0.33&#8201;m", "color": "#CCFFFF"}, {"text": " 0.33&nbsp;-&nbsp;1.0&#8201;m", "color": "#40E0D0"}, {"text": " 1.0&nbsp-&nbsp;2.0&#8201;m", "color": "#00BFFF"}, {"text": "&gt; 2.0&#8201;m", "color": "#0909FF"}]}
                     
-                    mp = next((x for x in cosmos.config.map_contours if x["name"] == "run_up"), None)                    
+                    mp = cosmos.config.map_contours["run_up"]    
      
                     lgn = {}
                     lgn["text"] = mp["string"]
@@ -1230,7 +686,7 @@ class WebViewer:
                         point = Point((x, y))
                         name = 'Loc nr: ' +  str(model.domain.filename[ip])
                                     
-                        id = np.argmax(model.domain.R2p[ip,:])                                                               
+                        id = np.argmax(model.domain.R2[ip,:])                                                               
                         features.append(Feature(geometry=point,
                                                 properties={"model_name":model.name,
                                                             "LocNr":int(model.domain.filename[ip]),
@@ -1243,8 +699,8 @@ class WebViewer:
 
                     if features:
                         feature_collection = FeatureCollection(features)
-                        output_path_waves =  os.path.join(output_path, 'extreme_sea_level_and_wave_height\\')
-                        os.mkdir(output_path_waves)
+                        output_path_waves =  os.path.join(output_path, 'extreme_sea_level_and_wave_height')
+                        fo.mkdir(output_path_waves)
                         file_name = os.path.join(output_path_waves,     
                                                 "extreme_sea_level_and_wave_height.geojson.js")
                         cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var swl =")
@@ -1270,10 +726,10 @@ class WebViewer:
                                 'Setup_5': model.domain.setup_prc["5"][ip,:],'Setup_50': model.domain.setup_prc["50"][ip,:],'Setup_95': model.domain.setup_prc["95"][ip,:],
                                 'Runup_5': model.domain.R2p_prc["5"][ip,:],'Runup_50': model.domain.R2p_prc["50"][ip,:],'Runup_95': model.domain.R2p_prc["95"][ip,:],}       
                         else:
-                            d= {'WL': model.domain.WL[ip,:],'Setup': model.domain.setup[ip,:], 'Swash': model.domain.swash[ip,:], 'Runup': model.domain.R2p[ip,:]}       
+                            d= {'WL': model.domain.WL[ip,:],'Setup': model.domain.R2_setup[ip,:], 'Swash': model.domain.swash[ip,:], 'Runup': model.domain.R2[ip,:]}       
             
                         v= pd.DataFrame(data=d, index =  pd.date_range(model.domain.input.tstart, periods=len(model.domain.swash[ip,:]), freq= '0.5H'))
-                        obs_file = "extreme_runup_height." + model.domain.runid + "." +str(model.domain.filename[ip]) + ".csv.js"
+                        obs_file = "extreme_runup_height." + model.domain.name + "." + str(model.domain.filename[ip]) + ".csv.js"
             
                         local_file_path = os.path.join(output_path,  "timeseries",
                                                            obs_file)
@@ -1290,15 +746,142 @@ class WebViewer:
                 except:
                     cosmos.log("An error occurred when making BEWARE webviewer !")
 
+    def make_timeseries(self, ts_type):
+        """Generic function to make time series for the webviewer."""        
+        if ts_type == "waves":
+            station_type = "wave_buoy"
+            var_string = "hm0,tp"
+            station_file = "wavebuoys.geojson.js"
+            station_var = "buoys"
+        elif ts_type == "wl":    
+            station_type = "tide_gauge"
+            var_string = "wl"
+            station_file = "stations.geojson.js"
+            station_var = "stations"
+        features = []    
+        for model in cosmos.scenario.model:
+            if model.station:
+                for station in model.station:
+                    if station.type == station_type and station.upload:                
+                        point = Point((station.longitude, station.latitude))
+                        if station.id:
+                            name = station.long_name + " (" + station.id + ")"
+                        else:
+                            name = station.long_name
+    
+                        path = cosmos.scenario.path
+                        t0 = cosmos.cycle - datetime.timedelta(hours=48)
+                        t1 = cosmos.cycle
+                        cmp_file = None
+                        obs_file = None
+                        
+                        # Merge time series from previous cycles
+                        v  = merge(path,
+                                   model.name,
+                                   model.region,
+                                   model.type,
+                                   station.name,
+                                   t0=t0.replace(tzinfo=None),
+                                   t1=t1.replace(tzinfo=None),
+                                   prefix=ts_type)
+                        
+                        # Check if merge returned values
+                        if v is not None:                            
+                            # Write csv js file
+                            cmp_file = ts_type + "." + station.name + "." + model.name + ".csv.js"
+                            csv_file = os.path.join(self.cycle_path,
+                                                    "timeseries",
+                                                    cmp_file)
+                            s = v.to_csv(date_format='%Y-%m-%dT%H:%M:%S',
+                                         float_format='%.3f',
+                                         header=False) 
+                            cht.misc.misc_tools.write_csv_js(csv_file, s, "var csv = `date_time," + var_string)
+
+                        # Check if there are observations
+                        if cosmos.scenario.observations_path and station.id:
+                            obs_pth = os.path.join(cosmos.config.path.main,
+                                               "observations",
+                                               cosmos.scenario.observations_path,
+                                               "waves")                        
+                            csv_file = ts_type + "." + station.id + ".observed.csv"
+                            if os.path.exists(os.path.join(obs_pth, csv_file)):
+                                # Read in csv file to a dataframe
+                                df = pd.read_csv(os.path.join(self.cycle_path, "timeseries", os.path.join(obs_pth, csv_file)),
+                                                index_col=0,
+                                                parse_dates=True)
+                                # Cut off time series to same time as model
+                                mask = (df.index >= t0.replace(tzinfo=None) - datetime.timedelta(hours=1)) & (df.index <= t1.replace(tzinfo=None) + datetime.timedelta(hours=1))
+                                df = df.loc[mask]
+                                # Check if df is not empty
+                                if not df.empty:                         
+                                    # Convert to csv
+                                    s = df.to_csv(date_format='%Y-%m-%dT%H:%M:%S',
+                                                float_format='%.3f',
+                                                header=False) 
+                                    # Write csv js file
+                                    obs_file = csv_file + ".js"
+                                    cht.misc.misc_tools.write_csv_js(os.path.join(self.cycle_path, "timeseries", obs_file),
+                                                                    s,
+                                                                    "var csv = `date_time," + var_string)
+                                
+                                
+                        if cmp_file or obs_file:
+                            features.append(Feature(geometry=point,
+                                                    properties={"name":station.name,
+                                                                "long_name":name,
+                                                                "id":station.id,
+                                                                "model_name":model.name,
+                                                                "model_type":model.type,
+                                                                "model_ensemble": model.ensemble,
+                                                                "mllw":station.mllw,
+                                                                "cycle": cosmos.cycle_string,
+                                                                "cmp_file":cmp_file,
+                                                                "obs_file":obs_file}))
+        if features:
+            feature_collection = FeatureCollection(features)
+            buoys_file = os.path.join(self.cycle_path, station_file)
+            cht.misc.misc_tools.write_json_js(buoys_file, feature_collection, "var " + station_var + " =")
+
+    def update_scenarios_js(self):
+        # Check if there is a scenarios.js file
+        # If so, append it with the current scenario
+        sc_file = os.path.join(self.path, "data", "scenarios.js")
+        isame = -1
+        cosmos.log("Updating scenario file : " + sc_file)
+        if fo.exists(sc_file):
+            scs = cht.misc.misc_tools.read_json_js(sc_file)
+            for isc, sc in enumerate(scs):
+                if sc["name"] == cosmos.scenario.name:
+                    isame = isc
+        else:
+            scs = []
+        # Current scenario        
+        newsc = {}
+        newsc["name"]        = cosmos.scenario.name    
+        newsc["long_name"]   = cosmos.scenario.long_name    
+        newsc["description"] = cosmos.scenario.description    
+        newsc["lon"]         = cosmos.scenario.lon    
+        newsc["lat"]         = cosmos.scenario.lat
+        newsc["zoom"]        = cosmos.scenario.zoom    
+        newsc["cycle"]       = cosmos.cycle.strftime('%Y-%m-%dT%H:%M:%S')
+        newsc["cycle_string"] = cosmos.cycle_string
+        newsc["duration"]    = str(cosmos.scenario.runtime)
+        now = datetime.datetime.utcnow()
+        newsc["last_update"] = now.strftime("%Y/%m/%d %H:%M:%S" + " (UTC)")
+        if isame>-1:
+            # Scenario already existed in web viewer
+            scs[isame] = newsc
+        else:
+            # New scenario in web viewer    
+            scs.append(newsc)        
+
+        cht.misc.misc_tools.write_json_js(sc_file, scs, "var scenario =")
 
     def upload(self):        
-
-        from cht.misc.sftp import SSHSession
-        
-        cosmos.log("Uploading web viewer ...")
-        
-        # Upload entire copy of local web viewer to web server
-        
+        """Upload web viewer to web server."""
+        from cht.misc.sftp import SSHSession        
+        cosmos.log("Uploading web viewer ...")        
+        # Upload entire copy of local web viewer to web server        
         try:
             f = SSHSession(cosmos.config.ftp_hostname,
                            username=cosmos.config.ftp_username,
@@ -1307,8 +890,7 @@ class WebViewer:
             cosmos.log("Error! Could not connect to sftp server !")
             return
         
-        try:
-            
+        try:            
             # Check if web viewer already exist
             make_wv_on_ftp = False
             if not self.exists:
@@ -1348,7 +930,7 @@ class WebViewer:
 
                 # Copy scenario data to server
                 cosmos.log("Uploading all data to web server ...")
-                f.put_all(scenario_path, remote_path)
+                f.put_all(self.cycle_path, remote_path)
             
             f.sftp.close()    
     
@@ -1363,45 +945,7 @@ class WebViewer:
             except:
                 pass
 
-
     def upload_data(self):        
         # Upload data from local web viewer to web server
         pass
 
-def update_scenarios_js(sc_file):
-    
-    # Check if there is a scenarios.js file
-    # If so, append it with the current scenario
-    isame = -1
-    cosmos.log("Updating scenario file : " + sc_file)
-    if fo.exists(sc_file):
-        scs = cht.misc.misc_tools.read_json_js(sc_file)
-        for isc, sc in enumerate(scs):
-            if sc["name"] == cosmos.scenario.name:
-                isame = isc
-    else:
-        scs = []
-
-    # Current scenario        
-    newsc = {}
-    newsc["name"]        = cosmos.scenario.name    
-    newsc["long_name"]   = cosmos.scenario.long_name    
-    newsc["description"] = cosmos.scenario.description    
-    newsc["lon"]         = cosmos.scenario.lon    
-    newsc["lat"]         = cosmos.scenario.lat
-    newsc["zoom"]        = cosmos.scenario.zoom    
-    newsc["cycle"]       = cosmos.cycle.strftime('%Y-%m-%dT%H:%M:%S')
-    newsc["cycle_string"] = cosmos.cycle_string
-    newsc["duration"]    = str(cosmos.scenario.runtime)
-
-    now = datetime.datetime.utcnow()
-    newsc["last_update"] = now.strftime("%Y/%m/%d %H:%M:%S" + " (UTC)")
-
-    if isame>-1:
-        # Scenario already existed in web viewer
-        scs[isame] = newsc
-    else:
-        # New scenario in web viewer    
-        scs.append(newsc)        
-
-    cht.misc.misc_tools.write_json_js(sc_file, scs, "var scenario =")

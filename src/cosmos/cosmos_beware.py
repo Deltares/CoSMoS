@@ -48,12 +48,8 @@ class CoSMoS_BEWARE(Model):
 
         """        
         # Read in the BEWARE model
-
-        # Now read in the domain data
-        # input_file  = os.path.join(self.path, "input", "profile_characteristics.mat")
         input_file  = os.path.join(self.path, "input", "beware.inp")
-        self.domain = BEWARE(input_file)
-        
+        self.domain = BEWARE(input_file)        
         self.domain.crs   = self.crs
         self.domain.type  = self.type
         self.domain.name  = self.name
@@ -79,10 +75,6 @@ class CoSMoS_BEWARE(Model):
         # Boundary conditions        
         if self.flow_nested:
             # Get boundary conditions from overall model (Nesting 2)
-#            output_path = os.path.join(self.flow_nested.cycle_path, "output")   
-            # output_path = os.path.join(r'p:\11204750-onr-westernpacific\Year2-3\cosmos\version01\cosmos\scenarios\hurricane_michael_coamps_spw\models\northamerica\delft3dfm\delft3dfm_gom\archive\20181009_00z\\',
-            #                             "output")   
-
             # Correct boundary water levels. Assuming that output from overall
             # model is in MSL !!!
             zcor = self.boundary_water_level_correction - self.vertical_reference_level_difference_with_msl       
@@ -132,12 +124,14 @@ class CoSMoS_BEWARE(Model):
         #fid.close()
 
         # Make run batch file
-        src = os.path.join(cosmos.config.beware_exe_path, "run_bw.bas")
-        batch_file = os.path.join(self.job_path, "run.bat")
+        src = os.path.join(cosmos.config.executables.beware_path, "run_bw.bas")
+        batch_file = os.path.join(self.job_path, "run_beware.bat")
 
         shutil.copyfile(src, batch_file)
         # findreplace(batch_file, "DISKKEY", 'P')
-        findreplace(batch_file, "EXEPATHKEY", cosmos.config.beware_exe_path)
+        findreplace(batch_file, "EXEPATHKEY", cosmos.config.executables.beware_path)
+        findreplace(batch_file, "CONDAPATHKEY", cosmos.config.conda.path)
+
 #        findreplace(batch_file, "RUNPATHKEY", self.job_path)
 #         fid = open(batch_file, "w")
 #         fid.write("@ echo off\n")

@@ -35,6 +35,7 @@ class Executables:
         self.hurrywave_path = None
         self.delft3d_path   = None
         self.xbeach_path    = None
+        self.beware_path    = None
 
 class WebServer:
     def __init__(self):

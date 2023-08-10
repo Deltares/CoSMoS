@@ -147,24 +147,34 @@ class ModelLoop():
                 # No need for a bach file. Workflow template will take care of different steps.
                 pass
             else:
-                # Make windows batch file (run.bat) that activates the correct environment and runs run_job.py   
-                fid = open(os.path.join(model.job_path, "run.bat"), "w")
-                fid.write("@ echo off\n")
-                fid.write("DATE /T > running.txt\n")
-                fid.write('set CONDAPATH=' + cosmos.config.conda.path + '\n')
-                fid.write(r"call %CONDAPATH%\Scripts\activate.bat cosmos" + "\n")
-                if model.ensemble:
-                    fid.write("python run_job_2.py prepare_ensemble\n")
-                    fid.write("python run_job_2.py simulate\n")
-                    fid.write("python run_job_2.py merge_ensemble\n")
-                    fid.write("python run_job_2.py map_tiles\n")   
-                    fid.write("python run_job_2.py clean_up\n")   
-                else:
-                    fid.write("python run_job_2.py simulate\n")
-                    fid.write("python run_job_2.py map_tiles\n")   
-                fid.write("move running.txt finished.txt\n")
-                fid.write("exit\n")
-                fid.close()
+                if model.type == "beware": # For now ...
+                    # Make windows batch file (run.bat) that activates the correct environment and runs run_job.py   
+                    fid = open(os.path.join(model.job_path, "run.bat"), "w")
+                    fid.write("@ echo off\n")
+                    fid.write("DATE /T > running.txt\n")
+                    fid.write("call run_beware.bat\n")
+                    fid.write("move running.txt finished.txt\n")
+                    fid.write("exit\n")
+                    fid.close()
+                else:    
+                    # Make windows batch file (run.bat) that activates the correct environment and runs run_job.py   
+                    fid = open(os.path.join(model.job_path, "run.bat"), "w")
+                    fid.write("@ echo off\n")
+                    fid.write("DATE /T > running.txt\n")
+                    fid.write('set CONDAPATH=' + cosmos.config.conda.path + '\n')
+                    fid.write(r"call %CONDAPATH%\Scripts\activate.bat cosmos" + "\n")
+                    if model.ensemble:
+                        fid.write("python run_job_2.py prepare_ensemble\n")
+                        fid.write("python run_job_2.py simulate\n")
+                        fid.write("python run_job_2.py merge_ensemble\n")
+                        fid.write("python run_job_2.py map_tiles\n")   
+                        fid.write("python run_job_2.py clean_up\n")   
+                    else:
+                        fid.write("python run_job_2.py simulate\n")
+                        fid.write("python run_job_2.py map_tiles\n")   
+                    fid.write("move running.txt finished.txt\n")
+                    fid.write("exit\n")
+                    fid.close()
 
             # And now actually kick off this job
             if cosmos.config.cycle.run_mode == "serial":
@@ -258,9 +268,16 @@ class ModelLoop():
             # Try to run post-processing. If it fails, print error message and continue.
 
             try:
-                post_process()
+                cosmos.webviewer.make()        
+                if cosmos.config.cycle.upload:
+                    current_path = os.getcwd()
+                    try:
+                        cosmos.webviewer.upload()
+                    except:
+                        print("An error occurred when uploading web viewer to server !!!")
+                    os.chdir(current_path)
             except Exception as e:
-                print("An error occured while post-processing !")
+                print("An error occured while making web viewer !")
                 print(f"Error: {e}")
 
             self.status = "done"

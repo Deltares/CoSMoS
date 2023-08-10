@@ -173,6 +173,8 @@ class Model:
             config["bw_nested"]["overall_model"] = self.bw_nested.name
             config["bw_nested"]["overall_type"]  = self.bw_nested.type
             config["bw_nested"]["overall_path"]  = self.bw_nested.cycle_output_path
+            config["bw_nested"]["overall_crs"]   = self.bw_nested.crs.to_epsg()
+            config["bw_nested"]["detail_crs"]   = self.crs.to_epsg()
         if cosmos.config.cycle.make_flood_maps and self.make_flood_map:
             config["flood_map"] = {}
             if self.ensemble:
@@ -186,6 +188,18 @@ class Model:
             config["flood_map"]["start_time"] = cosmos.cycle
             config["flood_map"]["stop_time"]  = cosmos.stop_time
             config["flood_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["flood_map"]["color_map"]]
+        if cosmos.config.cycle.make_wave_maps and self.make_wave_map:
+            config["hm0_map"] = {}
+            if self.ensemble:
+                name = "hm0_90"
+            else:
+                name = "hm0"    
+            config["hm0_map"]["name"]       = name
+            config["hm0_map"]["png_path"]   = os.path.join(cosmos.config.webviewer.data_path)
+            config["hm0_map"]["index_path"] = os.path.join(self.path, "tiling", "indices")
+            config["hm0_map"]["start_time"] = cosmos.cycle
+            config["hm0_map"]["stop_time"]  = cosmos.stop_time
+            config["hm0_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["hm0"]["color_map"]]
         
         dict2yaml(os.path.join(self.job_path, "config.yml"), config)
         
@@ -271,8 +285,6 @@ class Model:
                     self.bw_nested = model2
                     model2.nested_bw_models.append(self)
                     break
-
-
 
     def get_all_nested_models(self, tp, all_nested_models=None):
         """Return a list of all models nested in this model.
@@ -393,4 +405,40 @@ class Model:
             
             self.peak_boundary_twl  = z[imax]
             self.peak_boundary_time = t[imax].to_pydatetime()
-            
+
+    def set_stations_to_upload(self):
+        all_nested_models = self.get_all_nested_models("flow")
+        if self.type=='beware':
+            for station in self.station:
+                station.upload = False 
+
+        if all_nested_models:
+            all_nested_stations = []
+            if all_nested_models[0].type == 'beware':
+                all_nested_models= [self]
+                bw=1
+            else:
+                bw=0
+            for mdl in all_nested_models:
+                for st in mdl.station:
+                    all_nested_stations.append(st.name)
+            for station in self.station:
+                if station.type == "tide_gauge":
+                    if station.name in all_nested_stations and bw==0:                            
+                        station.upload = False 
+
+        all_nested_models = self.get_all_nested_models("wave")
+        if all_nested_models:
+            all_nested_stations = []
+            if all_nested_models[0].type == 'beware':
+                all_nested_models= [self]
+                bw=1
+            else:
+                bw=0
+            for mdl in all_nested_models:
+                for st in mdl.station:
+                    all_nested_stations.append(st.name)
+            for station in self.station:
+                if station.type == "wave_buoy":
+                    if station.name in all_nested_stations and bw==0:
+                        station.upload = False 

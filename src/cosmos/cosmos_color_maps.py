@@ -247,15 +247,15 @@ def read_color_maps(file_name):
                     if k==0:
                         cnt["string"] = "< " + f"{zmin:.1f}"
                         cnt["lower_value"] = -1.0e6
-                        cnt["upper_value"] = zz[i]
+                        cnt["upper_value"] = float(zz[i])
                     elif k==nsteps - 1:
                         cnt["string"] = "> " +  f"{zmax:.1f}"
-                        cnt["lower_value"] = zz[i]
+                        cnt["lower_value"] = float(zz[i])
                         cnt["upper_value"] = 1.0e6
                     else: 
                         cnt["string"] = f"{zz[i - 1]:.1f}" + " - " + f"{zz[i]:.1f}"                   
-                        cnt["lower_value"] = zz[i - 1]
-                        cnt["upper_value"] = zz[i]
+                        cnt["lower_value"] = float(zz[i - 1])
+                        cnt["upper_value"] = float(zz[i])
                     cnt["rgb"]   = rgb
                     cnt["hex"]   = rgb2hex(tuple(rgb))
     
@@ -264,7 +264,6 @@ def read_color_maps(file_name):
             
             map_type["contours"] = map_type["contours"][::-1]
             
-#        map_contours.append(map_type)    
         map_contours[tm["name"]] = map_type
 
     return map_contours
