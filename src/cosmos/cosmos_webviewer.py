@@ -9,12 +9,13 @@ import datetime
 import os
 import numpy as np
 import pandas as pd
+from scipy import interpolate                
 from geojson import Point, LineString, Feature, FeatureCollection
 from pyproj import CRS
 from pyproj import Transformer
 
 from .cosmos import cosmos
-from .cosmos_timeseries import merge_timeseries as merge
+#from .cosmos_timeseries import merge_timeseries as merge
 #from .cosmos_tiling import make_wave_map_tiles
 from .cosmos_tiling import make_precipitation_tiles
 
@@ -76,8 +77,18 @@ class WebViewer:
 
         cosmos.log("Making new cycle folder on web viewer ...")
         fo.mkdir(os.path.join(self.cycle_path))
-        
-        # Map variables
+
+        # Stations and buoys
+        cosmos.log("Copying time series ...")                
+        fo.mkdir(os.path.join(self.cycle_path, "timeseries"))        
+        # Set stations to upload (only upload for high-res nested models)
+        for model in cosmos.scenario.model:
+            model.set_stations_to_upload()
+        self.make_timeseries("wl")
+        self.make_timeseries("waves")
+
+        # Map tiles
+        cosmos.log("Adding tile layers ...")                
         self.map_variables = []
         self.set_map_tile_variables("flood_map",
                                     "Flood map",
@@ -110,23 +121,21 @@ class WebViewer:
         #                             cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["bed_level_pre"]["color_map"]],
         #                             16)
 
-        # Stations and buoys
-        cosmos.log("Copying time series ...")                
-        fo.mkdir(os.path.join(self.cycle_path, "timeseries"))        
-        # Set stations to upload (only upload for high-res nested models)
-        for model in cosmos.scenario.model:
-            model.set_stations_to_upload()
-        self.make_timeseries("wl")
-        self.make_timeseries("waves")
-
-        cosmos.log("Making run-up maps ...")                
-        self.make_runup_map()
-        self.make_xb_markers()
+        cosmos.log("Adding meteo layers ...")                
         self.make_meteo_maps()
 
+
+        cosmos.log("Adding run-up layers ...")                
+        self.make_runup_map()
+        cosmos.log("Adding XBeach markers ...")                
+        self.make_xb_markers()
+
         # Write map variables to file
+        cosmos.log("Writing variables ...")                
         mv_file = os.path.join(self.cycle_path, "variables.js")        
         cht.misc.misc_tools.write_json_js(mv_file, self.map_variables, "var map_variables =")
+
+        cosmos.log("Web viewer done.")                
 
     def set_map_tile_variables(self, name, long_name, description, color_map, max_native_zoom):
         # Check if flood maps are available
@@ -150,6 +159,8 @@ class WebViewer:
                     namestr.append("Combined " + hrstr + "-hour forecast")
                 else:
                     namestr.append(folder)
+
+            # TODO try to get neater time labels for the web viewer
             # # 24-hour increments
             # requested_times = pd.date_range(start=t0 + dt,
             #                                 end=t1,
@@ -227,20 +238,15 @@ class WebViewer:
             
     def make_meteo_maps(self):
         
-        from cht.misc import xmlkit as xml
-
         cosmos.log("Making meteo map tiles ...")
 
         # Wind
-        # xml_obj = xml.xml2obj(cosmos.scenario.file_name)
-        # if hasattr(xml_obj, "meteo_dataset"):
-        #     meteo_dataset = xml_obj.meteo_dataset[0].value
         meteo_dataset = cosmos.scenario.meteo_dataset
 
         for meteo_subset in cosmos.meteo_subset:
             if meteo_dataset == meteo_subset.name:
                 
-                # TODO these ranges 
+                # TODO these ranges should be in the config file
                 xlim = [-99.0, -55.0]
                 ylim = [8.0, 45.0]
                 
@@ -270,32 +276,25 @@ class WebViewer:
                     else:   
                         contour_set = "wnd60"
                         wndmx=60.0                
-            
                     dct={}
                     dct["name"]        = "wind"
                     dct["long_name"]   = "Wind"
                     dct["description"] = "This is a wind map. It can tell if your house will blow away."
                     dct["format"]      = "vector_field"
                     dct["max"]         = wndmx
-        
-                    mp = cosmos.config.map_contours[contour_set]
-                    
+                    mp = cosmos.config.map_contours[contour_set]                    
                     lgn = {}
-                    lgn["text"] = mp["string"]
-                        
-                    cntrs = mp["contours"]
-        
-                    contours = []
-                    
+                    lgn["text"] = mp["string"]                        
+                    cntrs = mp["contours"]        
+                    contours = []                    
                     for cntr in cntrs:    
                         contour = {}
                         contour["text"]  = cntr["string"]
                         contour["color"] = "#" + cntr["hex"]
                         contours.append(contour)
-            
                     lgn["contours"] = contours
                     dct["legend"]   = lgn
-                    
+
                     self.map_variables.append(dct)
                     
                     # Cyclone track(s)
@@ -715,9 +714,7 @@ class WebViewer:
                     
                     self.map_variables.append(dct)
                 
-
-                    # Time series 
-                        
+                    # Time series                         
                     for ip in range(len(model.domain.filename)):
                         
                         if os.path.exists(os.path.join(model.cycle_output_path,
@@ -772,18 +769,15 @@ class WebViewer:
                         path = cosmos.scenario.path
                         t0 = cosmos.cycle - datetime.timedelta(hours=48)
                         t1 = cosmos.cycle
+                        t0_obs = t0
+                        t1_obs = cosmos.stop_time
                         cmp_file = None
                         obs_file = None
                         
                         # Merge time series from previous cycles
-                        v  = merge(path,
-                                   model.name,
-                                   model.region,
-                                   model.type,
-                                   station.name,
-                                   t0=t0.replace(tzinfo=None),
-                                   t1=t1.replace(tzinfo=None),
-                                   prefix=ts_type)
+                        v  = self.merge_timeseries(path, model.name, station.name, ts_type,
+                                                   t0=t0.replace(tzinfo=None),
+                                                   t1=t1.replace(tzinfo=None))
                         
                         # Check if merge returned values
                         if v is not None:                            
@@ -810,7 +804,7 @@ class WebViewer:
                                                 index_col=0,
                                                 parse_dates=True)
                                 # Cut off time series to same time as model
-                                mask = (df.index >= t0.replace(tzinfo=None) - datetime.timedelta(hours=1)) & (df.index <= t1.replace(tzinfo=None) + datetime.timedelta(hours=1))
+                                mask = (df.index >= t0_obs.replace(tzinfo=None) - datetime.timedelta(hours=1)) & (df.index <= t1_obs.replace(tzinfo=None) + datetime.timedelta(hours=1))
                                 df = df.loc[mask]
                                 # Check if df is not empty
                                 if not df.empty:                         
@@ -865,6 +859,7 @@ class WebViewer:
         newsc["zoom"]        = cosmos.scenario.zoom    
         newsc["cycle"]       = cosmos.cycle.strftime('%Y-%m-%dT%H:%M:%S')
         newsc["cycle_string"] = cosmos.cycle_string
+        newsc["cycle_mode"]  = cosmos.config.cycle.mode
         newsc["duration"]    = str(cosmos.scenario.runtime)
         now = datetime.datetime.utcnow()
         newsc["last_update"] = now.strftime("%Y/%m/%d %H:%M:%S" + " (UTC)")
@@ -922,7 +917,7 @@ class WebViewer:
                 remote_file = remote_path + "/scenarios.js"
                 local_file  = os.path.join(".", "scenarios.js")
                 f.get(remote_file, local_file)
-                update_scenarios_js(local_file)                
+                self.update_scenarios_js(local_file)                
                 # Copy new scenarios.js to server
                 f.put(local_file, remote_path + "/scenarios.js")
                 # Delete local scenarios.js
@@ -949,3 +944,67 @@ class WebViewer:
         # Upload data from local web viewer to web server
         pass
 
+
+
+    def merge_timeseries(self, path, model_name, station, prefix,
+                         t0=None,
+                         t1=None,
+                         resample=None):
+        
+        name_str = prefix
+        available_times = []    
+        cycle_list = fo.list_folders(os.path.join(path,'*z'))
+        for it, cycle_string in enumerate(cycle_list):
+            available_times.append(datetime.datetime.strptime(cycle_list[it][-12:],"%Y%m%d_%Hz"))
+        if t0==None or t1==None:
+            t0 = available_times[0]
+            t1 = available_times[-1]
+                
+        # New pandas series
+        wl=[]
+        idx=[]
+        wl.append(0.0)
+        idx.append(pd.Timestamp("2100-01-01"))
+        vv = pd.Series(wl, index=idx)
+        vv.index.name = "date_time"
+        vv.name       = name_str
+        okay = False
+        for it, t in enumerate(available_times):        
+            if t>=t0 and t<=t1:                       
+                csv_file = os.path.join(path,
+                                        cycle_list[it][-12:],
+                                        "models",
+                                        model_name,
+                                        "timeseries",
+                                        prefix + "." + station + ".csv")
+                if os.path.exists(csv_file):
+                    df = pd.read_csv(csv_file, header=0,
+                                    index_col=0,
+                                    parse_dates=True).squeeze()
+                    df.index.name = "date_time"
+                    df.name       = name_str                    
+                    okay = True
+                    # Find last time in merged time series that is smaller than first time in new timeseries
+                    ilast = np.where(vv.index<df.index[0])[-1]
+                    if ilast.any():
+                        ilast = ilast[-1]
+                        vv = vv[0:ilast]
+                        vv = vv.append(df)
+                    else:
+                        vv = df
+                        
+        if okay:                                                
+            if resample:                        
+                t0 = (vv.index - vv.index[0]).total_seconds()
+                t1 = np.arange(0.0,t0[-1], resample)
+                f  = interpolate.interp1d(t0, vv)
+                v1 = f(t1)
+                t1 = vv.index[0] + t1*datetime.timedelta(seconds=1)                
+                vv = pd.Series(v1, index=t1)
+                vv.index.name = "date_time"
+                vv.name       = name_str                            
+        if okay:                                    
+            return vv                
+        else:
+            return None
+ 

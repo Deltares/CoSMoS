@@ -225,6 +225,7 @@ class ModelLoop():
 
             try:
                 model.post_process()
+                cosmos.log("Post-processing " + model.long_name + " done.")
             except Exception as e:
                 print("An error occured while post-processing : " + model.name)
                 print(f"Error: {e}")
