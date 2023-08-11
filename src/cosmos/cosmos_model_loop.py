@@ -11,7 +11,6 @@ import os
 from .cosmos import cosmos
 from .cosmos_cluster import cluster_dict as cluster
 from .cosmos_argo import Argo
-from .cosmos_postprocess import post_process
 import cht.misc.fileops as fo
 
 class ModelLoop():
