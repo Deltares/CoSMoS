@@ -86,9 +86,9 @@ class WebViewer:
         self.copy_floodmap()        
         self.copy_wave_maps()
         self.copy_sederomap()
-        # self.copy_bedlevelmaps()
+        self.copy_bedlevelmaps()
         self.make_runup_map()
-        # self.make_meteo_maps()
+        self.make_meteo_maps()
         mv_file = os.path.join(scenario_path,
                                "variables.js")
         
@@ -542,128 +542,120 @@ class WebViewer:
         from cht.misc import xmlkit as xml
 
         cosmos.log("Making meteo map tiles ...")
+        try:
+            scenario_path = os.path.join(self.path,
+                                        "data",
+                                        cosmos.scenario.name)
 
-        scenario_path = os.path.join(self.path,
-                                     "data",
-                                     cosmos.scenario.name)
+            # Wind
+            xml_obj = xml.xml2obj(cosmos.scenario.file_name)
+            if hasattr(xml_obj, "meteo_dataset"):
+                meteo_dataset = xml_obj.meteo_dataset[0].value
 
-        # Wind
-        xml_obj = xml.xml2obj(cosmos.scenario.file_name)
-        if hasattr(xml_obj, "meteo_dataset"):
-            meteo_dataset = xml_obj.meteo_dataset[0].value
-
-        for meteo_subset in cosmos.meteo_subset:
-            if meteo_dataset == meteo_subset.name:
-                
-                # TODO these ranges 
-                xlim = [-99.0, -55.0]
-                ylim = [8.0, 45.0]
-                
-                if meteo_subset.x is not None:
-                                        
-                    subset = meteo_subset.subset(xlim=xlim,
-                                                 ylim=ylim,
-                                                 time_range=[],
-                                                 stride=2)
-                    # Get maximum wind speed
-                    u = subset.quantity[0].u
-                    v = subset.quantity[0].v
-                    vmag = np.sqrt(u*u + v*v)
-                    wndmx = np.max(vmag)
+            for meteo_subset in cosmos.meteo_subset:
+                if meteo_dataset == meteo_subset.name:
                     
-                    file_name = os.path.join(scenario_path, "wind.json.js")
-                    subset.write_wind_to_json(file_name, time_range=None, js=True)
+                    xlim = meteo_subset.x_range #[-99.0, -55.0]
+                    ylim = meteo_subset.y_range #[8.0, 45.0]
                     
-                    # Add wind to map variables
-    
-                    if wndmx<=20.0:
-                        contour_set = "wnd20"
-                        wndmx=20.0                
-                    elif wndmx<=40.0:   
-                        contour_set = "wnd40"
-                        wndmx=40.0                
-                    else:   
-                        contour_set = "wnd60"
-                        wndmx=60.0                
-            
-                    dct={}
-                    dct["name"]        = "wind"
-                    dct["long_name"]   = "Wind"
-                    dct["description"] = "This is a wind map. It can tell if your house will blow away."
-                    dct["format"]      = "vector_field"
-                    dct["max"]         = wndmx
+                    if meteo_subset.x is None:
+                        t0= cosmos.scenario.cycle
+                        t1= cosmos.stop_time
+                        meteo_subset.collect([t0, t1],
+                            xystride=meteo_subset.xystride,
+                            tstride=meteo_subset.tstride)
+                        
+                    if meteo_subset.x is not None:
+                                            
+                        subset = meteo_subset.subset(xlim=xlim,
+                                                    ylim=ylim,
+                                                    time_range=[],
+                                                    stride=2)
+                        # Get maximum wind speed
+                        u = subset.quantity[0].u
+                        v = subset.quantity[0].v
+                        vmag = np.sqrt(u*u + v*v)
+                        wndmx = np.max(vmag)
+                        
+                        file_name = os.path.join(scenario_path, "wind.json.js")
+                        subset.write_wind_to_json(file_name, time_range=None, js=True)
+                        
+                        # Add wind to map variables
         
-                    mp = next((x for x in cosmos.config.map_contours if x["name"] == contour_set), None)    
-                    
-                    lgn = {}
-                    lgn["text"] = mp["string"]
-                        
-                    cntrs = mp["contours"]
-        
-                    contours = []
-                    
-                    for cntr in cntrs:    
-                        contour = {}
-                        contour["text"]  = cntr["string"]
-                        contour["color"] = "#" + cntr["hex"]
-                        contours.append(contour)
-            
-                    lgn["contours"] = contours
-                    dct["legend"]   = lgn
-                    
-                    self.map_variables.append(dct)
-                    
-                    # Cyclone track(s)
+                        if wndmx<=20.0:
+                            contour_set = "wnd20"
+                            wndmx=20.0                
+                        elif wndmx<=40.0:   
+                            contour_set = "wnd40"
+                            wndmx=40.0                
+                        else:   
+                            contour_set = "wnd60"
+                            wndmx=60.0                
+                
+                        dct={}
+                        dct["name"]        = "wind"
+                        dct["long_name"]   = "Wind"
+                        dct["description"] = "This is a wind map. It can tell if your house will blow away."
+                        dct["format"]      = "vector_field"
+                        dct["max"]         = wndmx
+                        dct["infographic"] = "empty"
+                        dct["legend"] = make_legend(type = contour_set)
 
-                    # subset = meteo_subset.subset(time_range=[],
-                    #                              stride=1,
-                    #                              tstride=tstride)
-    
-                    tracks = meteo_subset.find_cyclone_tracks(xlim=[-110.0,-30.0],
-                                                              ylim=[5.0, 45.0],
-                                                              pcyc=99500.0,
-                                                              dt=6)
-                    
-                    if tracks:
-                        features = []
-                        for track in tracks:
-                            
-                            points=[]
+                        self.map_variables.append(dct)
                         
-                            for ip in range(np.size(track.lon)):
-                                point = Point((track.lon[ip], track.lat[ip]))               
-                                if track.vmax[ip]<64.0:
-                                    cat = "TS"
-                                elif track.vmax[ip]<83.0:
-                                    cat = "1"
-                                elif track.vmax[ip]<96.0:    
-                                    cat = "2"
-                                elif track.vmax[ip]<113.0:    
-                                    cat = "3"
-                                elif track.vmax[ip]<137.0:    
-                                    cat = "4"
-                                else:    
-                                    cat = "5"
-                                features.append(Feature(geometry=point,
-                                                        properties={"time":track.time[ip].strftime("%Y/%m/%d %H:%M") + " UTC",
-                                                                    "lon":track.lon[ip],
-                                                                    "lat":track.lat[ip],
-                                                                    "vmax":track.vmax[ip],
-                                                                    "pc":track.pc[ip],
-                                                                    "category":cat}))
-                                
-                                points.append([track.lon[ip], track.lat[ip]])
-                            
-                            trk = LineString(coordinates=points)
-                            features.append(Feature(geometry=trk,
-                                                    properties={"name":"No name"}))
+                        # Cyclone track(s)
+
+                        # subset = meteo_subset.subset(time_range=[],
+                        #                              stride=1,
+                        #                              tstride=tstride)
+        
+                        tracks = meteo_subset.find_cyclone_tracks(xlim=[-110.0,-30.0],
+                                                                ylim=[5.0, 45.0],
+                                                                pcyc=99500.0,
+                                                                dt=6)
                         
-                        feature_collection = FeatureCollection(features)
-                        file_name = os.path.join(scenario_path, "track.geojson.js")
-                        cht.misc.misc_tools.write_json_js(file_name,
-                                                          feature_collection,
-                                                          "var track_data =")
+                        if tracks:
+                            features = []
+                            for track in tracks:
                                 
+                                points=[]
+                            
+                                for ip in range(np.size(track.track.geometry)):
+                                    point = Point((track.track.geometry.x[ip], track.track.geometry.y[ip]))                          
+                                    if track.track.vmax[ip]<64.0:
+                                        cat = "TS"
+                                    elif track.track.vmax[ip]<83.0:
+                                        cat = "1"
+                                    elif track.track.vmax[ip]<96.0:    
+                                        cat = "2"
+                                    elif track.track.vmax[ip]<113.0:    
+                                        cat = "3"
+                                    elif track.track.vmax[ip]<137.0:    
+                                        cat = "4"
+                                    else:    
+                                        cat = "5"
+                                    features.append(Feature(geometry=point,
+                                                            properties={"time":datetime.datetime.strptime(track.track.datetime[ip], '%Y%m%d %H%M%S').strftime('%Y/%m/%d %H:%M') + " UTC",
+                                                                        "lon":track.track.geometry.x[ip],
+                                                                        "lat":track.track.geometry.y[ip],
+                                                                        "vmax":track.track.vmax[ip],
+                                                                        "pc":track.track.pc[ip],
+                                                                        "category":cat}))
+                                    
+                                    points.append([track.track.geometry.x[ip], track.track.geometry.y[ip]])
+                                
+                                trk = LineString(coordinates=points)
+                                features.append(Feature(geometry=trk,
+                                                        properties={"name":"No name"}))
+                            
+                            feature_collection = FeatureCollection(features)
+                            file_name = os.path.join(self.scenario_path, "track.geojson.js")
+                            cht.misc.misc_tools.write_json_js(file_name,
+                                                            feature_collection,
+                                                            "var track_data =")
+        except:
+            print("ERROR while making meteo tiles")
+        
         
         # Cumulative rainfall
         
@@ -1330,3 +1322,24 @@ def update_scenarios_js(sc_file):
         scs.append(newsc)        
 
     cht.misc.misc_tools.write_json_js(sc_file, scs, "var scenario =")
+
+def make_legend(type:str = 'flood_map'):
+
+    mp = next((x for x in cosmos.config.map_contours if x["name"] == type), None)    
+    
+    lgn = {}
+    lgn["text"] = mp["string"]
+
+    cntrs = mp["contours"]
+
+    contours = []
+    
+    for cntr in cntrs:
+        contour = {}
+        contour["text"]  = cntr["string"]
+        contour["color"] = "#" + cntr["hex"]
+        contours.append(contour)
+    
+    lgn["contours"] = contours    
+
+    return lgn
