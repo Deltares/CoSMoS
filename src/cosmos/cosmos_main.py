@@ -140,7 +140,9 @@ class CoSMoS:
             fo.rmdir(os.path.join(cosmos.config.job_path,
                                   cosmos.config.scenario_name))
         
-        if upload:
+        if upload and os.path.isabs(cosmos.config.ftp_path):
+            wv.copy_to_webviewer()
+        elif upload:
             wv.upload()
 
     def post_process(self, sc_name, model=None, cycle=None):   

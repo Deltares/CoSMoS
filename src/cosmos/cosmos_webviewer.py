@@ -12,6 +12,7 @@ import pandas as pd
 from geojson import Point, LineString, Feature, FeatureCollection
 from pyproj import CRS
 from pyproj import Transformer
+import shutil
 
 from .cosmos_main import cosmos
 from .cosmos_timeseries import merge_timeseries as merge
@@ -1161,6 +1162,60 @@ class WebViewer:
                 except:
                     cosmos.log("An error occurred when making BEWARE webviewer !")
 
+
+    def copy_to_webviewer(self):
+        cosmos.log("Copying to web viewer ...")
+
+        # Upload entire copy of local web viewer to web server
+
+        try:
+            # Check if web viewer already exist
+            make_wv_on_ftp = False
+            if not self.exists:
+                # Web viewer does not even exist locally
+                make_wv_on_ftp = True
+            else:
+                # Check if web viewer exists on FTP
+                if not self.name in os.listdir(cosmos.config.ftp_path):
+                    make_wv_on_ftp = True
+                
+            if make_wv_on_ftp:
+                # Copy entire webviewer
+                shutil.copytree(self.path, cosmos.config.ftp_path)    
+            else:
+                # Webviewer already on ftp server
+                
+                # Only copy scenario output
+                scenario_path = os.path.join(self.path,
+                                             "data",
+                                             cosmos.scenario.name)
+                remote_path = os.path.join(cosmos.config.ftp_path, self.name, "data")
+
+                # Check if scenario is already on ftp server
+                cosmos.log("Removing existing data on web server ...")
+                if cosmos.scenario.name in os.listdir(remote_path):
+                    shutil.rmtree(os.path.join(remote_path, cosmos.scenario.name))
+                    
+                # Copy scenarios.js    
+                remote_file = os.path.join(remote_path, "scenarios.js")
+                local_file  = os.path.join(".", "scenarios.js")
+
+                shutil.copyfile(remote_file, local_file)
+                update_scenarios_js(local_file)                
+                # Copy new scenarios.js to server
+                shutil.copyfile(local_file, remote_file)
+                # Delete local scenarios.js
+                fo.rm(local_file)
+
+                # Copy scenario data to server
+                cosmos.log("Uploading all data to web server ...")
+                shutil.copytree(scenario_path, os.path.join(remote_path, cosmos.scenario.name))
+                
+            cosmos.log("Done uploading.")
+            
+        except BaseException as e:
+            cosmos.log("An error occurred while uploading !")
+            cosmos.log(str(e))
 
     def upload(self):        
 

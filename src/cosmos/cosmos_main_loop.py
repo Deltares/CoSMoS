@@ -206,10 +206,9 @@ class MainLoop:
                         continue
                     t = datetime.datetime.strptime(cycle[-12:],"%Y%m%d_%Hz")
                     if t<tkeep:
-                        pass
-                    # Commented out for now
-#                        cosmos.log("Removing older cycle : " + cycle[-12:])
-#                        fo.rmdir(cycle)
+                    #    pass
+                       cosmos.log("Removing older cycle : " + cycle[-12:])
+                       fo.rmdir(cycle)
             elif cosmos.storm_flag:
                 cycle_list = fo.list_folders(os.path.join(cosmos.scenario.path,"*z"))
                 cosmos.storm_keeplist.append(cycle_list[-1])

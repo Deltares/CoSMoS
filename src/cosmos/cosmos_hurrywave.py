@@ -380,7 +380,7 @@ class CoSMoS_HurryWave(Model):
                     hm0_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
                                                 "hm0",
                                                 pathstr[it])                        
-                    make_wave_map_tiles(hm0max, index_path, hm0_map_path, contour_set)
+                    make_wave_map_tiles(np.transpose(hm0max), index_path, hm0_map_path, contour_set)
 
                 # Full simulation        
                 hm0_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
@@ -388,7 +388,7 @@ class CoSMoS_HurryWave(Model):
                                             pathstr[-1])                    
                 hm0max = self.domain.read_hm0max(hm0max_file=file_name,
                                                   time_range=[t0, t1 + dt1])        
-                make_wave_map_tiles(hm0max, index_path, hm0_map_path, contour_set)
+                make_wave_map_tiles(np.transpose(hm0max), index_path, hm0_map_path, contour_set)
 
 
 

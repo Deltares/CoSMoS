@@ -25,7 +25,12 @@ def post_process():
         wv = WebViewer(cosmos.config.webviewer)
         wv.make()
         
-        if cosmos.config.upload:
+        if cosmos.config.upload and os.path.isabs(cosmos.config.ftp_path):
+            try:
+                wv.copy_to_webviewer()
+            except:
+                print("An error occurred when uploading web viewer to server !!!")
+        elif cosmos.config.upload:
             current_path = os.getcwd()
             try:
                 wv.upload()
