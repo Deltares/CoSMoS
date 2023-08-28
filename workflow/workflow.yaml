@@ -89,11 +89,22 @@ spec:
           print(json.dumps(members))
 
     - name: run-sfincs
+      # To select a nodegroup with a specific instance type
+      # nodeSelector:
+      #   beta.kubernetes.io/instance-type: m5.large
       container:
         image: deltares/sfincs-cpu:latest
         name: sfincs-cpu-argo
         command: [ "/bin/bash", "-c", "--" ]
         args: [ "sfincs" ]
+      # Define resources that are needed at max and at minimum
+      resources:
+        requests:
+          memory: "1Gi"
+          cpu: "1000m"
+        limits:
+          memory: "2Gi"
+          cpu: "2000m"
       inputs:
         parameters:
           - name: member
