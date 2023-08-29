@@ -225,14 +225,14 @@ class CoSMoS_XBeach(Model):
             
             cosmos.log("Making sedimenation/erosion tiles for model " + self.name)
             # make pngs
-            make_sedero_tiles(val_masked, index_path, sedero_map_path)
+            make_sedero_tiles(np.transpose(val_masked), index_path, sedero_map_path)
             cosmos.log("Sedimentation/erosion tiles done.")
             
             zb0 = dt['zb'][0, :, :].values
             zbend = dt['zb'][-1, :, :].values
             cosmos.log("Making bedlevel tiles for model " + self.name)
-            make_bedlevel_tiles(zb0, index_path, zb0_map_path)
-            make_bedlevel_tiles(zbend, index_path, zbend_map_path)
+            make_bedlevel_tiles(np.transpose(zb0), index_path, zb0_map_path)
+            make_bedlevel_tiles(np.transpose(zbend), index_path, zbend_map_path)
             cosmos.log("Bed level tiles done.")
             
 

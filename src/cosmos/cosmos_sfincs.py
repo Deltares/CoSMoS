@@ -574,12 +574,12 @@ class CoSMoS_SFINCS(Model):
                 pathstr = []
                 
                 # 6-hour increments
-                requested_times = pd.date_range(start=t0 + dt,
-                                                end=t1,
-                                                freq=str(dtinc) + "H").to_pydatetime().tolist()
+                # requested_times = pd.date_range(start=t0 + dt,
+                #                                 end=t1,
+                #                                 freq=str(dtinc) + "H").to_pydatetime().tolist()
     
-                for it, t in enumerate(requested_times):
-                    pathstr.append((t - dt).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
+                # for it, t in enumerate(requested_times):
+                #     pathstr.append((t - dt).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
     
                 pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
                             
@@ -587,15 +587,15 @@ class CoSMoS_SFINCS(Model):
                 
                 try:
                     # Inundation map over dt-hour increments                    
-                    for it, t in enumerate(requested_times):
+                    # for it, t in enumerate(requested_times):
     
-                        zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file,
-                                                       time_range=[t - dt + dt1, t + dt1])
-                        flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-                                                      "flood_map",
-                                                      pathstr[it])                                            
-                        make_flood_map_tiles(zsmax, index_path, topo_path, flood_map_path,
-                                                 water_level_correction=0.0)
+                    #     zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file,
+                    #                                    time_range=[t - dt + dt1, t + dt1])
+                    #     flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+                    #                                   "flood_map",
+                    #                                   pathstr[it])                                            
+                    #     make_flood_map_tiles(zsmax, index_path, topo_path, flood_map_path,
+                    #                              water_level_correction=0.0)
     
                     # Full simulation        
                     flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,

@@ -318,13 +318,13 @@ class WebViewer:
             namestr = []
             
             # 24-hour increments
-            requested_times = pd.date_range(start=t0 + dt,
-                                            end=t1,
-                                            freq=str(dtinc)+"H").to_pydatetime().tolist()
+            # requested_times = pd.date_range(start=t0 + dt,
+            #                                 end=t1,
+            #                                 freq=str(dtinc)+"H").to_pydatetime().tolist()
 
-            for it, t in enumerate(requested_times):
-                pathstr.append((t - dt).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
-                namestr.append((t - dt).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC")
+            # for it, t in enumerate(requested_times):
+            #     pathstr.append((t - dt).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
+            #     namestr.append((t - dt).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC")
 
             pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
             td = t1 - t0
@@ -559,7 +559,8 @@ class WebViewer:
                     ylim = meteo_subset.y_range #[8.0, 45.0]
                     
                     if meteo_subset.x is None:
-                        t0= cosmos.scenario.cycle
+                        # t0= cosmos.scenario.cycle
+                        t0 = cosmos.cycle_time.replace(tzinfo=None)
                         t1= cosmos.stop_time
                         meteo_subset.collect([t0, t1],
                             xystride=meteo_subset.xystride,
