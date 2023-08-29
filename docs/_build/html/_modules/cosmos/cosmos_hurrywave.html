@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cosmos.cosmos_hurrywave &mdash; CoSMoS 0.1 documentation</title><link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            CoSMoS
+          </a>
+              <div class="version">
+                0.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual.html">User manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../functions.html">Functions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">CoSMoS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cosmos.cosmos_hurrywave</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cosmos.cosmos_hurrywave</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Tue May 11 16:02:04 2021</span>
+
+<span class="sd">@author: ormondt</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+
+<span class="kn">from</span> <span class="nn">.cosmos_main</span> <span class="kn">import</span> <span class="n">cosmos</span>
+<span class="kn">from</span> <span class="nn">.cosmos_model</span> <span class="kn">import</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">.cosmos_tiling</span> <span class="kn">import</span> <span class="n">make_wave_map_tiles</span>
+<span class="kn">import</span> <span class="nn">cosmos.cosmos_meteo</span> <span class="k">as</span> <span class="nn">meteo</span>
+
+<span class="kn">from</span> <span class="nn">cht.hurrywave.hurrywave</span> <span class="kn">import</span> <span class="n">HurryWave</span>
+<span class="kn">import</span> <span class="nn">cht.misc.fileops</span> <span class="k">as</span> <span class="nn">fo</span>
+<span class="kn">import</span> <span class="nn">cht.nesting.nesting</span> <span class="k">as</span> <span class="nn">nesting</span>
+
+<div class="viewcode-block" id="CoSMoS_HurryWave"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_hurrywave.CoSMoS_HurryWave.html#cosmos.cosmos_hurrywave.CoSMoS_HurryWave">[docs]</a><span class="k">class</span> <span class="nc">CoSMoS_HurryWave</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    
+<div class="viewcode-block" id="CoSMoS_HurryWave.read_model_specific"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_hurrywave.CoSMoS_HurryWave.read_model_specific.html#cosmos.cosmos_hurrywave.CoSMoS_HurryWave.read_model_specific">[docs]</a>    <span class="k">def</span> <span class="nf">read_model_specific</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        
+        <span class="c1"># Read in the HurryWave model</span>
+        
+        <span class="c1"># Now read in the domain data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span> <span class="o">=</span> <span class="n">HurryWave</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;input&quot;</span><span class="p">),</span> <span class="n">load</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Copy some attributes to the model domain (needed for nesting)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">crs</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">type</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">name</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">runid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">runid</span>        </div>
+        
+<div class="viewcode-block" id="CoSMoS_HurryWave.pre_process"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_hurrywave.CoSMoS_HurryWave.pre_process.html#cosmos.cosmos_hurrywave.CoSMoS_HurryWave.pre_process">[docs]</a>    <span class="k">def</span> <span class="nf">pre_process</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        
+        <span class="c1"># Set path temporarily to job path</span>
+        <span class="n">pth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">job_path</span>
+        
+        <span class="c1"># Start and stop times</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">tref</span>     <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">ref_date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">tstart</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wave_start_time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">tstop</span>    <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wave_stop_time</span>
+<span class="c1">#        nsecs = (self.wave_stop_time - self.wave_start_time).total_seconds()</span>
+<span class="c1">#        self.domain.input.dtmaxout = nsecs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">dtmaxout</span> <span class="o">=</span> <span class="mf">21600.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">dtmapout</span> <span class="o">=</span> <span class="mf">21600.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">outputformat</span> <span class="o">=</span> <span class="s2">&quot;net&quot;</span>
+
+        <span class="c1"># Boundary conditions        </span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wave_nested</span><span class="p">:</span>
+
+            <span class="c1"># Get boundary conditions from overall model (Nesting 2)</span>
+            <span class="n">nesting</span><span class="o">.</span><span class="n">nest2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wave_nested</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
+                          <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
+                          <span class="n">output_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">wave_nested</span><span class="o">.</span><span class="n">cycle_output_path</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">bspfile</span> <span class="o">=</span> <span class="s2">&quot;hurrywave.bsp&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">boundary_conditions</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+                    
+        <span class="c1"># Meteo forcing</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meteo_atmospheric_pressure</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meteo_precipitation</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">meteo_wind</span><span class="p">:</span>
+
+            <span class="n">meteo</span><span class="o">.</span><span class="n">write_meteo_input_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                          <span class="s2">&quot;hurrywave&quot;</span><span class="p">,</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">tref</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">amufile</span> <span class="o">=</span> <span class="s2">&quot;hurrywave.amu&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">amvfile</span> <span class="o">=</span> <span class="s2">&quot;hurrywave.amv&quot;</span>
+    
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">meteo_spiderweb</span> <span class="ow">or</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">track_ensemble</span><span class="p">:</span>
+            
+            <span class="c1"># Spiderweb file given, copy to job folder</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">meteo_spiderweb</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">spwfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meteo_spiderweb</span>
+                <span class="n">meteo_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">main_path</span><span class="p">,</span> <span class="s2">&quot;meteo&quot;</span><span class="p">,</span> <span class="s2">&quot;spiderwebs&quot;</span><span class="p">)</span>
+                <span class="n">fo</span><span class="o">.</span><span class="n">copy_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">meteo_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">meteo_spiderweb</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">track_ensemble</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">spwfile</span> <span class="o">=</span> <span class="s2">&quot;hurrywave.spw&quot;</span>
+                <span class="n">fo</span><span class="o">.</span><span class="n">copy_file</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">best_track_file</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">,</span> <span class="s2">&quot;hurrywave.spw&quot;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">amufile</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">amvfile</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Make observation points</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="p">:</span>
+
+            <span class="k">for</span> <span class="n">station</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">obsfile</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">obsfile</span> <span class="o">=</span> <span class="s2">&quot;hurrywave.obs&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">observation_points_regular</span><span class="o">.</span><span class="n">add_point</span><span class="p">(</span><span class="n">station</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+                                                                 <span class="n">station</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+                                                                 <span class="n">station</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="c1">#            self.domain.write_observation_points()</span>
+                
+        <span class="c1"># Add observation points for nested models (Nesting 1)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nested_wave_models</span><span class="p">:</span>
+            
+            <span class="k">for</span> <span class="n">nested_model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nested_wave_models</span><span class="p">:</span>
+
+                <span class="n">specout</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">nested_model</span><span class="o">.</span><span class="n">type</span><span class="o">==</span><span class="s2">&quot;xbeach&quot;</span><span class="p">:</span>
+                    <span class="n">specout</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">nesting</span><span class="o">.</span><span class="n">nest1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span> <span class="n">nested_model</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span> <span class="n">option</span><span class="o">=</span><span class="s2">&quot;sp2&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">nested_model</span><span class="o">.</span><span class="n">type</span><span class="o">==</span><span class="s2">&quot;sfincs&quot;</span><span class="p">:</span>
+                    <span class="c1"># No sp2 output</span>
+                    <span class="n">nested_model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">bwvfile</span> <span class="o">=</span> <span class="s2">&quot;snapwave.bnd&quot;</span>
+                    <span class="n">nested_model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">read_wave_boundary_points</span><span class="p">()</span>
+                    <span class="n">nesting</span><span class="o">.</span><span class="n">nest1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span> <span class="n">nested_model</span><span class="o">.</span><span class="n">domain</span><span class="p">)</span>
+                    <span class="n">nested_model</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">bwvfile</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">specout</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">nesting</span><span class="o">.</span><span class="n">nest1</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span> <span class="n">nested_model</span><span class="o">.</span><span class="n">domain</span><span class="p">)</span>
+                    
+            <span class="k">if</span> <span class="n">specout</span><span class="p">:</span>        
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">ospfile</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">ospfile</span> <span class="o">=</span> <span class="s2">&quot;hurrywave.osp&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">observation_points_sp2</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>                             
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">dtsp2out</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">dtsp2out</span> <span class="o">=</span> <span class="mf">3600.0</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">observation_points_regular</span><span class="o">.</span><span class="n">gdf</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">obsfile</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">obsfile</span> <span class="o">=</span> <span class="s2">&quot;hurrywave.obs&quot;</span>            
+            <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">observation_points_regular</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+
+        <span class="c1"># Make restart file</span>
+        <span class="n">trstsec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">tstop</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">tref</span>            
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">meteo_subset</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">meteo_subset</span><span class="o">.</span><span class="n">last_analysis_time</span><span class="p">:</span>
+                <span class="n">trstsec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meteo_subset</span><span class="o">.</span><span class="n">last_analysis_time</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">tref</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">trstout</span>  <span class="o">=</span> <span class="n">trstsec</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">dtrstout</span> <span class="o">=</span> <span class="mf">0.0</span>
+        
+        <span class="c1"># Get restart file from previous cycle</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wave_restart_file</span><span class="p">:</span>
+            <span class="n">src</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">restart_wave_path</span><span class="p">,</span>
+                               <span class="bp">self</span><span class="o">.</span><span class="n">wave_restart_file</span><span class="p">)</span>
+            <span class="n">dst</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">,</span>
+                               <span class="s2">&quot;hurrywave.rst&quot;</span><span class="p">)</span>
+            <span class="n">fo</span><span class="o">.</span><span class="n">copy_file</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">rstfile</span> <span class="o">=</span> <span class="s2">&quot;hurrywave.rst&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">tspinup</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="c1"># Now write input file (sfincs.inp)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+
+        <span class="c1"># Make run batch file</span>
+        <span class="n">batch_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">,</span> <span class="s2">&quot;run.bat&quot;</span><span class="p">)</span>
+        <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">batch_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;@ echo off</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;DATE /T &gt; running.txt</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">exe_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">hurrywave_exe_path</span><span class="p">,</span> <span class="s2">&quot;hurrywave.exe&quot;</span><span class="p">)</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">exe_path</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;move running.txt finished.txt</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># fid.write(&quot;exit\n&quot;)</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c1"># Now loop through ensemble members</span>
+        <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">track_ensemble</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="p">:</span>
+            
+            <span class="c1"># Use main folder as best_track folder with spiderweb forcing</span>
+            <span class="c1"># os.rename(self.job_path, self.job_path + &quot;_besttrack&quot;)</span>
+            <span class="n">fo</span><span class="o">.</span><span class="n">copy_file</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">best_track_file</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">,</span> <span class="s2">&quot;hurrywave.spw&quot;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">spwfile</span> <span class="o">=</span> <span class="s2">&quot;hurrywave.spw&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">amufile</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">amvfile</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+
+            <span class="k">for</span> <span class="n">member_name</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">member_names</span><span class="p">:</span>
+                
+                <span class="c1"># Job path for this ensemble member</span>
+                <span class="n">member_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">job_path</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">member_name</span>
+                <span class="n">fo</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">member_path</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">member_path</span>
+
+                <span class="c1"># Boundary conditions </span>
+                <span class="n">zcor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundary_water_level_correction</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertical_reference_level_difference_with_msl</span>
+       
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wave_nested</span><span class="p">:</span>
+                    <span class="c1"># Get boundary conditions from overall model (Nesting 2)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wave_nested</span><span class="o">.</span><span class="n">ensemble</span><span class="p">:</span>
+                         <span class="n">output_file</span> <span class="o">=</span> <span class="s2">&quot;hurrywave_sp2_&quot;</span> <span class="o">+</span> <span class="n">member_name</span> <span class="o">+</span> <span class="s1">&#39;.nc&#39;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">output_file</span> <span class="o">=</span> <span class="kc">None</span>
+
+                    <span class="n">nesting</span><span class="o">.</span><span class="n">nest2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wave_nested</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
+                        <span class="n">output_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">wave_nested</span><span class="o">.</span><span class="n">cycle_output_path</span><span class="p">,</span>
+                        <span class="n">output_file</span><span class="o">=</span> <span class="n">output_file</span><span class="p">,</span>
+                        <span class="n">boundary_water_level_correction</span><span class="o">=</span><span class="n">zcor</span><span class="p">)</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">bspfile</span> <span class="o">=</span> <span class="s2">&quot;hurrywave.bsp&quot;</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">bndfile</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;..</span><span class="se">\\</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">)</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">hurrywave.bnd&quot;</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">boundary_conditions</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+                
+                <span class="c1"># Copy spw file to member path</span>
+                <span class="n">meteo_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">main_path</span><span class="p">,</span> <span class="s2">&quot;meteo&quot;</span><span class="p">)</span>
+                <span class="n">spwfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">meteo_path</span><span class="p">,</span>
+                                       <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">track_ensemble</span><span class="p">,</span>
+                                       <span class="n">member_name</span> <span class="o">+</span> <span class="s2">&quot;.spw&quot;</span><span class="p">)</span>
+                <span class="n">fo</span><span class="o">.</span><span class="n">copy_file</span><span class="p">(</span><span class="n">spwfile</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">member_path</span><span class="p">,</span> <span class="s2">&quot;hurrywave.spw&quot;</span><span class="p">))</span>
+                
+                <span class="c1"># Adjust input and save to .inp file</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">spwfile</span> <span class="o">=</span> <span class="s2">&quot;hurrywave.spw&quot;</span>  
+                <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">amufile</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">amvfile</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">depfile</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;..</span><span class="se">\\</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">)</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">hurrywave.dep&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">mskfile</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;..</span><span class="se">\\</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">)</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">hurrywave.msk&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">obsfile</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;..</span><span class="se">\\</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">)</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">hurrywave.obs&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">ospfile</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;..</span><span class="se">\\</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">)</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">hurrywave.osp&quot;</span>
+
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+                <span class="n">fo</span><span class="o">.</span><span class="n">copy_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_path</span><span class="p">,</span> <span class="s1">&#39;run.bat&#39;</span><span class="p">),</span> <span class="n">member_path</span><span class="p">)</span>
+
+        <span class="c1"># Set the path back to the one in cosmos\models\etc.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">pth</span></div>
+
+<div class="viewcode-block" id="CoSMoS_HurryWave.move"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_hurrywave.CoSMoS_HurryWave.move.html#cosmos.cosmos_hurrywave.CoSMoS_HurryWave.move">[docs]</a>    <span class="k">def</span> <span class="nf">move</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        
+        <span class="c1"># Move files from job folder to archive folder</span>
+        
+        <span class="c1"># First clear archive folder      </span>
+        
+        <span class="n">job_path</span>    <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">job_path</span>
+
+        <span class="c1"># Delete finished.txt file</span>
+        <span class="c1"># fo.delete_file(os.path.join(job_path, &quot;finished.txt&quot;))</span>
+        
+        <span class="n">output_path</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cycle_output_path</span>
+        <span class="n">input_path</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cycle_input_path</span>  
+        <span class="n">restart_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">restart_wave_path</span>
+        
+        <span class="c1"># Output        </span>
+        <span class="n">fo</span><span class="o">.</span><span class="n">move_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">job_path</span><span class="p">,</span> <span class="s2">&quot;hurrywave_map.nc&quot;</span><span class="p">),</span> <span class="n">output_path</span><span class="p">)</span>
+        <span class="n">fo</span><span class="o">.</span><span class="n">move_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">job_path</span><span class="p">,</span> <span class="s2">&quot;hurrywave_his.nc&quot;</span><span class="p">),</span> <span class="n">output_path</span><span class="p">)</span>
+        <span class="n">fo</span><span class="o">.</span><span class="n">move_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">job_path</span><span class="p">,</span> <span class="s2">&quot;hurrywave_sp2.nc&quot;</span><span class="p">),</span> <span class="n">output_path</span><span class="p">)</span>
+        <span class="n">fo</span><span class="o">.</span><span class="n">move_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">job_path</span><span class="p">,</span> <span class="s2">&quot;*.txt&quot;</span><span class="p">),</span> <span class="n">output_path</span><span class="p">)</span>
+
+        <span class="n">fo</span><span class="o">.</span><span class="n">move_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">job_path</span><span class="p">,</span> <span class="s2">&quot;hurrywave.rst&quot;</span><span class="p">),</span> <span class="n">input_path</span><span class="p">)</span>
+
+        <span class="c1"># Restart files </span>
+        <span class="n">fo</span><span class="o">.</span><span class="n">move_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">job_path</span><span class="p">,</span> <span class="s2">&quot;*.rst&quot;</span><span class="p">),</span> <span class="n">restart_path</span><span class="p">)</span>
+
+        <span class="c1"># Input</span>
+        <span class="n">fo</span><span class="o">.</span><span class="n">move_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">job_path</span><span class="p">,</span> <span class="s2">&quot;*.*&quot;</span><span class="p">),</span> <span class="n">input_path</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">track_ensemble</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="p">:</span>
+            <span class="c1"># And now for the ensemble members</span>
+            <span class="c1"># Only output</span>
+            <span class="k">for</span> <span class="n">member_name</span> <span class="ow">in</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">member_names</span><span class="p">:</span>
+                
+                <span class="n">pth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">job_path</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">member_name</span>
+
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pth</span><span class="p">,</span> <span class="s2">&quot;hurrywave_his.nc&quot;</span><span class="p">)):</span>
+                    <span class="n">fo</span><span class="o">.</span><span class="n">move_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pth</span><span class="p">,</span> <span class="s2">&quot;hurrywave_his.nc&quot;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cycle_output_path</span><span class="p">,</span> <span class="s1">&#39;hurrywave_his_&#39;</span><span class="o">+</span> <span class="n">member_name</span> <span class="o">+</span><span class="s1">&#39;.nc&#39;</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pth</span><span class="p">,</span> <span class="s2">&quot;hurrywave_map.nc&quot;</span><span class="p">)):</span>
+                    <span class="n">fo</span><span class="o">.</span><span class="n">move_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pth</span><span class="p">,</span> <span class="s2">&quot;hurrywave_map.nc&quot;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cycle_output_path</span><span class="p">,</span> <span class="s1">&#39;hurrywave_map_&#39;</span><span class="o">+</span> <span class="n">member_name</span> <span class="o">+</span><span class="s1">&#39;.nc&#39;</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pth</span><span class="p">,</span> <span class="s2">&quot;hurrywave_sp2.nc&quot;</span><span class="p">)):</span>
+                    <span class="n">fo</span><span class="o">.</span><span class="n">move_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pth</span><span class="p">,</span> <span class="s2">&quot;hurrywave_sp2.nc&quot;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cycle_output_path</span><span class="p">,</span> <span class="s1">&#39;hurrywave_sp2_&#39;</span><span class="o">+</span> <span class="n">member_name</span> <span class="o">+</span><span class="s1">&#39;.nc&#39;</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pth</span><span class="p">,</span> <span class="s2">&quot;hurrywave.rst&quot;</span><span class="p">)):</span>
+                    <span class="n">fo</span><span class="o">.</span><span class="n">move_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pth</span><span class="p">,</span> <span class="s2">&quot;hurrywave.rst&quot;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cycle_output_path</span><span class="p">,</span> <span class="s1">&#39;hurrywave_&#39;</span><span class="o">+</span> <span class="n">member_name</span> <span class="o">+</span><span class="s1">&#39;.rst&#39;</span><span class="p">))</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">pth</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="c1"># Folder was probably open in another application</span>
+                    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="CoSMoS_HurryWave.post_process"><a class="viewcode-back" href="../../_generated/cosmos.cosmos_hurrywave.CoSMoS_HurryWave.post_process.html#cosmos.cosmos_hurrywave.CoSMoS_HurryWave.post_process">[docs]</a>    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+        <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+        <span class="kn">import</span> <span class="nn">cht.misc.prob_maps</span> <span class="k">as</span> <span class="nn">pm</span>
+        <span class="c1"># Extract water levels</span>
+
+        <span class="n">input_path</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cycle_input_path</span>
+        <span class="n">output_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cycle_output_path</span>
+        <span class="n">post_path</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cycle_post_path</span>
+            
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">tref</span><span class="p">:</span>
+            <span class="c1"># This model has been run before. The model instance has not data on tref, obs points etc.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">read_input_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">input_path</span><span class="p">,</span> <span class="s2">&quot;hurrywave.inp&quot;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">read_observation_points</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">track_ensemble</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="p">:</span>
+            
+            <span class="c1"># Make probabilistic flood maps</span>
+            <span class="n">file_list</span><span class="o">=</span> <span class="n">fo</span><span class="o">.</span><span class="n">list_files</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s2">&quot;hurrywave_map_*&quot;</span><span class="p">))</span>
+            <span class="n">prcs</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)))</span>
+            <span class="nb">vars</span><span class="o">=</span> <span class="p">[</span><span class="s2">&quot;hm0&quot;</span><span class="p">,</span> <span class="s2">&quot;tp&quot;</span><span class="p">]</span>
+            <span class="n">output_file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s2">&quot;hurrywave_map_ensemble.nc&quot;</span><span class="p">)</span>
+            <span class="c1">#pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)</span>
+
+            <span class="c1"># Make probabilistic wave timeseries</span>
+            <span class="n">file_list</span><span class="o">=</span> <span class="n">fo</span><span class="o">.</span><span class="n">list_files</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s2">&quot;hurrywave_his_*&quot;</span><span class="p">))</span>
+            <span class="n">prcs</span><span class="o">=</span> <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">]</span><span class="c1">#np.concatenate((np.arange(0, 0.9, 0.05), np.arange(0.9, 1, 0.01)))</span>
+            <span class="nb">vars</span><span class="o">=</span> <span class="p">[</span><span class="s2">&quot;point_hm0&quot;</span><span class="p">,</span> <span class="s2">&quot;point_tp&quot;</span><span class="p">]</span>
+            <span class="n">output_file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s2">&quot;hurrywave_his_ensemble.nc&quot;</span><span class="p">)</span>
+            <span class="n">pm</span><span class="o">.</span><span class="n">prob_floodmaps</span><span class="p">(</span><span class="n">file_list</span><span class="o">=</span><span class="n">file_list</span><span class="p">,</span> <span class="n">variables</span><span class="o">=</span><span class="nb">vars</span><span class="p">,</span> <span class="n">prcs</span><span class="o">=</span><span class="n">prcs</span><span class="p">,</span> <span class="n">delete</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">output_file_name</span><span class="o">=</span><span class="n">output_file_name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="p">:</span>
+
+            <span class="n">vhm0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">read_timeseries_output</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">output_path</span><span class="p">,</span>
+                                                      <span class="n">parameter</span><span class="o">=</span><span class="s2">&quot;hm0&quot;</span><span class="p">)</span>
+            <span class="n">vtp</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">read_timeseries_output</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">output_path</span><span class="p">,</span>
+                                                      <span class="n">parameter</span><span class="o">=</span><span class="s2">&quot;tp&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">station</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="p">:</span>                
+                
+                <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">vhm0</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+                <span class="c1"># df.index=vhm0.index</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;date_time&#39;</span>
+                <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Hm0&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">vhm0</span><span class="p">[</span><span class="n">station</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+                <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Tp&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">vtp</span><span class="p">[</span><span class="n">station</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">track_ensemble</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensemble</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">prcs</span><span class="p">):</span>
+                        <span class="n">vhm0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">read_timeseries_output</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">output_path</span><span class="p">,</span>
+                                            <span class="n">file_name</span><span class="o">=</span> <span class="s2">&quot;hurrywave_his_ensemble.nc&quot;</span><span class="p">,</span>
+                                            <span class="n">parameter</span><span class="o">=</span> <span class="s2">&quot;hm0_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">v</span><span class="o">*</span><span class="mi">100</span><span class="p">)))</span>
+                        <span class="n">vtp</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">read_timeseries_output</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">output_path</span><span class="p">,</span>
+                                            <span class="n">file_name</span><span class="o">=</span> <span class="s2">&quot;hurrywave_his_ensemble.nc&quot;</span><span class="p">,</span>
+                                            <span class="n">parameter</span><span class="o">=</span><span class="s2">&quot;tp_&quot;</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">v</span><span class="o">*</span><span class="mi">100</span><span class="p">)))</span>
+                        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Hm0_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">v</span><span class="o">*</span><span class="mi">100</span><span class="p">))]</span><span class="o">=</span><span class="n">vhm0</span><span class="p">[</span><span class="n">station</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+                        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Tp_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">v</span><span class="o">*</span><span class="mi">100</span><span class="p">))]</span><span class="o">=</span><span class="n">vtp</span><span class="p">[</span><span class="n">station</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+
+                <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">post_path</span><span class="p">,</span>
+                                         <span class="s2">&quot;waves.&quot;</span> <span class="o">+</span> <span class="n">station</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.csv&quot;</span><span class="p">)</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span>
+                          <span class="n">date_format</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S&#39;</span><span class="p">,</span>
+                          <span class="n">float_format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.3f</span><span class="s1">&#39;</span><span class="p">)</span>        
+
+
+        <span class="c1"># Make wave map tiles</span>
+        <span class="k">if</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">make_wave_maps</span><span class="p">:</span>
+
+            <span class="c1"># 24 hour increments  </span>
+            <span class="n">dtinc</span> <span class="o">=</span> <span class="mi">24</span>
+
+            <span class="c1"># Wave map for the entire simulation</span>
+            <span class="n">dt1</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">dt</span>  <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="n">dtinc</span><span class="p">)</span>
+            <span class="n">t0</span>  <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">cycle_time</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>    
+            <span class="n">t1</span>  <span class="o">=</span> <span class="n">cosmos</span><span class="o">.</span><span class="n">stop_time</span>
+            
+            <span class="c1"># Determine if wave maps can be made</span>
+            <span class="n">okay</span>  <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">index_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;tiling&quot;</span><span class="p">,</span> <span class="s2">&quot;indices&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_wave_map</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">index_path</span><span class="p">):</span>            
+                 <span class="n">okay</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">if</span> <span class="n">okay</span><span class="p">:</span>
+
+                <span class="n">cosmos</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Making wave map tiles for model &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">long_name</span> <span class="o">+</span> <span class="s2">&quot; ...&quot;</span><span class="p">)</span>                
+
+                <span class="n">contour_set</span> <span class="o">=</span> <span class="s2">&quot;Hm0&quot;</span>            
+                <span class="n">pathstr</span> <span class="o">=</span> <span class="p">[]</span>
+                
+                <span class="c1"># 6-hour increments</span>
+                <span class="n">requested_times</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">t0</span> <span class="o">+</span> <span class="n">dt</span><span class="p">,</span>
+                                                <span class="n">end</span><span class="o">=</span><span class="n">t1</span><span class="p">,</span>
+                                                <span class="n">freq</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">dtinc</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;H&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_pydatetime</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    
+                <span class="k">for</span> <span class="n">it</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">requested_times</span><span class="p">):</span>
+                    <span class="n">pathstr</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">t</span> <span class="o">-</span> <span class="n">dt</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%HZ&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%HZ&quot;</span><span class="p">))</span>
+    
+                <span class="n">pathstr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;combined_&quot;</span> <span class="o">+</span> <span class="p">(</span><span class="n">t0</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%HZ&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="p">(</span><span class="n">t1</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%HZ&quot;</span><span class="p">))</span>
+                            
+                <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cycle_output_path</span><span class="p">,</span> <span class="s2">&quot;hurrywave_map.nc&quot;</span><span class="p">)</span>
+                
+                <span class="c1"># Wave map over dt-hour increments                    </span>
+                <span class="k">for</span> <span class="n">it</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">requested_times</span><span class="p">):</span>
+                    <span class="n">hm0max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">read_hm0max</span><span class="p">(</span><span class="n">hm0max_file</span><span class="o">=</span><span class="n">file_name</span><span class="p">,</span>
+                                                      <span class="n">time_range</span><span class="o">=</span><span class="p">[</span><span class="n">t</span> <span class="o">-</span> <span class="n">dt</span> <span class="o">+</span> <span class="n">dt1</span><span class="p">,</span> <span class="n">t</span> <span class="o">+</span> <span class="n">dt1</span><span class="p">])</span>                        
+                    <span class="n">hm0_map_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">cycle_tiles_path</span><span class="p">,</span>
+                                                <span class="s2">&quot;hm0&quot;</span><span class="p">,</span>
+                                                <span class="n">pathstr</span><span class="p">[</span><span class="n">it</span><span class="p">])</span>                        
+                    <span class="n">make_wave_map_tiles</span><span class="p">(</span><span class="n">hm0max</span><span class="p">,</span> <span class="n">index_path</span><span class="p">,</span> <span class="n">hm0_map_path</span><span class="p">,</span> <span class="n">contour_set</span><span class="p">)</span>
+
+                <span class="c1"># Full simulation        </span>
+                <span class="n">hm0_map_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cosmos</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">cycle_tiles_path</span><span class="p">,</span>
+                                            <span class="s2">&quot;hm0&quot;</span><span class="p">,</span>
+                                            <span class="n">pathstr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>                    
+                <span class="n">hm0max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">read_hm0max</span><span class="p">(</span><span class="n">hm0max_file</span><span class="o">=</span><span class="n">file_name</span><span class="p">,</span>
+                                                  <span class="n">time_range</span><span class="o">=</span><span class="p">[</span><span class="n">t0</span><span class="p">,</span> <span class="n">t1</span> <span class="o">+</span> <span class="n">dt1</span><span class="p">])</span>        
+                <span class="n">make_wave_map_tiles</span><span class="p">(</span><span class="n">hm0max</span><span class="p">,</span> <span class="n">index_path</span><span class="p">,</span> <span class="n">hm0_map_path</span><span class="p">,</span> <span class="n">contour_set</span><span class="p">)</span></div></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="c1">#         # Make wave map tiles</span>
+<span class="c1"># #        if cosmos.config.make_wave_maps and self.make_wave_map and not cosmos.config.webviewer:</span>
+<span class="c1">#         if cosmos.config.make_wave_maps and self.make_wave_map:</span>
+
+<span class="c1">#             index_path = os.path.join(self.path, &quot;tiling&quot;, &quot;indices&quot;)</span>
+            
+<span class="c1">#             if os.path.exists(index_path):</span>
+                
+<span class="c1">#                 if self.domain.input.outputformat[0:2] == &quot;bin&quot;:</span>
+<span class="c1">#                     file_name = os.path.join(output_path, &quot;hm0max.dat&quot;)</span>
+<span class="c1">#                 elif self.domain.input.outputformat[0:2] == &quot;asc&quot;:</span>
+<span class="c1">#                     file_name = os.path.join(output_path, &quot;hm0max.txt&quot;)</span>
+<span class="c1">#                 else:</span>
+<span class="c1">#                     file_name = os.path.join(output_path, &quot;hurrywave_map.nc&quot;)</span>
+
+
+
+                
+<span class="c1">#                 # 6-hour increments</span>
+<span class="c1">#                 requested_times = pd.date_range(start=t0 + dt6,</span>
+<span class="c1">#                                                 end=t1,</span>
+<span class="c1">#                                                 freq=&#39;6H&#39;).to_pydatetime().tolist()</span>
+    
+<span class="c1">#                 for it, t in enumerate(requested_times):</span>
+<span class="c1">#                     pathstr.append((t - dt6).strftime(&quot;%Y%m%d_%HZ&quot;) + &quot;_&quot; + (t).strftime(&quot;%Y%m%d_%HZ&quot;))</span>
+<span class="c1">#                     namestr.append((t - dt6).strftime(&quot;%Y-%m-%d %H:%M&quot;) + &quot; - &quot; + (t).strftime(&quot;%Y-%m-%d %H:%M&quot;) + &quot; UTC&quot;)</span>
+    
+<span class="c1">#                 pathstr.append(&quot;combined_&quot; + (t0).strftime(&quot;%Y%m%d_%HZ&quot;) + &quot;_&quot; + (t1).strftime(&quot;%Y%m%d_%HZ&quot;))</span>
+<span class="c1">#                 td = t1 - t0</span>
+<span class="c1">#                 hrstr = str(int(td.days * 24 + td.seconds/3600))</span>
+<span class="c1">#                 namestr.append(&quot;Combined &quot; + hrstr + &quot;-hour forecast&quot;)</span>
+                    
+<span class="c1">#                 for model in cosmos.scenario.model:</span>
+<span class="c1">#                     if model.type==&quot;hurrywave&quot;:</span>
+<span class="c1">#                         index_path = os.path.join(model.path, &quot;tiling&quot;, &quot;indices&quot;)            </span>
+<span class="c1">#                         if model.make_wave_map and os.path.exists(index_path):                            </span>
+                            
+<span class="c1">#                             cosmos.log(&quot;Making wave map tiles for model &quot; + model.long_name + &quot; ...&quot;)                </span>
+        
+<span class="c1">#                             file_name = os.path.join(model.cycle_output_path, &quot;hurrywave_map.nc&quot;)</span>
+                            
+<span class="c1">#                             # Wave map over 6-hour increments                    </span>
+<span class="c1">#                             for it, t in enumerate(requested_times):</span>
+<span class="c1">#                                 hm0max = model.domain.read_hm0max(hm0max_file=file_name,</span>
+<span class="c1">#                                                                   time_range=[t - dt1, t + dt1])                        </span>
+<span class="c1">#                                 hm0_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,</span>
+<span class="c1">#                                                             &quot;hm0&quot;,</span>
+<span class="c1">#                                                             pathstr[it])                        </span>
+<span class="c1">#                                 make_wave_map_tiles(hm0max, index_path, hm0_map_path, contour_set)</span>
+        
+<span class="c1">#                             # Full simulation        </span>
+<span class="c1">#                             hm0_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,</span>
+<span class="c1">#                                                         &quot;hm0&quot;,</span>
+<span class="c1">#                                                         pathstr[-1])                    </span>
+<span class="c1">#                             hm0max = model.domain.read_hm0max(hm0max_file=file_name,</span>
+<span class="c1">#                                                               time_range=[t0, t1 + dt1])        </span>
+<span class="c1">#                             make_wave_map_tiles(hm0max, index_path, hm0_map_path, contour_set)</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="c1">#                 # Wave map for the entire simulation</span>
+<span class="c1">#                 dt1 = datetime.timedelta(hours=1)</span>
+<span class="c1"># #                dt6 = datetime.timedelta(hours=6)</span>
+<span class="c1">#                 dt24 = datetime.timedelta(hours=24)</span>
+<span class="c1"># #                dt7 = datetime.timedelta(hours=7)</span>
+<span class="c1">#                 t0 = cosmos.cycle_time.replace(tzinfo=None)    </span>
+<span class="c1">#                 t1 = cosmos.stop_time</span>
+<span class="c1">#                 tr = [t0 + dt7, t1 + dt1]</span>
+<span class="c1">#                 tstr = &quot;combined_&quot; + (t0).strftime(&quot;%Y%m%d_%HZ&quot;) + &quot;_&quot; + (t1).strftime(&quot;%Y%m%d_%HZ&quot;)</span>
+<span class="c1">#                 ttlstr = &quot;Combined 48-hour forecast&quot;</span>
+
+<span class="c1">#                 hm0_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,</span>
+<span class="c1">#                                             &quot;hm0&quot;,</span>
+<span class="c1">#                                             tstr)</span>
+
+<span class="c1">#                 hm0max = self.domain.read_hm0max(hm0max_file=file_name,</span>
+<span class="c1">#                                                   time_range=tr)</span>
+    
+<span class="c1">#                 make_wave_map_tiles(hm0max, index_path, hm0_map_path,&quot;Hm0&quot;)</span>
+
+<span class="c1">#                 # Wave map over 6-hour increments</span>
+                
+<span class="c1">#                 # Loop through time</span>
+<span class="c1">#                 t0 = cosmos.cycle_time.replace(tzinfo=None)    </span>
+<span class="c1">#                 requested_times = pd.date_range(start=t0 + dt6,</span>
+<span class="c1">#                                           end=t1,</span>
+<span class="c1">#                                           freq=&#39;6H&#39;).to_pydatetime().tolist()</span>
+                
+<span class="c1">#                 cosmos.log(&quot;Making wave map tiles ...&quot;)    </span>
+<span class="c1">#                 for it, t in enumerate(requested_times):</span>
+<span class="c1">#                     tr = [t - dt1, t + dt1]</span>
+<span class="c1">#                     hm0max = self.domain.read_hm0max(hm0max_file=file_name,</span>
+<span class="c1">#                                                       time_range=tr)</span>
+                    
+<span class="c1">#                     tstr = (t - dt6).strftime(&quot;%Y%m%d_%HZ&quot;) + &quot;_&quot; + (t).strftime(&quot;%Y%m%d_%HZ&quot;)</span>
+<span class="c1">#                     ttlstr = (t - dt6).strftime(&quot;%Y-%m-%d %H:%M&quot;) + &quot; - &quot; + (t).strftime(&quot;%Y-%m-%d %H:%M&quot;) + &quot; UTC&quot;</span>
+<span class="c1">#                     hm0_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,</span>
+<span class="c1">#                                                 &quot;hm0&quot;,</span>
+<span class="c1">#                                                 tstr)</span>
+                    
+<span class="c1">#                     make_wave_map_tiles(hm0max, index_path, hm0_map_path,&quot;Hm0&quot;)</span>
+
+<span class="c1">#                 cosmos.log(&quot;Wave map tiles done.&quot;)    </span>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Deltares.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

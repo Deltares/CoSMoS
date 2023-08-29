@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cht.sfincs.sfincs &mdash; CoSMoS 0.1 documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            CoSMoS
+          </a>
+              <div class="version">
+                0.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../manual.html">User manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../functions.html">Functions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">CoSMoS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cht.sfincs.sfincs</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cht.sfincs.sfincs</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Sat May 15 08:08:40 2021</span>
+
+<span class="sd">@author: ormondt</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="c1">#import gdal</span>
+<span class="c1">#import subprocess</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="c1">#from matplotlib import pyplot as plt</span>
+<span class="kn">from</span> <span class="nn">pandas.tseries.offsets</span> <span class="kn">import</span> <span class="n">DateOffset</span>
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">pyproj</span> <span class="kn">import</span> <span class="n">CRS</span>
+<span class="kn">from</span> <span class="nn">pyproj</span> <span class="kn">import</span> <span class="n">Transformer</span>
+
+<span class="kn">from</span> <span class="nn">cht.misc.geometry</span> <span class="kn">import</span> <span class="n">RegularGrid</span>
+<span class="kn">from</span> <span class="nn">cht.misc.geometry</span> <span class="kn">import</span> <span class="n">Point</span>
+<span class="kn">from</span> <span class="nn">cht.misc.deltares_ini</span> <span class="kn">import</span> <span class="n">IniStruct</span>
+<span class="kn">from</span> <span class="nn">cht.tiling</span> <span class="kn">import</span> <span class="n">tiling</span>
+
+<div class="viewcode-block" id="SFINCS"><a class="viewcode-back" href="../../../_generated/cosmos.cosmos_sfincs.SFINCS.html#cosmos.cosmos_sfincs.SFINCS">[docs]</a><span class="k">class</span> <span class="nc">SFINCS</span><span class="p">:</span>
+    
+<div class="viewcode-block" id="SFINCS.__init__"><a class="viewcode-back" href="../../../_generated/cosmos.cosmos_sfincs.SFINCS.html#cosmos.cosmos_sfincs.SFINCS.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+ 
+<span class="c1">#        self.epsg                     = epsg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input</span>                    <span class="o">=</span> <span class="n">SfincsInput</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crs</span>                      <span class="o">=</span> <span class="n">crs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid</span>                     <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span>                     <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flow_boundary_point</span>      <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wave_boundary_point</span>      <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">observation_point</span>        <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obstacle</span>                 <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">if</span> <span class="n">input_file</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">input_file</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">input_file</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputfile</span><span class="p">):</span>
+        <span class="c1"># Reads sfincs.inp and attribute files</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_input_file</span><span class="p">(</span><span class="n">inputfile</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_attribute_files</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">read_input_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputfile</span><span class="p">):</span>
+        
+        <span class="c1"># Reads sfincs.inp</span>
+        
+        <span class="c1"># Get the path of sfincs.inp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">inputfile</span><span class="p">)</span>
+        
+        <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">inputfile</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">fid</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="nb">str</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+               <span class="c1"># Empty line</span>
+               <span class="k">continue</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">val</span>  <span class="o">=</span> <span class="nb">str</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># First try to convert to int</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># Now try to convert to float</span>
+                    <span class="n">val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;tref&quot;</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">val</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">val</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(),</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1"> %H%M%S&#39;</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">val</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;tstart&quot;</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">val</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">val</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(),</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1"> %H%M%S&#39;</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">val</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;tstop&quot;</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">val</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">val</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(),</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1"> %H%M%S&#39;</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">val</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">write_input_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">input_file</span><span class="p">:</span>
+            <span class="n">input_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;sfincs.inp&quot;</span><span class="p">)</span>
+            
+        <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;float&quot;</span><span class="p">:</span>
+                    <span class="n">string</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;int&quot;</span><span class="p">:</span>
+                    <span class="n">string</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+                    <span class="n">valstr</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+                        <span class="n">valstr</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+                    <span class="n">string</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">valstr</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">):</span>
+                    <span class="n">dstr</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2"> %H%M%S&quot;</span><span class="p">)</span>
+                    <span class="n">string</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">dstr</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">string</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>                
+                <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>    
+                       
+    <span class="k">def</span> <span class="nf">read_attribute_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># Grid</span>
+<span class="c1">#        self.grid = SfincsGrid()</span>
+
+        <span class="c1"># Flow boundary conditions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_flow_boundary_points</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_flow_boundary_conditions</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_astro_boundary_conditions</span><span class="p">()</span>
+
+        <span class="c1"># Wave boundary conditions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_wave_boundary_points</span><span class="p">()</span>
+        <span class="c1"># self.read_wave_boundary_conditions()</span>
+
+        <span class="c1"># Observation points</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_observation_points</span><span class="p">()</span>
+
+<span class="c1">#        self.grid.compute_coordinates(x0,y0,dx,dy,nx,ny,rotation)</span>
+    
+    <span class="k">def</span> <span class="nf">read_index_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+        
+    <span class="k">def</span> <span class="nf">read_depth_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">read_mask_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+    
+    <span class="k">def</span> <span class="nf">write_index_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">write_depth_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">write_mask_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<span class="c1">##### Flow Boundary points #####</span>
+    
+    <span class="k">def</span> <span class="nf">read_flow_boundary_points</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        
+        <span class="c1"># Read SFINCS bnd file</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">flow_boundary_point</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">bndfile</span><span class="p">:</span>
+            <span class="k">return</span>
+                    
+        <span class="n">bnd_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">bndfile</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">bnd_file</span><span class="p">):</span>
+            <span class="k">return</span>
+        
+        <span class="c1"># Read the bnd file</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">bnd_file</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">delim_whitespace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">])</span>
+        
+        <span class="c1"># Loop through points</span>
+        <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">values</span><span class="p">)):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+            <span class="n">point</span> <span class="o">=</span> <span class="n">FlowBoundaryPoint</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
+                                      <span class="n">df</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
+                                      <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flow_boundary_point</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">write_flow_boundary_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="c1"># Write SFINCS bnd file</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">bndfile</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">bndfile</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="k">return</span>
+            
+        <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow_boundary_point</span><span class="p">:</span>
+            <span class="n">string</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">point</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">x</span><span class="si">:</span><span class="s1">12.1f</span><span class="si">}{</span><span class="n">point</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">y</span><span class="si">:</span><span class="s1">12.1f</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>    
+
+    <span class="c1">### Flow Boundary conditions ###</span>
+    
+    <span class="k">def</span> <span class="nf">read_flow_boundary_conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="c1"># Read SFINCS bzs file</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">bzsfile</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">bzsfile</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="k">return</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span>
+            <span class="k">return</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">tref</span><span class="p">:</span>
+            <span class="c1"># tref has not yet been defined</span>
+            <span class="k">return</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">read_timeseries_file</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">tref</span><span class="p">)</span>
+
+        <span class="n">ts</span>  <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span>
+        <span class="k">for</span> <span class="n">icol</span><span class="p">,</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flow_boundary_point</span><span class="p">):</span>
+            <span class="n">point</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="n">icol</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">ts</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">write_flow_boundary_conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="c1"># Write SFINCS bzs file</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">bzsfile</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">bzsfile</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="k">return</span>
+        
+        <span class="c1"># Build a new DataFrame</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow_boundary_point</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="p">,</span> <span class="n">point</span><span class="o">.</span><span class="n">data</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">tmsec</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">tref</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">tmsec</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span>
+                  <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                  <span class="n">sep</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">,</span>
+                  <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                  <span class="n">float_format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%0.3f</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">read_astro_boundary_conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="c1"># Read SFINCS bca file</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">bcafile</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">bcafile</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="k">return</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="n">d</span> <span class="o">=</span> <span class="n">IniStruct</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">file_name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flow_boundary_point</span><span class="p">):</span>
+            <span class="n">point</span><span class="o">.</span><span class="n">astro</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">section</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">generate_bzs_from_bca</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                              <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                              <span class="n">dt</span><span class="o">=</span><span class="mf">600.0</span><span class="p">,</span>
+                              <span class="n">offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+                              <span class="n">write_file</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="c1">#        sys.path.append(r&#39;d:/checkouts/OpenEarthTools/trunk/python/applications/DeltaShell/applications/CoDeS/CoDeS_2.0/Tide/pytides/&#39;)</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow_boundary_point</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No boundary points found!&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="kn">from</span> <span class="nn">cht.tide.tide_predict</span> <span class="kn">import</span> <span class="n">predict</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">bzsfile</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">bzsfile</span> <span class="o">=</span> <span class="s2">&quot;sfincs.bzs&quot;</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">bzsfile</span>
+
+        <span class="n">times</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">tstart</span><span class="p">,</span>
+                              <span class="n">end</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">tstop</span><span class="p">,</span>
+                              <span class="n">freq</span><span class="o">=</span><span class="n">DateOffset</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">dt</span><span class="p">))</span>
+                              
+
+        <span class="c1"># Make boundary conditions based on bca file</span>
+        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow_boundary_point</span><span class="p">:</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">predict</span><span class="p">(</span><span class="n">point</span><span class="o">.</span><span class="n">astro</span><span class="p">,</span> <span class="n">times</span><span class="p">)</span> <span class="o">+</span> <span class="n">offset</span>
+            <span class="n">ts</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">times</span><span class="p">)</span>
+            <span class="n">point</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">times</span><span class="p">)</span>
+                    
+        <span class="k">if</span> <span class="n">write_file</span><span class="p">:</span>            
+            <span class="bp">self</span><span class="o">.</span><span class="n">write_flow_boundary_conditions</span><span class="p">()</span>
+
+    <span class="c1">### Wave boundary points</span>
+
+    <span class="k">def</span> <span class="nf">read_wave_boundary_points</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        
+        <span class="c1"># Read SFINCS bnd file</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wave_boundary_point</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">snapwave_bndfile</span><span class="p">:</span>
+            <span class="k">return</span>
+                    
+        <span class="n">bnd_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">snapwave_bndfile</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">bnd_file</span><span class="p">):</span>
+            <span class="k">return</span>
+        
+        <span class="c1"># Read the bnd file</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">bnd_file</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">delim_whitespace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">])</span>
+        
+        <span class="c1"># Loop through points</span>
+        <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">values</span><span class="p">)):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+            <span class="n">point</span> <span class="o">=</span> <span class="n">WaveBoundaryPoint</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
+                                      <span class="n">df</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
+                                      <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wave_boundary_point</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">write_wave_boundary_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="c1"># Write SFINCS bnd file</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">snapwave_bndfile</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">snapwave_bndfile</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="k">return</span>
+            
+        <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wave_boundary_point</span><span class="p">:</span>
+            <span class="n">string</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">point</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">x</span><span class="si">:</span><span class="s1">12.1f</span><span class="si">}{</span><span class="n">point</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">y</span><span class="si">:</span><span class="s1">12.1f</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>    
+
+    <span class="k">def</span> <span class="nf">write_wavemaker_forcing_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="c1"># Write SFINCS bfp file</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">wfpfile</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">wfpfile</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="k">return</span>
+            
+        <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavemaker_forcing_point</span><span class="p">:</span>
+            <span class="n">string</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">point</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">x</span><span class="si">:</span><span class="s1">12.1f</span><span class="si">}{</span><span class="n">point</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">y</span><span class="si">:</span><span class="s1">12.1f</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>    
+
+    <span class="k">def</span> <span class="nf">write_wave_boundary_conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        
+        <span class="c1"># Hm0, Tp, etc given (probably forced with SnapWave)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_bhs_file</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_btp_file</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_bwd_file</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_bds_file</span><span class="p">()</span>            
+
+    <span class="k">def</span> <span class="nf">write_wavemaker_forcing_conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        
+        <span class="c1"># Hm0_ig given (probably forced with BEWARE, or something)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_whi_file</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_wti_file</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_wst_file</span><span class="p">()</span>
+
+            
+    <span class="k">def</span> <span class="nf">write_bhs_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># Hm0</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">snapwave_bhsfile</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">snapwave_bhsfile</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wave_boundary_point</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="p">,</span> <span class="n">point</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;hm0&quot;</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">tmsec</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">tref</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">tmsec</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span>
+                  <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                  <span class="n">sep</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">,</span>
+                  <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                  <span class="n">float_format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%0.3f</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">write_btp_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># Tp</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">snapwave_btpfile</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">snapwave_btpfile</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wave_boundary_point</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="p">,</span> <span class="n">point</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;tp&quot;</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">tmsec</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">tref</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">tmsec</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span>
+                  <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                  <span class="n">sep</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">,</span>
+                  <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                  <span class="n">float_format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%0.1f</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">write_bwd_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># WavDir</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">snapwave_bwdfile</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">snapwave_bwdfile</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wave_boundary_point</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="p">,</span> <span class="n">point</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;wavdir&quot;</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">tmsec</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">tref</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">tmsec</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span>
+                  <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                  <span class="n">sep</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">,</span>
+                  <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                  <span class="n">float_format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%0.1f</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">write_bds_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># DirSpr</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">snapwave_bdsfile</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">snapwave_bdsfile</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wave_boundary_point</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="p">,</span> <span class="n">point</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;dirspr&quot;</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">tmsec</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">tref</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">tmsec</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span>
+                  <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                  <span class="n">sep</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">,</span>
+                  <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                  <span class="n">float_format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%0.1f</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            
+
+
+    <span class="k">def</span> <span class="nf">write_whi_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="c1"># Hm0 ig</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">whifile</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">whifile</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavemaker_forcing_point</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="p">,</span> <span class="n">point</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;hm0_ig&quot;</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">tmsec</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">tref</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">tmsec</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span>
+                  <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                  <span class="n">sep</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">,</span>
+                  <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                  <span class="n">float_format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%0.3f</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">write_wti_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="c1"># Tp ig</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">wtifile</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">wtifile</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavemaker_forcing_point</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="p">,</span> <span class="n">point</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;tp_ig&quot;</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">tmsec</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">tref</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">tmsec</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span>
+                  <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                  <span class="n">sep</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">,</span>
+                  <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                  <span class="n">float_format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%0.1f</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">write_wst_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="c1"># Set-up</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">wstfile</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">wstfile</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavemaker_forcing_point</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="p">,</span> <span class="n">point</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;setup&quot;</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">tmsec</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">tref</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">tmsec</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span>
+                  <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                  <span class="n">sep</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">,</span>
+                  <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                  <span class="n">float_format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%0.3f</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1">### Observation points ###</span>
+
+    <span class="k">def</span> <span class="nf">add_observation_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+                
+        <span class="bp">self</span><span class="o">.</span><span class="n">observation_point</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ObservationPoint</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">read_observation_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">observation_point</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">obsfile</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">obsfile</span><span class="p">)</span>
+                            
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning : file &quot;</span> <span class="o">+</span> <span class="n">file_name</span> <span class="o">+</span> <span class="s2">&quot; does not exist !&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="c1"># Loop through points</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">delim_whitespace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">])</span>
+        
+        <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">values</span><span class="p">)):</span>
+            <span class="n">point</span> <span class="o">=</span> <span class="n">ObservationPoint</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
+                                     <span class="n">df</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
+                                     <span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">ind</span><span class="p">]))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">observation_point</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">write_observation_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">obsfile</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">crsgeo</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">observation_point</span><span class="p">:</span>
+                <span class="n">string</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">point</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">x</span><span class="si">:</span><span class="s1">12.1f</span><span class="si">}{</span><span class="n">point</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">y</span><span class="si">:</span><span class="s1">12.1f</span><span class="si">}</span><span class="s1">  &quot;</span><span class="si">{</span><span class="n">point</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+            <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">observation_point</span><span class="p">:</span>
+                <span class="n">string</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">point</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">x</span><span class="si">:</span><span class="s1">12.6f</span><span class="si">}{</span><span class="n">point</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">y</span><span class="si">:</span><span class="s1">12.6f</span><span class="si">}</span><span class="s1">  &quot;</span><span class="si">{</span><span class="n">point</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+            <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        
+            
+    <span class="c1">### Output ###</span>
+
+    <span class="k">def</span> <span class="nf">read_timeseries_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name_list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">file_name</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parameter</span> <span class="o">=</span> <span class="s2">&quot;point_zs&quot;</span><span class="p">):</span>
+    
+        <span class="c1"># Returns a dataframe with timeseries</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">outputformat</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;bin&quot;</span><span class="p">:</span>
+            
+            <span class="c1"># ASCII output</span>
+    
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="p">:</span>
+                <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;zst.txt&quot;</span><span class="p">)</span>
+        
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">observation_point</span><span class="p">:</span>
+                <span class="c1"># First read observation points</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">read_observation_points</span><span class="p">()</span>
+            
+            <span class="n">columns</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">observation_point</span><span class="p">:</span>
+                <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                
+            <span class="n">df</span> <span class="o">=</span> <span class="n">read_timeseries_file</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">tref</span><span class="p">)</span>
+            
+            <span class="c1"># Add column names</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">columns</span>
+                
+            <span class="k">if</span> <span class="n">name_list</span><span class="p">:</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">name_list</span><span class="p">]</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            
+            <span class="c1"># NetCDF output</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="p">:</span>
+                <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;sfincs_his.nc&quot;</span><span class="p">)</span>
+                    
+            <span class="c1"># Open netcdf file</span>
+            <span class="n">ddd</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+<span class="c1">#            stations=ddd.point_zs.coords[&quot;station_name&quot;].values</span>
+            <span class="n">stations</span><span class="o">=</span><span class="n">ddd</span><span class="o">.</span><span class="n">station_name</span><span class="o">.</span><span class="n">values</span>
+            <span class="n">all_stations</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">ist</span><span class="p">,</span> <span class="n">st</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">stations</span><span class="p">):</span>
+<span class="c1">#                st=str(st)[2:-1]</span>
+                <span class="n">all_stations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+            
+
+            <span class="n">times</span>   <span class="o">=</span> <span class="n">ddd</span><span class="p">[</span><span class="n">parameter</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+    
+            <span class="c1"># If name_list is empty, add all points    </span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">name_list</span><span class="p">:</span>
+                <span class="n">name_list</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">st</span> <span class="ow">in</span> <span class="n">all_stations</span><span class="p">:</span>
+                    <span class="n">name_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">st</span><span class="p">)</span>
+            
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">times</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">name_list</span><span class="p">)</span>
+            
+            <span class="k">for</span> <span class="n">station</span> <span class="ow">in</span> <span class="n">name_list</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">ist</span><span class="p">,</span> <span class="n">st</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">all_stations</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">station</span> <span class="o">==</span> <span class="n">st</span><span class="p">:</span>
+                        <span class="n">wl</span> <span class="o">=</span> <span class="n">ddd</span><span class="p">[</span><span class="n">parameter</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[:,</span><span class="n">ist</span><span class="p">]</span>
+                        <span class="n">wl</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">wl</span><span class="p">)]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">999.0</span>
+                        <span class="n">df</span><span class="p">[</span><span class="n">st</span><span class="p">]</span><span class="o">=</span><span class="n">wl</span>
+                        <span class="k">break</span>            
+    
+            <span class="n">ddd</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                    
+        <span class="k">return</span> <span class="n">df</span>    
+
+    <span class="k">def</span> <span class="nf">read_zsmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zsmax_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;grid&quot;</span><span class="p">,</span> <span class="n">parameter</span> <span class="o">=</span> <span class="s1">&#39;zsmax&#39;</span><span class="p">):</span>
+    
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">zsmax_file</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">outputformat</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;net&quot;</span><span class="p">:</span>
+                <span class="n">zsmax_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;sfincs_map.nc&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">zsmax_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;zsmax.dat&quot;</span><span class="p">)</span>
+            
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">outputformat</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;net&quot;</span><span class="p">:</span>
+<span class="c1">#            ddd=xr.open_dataset(zsmax_file)</span>
+<span class="c1">#            zsmx=ddd.zsmax.values</span>
+<span class="c1">#            zsmax=np.transpose(np.nanmax(ddd.zsmax.values, axis=0))</span>
+            
+
+            <span class="n">dsin</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">zsmax_file</span><span class="p">)</span>
+
+            <span class="n">output_times</span> <span class="o">=</span> <span class="n">dsin</span><span class="o">.</span><span class="n">timemax</span><span class="o">.</span><span class="n">values</span>
+            <span class="k">if</span> <span class="n">time_range</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">t0</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">output_times</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">to_pydatetime</span><span class="p">()</span>
+                <span class="n">t1</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">output_times</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">to_pydatetime</span><span class="p">()</span>
+                <span class="n">time_range</span> <span class="o">=</span> <span class="p">[</span><span class="n">t0</span><span class="p">,</span> <span class="n">t1</span><span class="p">]</span>
+
+            <span class="n">it0</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">for</span> <span class="n">it</span><span class="p">,</span> <span class="n">time</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">output_times</span><span class="p">):</span>
+                <span class="n">time</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="p">))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">to_pydatetime</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">time</span><span class="o">&gt;=</span><span class="n">time_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">it0</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="n">it0</span> <span class="o">=</span> <span class="n">it</span>
+                <span class="k">if</span> <span class="n">time</span><span class="o">&lt;=</span><span class="n">time_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">it1</span> <span class="o">=</span> <span class="n">it</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">qtrfile</span><span class="p">:</span>
+                <span class="n">zsmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">dsin</span><span class="o">.</span><span class="n">zsmax</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">it0</span><span class="p">:</span><span class="n">it1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>                
+                <span class="n">zsmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">dsin</span><span class="o">.</span><span class="n">zsmax</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">it0</span><span class="p">:</span><span class="n">it1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,:,:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+            <span class="n">dsin</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+            <span class="k">return</span> <span class="n">zsmax</span>
+
+
+
+        <span class="k">else</span><span class="p">:</span>
+        
+            <span class="n">ind_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">indexfile</span><span class="p">)</span>
+    
+            <span class="n">freqstr</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">dtmaxout</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;S&quot;</span>
+            <span class="n">output_times</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">tstart</span><span class="p">,</span>
+                                         <span class="n">end</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">tstop</span><span class="p">,</span>
+                                         <span class="n">freq</span><span class="o">=</span><span class="n">freqstr</span><span class="p">)</span><span class="o">.</span><span class="n">to_pydatetime</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">nt</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_times</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">time_range</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">time_range</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">tstart</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">tstop</span><span class="p">]</span>
+            
+            <span class="k">for</span> <span class="n">it</span><span class="p">,</span> <span class="n">time</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">output_times</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">time</span><span class="o">&lt;=</span><span class="n">time_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">it0</span> <span class="o">=</span> <span class="n">it</span>
+                <span class="k">if</span> <span class="n">time</span><span class="o">&lt;=</span><span class="n">time_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">it1</span> <span class="o">=</span> <span class="n">it</span>
+    
+            <span class="c1"># Get maximum values</span>
+            <span class="n">nmax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">nmax</span>
+            <span class="n">mmax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">mmax</span>
+                            
+            <span class="c1"># Read sfincs.ind</span>
+            <span class="n">data_ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">ind_file</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;i4&quot;</span><span class="p">)</span>
+            <span class="n">npoints</span>  <span class="o">=</span> <span class="n">data_ind</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">data_ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">data_ind</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+            
+            <span class="c1"># Read zsmax file</span>
+            <span class="n">data_zs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">zsmax_file</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;f4&quot;</span><span class="p">)</span>
+            <span class="n">data_zs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">data_zs</span><span class="p">,[</span><span class="n">nt</span><span class="p">,</span> <span class="n">npoints</span> <span class="o">+</span> <span class="mi">2</span><span class="p">])[</span><span class="n">it0</span><span class="p">:</span><span class="n">it1</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">data_zs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">data_zs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">output</span><span class="o">==</span><span class="s2">&quot;grid&quot;</span><span class="p">:</span>
+                <span class="n">zs_da</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">([</span><span class="n">nmax</span><span class="o">*</span><span class="n">mmax</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>        
+                <span class="n">zs_da</span><span class="p">[</span><span class="n">data_ind</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">data_zs</span><span class="p">)</span>
+                <span class="n">zs_da</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">zs_da</span> <span class="o">==</span> <span class="o">-</span><span class="mi">999</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">zs_da</span><span class="p">)</span>
+                <span class="n">zs_da</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">zs_da</span><span class="p">,</span> <span class="p">[</span><span class="n">mmax</span><span class="p">,</span> <span class="n">nmax</span><span class="p">]))</span>
+                <span class="k">return</span> <span class="n">zs_da</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">data_zs</span>
+            
+    <span class="k">def</span> <span class="nf">read_cumulative_precipitation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;grid&quot;</span><span class="p">):</span>
+    
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;cumprcp.dat&quot;</span><span class="p">)</span>
+            
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">outputformat</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;net&quot;</span><span class="p">:</span>
+
+            <span class="n">ddd</span><span class="o">=</span><span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+            
+            <span class="c1"># freqstr = str(self.input.dtmaxout) + &quot;S&quot;</span>
+            <span class="c1"># output_times = pd.date_range(start=self.input.tstart,</span>
+            <span class="c1">#                              end=self.input.tstop,</span>
+            <span class="c1">#                              freq=freqstr).to_pydatetime().tolist()</span>
+            
+ <span class="c1">#           output_times = ddd.timemax.values</span>
+<span class="c1">#            output_times = ddd.timemax.values.astype(datetime.datetime)</span>
+<span class="c1">#            nt = len(output_times)</span>
+
+
+            <span class="n">output_times</span> <span class="o">=</span> <span class="n">ddd</span><span class="o">.</span><span class="n">timemax</span><span class="o">.</span><span class="n">values</span>
+            <span class="k">if</span> <span class="n">time_range</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+                <span class="n">t0</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">output_times</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">to_pydatetime</span><span class="p">()</span>
+                <span class="n">t1</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">output_times</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">to_pydatetime</span><span class="p">()</span>
+                <span class="n">time_range</span> <span class="o">=</span> <span class="p">[</span><span class="n">t0</span><span class="p">,</span> <span class="n">t1</span><span class="p">]</span>
+
+
+            
+            <span class="c1"># if time_range is None:</span>
+            <span class="c1">#     time_range = [self.input.tstart, self.input.tstop]</span>
+            
+            <span class="k">for</span> <span class="n">it</span><span class="p">,</span> <span class="n">time</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">output_times</span><span class="p">):</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="p">))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">to_pydatetime</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">t</span><span class="o">&lt;=</span><span class="n">time_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">it0</span> <span class="o">=</span> <span class="n">it</span>
+                <span class="k">if</span> <span class="n">t</span><span class="o">&lt;=</span><span class="n">time_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">it1</span> <span class="o">=</span> <span class="n">it</span>
+            
+<span class="c1">#            pall = ddd.cumprcp.values[it0:it1,:,:]            </span>
+<span class="c1">#            psum = </span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ddd</span><span class="o">.</span><span class="n">cumprcp</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">it0</span><span class="p">:</span><span class="n">it1</span><span class="p">,:,:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+            <span class="k">return</span> <span class="n">p</span>
+
+        <span class="c1"># else:</span>
+        
+        <span class="c1">#     ind_file = os.path.join(self.path, self.input.indexfile)</span>
+    
+        <span class="c1">#     freqstr = str(self.input.dtmaxout) + &quot;S&quot;</span>
+        <span class="c1">#     output_times = pd.date_range(start=self.input.tstart,</span>
+        <span class="c1">#                                  end=self.input.tstop,</span>
+        <span class="c1">#                                  freq=freqstr).to_pydatetime().tolist()</span>
+        <span class="c1">#     nt = len(output_times)</span>
+            
+        <span class="c1">#     if time_range is None:</span>
+        <span class="c1">#         time_range = [self.input.tstart, self.input.tstop]</span>
+            
+        <span class="c1">#     for it, time in enumerate(output_times):</span>
+        <span class="c1">#         if time&lt;=time_range[0]:</span>
+        <span class="c1">#             it0 = it</span>
+        <span class="c1">#         if time&lt;=time_range[1]:</span>
+        <span class="c1">#             it1 = it</span>
+    
+        <span class="c1">#     # Get maximum values</span>
+        <span class="c1">#     nmax = self.input.nmax</span>
+        <span class="c1">#     mmax = self.input.mmax</span>
+                            
+        <span class="c1">#     # Read sfincs.ind</span>
+        <span class="c1">#     data_ind = np.fromfile(ind_file, dtype=&quot;i4&quot;)</span>
+        <span class="c1">#     npoints  = data_ind[0]</span>
+        <span class="c1">#     data_ind = np.squeeze(data_ind[1:])</span>
+            
+        <span class="c1">#     # Read zsmax file</span>
+        <span class="c1">#     data_zs = np.fromfile(zsmax_file, dtype=&quot;f4&quot;)</span>
+        <span class="c1">#     data_zs = np.reshape(data_zs,[nt, npoints + 2])[it0:it1+1, 1:-1]</span>
+        <span class="c1">#     data_zs = np.amax(data_zs, axis=0)</span>
+            
+        <span class="c1">#     if output==&quot;grid&quot;:</span>
+        <span class="c1">#         zs_da = np.full([nmax*mmax], np.nan)        </span>
+        <span class="c1">#         zs_da[data_ind - 1] = np.squeeze(data_zs)</span>
+        <span class="c1">#         zs_da = np.where(zs_da == -999, np.nan, zs_da)</span>
+        <span class="c1">#         zs_da = np.transpose(np.reshape(zs_da, [mmax, nmax]))</span>
+        <span class="c1">#         return zs_da</span>
+        <span class="c1">#     else:</span>
+        <span class="c1">#         return data_zs</span>
+        
+<span class="c1">#     def write_hmax_geotiff(self, dem_file, index_file, hmax_file, time_range=None, zsmax_file=None):</span>
+        
+<span class="c1">#         no_datavalue = -9999</span>
+    
+<span class="c1">#         zs_da = self.read_zsmax(time_range=time_range, zsmax_file=zsmax_file)</span>
+<span class="c1">#         zs_da = 100 * zs_da</span>
+        
+<span class="c1">#         # Read indices for DEM and resample SFINCS max. water levels on DEM grid</span>
+<span class="c1">#         dem_ind   = np.fromfile(index_file, dtype=&quot;i4&quot;)</span>
+<span class="c1">#         ndem      = dem_ind[0]</span>
+<span class="c1">#         mdem      = dem_ind[1]</span>
+<span class="c1">#         indices   = dem_ind[2:]</span>
+<span class="c1">#         zsmax_dem = np.zeros_like(indices)</span>
+<span class="c1">#         zsmax_dem = np.where(zsmax_dem == 0, np.nan, 0)</span>
+<span class="c1">#         valid_indices = np.where(indices &gt; 0)</span>
+<span class="c1">#         indices = np.where(indices == 0, 1, indices)</span>
+<span class="c1">#         indices = indices - 1  # correct for python start counting at 0 (matlab at 1)</span>
+<span class="c1">#         zsmax_dem[valid_indices] = zs_da[indices][valid_indices]</span>
+<span class="c1">#         zsmax_dem = np.flipud(zsmax_dem.reshape(mdem, ndem).transpose())</span>
+
+<span class="c1">#         # Open DEM file</span>
+<span class="c1">#         dem_ds = gdal.Open(dem_file)</span>
+<span class="c1">#         band = dem_ds.GetRasterBand(1)</span>
+<span class="c1">#         dem = band.ReadAsArray()</span>
+<span class="c1">#         # calculate max. flood depth as difference between water level zs and dem, do not allow for negative values</span>
+<span class="c1">#         hmax_dem = zsmax_dem - dem  ## just for testing</span>
+<span class="c1">#         hmax_dem = np.where(hmax_dem &lt; 0, 0, hmax_dem)</span>
+<span class="c1">#         # set no data value to -9999</span>
+<span class="c1">#         hmax_dem = np.where(np.isnan(hmax_dem), no_datavalue, hmax_dem)</span>
+<span class="c1">#         # convert cm to m</span>
+<span class="c1">#         hmax_dem = hmax_dem/100</span>
+
+<span class="c1">#         # write max. flood depth (in m) to geotiff</span>
+<span class="c1">#         [cols, rows] = dem.shape</span>
+<span class="c1">#         driver = gdal.GetDriverByName(&quot;GTiff&quot;)</span>
+<span class="c1">#         outdata = driver.Create(hmax_file, rows, cols, 1, gdal.GDT_Float32)</span>
+<span class="c1">#         outdata.SetGeoTransform(dem_ds.GetGeoTransform())  ## sets same geotransform as input</span>
+<span class="c1">#         outdata.SetProjection(dem_ds.GetProjection())      ## sets same projection as input</span>
+<span class="c1">#         outdata.GetRasterBand(1).WriteArray(hmax_dem)</span>
+<span class="c1">#         outdata.GetRasterBand(1).SetNoDataValue(no_datavalue)  ## if you want these values transparent</span>
+<span class="c1"># #        outdata.SetMetadata({k: str(v) for k, v in scenarioDict.items()})</span>
+
+<span class="c1">#         outdata.FlushCache()  ## saves to disk!!</span>
+<span class="c1">#         outdata = None</span>
+<span class="c1">#         band = None</span>
+<span class="c1">#         dem_ds = None</span>
+
+    <span class="k">def</span> <span class="nf">grid_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;cor&#39;</span><span class="p">):</span>
+
+        <span class="n">cosrot</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">rotation</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">)</span>
+        <span class="n">sinrot</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">rotation</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">loc</span><span class="o">==</span><span class="s2">&quot;cor&quot;</span><span class="p">:</span>
+            <span class="n">xx</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">mmax</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span>
+                                 <span class="n">num</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">mmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">yy</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">nmax</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">dy</span><span class="p">,</span>
+                                 <span class="n">num</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">nmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">xx</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">mmax</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">dx</span> <span class="o">-</span> <span class="mf">0.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span>
+                                 <span class="n">num</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">mmax</span><span class="p">)</span>
+            <span class="n">yy</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">dy</span><span class="p">,</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">nmax</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">dy</span> <span class="o">-</span> <span class="mf">0.5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">dy</span><span class="p">,</span>
+                                 <span class="n">num</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">nmax</span><span class="p">)</span>
+            
+        <span class="n">xg0</span><span class="p">,</span> <span class="n">yg0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">)</span>
+        <span class="n">xg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">x0</span> <span class="o">+</span> <span class="n">xg0</span><span class="o">*</span><span class="n">cosrot</span> <span class="o">-</span> <span class="n">yg0</span><span class="o">*</span><span class="n">sinrot</span>
+        <span class="n">yg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">y0</span> <span class="o">+</span> <span class="n">xg0</span><span class="o">*</span><span class="n">sinrot</span> <span class="o">+</span> <span class="n">yg0</span><span class="o">*</span><span class="n">cosrot</span>
+
+        <span class="k">return</span> <span class="n">xg</span><span class="p">,</span> <span class="n">yg</span>
+    
+    <span class="k">def</span> <span class="nf">bounding_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="n">xg</span><span class="p">,</span> <span class="n">yg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_coordinates</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;cor&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">crs</span><span class="p">:</span>
+            <span class="n">transformer</span> <span class="o">=</span> <span class="n">Transformer</span><span class="o">.</span><span class="n">from_crs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
+                                               <span class="n">crs</span><span class="p">,</span>
+                                               <span class="n">always_xy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">xg</span><span class="p">,</span> <span class="n">yg</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">xg</span><span class="p">,</span> <span class="n">yg</span><span class="p">)</span>
+        
+        <span class="n">x_range</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">xg</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">xg</span><span class="p">))]</span>
+        <span class="n">y_range</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">yg</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">yg</span><span class="p">))]</span>
+        
+        <span class="k">return</span> <span class="n">x_range</span><span class="p">,</span> <span class="n">y_range</span>
+
+    <span class="k">def</span> <span class="nf">outline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="n">xg</span><span class="p">,</span> <span class="n">yg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_coordinates</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;cor&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">crs</span><span class="p">:</span>
+            <span class="n">transformer</span> <span class="o">=</span> <span class="n">Transformer</span><span class="o">.</span><span class="n">from_crs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
+                                               <span class="n">crs</span><span class="p">,</span>
+                                               <span class="n">always_xy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">xg</span><span class="p">,</span> <span class="n">yg</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">xg</span><span class="p">,</span> <span class="n">yg</span><span class="p">)</span>
+        
+        <span class="n">xp</span> <span class="o">=</span> <span class="p">[</span> <span class="n">xg</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">xg</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">xg</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">xg</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">xg</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="p">]</span>
+        <span class="n">yp</span> <span class="o">=</span> <span class="p">[</span> <span class="n">yg</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">yg</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">yg</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">yg</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">yg</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="p">]</span>
+        
+        <span class="k">return</span> <span class="n">xp</span><span class="p">,</span> <span class="n">yp</span>
+        
+    <span class="k">def</span> <span class="nf">make_index_tiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">zoom_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">qtrfile</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">.quadtree</span> <span class="kn">import</span> <span class="n">QuadtreeGrid</span>
+            <span class="n">quadtree</span> <span class="o">=</span> <span class="n">QuadtreeGrid</span><span class="p">(</span><span class="n">crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span> 
+            <span class="n">quadtree</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">qtrfile</span><span class="p">))</span>
+            <span class="n">quadtree</span><span class="o">.</span><span class="n">make_index_tiles</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">zoom_range</span><span class="o">=</span><span class="n">zoom_range</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="kn">from</span> <span class="nn">cht.tiling.tiling</span> <span class="kn">import</span> <span class="n">deg2num</span>
+        <span class="kn">from</span> <span class="nn">cht.tiling.tiling</span> <span class="kn">import</span> <span class="n">num2deg</span>
+        <span class="kn">import</span> <span class="nn">cht.misc.fileops</span> <span class="k">as</span> <span class="nn">fo</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">zoom_range</span><span class="p">:</span>
+            <span class="n">zoom_range</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">13</span><span class="p">]</span>
+
+        <span class="n">npix</span> <span class="o">=</span> <span class="mi">256</span>
+        
+        <span class="c1"># Compute lon/lat range</span>
+        <span class="n">lon_range</span><span class="p">,</span> <span class="n">lat_range</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounding_box</span><span class="p">(</span><span class="n">crs</span><span class="o">=</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_epsg</span><span class="p">(</span><span class="mi">4326</span><span class="p">))</span>
+        
+        <span class="n">cosrot</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">rotation</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">)</span>
+        <span class="n">sinrot</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">rotation</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">)</span>       
+        
+        <span class="n">transformer_a</span> <span class="o">=</span> <span class="n">Transformer</span><span class="o">.</span><span class="n">from_crs</span><span class="p">(</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_epsg</span><span class="p">(</span><span class="mi">4326</span><span class="p">),</span>
+                                             <span class="n">CRS</span><span class="o">.</span><span class="n">from_epsg</span><span class="p">(</span><span class="mi">3857</span><span class="p">),</span>
+                                             <span class="n">always_xy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">transformer_b</span> <span class="o">=</span> <span class="n">Transformer</span><span class="o">.</span><span class="n">from_crs</span><span class="p">(</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_epsg</span><span class="p">(</span><span class="mi">3857</span><span class="p">),</span>
+                                             <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
+                                             <span class="n">always_xy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">izoom</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">zoom_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">zoom_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Processing zoom level &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">izoom</span><span class="p">))</span>
+        
+            <span class="n">zoom_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">izoom</span><span class="p">))</span>
+        
+            <span class="n">dxy</span> <span class="o">=</span> <span class="p">(</span><span class="mf">40075016.686</span><span class="o">/</span><span class="n">npix</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">izoom</span>
+            <span class="n">xx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="p">(</span><span class="n">npix</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">dxy</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">npix</span><span class="p">)</span>
+            <span class="n">yy</span> <span class="o">=</span> <span class="n">xx</span><span class="p">[:]</span>
+            <span class="n">xv</span><span class="p">,</span> <span class="n">yv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">)</span>
+        
+            <span class="n">ix0</span><span class="p">,</span> <span class="n">iy0</span> <span class="o">=</span> <span class="n">deg2num</span><span class="p">(</span><span class="n">lat_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lon_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">izoom</span><span class="p">)</span>
+            <span class="n">ix1</span><span class="p">,</span> <span class="n">iy1</span> <span class="o">=</span> <span class="n">deg2num</span><span class="p">(</span><span class="n">lat_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">lon_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">izoom</span><span class="p">)</span>
+        
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ix0</span><span class="p">,</span> <span class="n">ix1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            
+                <span class="n">path_okay</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">zoom_path_i</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">zoom_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+            
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iy0</span><span class="p">,</span> <span class="n">iy1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            
+                    <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">zoom_path_i</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.dat&quot;</span><span class="p">)</span>
+            
+                    <span class="c1"># Compute lat/lon at ll corner of tile</span>
+                    <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span> <span class="o">=</span> <span class="n">num2deg</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">izoom</span><span class="p">)</span>
+            
+                    <span class="c1"># Convert to Global Mercator</span>
+                    <span class="n">xo</span><span class="p">,</span> <span class="n">yo</span>   <span class="o">=</span> <span class="n">transformer_a</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">lon</span><span class="p">,</span><span class="n">lat</span><span class="p">)</span>
+            
+                    <span class="c1"># Tile grid on local mercator</span>
+                    <span class="n">x</span>        <span class="o">=</span> <span class="n">xv</span><span class="p">[:]</span> <span class="o">+</span> <span class="n">xo</span> <span class="o">+</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">dxy</span>
+                    <span class="n">y</span>        <span class="o">=</span> <span class="n">yv</span><span class="p">[:]</span> <span class="o">+</span> <span class="n">yo</span> <span class="o">+</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">dxy</span>
+            
+                    <span class="c1"># Convert tile grid to crs of SFINCS model</span>
+                    <span class="n">x</span><span class="p">,</span><span class="n">y</span>      <span class="o">=</span> <span class="n">transformer_b</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+                    
+                    <span class="c1"># Now rotate around origin of SFINCS model</span>
+                    <span class="n">x00</span> <span class="o">=</span> <span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">x0</span>
+                    <span class="n">y00</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">y0</span>
+                    <span class="n">xg</span>  <span class="o">=</span> <span class="n">x00</span><span class="o">*</span><span class="n">cosrot</span> <span class="o">-</span> <span class="n">y00</span><span class="o">*</span><span class="n">sinrot</span>
+                    <span class="n">yg</span>  <span class="o">=</span> <span class="n">x00</span><span class="o">*</span><span class="n">sinrot</span> <span class="o">+</span> <span class="n">y00</span><span class="o">*</span><span class="n">cosrot</span>
+                    
+                    <span class="n">iind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">xg</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">dx</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+                    <span class="n">jind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">yg</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">dy</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+                    <span class="n">ind</span>  <span class="o">=</span> <span class="n">iind</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">nmax</span> <span class="o">+</span> <span class="n">jind</span>
+                    <span class="n">ind</span><span class="p">[</span><span class="n">iind</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">]</span>   <span class="o">=</span> <span class="o">-</span><span class="mi">999</span>
+                    <span class="n">ind</span><span class="p">[</span><span class="n">jind</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">]</span>   <span class="o">=</span> <span class="o">-</span><span class="mi">999</span>
+                    <span class="n">ind</span><span class="p">[</span><span class="n">iind</span><span class="o">&gt;=</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">mmax</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">999</span>
+                    <span class="n">ind</span><span class="p">[</span><span class="n">jind</span><span class="o">&gt;=</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">nmax</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">999</span>
+<span class="c1">#                    ind           = np.ascontiguousarray(np.transpose(ind))</span>
+
+                    <span class="c1"># if i==142 and j==305:</span>
+                    
+                    <span class="c1">#     from matplotlib import pyplot as plt</span>
+                    <span class="c1">#     fig, ax = plt.subplots(1,1)                                            </span>
+                    <span class="c1">#     ax.plot(x,y)</span>
+                    <span class="c1">#     ax.plot(x.transpose(),y.transpose())</span>
+                    <span class="c1">#     ax.axis(&#39;equal&#39;)</span>
+                    <span class="c1">#     x_range, y_range = self.bounding_box()</span>
+                    <span class="c1">#     xp = [x_range[0], x_range[1],x_range[1],x_range[0],x_range[0]]</span>
+                    <span class="c1">#     yp = [y_range[0], y_range[0],y_range[1],y_range[1],y_range[0]]</span>
+                    <span class="c1">#     ax.plot(xp,yp)</span>
+                    <span class="c1">#     xout, yout = self.outline()</span>
+                    <span class="c1">#     ax.plot(xout,yout)</span>
+                    <span class="c1">#     fig, ax = plt.subplots(1,1)                                            </span>
+                    <span class="c1">#     ax.pcolor(ind.reshape([256, 256]))</span>
+                    <span class="c1">#     xxx=1</span>
+                    
+                    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">ind</span><span class="o">&gt;=</span><span class="mi">0</span><span class="p">):</span>
+                        
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">path_okay</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">zoom_path_i</span><span class="p">):</span>
+                                <span class="n">fo</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">zoom_path_i</span><span class="p">)</span>
+                                <span class="n">path_okay</span> <span class="o">=</span> <span class="kc">True</span>
+                             
+                        <span class="c1"># And write indices to file</span>
+                        <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span>
+                        <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+                        <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<span class="k">class</span> <span class="nc">SfincsInput</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mmax</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nmax</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dx</span>   <span class="o">=</span> <span class="mf">10.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dy</span>   <span class="o">=</span> <span class="mf">10.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x0</span>   <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y0</span>   <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rotation</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">latitude</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">tnow</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">hour</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">minute</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">second</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">microsecond</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tref</span><span class="o">=</span><span class="n">tnow</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tstart</span><span class="o">=</span><span class="n">tnow</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tstop</span><span class="o">=</span><span class="n">tnow</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tspinup</span><span class="o">=</span><span class="mf">60.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t0out</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtmapout</span><span class="o">=</span><span class="mf">3600.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dthisout</span><span class="o">=</span><span class="mf">600.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtrstout</span><span class="o">=</span><span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtmaxout</span><span class="o">=</span><span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trstout</span><span class="o">=-</span><span class="mf">999.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtwnd</span><span class="o">=</span><span class="mf">1800.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="o">=</span><span class="mf">1.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nuvisc</span><span class="o">=-</span><span class="mf">999.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">huthresh</span><span class="o">=</span><span class="mf">0.01</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">manning</span><span class="o">=</span><span class="mf">0.04</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">manning_land</span><span class="o">=</span><span class="mf">0.04</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">manning_sea</span><span class="o">=</span><span class="mf">0.02</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rgh_lev_land</span><span class="o">=</span><span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zsini</span><span class="o">=</span><span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qinf</span><span class="o">=</span><span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">igperiod</span><span class="o">=</span><span class="mf">120.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rhoa</span><span class="o">=</span><span class="mf">1.25</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rhow</span><span class="o">=</span><span class="mf">1024.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtmax</span><span class="o">=</span><span class="mf">999.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxlev</span><span class="o">=</span><span class="mf">999.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bndtype</span><span class="o">=</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">advection</span><span class="o">=</span><span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">baro</span><span class="o">=</span><span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pavbnd</span><span class="o">=</span><span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gapres</span><span class="o">=</span><span class="mf">101200.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">advlim</span><span class="o">=</span><span class="mf">9999.9</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stopdepth</span><span class="o">=</span><span class="mf">1000.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crsgeo</span><span class="o">=</span><span class="mi">0</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">depfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mskfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indexfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cstfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bndfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bzsfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bzifile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bwvfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bhsfile</span><span class="o">=</span><span class="kc">None</span>
+<span class="c1">#        self.bhifile=None</span>
+<span class="c1">#        self.bstfile=None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btpfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bwdfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bdsfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bcafile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">corfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">srcfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inifile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sbgfile</span><span class="o">=</span><span class="kc">None</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">spwfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">amufile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">amvfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ampfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">amprfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wndfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">precipfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obsfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crsfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thdfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">manningfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scsfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rstfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wfpfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">whifile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wtifile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wstfile</span><span class="o">=</span><span class="kc">None</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputformat</span><span class="o">=</span><span class="s2">&quot;bin&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outputformat</span><span class="o">=</span><span class="s2">&quot;net&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">cdnrb</span><span class="o">=</span><span class="mi">3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cdwnd</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">28.0</span><span class="p">,</span><span class="mf">50.0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cdval</span><span class="o">=</span><span class="p">[</span><span class="mf">0.001</span><span class="p">,</span><span class="mf">0.0025</span><span class="p">,</span><span class="mf">0.0015</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtwave</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapwave</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapwave_gamma</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapwave_dtheta</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapwave_hmin</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapwave_fw0</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapwave_crit</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapwave_igwaves</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapwave_nrsweeps</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapwave_bhsfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapwave_btpfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapwave_bwdfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapwave_bdsfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapwave_encfile</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapwave_bndfile</span><span class="o">=</span><span class="kc">None</span>
+
+<span class="k">class</span> <span class="nc">SfincsGrid</span><span class="p">():</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">rotation</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="n">RegularGrid</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">rotation</span><span class="p">)</span>
+
+    <span class="c1"># def plot(self,ax):</span>
+    <span class="c1">#     self.geometry.plot(ax)</span>
+
+    <span class="c1"># def corner_coordinates(self):</span>
+    <span class="c1">#     x,y = self.geometry.grid_coordinates_corners()</span>
+    <span class="c1">#     return x, y</span>
+
+    <span class="c1"># def centre_coordinates(self):</span>
+    <span class="c1">#     x,y = self.geometry.grid_coordinates_centres()</span>
+    <span class="c1">#     return x, y</span>
+
+<span class="k">class</span> <span class="nc">SfincsDepth</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ax</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<span class="k">class</span> <span class="nc">SfincsMask</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msk</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ax</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<span class="k">class</span> <span class="nc">SfincsFlowBoundaryConditions</span><span class="p">():</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bndfile</span><span class="p">,</span> <span class="n">bzsfile</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_points</span><span class="p">(</span><span class="n">bndfile</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_time_series</span><span class="p">(</span><span class="n">bzsfile</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">read_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">read_time_series</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+        <span class="k">pass</span>
+    
+    <span class="k">def</span> <span class="nf">set_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="k">pass</span>
+    
+    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ax</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<span class="k">class</span> <span class="nc">SfincsWaveBoundaryConditions</span><span class="p">():</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bndfile</span><span class="p">,</span> <span class="n">bzsfile</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_points</span><span class="p">(</span><span class="n">bndfile</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_time_series</span><span class="p">(</span><span class="n">bzsfile</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">read_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">read_time_series</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+        <span class="k">pass</span>
+    
+    <span class="k">def</span> <span class="nf">set_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="k">pass</span>
+    
+    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ax</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<span class="k">class</span> <span class="nc">FlowBoundaryPoint</span><span class="p">():</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">astro</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span>                   <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span>               <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span>                   <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">astro</span>                  <span class="o">=</span> <span class="n">astro</span>
+
+<span class="k">class</span> <span class="nc">WaveBoundaryPoint</span><span class="p">():</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span>                   <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span>               <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span>                   <span class="o">=</span> <span class="n">data</span>
+
+<span class="k">class</span> <span class="nc">WaveMakerForcingPoint</span><span class="p">():</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span>                   <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span>               <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span>                   <span class="o">=</span> <span class="n">data</span>
+
+<span class="k">class</span> <span class="nc">ObservationPoint</span><span class="p">():</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span>     <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
+
+                    
+<span class="k">def</span> <span class="nf">read_timeseries_file</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">ref_date</span><span class="p">):</span>
+    
+    <span class="c1"># Returns a dataframe with time series for each of the columns</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">delim_whitespace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">ts</span> <span class="o">=</span> <span class="n">ref_date</span> <span class="o">+</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">)</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">ts</span>
+    
+    <span class="k">return</span> <span class="n">df</span>
+
+
+<span class="c1"># class QuadtreeGrid():</span>
+
+<span class="c1">#     def __init__(self):</span>
+<span class="c1">#         self.geometry = RegularGrid(x0, y0, dx, dy, nx, ny, rotation)</span>
+        
+<span class="c1">#     def read(self, file_name):</span>
+    
+
+<span class="c1"># fid=fopen(buqfile,&#39;r&#39;);</span>
+
+<span class="c1"># % Number of blocks</span>
+<span class="c1"># np=fread(fid,1,&#39;integer*4&#39;);</span>
+
+<span class="c1"># % Nr levels</span>
+<span class="c1"># nlev=fread(fid,1,&#39;integer*1&#39;);</span>
+
+<span class="c1"># % Grid stuff</span>
+<span class="c1"># buq.x0=fread(fid,1,&#39;real*4&#39;);</span>
+<span class="c1"># buq.y0=fread(fid,1,&#39;real*4&#39;);</span>
+<span class="c1"># buq.dx=fread(fid,1,&#39;real*4&#39;);</span>
+<span class="c1"># buq.dy=fread(fid,1,&#39;real*4&#39;);</span>
+<span class="c1"># buq.rotation=fread(fid,1,&#39;real*4&#39;);</span>
+
+<span class="c1"># % Levels</span>
+<span class="c1"># buq.level=fread(fid,np,&#39;integer*1&#39;);</span>
+
+<span class="c1"># % N</span>
+<span class="c1"># buq.n=fread(fid,np,&#39;integer*4&#39;);</span>
+
+<span class="c1"># % M</span>
+<span class="c1"># buq.m=fread(fid,np,&#39;integer*4&#39;);</span>
+
+<span class="c1"># % NU</span>
+<span class="c1"># buq.nu=fread(fid,np,&#39;integer*1&#39;);</span>
+<span class="c1"># buq.nu1=fread(fid,np,&#39;integer*4&#39;);</span>
+<span class="c1"># buq.nu2=fread(fid,np,&#39;integer*4&#39;);</span>
+<span class="c1"># % MU</span>
+<span class="c1"># buq.mu=fread(fid,np,&#39;integer*1&#39;);</span>
+<span class="c1"># buq.mu1=fread(fid,np,&#39;integer*4&#39;);</span>
+<span class="c1"># buq.mu2=fread(fid,np,&#39;integer*4&#39;);</span>
+<span class="c1"># % ND</span>
+<span class="c1"># buq.nd=fread(fid,np,&#39;integer*1&#39;);</span>
+<span class="c1"># buq.nd1=fread(fid,np,&#39;integer*4&#39;);</span>
+<span class="c1"># buq.nd2=fread(fid,np,&#39;integer*4&#39;);</span>
+<span class="c1"># % MD</span>
+<span class="c1"># buq.md=fread(fid,np,&#39;integer*1&#39;);</span>
+<span class="c1"># buq.md1=fread(fid,np,&#39;integer*4&#39;);</span>
+<span class="c1"># buq.md2=fread(fid,np,&#39;integer*4&#39;);</span>
+
+<span class="c1"># fclose(fid);</span>
+
+<span class="c1"># buq.level=buq.level+1;</span>
+<span class="c1"># nlev=nlev+1;</span>
+<span class="c1"># buq.nmax=0;</span>
+<span class="c1"># buq.mmax=0;</span>
+
+<span class="c1"># for nm = 1:np</span>
+<span class="c1">#       n    = buq.n(nm);</span>
+<span class="c1">#       m    = buq.m(nm);</span>
+<span class="c1">#       iref = buq.level(nm);</span>
+<span class="c1">#       buq.nmax = max(buq.nmax, floor( (1.0*(n - 1) + 0.01) / (2^(iref - 1))) + 2);</span>
+<span class="c1">#       buq.mmax = max(buq.mmax, floor( (1.0*(m - 1) + 0.01) / (2^(iref - 1))) + 2);</span>
+<span class="c1"># end</span>
+
+<span class="c1"># buq.first_point_per_level = 0;</span>
+<span class="c1"># buq.last_point_per_level = 0;</span>
+<span class="c1"># buq.nm_indices = 0;</span>
+<span class="c1"># % First count</span>
+<span class="c1"># %</span>
+<span class="c1"># ireflast = 0;</span>
+<span class="c1"># %</span>
+<span class="c1"># for ip = 1: np</span>
+<span class="c1">#     %</span>
+<span class="c1">#     iref = buq.level(ip);</span>
+<span class="c1">#     n    = buq.n(ip);</span>
+<span class="c1">#     m    = buq.m(ip);</span>
+<span class="c1">#     nmx  = buq.nmax*2^(iref - 1);</span>
+<span class="c1">#     nm   = (m - 1)*nmx + n;</span>
+<span class="c1">#     %</span>
+<span class="c1">#     buq.nm_indices(ip) = nm;</span>
+<span class="c1">#     %</span>
+<span class="c1">#     if iref&gt;ireflast</span>
+<span class="c1">#         %</span>
+<span class="c1">#         % Found new level</span>
+<span class="c1">#         %</span>
+<span class="c1">#         buq.first_point_per_level(iref) = ip;</span>
+<span class="c1">#         ireflast = iref;</span>
+<span class="c1">#         %</span>
+<span class="c1">#     end</span>
+<span class="c1">#     %</span>
+<span class="c1">#     buq.last_point_per_level(iref) = ip;</span>
+<span class="c1">#     %</span>
+<span class="c1"># end</span>
+<span class="c1"># disp(&#39;done&#39;)    </span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Deltares.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

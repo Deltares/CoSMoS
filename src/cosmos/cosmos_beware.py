@@ -25,9 +25,28 @@ from .cosmos_tiling import make_flood_map_tiles
 from cht.nesting.nest2 import nest2
 
 class CoSMoS_BEWARE(Model):
-    
+    """Cosmos class for BEWARE model.
+
+    BEWARE is a meta-model based on XBeach for predicting nearshore wave heights and total water levels at reef-lined coasts.
+
+    Parameters
+    ----------
+    Model : class
+        Generic cosmos model attributes
+
+    See Also
+    ----------
+    cosmos.cosmos_model_loop: invokes current class
+    cosmos.cosmos_model: function call
+    """    
     def read_model_specific(self):
-        
+        """Read BEWARE specific model attributes
+
+        See Also
+        ----------
+        cht.beware.beware
+
+        """        
         # Read in the BEWARE model
 
         # Now read in the domain data
@@ -41,7 +60,13 @@ class CoSMoS_BEWARE(Model):
         self.domain.runid = self.runid
 
     def pre_process(self):
+        """Preprocess BEWARE model: write wave and water level conditions, input file, run.bat
+
+        See Also
+        ----------
+        cht.nesting.nest2
         
+        """   
         # First generate input that is identical for all members
         
         # Set path temporarily to job path
@@ -198,7 +223,8 @@ class CoSMoS_BEWARE(Model):
 
         
     def move(self):
-        
+        """Move BEWARE model input and output files
+        """        
         # Move files from job folder to archive folder
         
         # First clear archive folder      
@@ -228,6 +254,13 @@ class CoSMoS_BEWARE(Model):
                     pass
 
     def post_process(self):
+        """Post-process BEWARE output
+        
+        See Also
+        ----------
+        cht.misc.prob_maps
+        
+        """        
         # Post-processing occurs in cosmos_webviewer.py
         import numpy as np
         import cht.misc.prob_maps as pm

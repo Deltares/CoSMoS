@@ -22,8 +22,18 @@ from cht.nesting.nest1 import nest1
 from cht.nesting.nest2 import nest2
 
 class Model:
-    
+    """Read generic model data from xml file, prepare model run paths, and submit jobs.
+
+    """
     def __init__(self):
+        """Initialize model attributes described in xml file.
+
+        See Also
+        --------
+        cosmos.cosmos_scenario
+
+        """
+
         self.flow               = False
         self.wave               = False
         self.priority           = 10    
@@ -70,7 +80,13 @@ class Model:
         self.zb_deshoal         = None
 
     def read_generic(self):
-        
+        """Read model attributes from xml file.
+
+        See Also
+        --------
+        cosmos.cosmos_scenario.Scenario
+
+        """
         try:
             xml_obj = xml.xml2obj(self.file_name)
         except:
@@ -154,7 +170,13 @@ class Model:
                 
         
     def prepare(self):
-        
+        """Set model paths (input, output, figures, restart, job).
+
+        See Also
+        --------
+        cosmos.cosmos_main_loop.MainLoop
+
+        """        
         # First model and restart folders if necessary
 
         cycle_path      = cosmos.scenario.cycle_path
@@ -253,7 +275,8 @@ class Model:
 #        self.job_path = job_path      
 
     def submit_job(self):
-
+        """Submit model.
+        """
         if cosmos.scenario.track_ensemble and self.ensemble:
             
             # Make run batch file
@@ -288,6 +311,8 @@ class Model:
 #        os.remove('tmp.bat')
 
     def get_all_nested_models(self, tp, all_nested_models=None):
+        """Return a list of all models nested in this model.
+        """        
         # def get_all_nested_models(self, tp, all_nested_models=[]):
         # don't define empty list as default ! (https://nikos7am.com/posts/mutable-default-arguments/)
         # Return a list of all models nested in this model
@@ -312,7 +337,8 @@ class Model:
         return all_nested_models
         
     def add_stations(self, name):
-
+        """Add stations that are located in this model.
+        """
         wgs84 = CRS.from_epsg(4326)
         transformer = Transformer.from_crs(wgs84, self.crs, always_xy=True)
         
@@ -356,7 +382,8 @@ class Model:
             self.station.append(station)
             
     def get_peak_boundary_conditions(self):
-        
+            """Get boundary conditions from overall model and define peak.
+            """      
             # Water level boundary conditions
 
             # Get boundary conditions from overall model (Nesting 2)

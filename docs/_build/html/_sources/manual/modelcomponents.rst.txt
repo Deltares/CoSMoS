@@ -1,0 +1,106 @@
+Model components and folder structure
+------------
+
+Figure 1 shows an overview of the main cosmos workflow. The main components of this workflow are elaborated below.
+
+.. figure:: pngs/cosmos_workflow.png
+  :width: 400
+  :alt: Alternative text
+
+  Figure 1: CoSMoS workflow
+
+
+Main CoSMoS components
+^^^^^^^^^^^^
+
+The CoSMoS system consists of three main classes:
+
+**CoSMoS class**
+
+When CoSMoS is initialized with the (run_cosmos) script, input settings are passed to the CoSMoS class (:py:class:`cosmos.cosmos_main.CoSMoS`). 
+This class saves input settings to self.config, which can be accessed by other CoSMoS classes. 
+The CoSMoS class starts the :py:class:`cosmos.cosmos_main_loop.MainLoop`.
+
+**Main Loop**
+
+In the main loop (blue box in Figure 1, :py:class:`cosmos.cosmos_main_loop.MainLoop`), the xml scenario file is read, cycle times are determined, meteo is downloaded, 
+and the cosmos model loop (:py:class:`cosmos.cosmos_model_loop.ModelLoop`) is initiated with a scheduler. This scheduler starts the cosmos model loop based on the cycle time interval (forecast mode), 
+or just once if ran in hindcast mode. 
+
+**Model Loop**
+
+In the model loop, all models are pre-processed, submitted, and post-processed. The model loop initiates itself every second, executing the following tasks:
+    - Checking for finished simulations. If there are finished simulations, they are moved to the scenario folder.
+    - Making a waiting list of models to be run. The first model on the list is preprocessed and submitted.
+    - The finished model is post-processed.
+    - Checking if all models are finished. If all models are finished, the webviewer is initialized.
+
+
+CoSMoS model components
+^^^^^^^^^^^^
+The three main classes described above use CoSMoS model classes to determine how to pre- and post-process the individual models. 
+The (:py:class:`cosmos.cosmos_model.Model`) reads generic input data from the model xml files, prepares model paths and submits jobs. 
+The following classes read, write, and move model-specific data:
+-   :py:class:`cosmos.cosmos_beware.CoSMoS_BEWARE`
+-   :py:class:`cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM`
+-   :py:class:`cosmos.cosmos_hurrywave.CoSMoS_HurryWave`
+-   :py:class:`cosmos.cosmos_sfincs.CoSMoS_SFINCS`
+-   :py:class:`cosmos.cosmos_xbeach.CoSMoS_XBeach`
+
+Additional CoSMoS classes
+^^^^^^^^^^^^
+The following additional classes are used during the CoSMoS cycle:
+
+-   :py:class:`cosmos.cosmos_scenario.Scenario`
+-   :py:class:`cosmos.cosmos_webviewer.WebViewer`
+-   :py:class:`cosmos.cosmos_stations.Stations`
+-   :py:class:`cosmos.cosmos_meteo.Meteo`
+
+
+CoSMoS folder structure
+^^^^^^^^^^^^
+Example of cosmos folder structure (link to cosmos_run_folder)?
+
+| cosmos_run_folder
+| ├── configurations
+| │   └── default.xml
+| ├── exe
+| ├── meteo
+| │   └── meteo_subsets.xml
+| ├── models
+| │   ├── [region]
+| │       ├── [model_type]
+| │           ├── [model_name]
+| │               ├── input
+| │               ├── misc
+| │               └── [model_name.xml]
+| └── scenarios
+| │   ├── [scenario_name]
+| │       └── [scenario_name.xml]
+| └── stations
+| │   └── [station_name.xml]
+| └── super_regions
+| │   └── [superregion_name.xml]
+| └── templates
+| │   ├── webviewers
+| │       ├── [version_name]
+| └── run_cosmos.py
+| 
+| 
+
+.. literalinclude:: https://github.com/Deltares/CoSMoS/tree/main/cosmos_run_folder
+   :language: text
+
+.. .. The following table provides an overview of all cosmos system components:
+
+.. .. list-table::
+..    :widths: 30 70
+..    :header-rows: 0
+
+..    * - :py:class:`cosmos.cosmos_main.CoSMoS`
+..      - When CoSMoS is initialized with the () script, input settings are passed to the CoSMoS class (:py:class:`cosmos.cosmos_main.CoSMoS`). 
+..         This class saves input settings to self.config, which can be accessed by other CoSMoS classes. 
+..         The CoSMoS class then starts the :py:class:`cosmos.cosmos_main_loop.MainLoop`.
+
+..    * - :py:attr:`cosmos.cosmos_mainloop.MainLoop`
+..      - In the main loop, the xml scenario is read, cycle times are determined and the cosmos model loop is initiated.

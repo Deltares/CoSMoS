@@ -382,6 +382,10 @@ class CoSMoS_SFINCS(Model):
                         self.domain.input.snapwave_bwdfile = "snapwave.bwd"
                         self.domain.input.snapwave_bdsfile = "snapwave.bds"
 
+                        self.domain.input.snapwave_encfile = r"..\\" + os.path.basename(self.job_path) + r"\\snapwave.enc"
+                        self.domain.input.snapwave_bndfile = r"..\\" + os.path.basename(self.job_path) + r"\\snapwave.bnd"
+                        self.domain.input.snapwave_mskfile = r"..\\" + os.path.basename(self.job_path) + r"\\snapwave.msk"
+
                         self.domain.write_bhs_file(file_name = os.path.join(member_path, self.domain.input.snapwave_bhsfile))
                         self.domain.write_btp_file(file_name = os.path.join(member_path, self.domain.input.snapwave_btpfile))
                         self.domain.write_bwd_file(file_name = os.path.join(member_path, self.domain.input.snapwave_bwdfile))
@@ -403,6 +407,7 @@ class CoSMoS_SFINCS(Model):
                     self.domain.input.wtifile = "sfincs.wti"
 
                     self.domain.input.wfpfile = r"..\\" + os.path.basename(self.job_path) + r"\\sfincs.wfp"
+
                     self.domain.write_whi_file(file_name = os.path.join(member_path, self.domain.input.whifile))
                     self.domain.write_wti_file(file_name = os.path.join(member_path, self.domain.input.wtifile))
                     
@@ -498,25 +503,17 @@ class CoSMoS_SFINCS(Model):
         output_path = self.cycle_output_path
         post_path   = self.cycle_post_path
         
-        if cosmos.scenario.track_ensemble and self.ensemble:
-            
-            # Make probabilistic flood maps
-            file_list= fo.list_files(os.path.join(output_path, "sfincs_map_*"))
-            prcs= [0.05, 0.5, 0.95]#np.concatenate((np.arange(0, 0.9, 0.05), np.arange(0.9, 1, 0.01)))            
-            vars= ["zs", "zsmax"]
-            output_file_name = os.path.join(output_path, "sfincs_map_ensemble.nc")
-            # pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
-
-            # Make probabilistic water level timeseries
-            file_list= fo.list_files(os.path.join(output_path, "sfincs_his_*"))
-            prcs=  [0.05, 0.5, 0.95]
-            vars= ["point_zs"]
-            output_file_name = os.path.join(output_path, "sfincs_his_ensemble.nc")
-            # pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
-
         if self.station:
 
             cosmos.log("Extracting time series from model " + self.name)    
+
+            if cosmos.scenario.track_ensemble and self.ensemble:
+                # Make probabilistic water level timeseries
+                file_list= fo.list_files(os.path.join(output_path, "sfincs_his_*"))
+                prcs=  [0.05, 0.5, 0.95]
+                vars= ["point_zs"]
+                output_file_name = os.path.join(output_path, "sfincs_his_ensemble.nc")
+                pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
 
             if self.domain.input.outputformat=="bin":
                 nc_file = os.path.join(output_path, "zst.txt")
@@ -535,12 +532,12 @@ class CoSMoS_SFINCS(Model):
                 df['wl']= v[station.name]                          
                 df['wl'] = df['wl'] + station.water_level_correction
 
-                # if cosmos.scenario.track_ensemble and self.ensemble:
-                #    nc_file = os.path.join(output_path, "sfincs_his_ensemble.nc")
-                #    for ii,vv in enumerate(prcs):
-                #        tmp = self.domain.read_timeseries_output(name_list = name_list, file_name=nc_file, parameter = "point_zs_" + str(round(vv*100)))
-                #        df["wl_" + str(round(vv*100))]=tmp[station.name]
-                #        df["wl_" + str(round(vv*100))]= df["wl_" + str(round(vv*100))]+ station.water_level_correction
+                if cosmos.scenario.track_ensemble and self.ensemble:
+                   nc_file = os.path.join(output_path, "sfincs_his_ensemble.nc")
+                   for ii,vv in enumerate(prcs):
+                       tmp = self.domain.read_timeseries_output(name_list = name_list, file_name=nc_file, parameter = "point_zs_" + str(round(vv*100)))
+                       df["wl_" + str(round(vv*100))]=tmp[station.name]
+                       df["wl_" + str(round(vv*100))]= df["wl_" + str(round(vv*100))]+ station.water_level_correction
 
                 file_name = os.path.join(post_path,
                                          "waterlevel." + station.name + ".csv")
@@ -551,6 +548,14 @@ class CoSMoS_SFINCS(Model):
 
         # Make flood map tiles
         if cosmos.config.make_flood_maps and self.make_flood_map:
+
+            if cosmos.scenario.track_ensemble and self.ensemble:
+                # Make probabilistic flood maps
+                file_list= fo.list_files(os.path.join(output_path, "sfincs_map_*"))
+                prcs= [0.05, 0.5, 0.95]#np.concatenate((np.arange(0, 0.9, 0.05), np.arange(0.9, 1, 0.01)))            
+                vars= ["zs", "zsmax"]
+                output_file_name = os.path.join(output_path, "sfincs_map_ensemble.nc")
+                pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
 
             flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
                                           "flood_map")
@@ -606,16 +611,16 @@ class CoSMoS_SFINCS(Model):
                     make_flood_map_tiles(zsmax, index_path, topo_path, flood_map_path,
                                          water_level_correction=0.0)
 
-                    # if cosmos.scenario.track_ensemble and self.ensemble:
-                    #     zsmax_file = os.path.join(output_path, "sfincs_map_ensemble.nc")
-                    #     # Full simulation        
-                    #     flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-                    #                                 "flood_map", 
-                    #                                 pathstr[-1] + "_95")                    
-                    #     zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file,
-                    #                                 time_range=[t0 + dt1, t1 + dt1], parameter = 'zsmax_95')
-                    #     make_flood_map_tiles(zsmax, index_path, topo_path, flood_map_path,
-                    #                         water_level_correction=0.0)
+                    if cosmos.scenario.track_ensemble and self.ensemble:
+                        zsmax_file = os.path.join(output_path, "sfincs_map_ensemble.nc")
+                        # Full simulation        
+                        flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+                                                    "flood_map", 
+                                                    pathstr[-1] + "_95")                    
+                        zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file,
+                                                    time_range=[t0 + dt1, t1 + dt1], parameter = 'zsmax_95')
+                        make_flood_map_tiles(zsmax, index_path, topo_path, flood_map_path,
+                                            water_level_correction=0.0)
                 except:
                     print("An error occured while making flood map tiles")
 
