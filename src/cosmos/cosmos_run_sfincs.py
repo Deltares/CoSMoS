@@ -235,6 +235,7 @@ def map_tiles(config):
         flood_map_path = config["flood_map"]["png_path"]
         index_path     = config["flood_map"]["index_path"]
         topo_path      = config["flood_map"]["topo_path"]
+        zsmax_path     = config["flood_map"]["zsmax_path"]
                 
         if os.path.exists(index_path) and os.path.exists(topo_path):
             
@@ -261,7 +262,10 @@ def map_tiles(config):
 
             pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
 
-            zsmax_file = "./sfincs_map.nc"
+            #zsmax_file = "/input/sfincs_map.nc"
+            zsmax_file = os.path.join(zsmax_path,
+                                      "sfincs_map.nc")
+            
             if config["ensemble"]:
                 varname = "zsmax_90"
             else:

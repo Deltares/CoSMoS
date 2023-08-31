@@ -190,6 +190,8 @@ class ModelLoop():
             elif cosmos.config.cycle.run_mode == "cloud":
                 cosmos.log("Ready to submit to Argo - " + model.long_name + " ...")
                 s3key = cosmos.scenario.name + "/" + "models" + "/" + model.name
+                tilesfolder = model.name + "_tiling"
+                webviewerfolder = ""
                 # Delete existing folder in cloud storage
                 cosmos.log("Deleting model folder on S3 : " + model.name)                
                 cosmos.cloud.delete_folder("cosmos-scenarios", s3key)
@@ -203,7 +205,7 @@ class ModelLoop():
                                                os.path.join(model.job_path, "base_input"),
                                                s3key + "/base_input")
                 cosmos.log("Submitting to S3 : " + s3key)
-                model.cloud_job = cosmos.argo.submit_template_job(model.workflow_name, s3key)
+                model.cloud_job = cosmos.argo.submit_template_job(model.workflow_name, s3key, tilesfolder, webviewerfolder)
 
             else:
                 # Model will be run on WCP node
@@ -311,8 +313,9 @@ def check_for_finished_simulations():
     for model in cosmos.scenario.model:
         if model.status == "running":
             if cosmos.config.cycle.run_mode == "cloud":
-                #cosmos.log(model.cloud_job)
-                if Argo.get_task_status(model.cloud_job):
+                #TODO: Implement handling of failed workflow. What happens
+                #      when a workflow fails?
+                if Argo.get_task_status(model.cloud_job) != "Running":
                     finished_list.append(model)
             else:
                 file_name = os.path.join(model.job_path,

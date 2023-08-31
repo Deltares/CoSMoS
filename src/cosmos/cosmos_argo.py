@@ -14,22 +14,20 @@ class Argo:
     def __init__(self):
         pass
 
-    def submit_template_job(self, workflow_name, subfolder):
+    def submit_template_job(self, workflow_name, subfolder, tilingfolder):
 
         wt_ref = WorkflowTemplateRef(name=workflow_name, cluster_scope=False)
 
         w = Workflow(
             generate_name=workflow_name+"-",
             workflow_template_ref=wt_ref,
-            arguments={"subfolder": subfolder}
+            arguments={"subfolder": subfolder,
+                       "tilingfolder": tilingfolder}
         )
 
         cosmos.log("Cloud Workflow started")
         w.create()
-        # Put to sleep for a few seconds. Otherwise it crashes regularly at w.wait()
-        time.sleep(3) 
-        w.wait()
-        cosmos.log("Cloud Workflow finished")
+
         return w
 
     def submit_single_job(model):
@@ -39,14 +37,10 @@ class Argo:
         return w.create()
 
     def get_task_status(workflow):
-        # Getting the status as done before doesnt work anymore. 
-        # Needs to work with the workflow service instead. For now we wait
-        # for completion of the workflow when creating the workflow
-        return True
 
-        # status = workflow.status
-        
-        # if status == 'succeeded':
-        #     return True
+        wf = workflow.workflows_service.get_workflow(workflow.name, namespace=workflow.namespace)
+        status = WorkflowStatus.from_argo_status(wf.status.phase)
 
-        # return False
+        cosmos.log("Status of workflow: " + status)
+
+        return status
