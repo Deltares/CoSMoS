@@ -72,6 +72,7 @@ class CoSMoS:
             run_models:bool=True,
             make_flood_maps:bool=True,
             make_wave_maps:bool=True,
+            make_water_level_maps:bool=True,
             get_meteo:bool=True,
             make_figures:bool=True,
             upload:bool=False,
@@ -103,6 +104,8 @@ class CoSMoS:
             Option to make flood maps, by default True
         make_wave_maps : bool, optional
             Option to make wave maps, by default True
+        make_water_level_maps: bool, optional
+            Option to make water level maps, by default True
         get_meteo : bool, optional
             Option to upload results, by default True
         make_figures : bool, optional
@@ -134,6 +137,7 @@ class CoSMoS:
         self.config.cycle_mode      = mode
         self.config.make_flood_maps = make_flood_maps
         self.config.make_wave_maps  = make_wave_maps
+        self.config.make_water_level_maps = make_water_level_maps
         self.config.upload          = upload
         self.config.webviewer       = webviewer
 #        self.config.forecast        = forecast

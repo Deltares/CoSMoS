@@ -83,7 +83,8 @@ class WebViewer:
         self.map_variables = []
   
         self.copy_timeseries()
-        self.copy_floodmap()        
+        self.copy_floodmap()
+        self.copy_water_level_maps()        
         self.copy_wave_maps()
         self.copy_sederomap()
         self.copy_bedlevelmaps()
@@ -372,6 +373,73 @@ class WebViewer:
             
             self.map_variables.append(dct)
 
+    def copy_water_level_maps(self):
+
+        cosmos.log("Copying water level map tiles ...")
+
+        scenario_path = os.path.join(self.path,
+                                     "data",
+                                     cosmos.scenario.name)
+        
+        # Check if water level maps are available
+        wl_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+                                      "water_level")
+        
+        if fo.exists(wl_map_path):
+    
+            # Wave map for the entire simulation
+            t0  = cosmos.cycle_time.replace(tzinfo=None)    
+            t1  = cosmos.stop_time
+
+            pathstr = []
+            namestr = []
+
+            pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
+            td = t1 - t0
+            hrstr = str(int(td.days * 24 + td.seconds/3600))
+            namestr.append("Combined " + hrstr + "-hour forecast")
+
+            if os.path.exists(os.path.join(wl_map_path, "combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ") + "_95")):
+                pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ") + "_95")
+                namestr.append("Combined " + hrstr + "-hour forecast 95 %")
+
+            wvpath = os.path.join(scenario_path)
+            fo.copy_file(wl_map_path, wvpath)
+            dct={}
+            dct["name"]        = "water_level"
+            dct["long_name"]   = "Maximum water level"
+            dct["description"] = "This is a water level map. It tells you where the maximum water levels occur"
+            dct["format"]      = "xyz_tile_layer"
+            dct["max_native_zoom"]  = 11
+
+            tms = []            
+            for it, pth in enumerate(pathstr):
+                tm = {}
+                tm["name"]   = pth
+                tm["string"] = namestr[it]
+                tms.append(tm)
+            dct["times"]        = tms  
+
+            mp = next((x for x in cosmos.config.map_contours if x["name"] == "water_level"), None)    
+            
+            lgn = {}
+            lgn["text"] = mp["string"]
+
+            cntrs = mp["contours"]
+
+            contours = []
+            
+            for cntr in cntrs:
+                contour = {}
+                contour["text"]  = cntr["string"]
+                contour["color"] = "#" + cntr["hex"]
+                contours.append(contour)
+    
+            lgn["contours"] = contours
+            dct["legend"]   = lgn
+            
+            self.map_variables.append(dct)
+
     def copy_wave_maps(self):
             
         # Wave maps
@@ -559,9 +627,16 @@ class WebViewer:
                     ylim = meteo_subset.y_range #[8.0, 45.0]
                     
                     if meteo_subset.x is None:
-                        # t0= cosmos.scenario.cycle
-                        t0 = cosmos.cycle_time.replace(tzinfo=None)
-                        t1= cosmos.stop_time
+                        # t0 = cosmos.cycle_time.replace(tzinfo=None)
+                        # t0 = meteo_subset.last_analysis_time
+                        # t1= cosmos.stop_time
+                        t0      = datetime.datetime(2100,1,1,0,0,0)
+                        t1      = datetime.datetime(1970,1,1,0,0,0)
+                        for model in cosmos.scenario.model:
+                            if model.meteo_subset:
+                                if model.meteo_subset.name == meteo_subset.name:
+                                    t0 = min(t0, model.flow_start_time)
+                                    t1 = max(t1, model.flow_stop_time)
                         meteo_subset.collect([t0, t1],
                             xystride=meteo_subset.xystride,
                             tstride=meteo_subset.tstride)
@@ -650,7 +725,7 @@ class WebViewer:
                                                         properties={"name":"No name"}))
                             
                             feature_collection = FeatureCollection(features)
-                            file_name = os.path.join(self.scenario_path, "track.geojson.js")
+                            file_name = os.path.join(self.path, "track.geojson.js")
                             cht.misc.misc_tools.write_json_js(file_name,
                                                             feature_collection,
                                                             "var track_data =")
@@ -693,13 +768,13 @@ class WebViewer:
             namestr = []
             
             # 24-hour increments
-            requested_times = pd.date_range(start=t0 + dt24,
-                                            end=t1,
-                                            freq='24H').to_pydatetime().tolist()
+            # requested_times = pd.date_range(start=t0 + dt24,
+            #                                 end=t1,
+            #                                 freq='24H').to_pydatetime().tolist()
 
-            for it, t in enumerate(requested_times):
-                pathstr.append((t - dt24).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
-                namestr.append((t - dt24).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC")
+            # for it, t in enumerate(requested_times):
+            #     pathstr.append((t - dt24).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
+            #     namestr.append((t - dt24).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC")
 
             pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
             td = t1 - t0
@@ -717,22 +792,23 @@ class WebViewer:
                         file_name = os.path.join(model.cycle_output_path, "sfincs_map.nc")
                         
                         # Precip map over 24-hour increments                    
-                        for it, t in enumerate(requested_times):
-                            p = model.domain.read_cumulative_precipitation(file_name=file_name,
-                                                                           time_range=[t - dt24 + dt1, t + dt1])                        
-                            p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-                                                        "precipitation",
-                                                        pathstr[it])                        
-                            make_precipitation_tiles(p, index_path, p_map_path, contour_set)
+                        # for it, t in enumerate(requested_times):
+                        #     p = model.domain.read_cumulative_precipitation(file_name=file_name,
+                        #                                                    time_range=[t - dt24 + dt1, t + dt1])                        
+                        #     p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+                        #                                 "precipitation",
+                        #                                 pathstr[it])                        
+                        #     make_precipitation_tiles(p, index_path, p_map_path, contour_set)
 
 
                         # Full simulation       
                         p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
                                                   "precipitation",
-                                                   pathstr[-1])                        
-                        p = model.domain.read_cumulative_precipitation(file_name=file_name,
-                                                                       time_range=[t0 + dt1, t1 + dt1])                        
-                        make_precipitation_tiles(p, index_path, p_map_path, contour_set)
+                                                   pathstr[-1])
+                        if not model.domain.input.qtrfile:                        
+                            p = model.domain.read_cumulative_precipitation(file_name=file_name,
+                                                                        time_range=[t0 + dt1, t1 + dt1])                        
+                            make_precipitation_tiles(p, index_path, p_map_path, contour_set)
             
             # Check if wave maps are available
             p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,

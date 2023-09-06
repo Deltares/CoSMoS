@@ -18,7 +18,7 @@ from cht.misc.deltares_ini import IniStruct
 
 from .cosmos_main import cosmos
 from .cosmos_model import Model
-from .cosmos_tiling import make_flood_map_tiles
+from .cosmos_tiling import make_flood_map_tiles, make_water_level_tiles
 import cosmos.cosmos_meteo as meteo
 
 #import xmlkit as xml
@@ -50,6 +50,8 @@ class CoSMoS_SFINCS(Model):
         self.domain.name  = self.name
         self.domain.runid = self.runid
         
+        # TODO properly add make_water_level_map into cosmos_model and scenario
+        self.make_water_level_map = True
         
     def pre_process(self):
                        
@@ -559,7 +561,7 @@ class CoSMoS_SFINCS(Model):
 
             flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
                                           "flood_map")
-            
+                        
             index_path = os.path.join(self.path, "tiling", "indices")
             topo_path = os.path.join(self.path, "tiling", "topobathy")
             
@@ -624,27 +626,61 @@ class CoSMoS_SFINCS(Model):
                 except:
                     print("An error occured while making flood map tiles")
 
+        # Make water level map tiles
+        if cosmos.config.make_water_level_maps and self.make_water_level_map:
 
-#         # Make flood map tiles
-# #        if cosmos.config.make_flood_maps and self.make_flood_map and self.domain.input.outputformat=="bin":
-#         if cosmos.config.make_flood_maps and self.make_flood_map:
-
-#             flood_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-#                                           "flood_map")
+            if cosmos.scenario.track_ensemble and self.ensemble:
+                # Make probabilistic flood maps
+                file_list= fo.list_files(os.path.join(output_path, "sfincs_map_*"))
+                prcs= [0.05, 0.5, 0.95]       
+                vars= ["zs", "zsmax"]
+                output_file_name = os.path.join(output_path, "sfincs_map_ensemble.nc")
+                pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
+                        
+            index_path = os.path.join(self.path, "tiling", "indices")
+            topo_path = os.path.join(self.path, "tiling", "topobathy")
             
-#             index_path = os.path.join(self.path, "tiling", "indices")
-#             topo_path = os.path.join(self.path, "tiling", "topobathy")
-            
-#             if os.path.exists(index_path) and os.path.exists(topo_path):
-
-#                 if self.domain.input.outputformat[0:3]=="bin":                
-#                     zsmax_file = os.path.join(output_path, "zsmax.dat")
-#                     zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file)
-#                 else:
-#                     zsmax_file = os.path.join(output_path, "sfincs_map.nc")
-#                     zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file)
+            # at least indices are needed for water-level maps
+            if os.path.exists(index_path):
+                # water levels can also be plotted without bed-level information
+                if not os.path.exists(topo_path):
+                    topo_path = None
+                cosmos.log("Making water level map tiles for model " + self.long_name + " ...")                
+    
+                # Wave map for the entire simulation
+                t0  = cosmos.cycle_time.replace(tzinfo=None)    
+                t1  = cosmos.stop_time
                     
-#                 cosmos.log("Making flood map tiles for model " + self.name)    
-#                 make_flood_map_tiles(zsmax, index_path, topo_path, flood_map_path,
-#                                          water_level_correction=0.0)
-#                 cosmos.log("Flood map tiles done.")    
+                pathstr = []
+                pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
+                            
+                zsmax_file = os.path.join(output_path, "sfincs_map.nc")
+                
+                try:
+                    # Full simulation        
+                    water_level_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+                                                    "water_level",
+                                                   pathstr[-1])                    
+                    zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file)
+
+                    water_level_correction = self.vertical_reference_level_difference_with_msl
+
+                    make_water_level_tiles(zsmax, index_path, topo_path, water_level_path,
+                         water_level_correction)
+                    
+                    if cosmos.scenario.track_ensemble and self.ensemble:
+                        zsmax_file = os.path.join(output_path, "sfincs_map_ensemble.nc")
+                        # Full simulation
+                        water_level_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+                                                    "water_level",
+                                                    pathstr[-1] + "_95")       
+                
+                        zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file,
+                                                    parameter = 'zsmax_95')
+                        make_water_level_tiles(zsmax, index_path, topo_path, water_level_path,
+                            water_level_correction)
+
+                except:        
+                    print("An error occured while making water level map tiles")
+
+

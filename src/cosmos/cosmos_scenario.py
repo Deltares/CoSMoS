@@ -471,7 +471,7 @@ class Scenario:
 
                 self.ensemble_nrtracks = xml_obj.ensemble_nrtracks[0].value
                 tc2= TropicalCycloneEnsemble(name= cycname, TropicalCyclone= tc)
-                tc2.tstart  = xml_obj.cycle[0].value-timedelta(hours=max(spinup_ensembles)+3)
+                tc2.tstart  = xml_obj.cycle[0].value-timedelta(hours=max(spinup_ensembles))
                 tc2.tstart_ensemble  = xml_obj.cycle[0].value
                 tc2.tend    = xml_obj.cycle[0].value+timedelta(hours=self.run_duration)
                 tc2.compute_ensemble(number_of_realizations= self.ensemble_nrtracks)

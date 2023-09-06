@@ -31,11 +31,11 @@ def merge_timeseries(path, model_name, model_region, model_type, station, t0=Non
         t1 = available_times[-1]
             
     # New pandas series
-    wl=[]
-    idx=[]
-    wl.append(0.0)
-    idx.append(pd.Timestamp("2100-01-01"))
-    vv = pd.Series(wl, index=idx)
+    # wl=[]
+    # idx=[]
+    # wl.append(0.0)
+    # idx.append(pd.Timestamp("2100-01-01"))
+    vv = pd.Series([0.0], index=[pd.Timestamp("2100-01-01")])
     vv.index.name = "date_time"
     vv.name       = name_str
     
@@ -68,7 +68,8 @@ def merge_timeseries(path, model_name, model_region, model_type, station, t0=Non
                 if ilast.any():
                     ilast = ilast[-1]
                     vv = vv[0:ilast]
-                    vv = vv.append(df)
+                    vv = pd.concat([vv,df])
+                    # vv = vv.append(df)
                 else:
                     vv = df
                     
