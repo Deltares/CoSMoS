@@ -290,13 +290,11 @@ def map_tiles(config):
                                             config["flood_map"]["name"],
                                             pathstr[it])                                            
 
-                    make_png_tiles(zsmax, index_path, png_path,
-                                   option="floodmap",
-                                   topo_path=topo_path,
-                                   color_values=color_values,
-                                   zoom_range=[0, 13],
-                                   zbmax=1.0,
-                                   quiet=True)
+                    make_floodmap_tiles(zsmax, index_path, png_path, topo_path,
+                                        color_values=color_values,
+                                        zoom_range=[0, 13],
+                                        zbmax=1.0,
+                                        quiet=True)
 
                 # Full simulation        
                 zsmax = sf.read_zsmax(zsmax_file=zsmax_file,
