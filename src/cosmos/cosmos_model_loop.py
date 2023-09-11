@@ -191,7 +191,7 @@ class ModelLoop():
                 cosmos.log("Ready to submit to Argo - " + model.long_name + " ...")
                 s3key = cosmos.scenario.name + "/" + "models" + "/" + model.name
                 tilesfolder = model.name + "_tiling"
-                webviewerfolder = ""
+                webviewerfolder = cosmos.config.webviewer.name + "/data/" + cosmos.scenario.name + "/" + cosmos.cycle_string
                 # Delete existing folder in cloud storage
                 cosmos.log("Deleting model folder on S3 : " + model.name)                
                 cosmos.cloud.delete_folder("cosmos-scenarios", s3key)
