@@ -182,9 +182,16 @@ class Model:
             else:
                 name = "flood_map"    
             config["flood_map"]["name"] = name
-            config["flood_map"]["png_path"]   = os.path.join(cosmos.config.webviewer.data_path)
-            config["flood_map"]["index_path"] = os.path.join(self.path, "tiling", "indices")
-            config["flood_map"]["topo_path"]  = os.path.join(self.path, "tiling", "topobathy")
+            if cosmos.config.cycle.run_mode == "cloud":
+                config["flood_map"]["png_path"]   = "/output"
+                config["flood_map"]["index_path"] = "/tiles/indices"
+                config["flood_map"]["topo_path"]  = "/tiles/topobathy"
+                config["flood_map"]["zsmax_path"]  = "/input"
+            else:
+                config["flood_map"]["png_path"]   = os.path.join(cosmos.config.webviewer.data_path)
+                config["flood_map"]["index_path"] = os.path.join(self.path, "tiling", "indices")
+                config["flood_map"]["topo_path"]  = os.path.join(self.path, "tiling", "topobathy")
+                config["flood_map"]["zsmax_path"]  = "."
             config["flood_map"]["start_time"] = cosmos.cycle
             config["flood_map"]["stop_time"]  = cosmos.stop_time
             config["flood_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["flood_map"]["color_map"]]

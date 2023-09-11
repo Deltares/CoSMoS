@@ -235,7 +235,7 @@ def map_tiles(config):
         flood_map_path = config["flood_map"]["png_path"]
         index_path     = config["flood_map"]["index_path"]
         topo_path      = config["flood_map"]["topo_path"]
-#        zsmax_path     = config["flood_map"]["zsmax_path"]
+        zsmax_path     = config["flood_map"]["zsmax_path"]
                 
         if os.path.exists(index_path) and os.path.exists(topo_path):
             
@@ -263,9 +263,8 @@ def map_tiles(config):
             pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
 
             #zsmax_file = "/input/sfincs_map.nc"
-#            zsmax_file = os.path.join(zsmax_path,
-#                                      "sfincs_map.nc")
-            zsmax_file = "sfincs_map.nc"
+            zsmax_file = os.path.join(zsmax_path,
+                                      "sfincs_map.nc")
             
             if config["ensemble"]:
                 varname = "zsmax_90"
@@ -278,8 +277,8 @@ def map_tiles(config):
                 for it, t in enumerate(requested_times):
 
                     zsmax = sf.read_zsmax(zsmax_file=zsmax_file,
-                                        time_range=[t - dt + dt1, t + dt1],
-                                        varname=varname)
+                                          time_range=[t - dt + dt1, t + dt1],
+                                          varname=varname)
                     # Difference between MSL and NAVD88 (used in topo data)
                     zsmax += config["vertical_reference_level_difference_with_msl"]
                     zsmax = np.transpose(zsmax)
