@@ -885,7 +885,14 @@ class WebViewer:
 
         cht.misc.misc_tools.write_json_js(sc_file, scs, "var scenario =")
 
-    def upload(self):        
+    def upload(self):
+        if cosmos.config.cycle.run_mode == "cloud":
+            # Upload to S3
+            self.upload_to_s3()
+        else:
+            self.upload_to_opendap()
+
+    def upload_to_opendap(self):    
         """Upload web viewer to web server."""
         from cht.misc.sftp import SSHSession        
         cosmos.log("Uploading web viewer ...")        
@@ -953,11 +960,22 @@ class WebViewer:
             except:
                 pass
 
-    def upload_data(self):        
-        # Upload data from local web viewer to web server
-        pass
-
-
+    def upload_to_s3(self):    
+        """Upload web viewer to S3"""
+        cosmos.log("Uploading web viewer to S3 ...")        
+        try:
+            # Upload entire copy of local web viewer to web server
+            bucket_name = "scenario-webviewer"
+            local_folder = self.cycle_path
+            s3_folder = self.name + "/" + "data" + "/" + cosmos.scenario.name + "/" + cosmos.cycle_string
+            cosmos.cloud.upload_folder(bucket_name, local_folder, s3_folder)
+            # Upload scenarios.js
+            local_file = os.path.join(self.path, "data", "scenarios.js")
+            s3_file    = self.name + "/" + "data" + "/" + "scenarios.js"
+            cosmos.cloud.upload_file(bucket_name, local_file, s3_file)
+        except BaseException as e:
+            cosmos.log("An error occurred while uploading !")
+            cosmos.log(str(e))
 
     def merge_timeseries(self, path, model_name, station, prefix,
                          t0=None,

@@ -46,6 +46,10 @@ class CoSMoS_SFINCS(Model):
         self.domain.input.outputformat = "net"
         self.domain.input.bzsfile  = "sfincs.bzs"
         self.domain.input.storecumprcp = 1
+
+        # Temporary fix for SFINCS bug 
+        if hasattr(self.domain.input, "krfile")
+            self.domain.input.ksfile = self.domain.input.krfile
         
         if self.flow_nested:
             self.domain.input.pavbnd = -999.0
