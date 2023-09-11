@@ -22,6 +22,7 @@ class Scenario:
         self.model         = []
         self.long_name     = name
         self.description   = name
+        self.cycle         = None
         self.lon           = 0.0
         self.lat           = 0.0
         self.zoom          = 10
@@ -31,6 +32,7 @@ class Scenario:
         self.job_list_path = None
         self.restart_path  = None
         self.last_cycle    = None 
+#        self.ensemble      = False 
         self.track_ensemble             = None 
         self.track_ensemble_nr_realizations = 0 
         self.meteo_dataset              = None
@@ -160,6 +162,7 @@ class Scenario:
             # Path in model database
             model.path        = model_path
             model.name        = name
+            model.deterministic_name = name
             model.version     = vsn
             model.region      = region
             model.file_name   = file_name

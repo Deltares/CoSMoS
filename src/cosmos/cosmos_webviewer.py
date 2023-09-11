@@ -124,7 +124,6 @@ class WebViewer:
         cosmos.log("Adding meteo layers ...")                
         self.make_meteo_maps()
 
-
         cosmos.log("Adding run-up layers ...")                
         self.make_runup_map()
         cosmos.log("Adding XBeach markers ...")                
@@ -298,6 +297,7 @@ class WebViewer:
                     self.map_variables.append(dct)
                     
                     # Cyclone track(s)
+                    # TODO: move a lot of this code to cht_cyclones
                     tracks = meteo_subset.find_cyclone_tracks(xlim=[-110.0,-30.0],
                                                               ylim=[5.0, 45.0],
                                                               pcyc=99500.0,
@@ -342,11 +342,21 @@ class WebViewer:
                                                     properties={"name":"No name"}))
                         
                         feature_collection = FeatureCollection(features)
+
                         file_name = os.path.join(self.cycle_path, "track.geojson.js")
                         cht.misc.misc_tools.write_json_js(file_name,
                                                           feature_collection,
                                                           "var track_data =")
-                                
+
+        if cosmos.scenario.track_ensemble:
+            feature_collection = cosmos.scenario.track_ensemble.get_feature_collection()
+            file_name = os.path.join(self.cycle_path, "track_ensemble.geojson.js")
+            cht.misc.misc_tools.write_json_js(file_name,
+                                              feature_collection,
+                                              "var track_ensemble_data =")
+
+
+
         return
         # Cumulative rainfall
         
@@ -781,6 +791,9 @@ class WebViewer:
                         
                         # Check if merge returned values
                         if v is not None:                            
+                            # Correct to MSL if necessary
+                            if ts_type == "wl":
+                                v += model.vertical_reference_level_difference_with_msl
                             # Write csv js file
                             cmp_file = ts_type + "." + station.name + "." + model.name + ".csv.js"
                             csv_file = os.path.join(self.cycle_path,

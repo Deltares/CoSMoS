@@ -42,6 +42,7 @@ class CoSMoS_SFINCS(Model):
         self.domain.input.tstop    = self.flow_stop_time
         self.domain.input.dtmapout = 21600.0 # should this not be configurable?
         self.domain.input.dtmaxout = 21600.0 # should this not be configurable?
+        self.domain.input.dtout    = None
         self.domain.input.outputformat = "net"
         self.domain.input.bzsfile  = "sfincs.bzs"
         self.domain.input.storecumprcp = 1

@@ -13,12 +13,16 @@ import copy
 
 from .cosmos import cosmos
 from cht.tropical_cyclone.tropical_cyclone import TropicalCycloneEnsemble
-from cht.meteo.meteo import filter_cyclones_TCvitals
+from cht.meteo.meteo import filter_cyclones_TCvitals, find_priorityTC
 import cht.misc.fileops as fo
 from datetime import datetime
 import cht.misc.misc_tools
 
 def setup_track_ensemble():
+
+    tc = None
+    ens_start = None
+
     # Check if scenario is forced with track files or gridded data
     if not cosmos.scenario.meteo_track:
         # If only gridded data, try to extract the storm track
@@ -28,21 +32,17 @@ def setup_track_ensemble():
             if meteo_subset.name == cosmos.scenario.meteo_dataset:
                 break
 
-#        meteo_subset = cosmos.meteo_subset[0]
+        ens_start = meteo_subset.last_analysis_time
 
         cosmos.log("Finding storm tracks ...")
-        tracks = meteo_subset.find_cyclone_tracks()
-#        # Filter cyclone based on TCvitals
-#        tracks = filter_cyclones_TCvitals(tracks)
-        # Take the one with the longest track (this is of course bullshit)
-        imax = 0
-        for itrack, track in enumerate(tracks):
-            if len(track.track) > imax:
-                itrmax = itrack
-                imax = len(track.track)
+        tracks = meteo_subset.find_cyclone_tracks(method="vorticity",
+                                                  pcyc=102000.0,
+                                                  vcyc=30.0,
+                                                  vmin=18.0)
+        # Filter cyclone based on TCvitals
+        tc = find_priorityTC(tracks, "priority_storm.txt")        
 
         # Use the first track to make ensembles
-        tc = tracks[itrmax]
         tc.account_for_forward_speed()
         tc.estimate_missing_values()
         tc.include_rainfall = True
@@ -54,13 +54,27 @@ def setup_track_ensemble():
         # Read in storm track from *.cyc file
         tc = tc.read(cosmos.scenario.meteo_track)    
 
+    if not tc:
+        # No track found
+        return
+
     # Generate track ensemble
     cosmos.log("Generating track ensemble ...")
+#    cosmos.scenario.ensemble = True
+    cosmos.scenario.cyclone_track = tc.track
     cosmos.scenario.track_ensemble = TropicalCycloneEnsemble(TropicalCyclone=tc)
+    cosmos.scenario.track_ensemble.position_method = 1
     t0str = tc.track.loc[0]["datetime"]
-    t1str = tc.track.loc[len(tc.track) - 1]["datetime"]
     cosmos.scenario.track_ensemble.tstart  = datetime.strptime(t0str, "%Y%m%d %H%M%S")
+    t1str = tc.track.loc[len(tc.track) - 1]["datetime"]
     cosmos.scenario.track_ensemble.tend    = datetime.strptime(t1str, "%Y%m%d %H%M%S")
+    if ens_start:
+        # Ensemble starts at the time of the last analysis
+        cosmos.scenario.track_ensemble.tstart_ensemble = ens_start
+    else:    
+        t0str = tc.track.loc[0]["datetime"]
+        cosmos.scenario.track_ensemble.tstart_ensemble = datetime.strptime(t0str, "%Y%m%d %H%M%S")
+    cosmos.scenario.track_ensemble.dt = 12
     cosmos.scenario.track_ensemble.compute_ensemble(number_of_realizations=cosmos.scenario.track_ensemble_nr_realizations)    
 
     # Write to files
@@ -70,7 +84,7 @@ def setup_track_ensemble():
     cosmos.scenario.track_ensemble.to_spiderweb(cosmos.scenario.cycle_track_ensemble_spw_path)
 
     # Get outline of ensemble
-    cone = cosmos.scenario.track_ensemble.get_outline(buffer=300000.0)
+    cone = cosmos.scenario.track_ensemble.get_outline(buffer=500000.0)
 
     # Make geojson file (in webviewer folder)
     file_name = os.path.join(cosmos.config.webviewer.data_path,
@@ -94,6 +108,8 @@ def setup_track_ensemble():
             ensemble_model.read_model_specific()
             # Set ensemble flag
             ensemble_model.ensemble = True
+            # Set name of matching deterministic model
+            ensemble_model.deterministic_name = model.name
             # Change nesting (new nested models will be set later in this function)
             ensemble_model.nested_flow_models = []
             ensemble_model.nested_wave_models = []

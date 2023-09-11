@@ -297,7 +297,7 @@ class ModelLoop():
             # Check if we need to start a new cycle
             if cosmos.config.cycle.mode == "continuous" and cosmos.next_cycle_time:
                 # Start new main loop
-                cosmos.main_loop.start(cycle_time=cosmos.next_cycle_time)
+                cosmos.main_loop.start(cycle=cosmos.next_cycle_time)
             else:
                 cosmos.log("All done.")
 

@@ -243,9 +243,9 @@ class Model:
         self.cycle_figures_path = os.path.join(cycle_path, "models", name, "figures")
         self.cycle_post_path    = os.path.join(cycle_path, "models", name, "timeseries")
         
-        # Restart paths
-        self.restart_flow_path = os.path.join(restart_path, name, "flow")
-        self.restart_wave_path = os.path.join(restart_path, name, "wave")
+        # Restart paths (use deterministic name for restart files)
+        self.restart_flow_path = os.path.join(restart_path, self.deterministic_name, "flow")
+        self.restart_wave_path = os.path.join(restart_path, self.deterministic_name, "wave")
 
         # Model folder in the jobs folder
         # self.job_path = os.path.join(cosmos.config.path.jobs,
