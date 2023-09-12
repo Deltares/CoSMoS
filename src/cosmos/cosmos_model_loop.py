@@ -51,8 +51,12 @@ class ModelLoop():
         self.status = "running"
         while self.status == "running":        
             # This will be repeated until the status of the model loop changes to "done" 
-            self.scheduler = sched.scheduler(time.time, time.sleep)
-            dt = 1.0 # Execute the next model loop 1 second from now
+            self.scheduler = sched.scheduler(time.time,
+                                              time.sleep)
+            if cosmos.config.cycle.run_mode == "cloud":
+                dt = 20.0 # Execute the next model loop 1 second from now
+            else:                
+                dt = 1.0 # Execute the next model loop 1 second from now
             self.scheduler.enter(dt, 1, self.run, ())
             self.scheduler.run()
 
@@ -190,7 +194,7 @@ class ModelLoop():
             elif cosmos.config.cycle.run_mode == "cloud":
                 cosmos.log("Ready to submit to Argo - " + model.long_name + " ...")
                 s3key = cosmos.scenario.name + "/" + "models" + "/" + model.name
-                tilesfolder = model.name
+                tilesfolder = model.deterministic_name
                 webviewerfolder = cosmos.config.webviewer.name + "/data/" + cosmos.scenario.name + "/" + cosmos.cycle_string
                 # Delete existing folder in cloud storage
                 cosmos.log("Deleting model folder on S3 : " + model.name)                

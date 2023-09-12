@@ -143,7 +143,7 @@ def setup_track_ensemble():
     if cosmos.config.cycle.run_mode == "cloud":
         cosmos.log("Uploading spiderweb files to S3")
         path = cosmos.scenario.cycle_track_ensemble_spw_path
-        subfolder = os.path.join(cosmos.scenario.name, "track_ensemble", "spw")
+        subfolder = cosmos.scenario.name + "/track_ensemble/spw"
         cosmos.cloud.upload_folder("cosmos-scenarios", path, subfolder)
 
     cosmos.log("Track ensemble done ...")

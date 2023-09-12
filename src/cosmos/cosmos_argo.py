@@ -41,9 +41,16 @@ class Argo:
 
     def get_task_status(workflow):
 
-        wf = workflow.workflows_service.get_workflow(workflow.name, namespace=workflow.namespace)
-        status = WorkflowStatus.from_argo_status(wf.status.phase)
+        status = "Unknown"
 
-        cosmos.log("Status of workflow: " + status)
+        try:
+            wf = workflow.workflows_service.get_workflow(workflow.name, namespace=workflow.namespace)
+            status = WorkflowStatus.from_argo_status(wf.status.phase)
+
+            cosmos.log("Status of workflow: " + status)
+
+        except BaseException as e:
+            cosmos.log("An error occurred while checking status !")
+            cosmos.log(str(e))
 
         return status
