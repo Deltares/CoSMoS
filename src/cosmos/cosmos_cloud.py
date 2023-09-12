@@ -56,6 +56,11 @@ class Cloud:
         if not quiet:
             print("Deleted " + os.path.basename(file))
 
+    def make_folder(self, bucket_name, s3_folder, quiet=True):
+        self.s3_client.put_objects(bBucket=bucket_name, Key=(s3_folder + '/'))
+        if not quiet:
+            print("Made folder: " + s3_folder)
+
     def upload_folder(self, bucket_name, local_folder, s3_folder, quiet=True):
         # Should do this recursively so that every subfolder is also uploaded
         flist = fo.list_files(os.path.join(local_folder, "*"), full_path=True)

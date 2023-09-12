@@ -58,9 +58,7 @@ class WebViewer:
                                             "COSMOS_VIEWER",
                                             cosmos.scenario.long_name)
 
-        # Make scenario folder and cycle folder 
-        fo.mkdir(os.path.join(self.path, "data", cosmos.scenario.name))
-        fo.mkdir(os.path.join(self.path, "data", cosmos.scenario.name, cosmos.cycle_string))
+    
 
     def make(self):
 
@@ -75,8 +73,15 @@ class WebViewer:
                                        cosmos.scenario.name,
                                        cosmos.cycle_string)
 
+        # Make scenario folder and cycle folder 
         cosmos.log("Making new cycle folder on web viewer ...")
-        fo.mkdir(os.path.join(self.cycle_path))
+        fo.mkdir(os.path.join(self.path, "data", cosmos.scenario.name))
+        fo.mkdir(os.path.join(self.path, "data", cosmos.scenario.name, cosmos.cycle_string))
+
+#        # In cloud mode, also make a path on S3
+#        if cosmos.config.cycle.run_mode == "cloud":
+
+
 
         # Stations and buoys
         cosmos.log("Copying time series ...")                
