@@ -161,7 +161,8 @@ class WebViewer:
                 bucket_name = 'cosmos-ensemble-tiles'
                 #TODO: where to get prefix?
                 
-                prefix = 'ian_06/20220928_00z/flood_map_90/'
+#                prefix = 'ian_06/20220928_00z/flood_map_90/'
+                prefix = cosmos.scenario.name + "/" + cosmos.cycle_string + "/" + name + "/"
 
                 s3_client = boto3.client('s3')
                 paginator = s3_client.get_paginator('list_objects_v2')
