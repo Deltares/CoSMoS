@@ -84,7 +84,7 @@ def setup_track_ensemble():
     cosmos.scenario.track_ensemble.to_spiderweb(cosmos.scenario.cycle_track_ensemble_spw_path)
 
     # Get outline of ensemble
-    cone = cosmos.scenario.track_ensemble.get_outline(buffer=500000.0)
+    cone = cosmos.scenario.track_ensemble.get_outline(buffer=200000.0)
 
     # Make geojson file (in webviewer folder)
     file_name = os.path.join(cosmos.config.webviewer.data_path,

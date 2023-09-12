@@ -62,10 +62,14 @@ class Cloud:
             print("Made folder: " + s3_folder)
 
     def upload_folder(self, bucket_name, local_folder, s3_folder, quiet=True):
+        local_folder = local_folder.replace('\\\\','\\')
+        local_folder = local_folder.replace('\\','/')
         # Recursively list all files
-        flist = fo.list_all_files(local_folder)
+        flist = list_all_files(local_folder)
         for file in flist:
-            s3_key = os.path.join(s3_folder, os.path.basename(file)).replace('\\', '/')
+            file1 = file.replace('\\','/')
+            file1 = file1.replace(local_folder,'')
+            s3_key = s3_folder + file1
             self.s3_client.upload_file(file, bucket_name, s3_key)
             if not quiet:
                 print("Uploaded " + os.path.basename(file))
@@ -82,10 +86,20 @@ class Cloud:
                     print("Downloaded " + os.path.basename(s3_key))
 
     def delete_folder(self, bucket_name, folder):
-        objects = self.s3_client.list_objects(Bucket=bucket_name, Prefix=folder)
+        objects = self.s3_client.list_objects(Bucket=bucket_name, Prefix=folder, Delimiter="/")
         if "Contents" in objects:
             for object in objects['Contents']:
                 self.s3_client.delete_object(Bucket=bucket_name, Key=object['Key'])
+
+    def list_folders(self, bucket_name, folder):
+        folders = []
+        paginator = self.s3_client.get_paginator('list_objects_v2')
+        iterator = paginator.paginate(Bucket=bucket_name, Prefix=folder, Delimiter='/')
+        for page in iterator:
+            for subfolder in page.get('CommonPrefixes', []):
+                subfolder_name = subfolder['Prefix'].rstrip('/').split('/')[-1]
+                folders.append(subfolder_name)
+        return folders 
 
 def list_all_files(src):
     # Recursively list all files and folders in a folder

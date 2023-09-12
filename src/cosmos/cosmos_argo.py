@@ -14,15 +14,18 @@ class Argo:
     def __init__(self):
         pass
 
-    def submit_template_job(self, workflow_name, subfolder, tilingfolder, webviewerfolder):
+    def submit_template_job(self, workflow_name, model_name, subfolder, tilingfolder, webviewerfolder):
 
         wt_ref = WorkflowTemplateRef(name=workflow_name, cluster_scope=False)
 
+        mname = model_name.replace("_","-")
+
         w = Workflow(
-            generate_name=workflow_name+"-",
+            generate_name=mname+"-",
             workflow_template_ref=wt_ref,
             arguments={"subfolder": subfolder,
-                       "tilingfolder": tilingfolder}
+                       "tilingfolder": tilingfolder,
+                       "webviewerfolder": webviewerfolder}
         )
 
         cosmos.log("Cloud Workflow started")

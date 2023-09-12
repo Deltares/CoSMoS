@@ -143,46 +143,41 @@ class WebViewer:
         cosmos.log("Web viewer done.")                
 
     def set_map_tile_variables(self, name, long_name, description, color_map, max_native_zoom):
-        # Check if flood maps are available
-        tile_path = os.path.join(self.cycle_path, name)
-        if fo.exists(tile_path):
-            # 24 hour increments  
-            dtinc = 24
-            # Wave map for the entire simulation
-            dt  = datetime.timedelta(hours=dtinc)
-            t0  = cosmos.cycle.replace(tzinfo=None)    
-            t1  = cosmos.stop_time
 
-            pathstr = []
-            namestr = []
-            hrstr = "48"
-            # Check times
-            if cosmos.config.cycle.run_mode == "cloud":
-                bucket_name = 'cosmos-ensemble-tiles'
-                #TODO: where to get prefix?
-                
-#                prefix = 'ian_06/20220928_00z/flood_map_90/'
-                prefix = cosmos.scenario.name + "/" + cosmos.cycle_string + "/" + name + "/"
-
-                s3_client = boto3.client('s3')
-                paginator = s3_client.get_paginator('list_objects_v2')
-                iterator = paginator.paginate(Bucket=bucket_name, Prefix=prefix, Delimiter='/')
-
-                folders = []
-                for page in iterator:
-                    #print(page.get('CommonPrefixes'))
-                    for subfolder in page.get('CommonPrefixes', []):
-                        subfolder_name = subfolder['Prefix'].rstrip('/').split('/')[-1]
-                        folders.append(subfolder_name)
-            else:
+        folders = [] 
+        # Check if tiles are available
+        if cosmos.config.cycle.run_mode == "cloud":
+            bucket_name = 'cosmos-ensemble-tiles'
+            prefix = cosmos.scenario.name + "/" + cosmos.cycle_string + "/" + name + "/"
+            prefix = 'ian_06/20220928_00z/flood_map_90/'
+            folders = cosmos.cloud.list_folders(bucket_name, prefix)
+        else:    
+            # Tiles are stored locally
+            tile_path = os.path.join(self.cycle_path, name)
+            if fo.exists(tile_path):
+                # Check times
                 folders = fo.list_folders(os.path.join(tile_path, "*"), basename=True)
 
-            for folder in folders:
-                pathstr.append(folder)
-                if folder[0:3] == "com":
-                    namestr.append("Combined " + hrstr + "-hour forecast")
-                else:
-                    namestr.append(folder)
+        if not folders:
+            return
+        
+        # 24 hour increments  
+        dtinc = 24
+        # Wave map for the entire simulation
+        dt  = datetime.timedelta(hours=dtinc)
+        t0  = cosmos.cycle.replace(tzinfo=None)    
+        t1  = cosmos.stop_time
+
+        pathstr = []
+        namestr = []
+        hrstr = "48"
+
+        for folder in folders:
+            pathstr.append(folder)
+            if folder[0:3] == "com":
+                namestr.append("Combined " + hrstr + "-hour forecast")
+            else:
+                namestr.append(folder)
 
             # TODO try to get neater time labels for the web viewer
             # # 24-hour increments
@@ -205,33 +200,33 @@ class WebViewer:
 
             # wvpath = os.path.join(scenario_path)
             # fo.copy_file(flood_map_path, wvpath)
-            dct={}
-            dct["name"]        = name
-            dct["long_name"]   = long_name
-            dct["description"] = description
-            dct["format"]      = "xyz_tile_layer"
-            dct["max_native_zoom"]  = 13
+        dct={}
+        dct["name"]        = name
+        dct["long_name"]   = long_name
+        dct["description"] = description
+        dct["format"]      = "xyz_tile_layer"
+        dct["max_native_zoom"]  = 13
 
-            tms = []            
-            for it, pth in enumerate(pathstr):
-                tm = {}
-                tm["name"]   = pth
-                tm["string"] = namestr[it]
-                tms.append(tm)
-            dct["times"]        = tms  
+        tms = []            
+        for it, pth in enumerate(pathstr):
+            tm = {}
+            tm["name"]   = pth
+            tm["string"] = namestr[it]
+            tms.append(tm)
+        dct["times"]        = tms  
 
-            lgn = {}
-            lgn["text"] = color_map["string"]
-            cntrs = color_map["contours"]
-            contours = []
-            for cntr in cntrs:
-                contour = {}
-                contour["text"]  = cntr["string"]
-                contour["color"] = "#" + cntr["hex"]
-                contours.append(contour)
-            lgn["contours"] = contours
-            dct["legend"]   = lgn
-            self.map_variables.append(dct)
+        lgn = {}
+        lgn["text"] = color_map["string"]
+        cntrs = color_map["contours"]
+        contours = []
+        for cntr in cntrs:
+            contour = {}
+            contour["text"]  = cntr["string"]
+            contour["color"] = "#" + cntr["hex"]
+            contours.append(contour)
+        lgn["contours"] = contours
+        dct["legend"]   = lgn
+        self.map_variables.append(dct)
 
 
                 
@@ -996,8 +991,8 @@ class WebViewer:
             cosmos.cloud.upload_folder(bucket_name, local_folder, s3_folder)
             # Upload scenarios.js
             local_file = os.path.join(self.path, "data", "scenarios.js")
-            s3_file    = self.name + "/" + "data" + "/" + "scenarios.js"
-            cosmos.cloud.upload_file(bucket_name, local_file, s3_file)
+            s3_folder  = self.name + "/" + "data"
+            cosmos.cloud.upload_file(bucket_name, local_file, s3_folder)
         except BaseException as e:
             cosmos.log("An error occurred while uploading !")
             cosmos.log(str(e))
