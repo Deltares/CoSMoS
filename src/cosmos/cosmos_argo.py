@@ -14,7 +14,7 @@ class Argo:
     def __init__(self):
         pass
 
-    def submit_template_job(self, workflow_name, subfolder, tilingfolder):
+    def submit_template_job(self, workflow_name, subfolder, tilingfolder, webviewerfolder):
 
         wt_ref = WorkflowTemplateRef(name=workflow_name, cluster_scope=False)
 
