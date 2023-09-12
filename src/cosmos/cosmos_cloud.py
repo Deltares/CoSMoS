@@ -62,8 +62,8 @@ class Cloud:
             print("Made folder: " + s3_folder)
 
     def upload_folder(self, bucket_name, local_folder, s3_folder, quiet=True):
-        # Should do this recursively so that every subfolder is also uploaded
-        flist = fo.list_files(os.path.join(local_folder, "*"), full_path=True)
+        # Recursively list all files
+        flist = fo.list_all_files(local_folder)
         for file in flist:
             s3_key = os.path.join(s3_folder, os.path.basename(file)).replace('\\', '/')
             self.s3_client.upload_file(file, bucket_name, s3_key)
@@ -86,3 +86,14 @@ class Cloud:
         if "Contents" in objects:
             for object in objects['Contents']:
                 self.s3_client.delete_object(Bucket=bucket_name, Key=object['Key'])
+
+def list_all_files(src):
+    # Recursively list all files and folders in a folder
+    import pathlib
+    pth = pathlib.Path(src)
+    pthlst = list(pth.rglob("*"))
+    lst = []
+    for f in pthlst:
+        if f.is_file():
+            lst.append(str(f))
+    return lst        
