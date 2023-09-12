@@ -13,6 +13,7 @@ from scipy import interpolate
 from geojson import Point, LineString, Feature, FeatureCollection
 from pyproj import CRS
 from pyproj import Transformer
+import boto3
 
 from .cosmos import cosmos
 #from .cosmos_timeseries import merge_timeseries as merge
@@ -156,7 +157,25 @@ class WebViewer:
             namestr = []
             hrstr = "48"
             # Check times
-            folders = fo.list_folders(os.path.join(tile_path, "*"), basename=True)
+            if cosmos.config.cycle.run_mode == "cloud":
+                bucket_name = 'cosmos-ensemble-tiles'
+                #TODO: where to get prefix?
+                
+                prefix = 'ian_06/20220928_00z/flood_map_90/'
+
+                s3_client = boto3.client('s3')
+                paginator = s3_client.get_paginator('list_objects_v2')
+                iterator = paginator.paginate(Bucket=bucket_name, Prefix=prefix, Delimiter='/')
+
+                folders = []
+                for page in iterator:
+                    #print(page.get('CommonPrefixes'))
+                    for subfolder in page.get('CommonPrefixes', []):
+                        subfolder_name = subfolder['Prefix'].rstrip('/').split('/')[-1]
+                        folders.append(subfolder_name)
+            else:
+                folders = fo.list_folders(os.path.join(tile_path, "*"), basename=True)
+
             for folder in folders:
                 pathstr.append(folder)
                 if folder[0:3] == "com":
@@ -896,7 +915,7 @@ class WebViewer:
             self.upload_to_s3()
         else:
             self.upload_to_opendap()
-
+            
     def upload_to_opendap(self):    
         """Upload web viewer to web server."""
         from cht.misc.sftp import SSHSession        
