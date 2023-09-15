@@ -37,7 +37,7 @@ def setup_track_ensemble():
         cosmos.log("Finding storm tracks ...")
         tracks = meteo_subset.find_cyclone_tracks(method="vorticity",
                                                   pcyc=102000.0,
-                                                  vcyc=30.0,
+                                                  vcyc=40.0,
                                                   vmin=18.0)
         # Filter cyclone based on TCvitals
         tc = find_priorityTC(tracks, "priority_storm.txt")        
@@ -74,7 +74,7 @@ def setup_track_ensemble():
     else:    
         t0str = tc.track.loc[0]["datetime"]
         cosmos.scenario.track_ensemble.tstart_ensemble = datetime.strptime(t0str, "%Y%m%d %H%M%S")
-    cosmos.scenario.track_ensemble.dt = 12
+    cosmos.scenario.track_ensemble.dt = 3
     cosmos.scenario.track_ensemble.compute_ensemble(number_of_realizations=cosmos.scenario.track_ensemble_nr_realizations)    
 
     # Write to files
