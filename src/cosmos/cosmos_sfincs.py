@@ -189,7 +189,7 @@ class CoSMoS_SFINCS(Model):
             fid = open(batch_file, "w")
             fid.write("@ echo off\n")
             exe_path = os.path.join(cosmos.config.executables.sfincs_path, "sfincs.exe")
-            fid.write(exe_path + "\n")
+            fid.write(exe_path + ">sfincs.log\n")
             fid.close()
  
         if cosmos.config.cycle.run_mode == "cloud":

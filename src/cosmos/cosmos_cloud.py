@@ -92,6 +92,8 @@ class Cloud:
                 self.s3_client.delete_object(Bucket=bucket_name, Key=object['Key'])
 
     def list_folders(self, bucket_name, folder):
+        if folder[-1] != "/":
+             folder = folder + "/"
         folders = []
         paginator = self.s3_client.get_paginator('list_objects_v2')
         iterator = paginator.paginate(Bucket=bucket_name, Prefix=folder, Delimiter='/')

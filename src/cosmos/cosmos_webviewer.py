@@ -147,9 +147,8 @@ class WebViewer:
         folders = [] 
         # Check if tiles are available
         if cosmos.config.cycle.run_mode == "cloud":
-            bucket_name = 'cosmos-ensemble-tiles'
-            prefix = cosmos.scenario.name + "/" + cosmos.cycle_string + "/" + name + "/"
-            prefix = 'ian_06/20220928_00z/flood_map_90/'
+            bucket_name = 'scenario-webviewer'
+            prefix = self.name + "/data/" + cosmos.scenario.name + "/" + cosmos.cycle_string + "/" + name
             folders = cosmos.cloud.list_folders(bucket_name, prefix)
         else:    
             # Tiles are stored locally
