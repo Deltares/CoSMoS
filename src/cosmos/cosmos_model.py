@@ -429,6 +429,6 @@ class Model:
             # Index of peak
             imax = np.argmax(twl)
             
-            self.peak_boundary_twl  = z[imax]
+            self.peak_boundary_twl  = twl[imax]
             self.peak_boundary_time = t[imax].to_pydatetime()
             

@@ -725,7 +725,7 @@ class WebViewer:
                                                         properties={"name":"No name"}))
                             
                             feature_collection = FeatureCollection(features)
-                            file_name = os.path.join(self.path, "track.geojson.js")
+                            file_name = os.path.join(scenario_path, "track.geojson.js")
                             cht.misc.misc_tools.write_json_js(file_name,
                                                             feature_collection,
                                                             "var track_data =")
@@ -805,10 +805,10 @@ class WebViewer:
                         p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
                                                   "precipitation",
                                                    pathstr[-1])
-                        if not model.domain.input.qtrfile:                        
-                            p = model.domain.read_cumulative_precipitation(file_name=file_name,
-                                                                        time_range=[t0 + dt1, t1 + dt1])                        
-                            make_precipitation_tiles(p, index_path, p_map_path, contour_set)
+
+                        p = model.domain.read_cumulative_precipitation(file_name=file_name,
+                                                                    time_range=[t0 + dt1, t1 + dt1])                        
+                        make_precipitation_tiles(p, index_path, p_map_path, contour_set)
             
             # Check if wave maps are available
             p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,

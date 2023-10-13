@@ -293,7 +293,7 @@ class CoSMoS_SFINCS(Model):
         fid.write("@ echo off\n")
         fid.write("DATE /T > running.txt\n")
         exe_path = os.path.join(cosmos.config.sfincs_exe_path, "sfincs.exe")
-        fid.write(exe_path + "\n")
+        fid.write(exe_path + " >sfincs_log.txt \n")
         fid.write("move running.txt finished.txt\n")
         fid.close()
 
@@ -664,9 +664,16 @@ class CoSMoS_SFINCS(Model):
                     zsmax = self.domain.read_zsmax(zsmax_file=zsmax_file)
 
                     water_level_correction = self.vertical_reference_level_difference_with_msl
+                    zbmax = 0.0
+                    # NOTE all overland models get a boundary_water_level_correction
+                    # this causes an offset wrt the surge models
+                    # correct surge models as well to align plots:
+                    if self.boundary_water_level_correction == 0.0: # default value
+                        water_level_correction += 0.15
+                        zbmax = -1.0
 
                     make_water_level_tiles(zsmax, index_path, topo_path, water_level_path,
-                         water_level_correction)
+                         water_level_correction, zbmax)
                     
                     if cosmos.scenario.track_ensemble and self.ensemble:
                         zsmax_file = os.path.join(output_path, "sfincs_map_ensemble.nc")
