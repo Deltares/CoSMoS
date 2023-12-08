@@ -161,7 +161,7 @@ class CoSMoS_SFINCS(Model):
                 nesting.nest2(self.flow_nested.domain,
                         self.domain,
                         output_path=self.flow_nested.cycle_output_path,
-                        output_file='sfincs_his.nc',
+                        # output_file='sfincs_his.nc',
                         boundary_water_level_correction=zcor,
                         option="flow",
                         bc_file= os.path.join(self.job_path,self.domain.input.bzsfile))
