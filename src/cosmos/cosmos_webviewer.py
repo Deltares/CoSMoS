@@ -803,10 +803,9 @@ class WebViewer:
             if cosmos.scenario.meteo_spiderweb or cosmos.config.cycle.ensemble:
                 from cht.tropical_cyclone.tropical_cyclone import to_geojson
                 if cosmos.scenario.meteo_spiderweb:
-                    spwfile = os.path.join(cosmos.config.meteo_database.path,
-                                                    "spiderwebs",
-                                                    cosmos.scenario.meteo_spiderweb)
-                    cycfile = spwfile.split('.')[0] + '.cyc'
+                    cycfile = os.path.join(cosmos.config.meteo_database.path,
+                                                    "tracks",
+                                                    cosmos.scenario.meteo_spiderweb.split('.')[0] + '.cyc')
                 elif cosmos.scenario.meteo_track:
                     cycfile = os.path.join(cosmos.config.meteo_database.path,
                                                     "tracks",
@@ -1108,7 +1107,7 @@ class WebViewer:
                                                                 "Lat":y,                                                
                                                                 "Setup":round(model.domain.R2_setup[ip, id],2),
                                                                 "Swash":round(model.domain.swash[ip, id],2),
-                                                                "TWL":round(model.domain.R2[ip, id],2)}))
+                                                                "TWL":round(model.domain.R2[ip, id] + model.domain.WL[ip, id],2)}))
                                             
                         if features:
                             feature_collection = FeatureCollection(features)
@@ -1174,7 +1173,7 @@ class WebViewer:
                                                                 "Lat":y,                                                
                                                                 "Setup":round(model.domain.R2_setup_prc["95"][ip, id],2),
                                                                 "Swash":round(model.domain.swash[ip, id],2),
-                                                                "TWL":round(model.domain.R2_prc["95"][ip, id],2)}))
+                                                                "TWL":round(model.domain.R2_prc["95"][ip, id]+model.domain.WL[ip, id],2)}))
                                                 
                         if features:
                             feature_collection = FeatureCollection(features)
@@ -1214,6 +1213,46 @@ class WebViewer:
             
                         self.map_variables.append(dct)
 
+                    # Offshore water level and wave height
+
+                    features = []
+                        
+                    for ip in range(len(model.domain.filename)):
+                        x, y = transformer.transform(model.domain.xo[ip],
+                                                     model.domain.yo[ip])
+                        point = Point((x, y))
+                        name = 'Loc nr: ' +  str(model.domain.filename[ip])
+                                    
+                        id = np.argmax(model.domain.R2[ip,:])                                                               
+                        features.append(Feature(geometry=point,
+                                                properties={"model_name":model.name,
+                                                            "LocNr":int(model.domain.filename[ip]),
+                                                            "Lon": round(x,3),
+                                                            "Lat": round(y,3),
+                                                            "Hs":round(model.domain.Hs[ip, id],2),
+                                                            "Tp":round(model.domain.Tp[ip, id],1),
+                                                            "WL":round(model.domain.WL[ip, id],2)}))
+                        
+                    if features:
+                        feature_collection = FeatureCollection(features)
+                        output_path_waves =  os.path.join(output_path, 'extreme_sea_level_and_wave_height\\')
+                        fo.mkdir(output_path_waves)
+                        file_name = os.path.join(output_path_waves,     
+                                                "extreme_sea_level_and_wave_height.geojson.js")
+                        cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var swl =")
+
+
+                    dct={}
+                    dct["name"]        = "extreme_sea_level_and_wave_height"
+                    dct["long_name"]   = "Offshore WL and Hs"
+                    dct["description"] = "This is the total offshore water level (tide + surge) and wave conditions."
+                    dct["format"]      = "geojson"
+                    dct["legend"]      = {"text": "Offshore Hs", "contours": [{"text": " 0.0&nbsp-&nbsp;1.0&#8201;m", "color": "#CCFFFF"}, {"text": " 1.0&nbsp;-&nbsp;3.0&#8201;m", "color": "#40E0D0"}, {"text": " 3.0&nbsp-&nbsp;5.0&#8201;m", "color": "#00BFFF"}, {"text": "&gt; 5.0&#8201;m", "color": "#0909FF"}]}
+                    dct["infographic"]   = "offshore"
+
+                    self.map_variables.append(dct)
+
+
                     # Horizontal runup
 
                     features = []
@@ -1243,7 +1282,7 @@ class WebViewer:
                                                             "Lat":y,                                                
                                                             "Setup":round(model.domain.R2_setup[ip, id],2),
                                                             "Swash":round(model.domain.swash[ip, id],2),
-                                                            "TWL":round(model.domain.R2[ip, id],2)}))
+                                                            "TWL":round(model.domain.R2[ip, id] + model.domain.WL[ip, id],2)}))
 
                     if features:
                         feature_collection = FeatureCollection(features)
@@ -1283,45 +1322,6 @@ class WebViewer:
                     # dct["legend"]   = lgn
 
                     self.map_variables.append(dct)                
-
-                    # Offshore water level and wave height
-
-                    features = []
-                        
-                    for ip in range(len(model.domain.filename)):
-                        x, y = transformer.transform(model.domain.xo[ip],
-                                                     model.domain.yo[ip])
-                        point = Point((x, y))
-                        name = 'Loc nr: ' +  str(model.domain.filename[ip])
-                                    
-                        id = np.argmax(model.domain.R2[ip,:])                                                               
-                        features.append(Feature(geometry=point,
-                                                properties={"model_name":model.name,
-                                                            "LocNr":int(model.domain.filename[ip]),
-                                                            "Lon": round(x,3),
-                                                            "Lat": round(y,3),
-                                                            "Hs":round(model.domain.Hs[ip, id],2),
-                                                            "Tp":round(model.domain.Tp[ip, id],1),
-                                                            "WL":round(model.domain.WL[ip, id],2)}))
-                        
-                    if features:
-                        feature_collection = FeatureCollection(features)
-                        output_path_waves =  os.path.join(output_path, 'extreme_sea_level_and_wave_height\\')
-                        fo.mkdir(output_path_waves)
-                        file_name = os.path.join(output_path_waves,     
-                                                "extreme_sea_level_and_wave_height.geojson.js")
-                        cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var swl =")
-
-
-                    dct={}
-                    dct["name"]        = "extreme_sea_level_and_wave_height"
-                    dct["long_name"]   = "Offshore WL and Hs"
-                    dct["description"] = "This is the total offshore water level (tide + surge) and wave conditions."
-                    dct["format"]      = "geojson"
-                    dct["legend"]      = {"text": "Offshore WL", "contours": [{"text": " 0.0&nbsp-&nbsp;0.33&#8201;m", "color": "#CCFFFF"}, {"text": " 0.33&nbsp;-&nbsp;1.0&#8201;m", "color": "#40E0D0"}, {"text": " 1.0&nbsp-&nbsp;2.0&#8201;m", "color": "#00BFFF"}, {"text": "&gt; 2.0&#8201;m", "color": "#0909FF"}]}
-                    dct["infographic"]   = "offshore"
-
-                    self.map_variables.append(dct)
                 
 
                     # Time series 
