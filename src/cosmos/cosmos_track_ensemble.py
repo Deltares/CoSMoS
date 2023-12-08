@@ -132,3 +132,24 @@ def setup_track_ensemble():
         cosmos.scenario.ensemble_names.append(str(iens+1).zfill(5))
     cosmos.scenario.best_track = str(0).zfill(5)
 
+
+def track_to_spw():
+    
+    if cosmos.scenario.meteo_spiderweb:
+        spwfile = os.path.join(cosmos.config.meteo_database.path,
+                        "spiderwebs",
+                        cosmos.scenario.meteo_spiderweb)
+        
+        if not os.path.isfile(spwfile):
+            from cht.tropical_cyclone.tropical_cyclone import TropicalCyclone
+            tc= TropicalCyclone()
+            cycfile = os.path.join(cosmos.config.meteo_database.path,
+                            "tracks",
+                            cosmos.scenario.meteo_spiderweb.split('.')[0] + ".cyc")
+
+            try:
+                tc.read_track(cycfile, 'ddb_cyc')
+                tc.include_rainfall = True
+                tc.to_spiderweb(spwfile, format_type='ascii')
+            except:
+                pass
