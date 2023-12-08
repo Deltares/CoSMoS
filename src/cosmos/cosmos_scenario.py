@@ -198,6 +198,12 @@ class Scenario:
                 model.meteo_atmospheric_pressure = False
             if not self.meteo_precipitation and model.meteo_precipitation:
                 model.meteo_precipitation = False
+            if not self.meteo_dataset and not model.meteo_dataset:
+                model.meteo_wind = False
+                model.meteo_atmospheric_pressure = False
+                model.meteo_precipitation = False
+
+            # If no meteo_dataset is given, turn of wind/pressure/rain 
 
             model.flow_start_time            = None
             model.flow_stop_time             = None
