@@ -40,7 +40,8 @@ def setup_track_ensemble():
                                                   vcyc=40.0,
                                                   vmin=18.0)
         # Filter cyclone based on TCvitals
-        tc = find_priorityTC(tracks, "priority_storm.txt")        
+        tc = find_priorityTC(tracks, "priority_storm.txt")
+#        tc = tracks[0]
 
         # Use the first track to make ensembles
         tc.account_for_forward_speed()
@@ -74,6 +75,7 @@ def setup_track_ensemble():
     else:    
         t0str = tc.track.loc[0]["datetime"]
         cosmos.scenario.track_ensemble.tstart_ensemble = datetime.strptime(t0str, "%Y%m%d %H%M%S")
+        cosmos.scenario.track_ensemble.tstart_ensemble = cosmos.cycle.replace(tzinfo=None)
     cosmos.scenario.track_ensemble.dt = 3
     cosmos.scenario.track_ensemble.compute_ensemble(number_of_realizations=cosmos.scenario.track_ensemble_nr_realizations)    
 

@@ -985,6 +985,7 @@ class WebViewer:
         try:
             # Upload entire copy of local web viewer to web server
             bucket_name = "scenario-webviewer"
+#            bucket_name = "cosmos.deltares.nl"
             local_folder = self.cycle_path
             s3_folder = self.name + "/" + "data" + "/" + cosmos.scenario.name + "/" + cosmos.cycle_string
             cosmos.cloud.upload_folder(bucket_name, local_folder, s3_folder)

@@ -316,17 +316,20 @@ def check_for_finished_simulations():
     finished_list = []
     
     for model in cosmos.scenario.model:
-        if model.status == "running":
-            if cosmos.config.cycle.run_mode == "cloud":
-                #TODO: Implement handling of failed workflow. What happens
-                #      when a workflow fails?
-                if Argo.get_task_status(model.cloud_job) != "Running":
-                    finished_list.append(model)
-            else:
-                file_name = os.path.join(model.job_path,
-                                        "finished.txt")
-                if os.path.exists(file_name):
-                    finished_list.append(model)
+        try:
+            if model.status == "running":
+                if cosmos.config.cycle.run_mode == "cloud":
+                    #TODO: Implement handling of failed workflow. What happens
+                    #      when a workflow fails?
+                    if Argo.get_task_status(model.cloud_job) != "Running":
+                        finished_list.append(model)
+                else:
+                    file_name = os.path.join(model.job_path,
+                                            "finished.txt")
+                    if os.path.exists(file_name):
+                        finished_list.append(model)
+        except:
+            print("An error occurred when checking job status!")                
                               
     return finished_list
 
