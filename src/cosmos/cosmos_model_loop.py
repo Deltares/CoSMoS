@@ -260,6 +260,11 @@ def update_waiting_list():
                     okay = False
                 if model.wave_nested.status == "failed":
                     model.status = "failed"
+            if model.bw_nested:
+                if model.bw_nested.status != "finished":
+                    okay = False
+                if model.bw_nested.status == "failed":
+                    model.status = "failed"
                     
             if okay and model.cluster:
                 # Model appears ready to run, and is member of a cluster
