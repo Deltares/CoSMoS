@@ -1,4 +1,4 @@
-# Run HurryWave model (including some pre and post processing)
+# Run XBeach model (including some pre and post processing)
 
 import os
 import pandas as pd  
@@ -13,8 +13,9 @@ from cht.misc.prob_maps import merge_nc_his
 from cht.misc.prob_maps import merge_nc_map
 from cht.tiling.tiling import make_floodmap_tiles
 from cht.tiling.tiling import make_png_tiles
-from cht.hurrywave.hurrywave import HurryWave
+from cht.sfincs.sfincs import SFINCS
 from cht.nesting.nest2 import nest2
+#from cht.misc.argo import Argo
 
 def read_ensemble_members():
     with open('ensemble_members.txt') as f:
@@ -81,7 +82,7 @@ def prepare_single(config, member=None):
         print("Copying spiderweb file ...")
         if config["run_mode"] == "cloud":
             s3_key = config["scenario"] + "/" + "track_ensemble" + "/" + "spw" + "/ensemble" + member + ".spw"
-            local_file_path = f'/input/hurrywave.spw'  # Replace with the local path where you want to save the file
+            local_file_path = f'/input/sfincs.spw'  # Replace with the local path where you want to save the file
             # Download the file from S3
             try:
                 s3_client.download_file(bucket_name, s3_key, local_file_path)
@@ -91,102 +92,169 @@ def prepare_single(config, member=None):
         else:
             # Copy all spiderwebs to jobs folder
             fname0 = os.path.join(config["spw_path"], "ensemble" + member + ".spw")
-            fo.copy_file(fname0, "hurrywave.spw")
+            fo.copy_file(fname0, "sfincs.spw")
 
-    # Read HurryWave model (necessary for nesting)
-    hw = HurryWave()
-    hw.name = config["model"]
-    hw.type = "hurrywave"
-    hw.path = "."
+    # Read SFINCS model (necessary for nesting)
+    sf = SFINCS("sfincs.inp")
+    sf.name = config["model"]
+    sf.type = "sfincs"
+    sf.path = "."
 
     # Nesting
-    if "wave_nested" in config:
-        print("Nesting wave ...")
+    if "flow_nested" in config:
+        print("Nesting flow ...")
         # Get boundary conditions from overall model (Nesting 2)
+        # Correct boundary water levels. Assuming that output from overall
+        # model is in MSL !!!
+        zcor = config["flow_nested"]["boundary_water_level_correction"] - config["vertical_reference_level_difference_with_msl"]
         # If cloud mode, copy boundary files from S3
         if config["run_mode"] == "cloud":
             file_name = config["flow_nested"]["overall_file"]    
+            s3_key = config["scenario"] + "/" + "models" + "/" + config["flow_nested"]["overall_model"] + "/" + file_name
+            local_file_path = f'/input/boundary'
+            fo.mkdir(local_file_path)
+            # Download the file from S3
+            s3_client.download_file(bucket_name, s3_key, os.path.join(local_file_path, os.path.basename(s3_key)))
+            # Change path in config
+            config["flow_nested"]["overall_path"] = local_file_path   
+
+        # Get boundary conditions from overall model (Nesting 2)
+        if config["ensemble"]:
+            nest2(config["flow_nested"]["overall_type"],
+                sf,
+                output_path=config["flow_nested"]["overall_path"],
+                boundary_water_level_correction=zcor,
+                option="flow",
+                bc_path=".",
+                ensemble_member_index=int(member))
+        else:
+            # Deterministic    
+            nest2(config["flow_nested"]["overall_type"],
+                sf,
+                output_path=config["flow_nested"]["overall_path"],
+                boundary_water_level_correction=zcor,
+                option="flow",
+                bc_path=".")
+        
+    if "wave_nested" in config:
+        print("Nesting wave ...")
+        # Get boundary conditions from overall model (Nesting 2)
+        if config["run_mode"] == "cloud":
+            file_name = config["wave_nested"]["overall_file"]    
             s3_key = config["scenario"] + "/" + "models" + "/" + config["wave_nested"]["overall_model"] + "/" + file_name
             local_file_path = f'/input/boundary'
             fo.mkdir(local_file_path)
             # Download the file from S3
             s3_client.download_file(bucket_name, s3_key, os.path.join(local_file_path, os.path.basename(s3_key)))
             # Change path in config
-            config["wave_nested"]["overall_path"] = local_file_path   
+            config["flow_nested"]["overall_path"] = local_file_path   
 
         # Get boundary conditions from overall model (Nesting 2)
         if config["ensemble"]:
             nest2(config["wave_nested"]["overall_type"],
-                hw,
+                sf,
                 output_path=config["wave_nested"]["overall_path"],
+                option="wave",
                 bc_path=".",
                 ensemble_member_index=int(member))
         else:
             # Deterministic    
             nest2(config["wave_nested"]["overall_type"],
-                hw,
+                sf,
                 output_path=config["wave_nested"]["overall_path"],
-                option="flow",
+                option="wave",
                 bc_path=".")
-        
+
+    # If SFINCS nested in Hurrywave for SNAPWAVE setup, separately run BEWARE nesting for LF waves
+    if "bw_nested" in config:
+        print("Nesting bw ...")
+        if config["run_mode"] == "cloud":
+            file_name = config["bw_nested"]["overall_file"]    
+            s3_key = config["scenario"] + "/" + "models" + "/" + config["bw_nested"]["overall_model"] + "/" + file_name
+            local_file_path = f'/input/boundary'
+            fo.mkdir(local_file_path)
+            # Download the file from S3
+            s3_client.download_file(bucket_name, s3_key, os.path.join(local_file_path, os.path.basename(s3_key)))
+            # Change path in config
+            config["bw_nested"]["overall_path"] = local_file_path   
+        # Get boundary conditions from overall model (Nesting 2)
+        if config["ensemble"]:
+            nest2(config["bw_nested"]["overall_type"],
+                sf,
+                output_path=config["wave_nested"]["overall_path"],
+                option="wave",
+                bc_path=".",
+                ensemble_member_index=int(member))
+        else:
+            # Deterministic    
+            nest2(config["bw_nested"]["overall_type"],
+                sf,
+                output_path=config["bw_nested"]["overall_path"],
+                option="wave",
+                bc_path=".",
+                detail_crs=config["bw_nested"]["detail_crs"],
+                overall_crs=config["bw_nested"]["overall_crs"])
+        sf.write_wavemaker_forcing_points()
 
 def merge_ensemble(config):
     print("Merging ...")
     if config["run_mode"] == "cloud":
         folder_path = '/input'
-        his_output_file_name = os.path.join("/output/hurrywave_his.nc")
-#        map_output_file_name = os.path.join("/output/hurrywave_map.nc")
+        his_output_file_name = os.path.join("/output/sfincs_his.nc")
+        map_output_file_name = os.path.join("/output/sfincs_map.nc")
         # Make output folder_path
         os.mkdir("output")
     else:
         folder_path = './'
-        his_output_file_name = "./hurrywave_his.nc"
-        map_output_file_name = "./hurrywave_map.nc"
+        his_output_file_name = "./sfincs_his.nc"
+        map_output_file_name = "./sfincs_map.nc"
     # Read in the list of ensemble members
     ensemble_members = read_ensemble_members()
     # Merge output files
     his_files = []
     map_files = []
     for member in ensemble_members:
-        his_files.append(os.path.join(folder_path, member, "hurrywave_his.nc"))
-        map_files.append(os.path.join(folder_path, member, "hurrywave_map.nc"))
+        his_files.append(os.path.join(folder_path, member, "sfincs_his.nc"))
+        map_files.append(os.path.join(folder_path, member, "sfincs_map.nc"))
     merge_nc_his(his_files, ["point_zs"], output_file_name=his_output_file_name)
-    # if "hm0_map" in config:
-    #     merge_nc_map(map_files, ["zsmax"], output_file_name=map_output_file_name)
+    if "flood_map" in config:
+        merge_nc_map(map_files, ["zsmax"], output_file_name=map_output_file_name)
     # Copy restart files from the first ensemble member (restart files are the same for all members)
-    fo.copy_file(os.path.join(folder_path, ensemble_members[0], 'hurrywave.*.rst'), folder_path)    
+    fo.copy_file(os.path.join(folder_path, ensemble_members[0], 'sfincs.*.rst'), folder_path)    
 
 def map_tiles(config):
 
     # Make flood map tiles
-    if "hm0_map" in config:
+    if "flood_map" in config:
 
         # Make SFINCS object
-        hw = HurryWave()
+        sf = SFINCS()
 
-        print("Making Hm0 map ...")
+        print("Making flood map ...")
 
-        hm0_path       = config["hm0_map"]["png_path"]
-        index_path     = config["hm0_map"]["index_path"]
+        flood_map_path = config["flood_map"]["png_path"]
+        index_path     = config["flood_map"]["index_path"]
+        topo_path      = config["flood_map"]["topo_path"]
+        zsmax_path     = config["flood_map"]["zsmax_path"]
                 
-        if os.path.exists(index_path):
+        if os.path.exists(index_path) and os.path.exists(topo_path):
             
             print("Making flood map tiles for model " + config["model"] + " ...")                
 
             # 24 hour increments  
-            dtinc = 12
+            dtinc = 24
 
             # Wave map for the entire simulation
             dt1 = datetime.timedelta(hours=1)
             dt  = datetime.timedelta(hours=dtinc)
-            t0  = config["hm0_map"]["start_time"].replace(tzinfo=None)
-            t1  = config["hm0_map"]["stop_time"].replace(tzinfo=None)
+            t0  = config["flood_map"]["start_time"].replace(tzinfo=None)
+            t1  = config["flood_map"]["stop_time"].replace(tzinfo=None)
                 
             requested_times = pd.date_range(start=t0 + dt,
                                             end=t1,
                                             freq=str(dtinc) + "H").to_pydatetime().tolist()
 
-            color_values = config["hm0_map"]["color_map"]["contours"]
+            color_values = config["flood_map"]["color_map"]["contours"]
 
             pathstr = []
             for it, t in enumerate(requested_times):
@@ -194,52 +262,57 @@ def map_tiles(config):
 
             pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
 
-            hm0max_file = "./hurrywave_map.nc"
+            #zsmax_file = "/input/sfincs_map.nc"
+            zsmax_file = os.path.join(zsmax_path,
+                                      "sfincs_map.nc")
+            
             if config["ensemble"]:
-                varname = "hm0max_90"
+                varname = "zsmax_90"
             else:
-                varname = "hm0max"    
+                varname = "zsmax"    
 
             try:
 
                 # Inundation map over dt-hour increments                    
                 for it, t in enumerate(requested_times):
 
-                    hm0max = hw.read_hm0max(time_range=[t - dt + dt1, t + dt1],
-                                            hm0max_file=hm0max_file,
-                                            parameter=varname)                    
-                    hm0max = np.transpose(hm0max)
+                    zsmax = sf.read_zsmax(zsmax_file=zsmax_file,
+                                          time_range=[t - dt + dt1, t + dt1],
+                                          varname=varname)
+                    # Difference between MSL and NAVD88 (used in topo data)
+                    zsmax += config["vertical_reference_level_difference_with_msl"]
+                    zsmax = np.transpose(zsmax)
 
-                    png_path = os.path.join(hm0_path,
+                    png_path = os.path.join(flood_map_path,
                                             config["scenario"],
                                             config["cycle"],
-                                            config["hm0_map"]["name"],
+                                            config["flood_map"]["name"],
                                             pathstr[it])                                            
 
-                    make_png_tiles(hm0max, index_path, png_path,
-                                   color_values=color_values,
-                                   zoom_range=[0, 13],
-                                   zbmax=1.0,
-                                   quiet=True)
+                    make_floodmap_tiles(zsmax, index_path, png_path, topo_path,
+                                        color_values=color_values,
+                                        zoom_range=[0, 13],
+                                        zbmax=1.0,
+                                        quiet=True)
 
                 # Full simulation        
-                hm0max = hw.read_hm0max(time_range=[t - dt + dt1, t + dt1],
-                                        hm0max_file=hm0max_file,
-                                        parameter=varname)                    
-                hm0max = np.transpose(hm0max)
+                zsmax = sf.read_zsmax(zsmax_file=zsmax_file,
+                                    time_range=[t0 + dt1, t1 + dt1],
+                                    varname=varname)
+                zsmax += config["vertical_reference_level_difference_with_msl"]
+                zsmax = np.transpose(zsmax)
 
-                png_path = os.path.join(hm0_path,
+                png_path = os.path.join(flood_map_path,
                                         config["scenario"],
                                         config["cycle"],
-                                        config["hm0_map"]["name"],
+                                        config["flood_map"]["name"],
                                         pathstr[-1]) 
 
-                make_png_tiles(hm0max, index_path, png_path,
-                                color_values=color_values,
-                                zoom_range=[0, 13],
-                                zbmax=1.0,
-                                quiet=True)
-
+                make_floodmap_tiles(zsmax, index_path, png_path, topo_path,
+                                    color_values=color_values,
+                                    zoom_range=[0, 13],
+                                    zbmax=1.0,
+                                    quiet=True)
             except:
                 print("An error occured while making flood map tiles")
 
@@ -300,13 +373,13 @@ elif option == "simulate":
         for member in ensemble_members:
             print('Running ensemble member ' + member)
             os.chdir(member)
-            # Run the Hurrywave model
+            # Run the SFINCS model
             prepare_single(config, member=member)
-            os.system("call run_hurrywave.bat\n")
+            os.system("call run_sfincs.bat\n")
             os.chdir(curdir)
     else:
         prepare_single(config)
-        os.system("call run_hurrywave.bat\n")
+        os.system("call run_sfincs.bat\n")
 
 elif option == "prepare_single":
     # Only occurs in cloud mode (running single is done in workflow)
@@ -330,7 +403,7 @@ elif option == "merge_ensemble":
     merge_ensemble(config)
 
 elif option == "map_tiles":
-    # Make map tiles
+    # Make flood map tiles
     map_tiles(config)
 
 elif option == "clean_up":
