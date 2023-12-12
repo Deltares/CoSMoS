@@ -10,3 +10,5 @@ __pycache__
 /cosmos_run_folder/*.bat
 _build
 _generated
+/docs/_build
+/docs/source/_generated
