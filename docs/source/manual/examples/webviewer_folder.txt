@@ -1,0 +1,16 @@
+[webviewer_name]
+└── index.html
+├── css
+├── data
+    └── scenarios.js
+    ├── hurricane_irma
+        └── variables.js
+        └── stations.js
+        └── wavebuoys.js
+        ├── timeseries
+        ├── floodmap
+        ├── hm0
+        ├── precipitation
+├── html
+├── img
+├── js

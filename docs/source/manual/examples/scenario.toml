@@ -1,0 +1,13 @@
+long_name     = "Hurricane Laura"
+cycle         = 2020-08-26T00:00:00
+runtime       = 24
+description   = ""
+meteo_dataset = "gfs_anl_0p50_north_atlantic"
+lon           = -70.0
+lat           = 30.0
+zoom          = 5
+
+[[model]]
+name = "sfincs_gom_500m"
+[[model]]
+name = "sfincs_gom_0002"

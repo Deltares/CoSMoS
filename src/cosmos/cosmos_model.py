@@ -20,23 +20,16 @@ import shapely
 from .cosmos import cosmos
 from .cosmos_cluster import cluster_dict as cluster
 
-#import cht.misc.xmlkit as xml
-#from cht.nesting.nest1 import nest1
 from cht.nesting.nest2 import nest2
 import cht.misc.fileops as fo
 from cht.misc.misc_tools import dict2yaml
 
 class Model:
-    """Read generic model data from xml file, prepare model run paths, and submit jobs.
+    """Read generic model data from toml file, prepare model run paths, and submit jobs.
 
     """
     def __init__(self):
-        """Initialize model attributes described in xml file.
-
-        See Also
-        --------
-        cosmos.cosmos_scenario
-
+        """Initialize model attributes described in model.toml file.
         """
  
         self.flow               = False
@@ -84,6 +77,13 @@ class Model:
         self.ensemble           = False
 
     def read_generic(self):
+        """Read model attributes from model.toml file.
+
+        See Also
+        --------
+        cosmos.cosmos_scenario.Scenario
+        cosmos.cosmos_model_loop.ModelLoop
+        """
 
         mdl_dict = toml.load(self.file_name)
 
@@ -211,13 +211,11 @@ class Model:
         dict2yaml(os.path.join(self.job_path, "config.yml"), config)
         
     def set_paths(self):
-        
         """Set model paths (input, output, figures, restart, job).
 
         See Also
         --------
         cosmos.cosmos_main_loop.MainLoop
-
         """        
         # First model and restart folders if necessary
 
@@ -271,6 +269,8 @@ class Model:
         fo.mkdir(self.restart_wave_path)
 
     def get_nested_models(self):
+        """Get which model the current model is nested in. 
+        """        
         if self.flow_nested_name:
             # Look up model from which it gets it boundary conditions
             for model2 in cosmos.scenario.model:
@@ -320,8 +320,13 @@ class Model:
         return all_nested_models
         
     def add_stations(self, name):
-        """Add stations that are located in this model.
-        """
+        """Add stations that are located within this model.
+
+        Parameters
+        ----------
+        name : str
+            station file name or station name
+        """        
         wgs84 = CRS.from_epsg(4326)
         transformer = Transformer.from_crs(wgs84, self.crs, always_xy=True)
         
@@ -376,7 +381,7 @@ class Model:
                 self.domain.tref  = self.flow_start_time
                 self.domain.tstop = self.flow_stop_time
 
-            z_max = nest2(self.flow_nested.domain,
+            z_max = nesting.nest2(self.flow_nested.domain,
                           self.domain,
                           output_path=self.flow_nested.cycle_output_path,
                           boundary_water_level_correction=zcor,

@@ -15,8 +15,23 @@ from .cosmos_cluster import Cluster
 # from cht.misc import xmlkit as xml
 
 class Scenario:
-    
+    """Scenario class to read scenario file and initialize models. 
+
+    See Also
+    ----------
+    cosmos.cosmos_main_loop.MainLoop
+    cosmos.cosmos_model_loop.ModelLoop
+    cosmos.cosmos_model.Model
+
+    """  
     def __init__(self, name):
+        """Initialize cosmos scenario.
+
+        Parameters
+        ----------
+        name : str
+            Name of scenario to be executed.
+        """        
 
         self.name          = name
         self.model         = []
@@ -32,7 +47,6 @@ class Scenario:
         self.job_list_path = None
         self.restart_path  = None
         self.last_cycle    = None 
-#        self.ensemble      = False 
         self.track_ensemble             = None 
         self.track_ensemble_nr_realizations = 0 
         self.meteo_dataset              = None
@@ -44,6 +58,22 @@ class Scenario:
         self.observations_path = ""
         
     def read(self):
+        """Read scenario file, set model paths and settings, initialize models and read model generic and model specific data. 
+        """
+
+        # Read scenario file
+        cosmos.log("Reading scenario file ...")        
+        self.path = os.path.join(cosmos.config.path.scenarios, self.name)
+        scenario_file = os.path.join(self.path, "scenario.toml")     
+        sc_dict = toml.load(scenario_file)
+
+        # Turn into object        
+        for key, value in sc_dict.items():
+            if key == "model":
+                pass
+            else:    
+#                for key, value in sc_dict[key].items():
+                setattr(self, key, value)
         
         # Read scenario file
         cosmos.log("Reading scenario file ...")        
@@ -71,11 +101,14 @@ class Scenario:
                 # Set meteo to one give in scenario
                 models_in_scenario[name]["meteo_dataset"] = self.meteo_dataset
                 models_in_scenario[name]["meteo_spiderweb"] = self.meteo_spiderweb
+                models_in_scenario[name]["meteo_track"] = self.meteo_track
                 # But override is separate dataset is provided for model
                 if "meteo_dataset" in mdl:
                     models_in_scenario[name]["meteo_dataset"] = mdl["meteo_dataset"]
                 if "meteo_spiderweb" in mdl:
                     models_in_scenario[name]["meteo_spiderweb"] = mdl["meteo_spiderweb"]
+                if "meteo_track" in mdl:
+                    models_in_scenario[name]["meteo_track"] = mdl["meteo_track"]
                                                         
             else:
                 
@@ -103,19 +136,20 @@ class Scenario:
                             # Set meteo to one give in scenario
                             models_in_scenario[name]["meteo_dataset"] = self.meteo_dataset
                             models_in_scenario[name]["meteo_spiderweb"] = self.meteo_spiderweb
+                            models_in_scenario[name]["meteo_track"] = self.meteo_track
                             # But override is separate dataset is provided for model
                             if "meteo_dataset" in mdl:
                                 models_in_scenario[name]["meteo_dataset"] = mdl["meteo_dataset"]
                             if "meteo_spiderweb" in mdl:
                                 models_in_scenario[name]["meteo_spiderweb"] = mdl["meteo_spiderweb"]
+                            if "meteo_track" in mdl:
+                                models_in_scenario[name]["meteo_track"] = mdl["meteo_track"]
 
         ### Add missing models
         # We know which models need to be added. Check if all models that provide boundary conditions are there as well.
                         
         ### Clear model list
         self.model = []
-
-        spinup_ensembles = []
 
         # Loop through models in scenario         
         for name in models_in_scenario.keys():
@@ -170,7 +204,8 @@ class Scenario:
 
             model.meteo_dataset              = models_in_scenario[name]["meteo_dataset"]
             model.meteo_spiderweb            = models_in_scenario[name]["meteo_spiderweb"]
-            
+            model.meteo_track                = models_in_scenario[name]["meteo_track"]
+
             # If wind/pressure/rain are actively turned off in scenario, also do it here    
             if not self.meteo_wind and model.meteo_wind:
                 model.meteo_wind = False
@@ -199,70 +234,7 @@ class Scenario:
                        break
                         
             self.model.append(model)
-        
-        # ### Add models to clusters 
-        # if hasattr(xml_obj, "cluster"):
-        #     for xml_cluster in xml_obj.cluster:
-        #         name = xml_cluster.name[0].value.lower()
-        #         cl = Cluster(name)
-        #         if hasattr(xml_cluster, "run_condition"):
-        #             cl.run_condition = xml_cluster.run_condition[0].value
-        #         if hasattr(xml_cluster, "topn"):
-        #             cl.topn = int(xml_cluster.topn[0].value)
-        #         if hasattr(xml_cluster, "hm0fac"):
-        #             cl.hm0fac = float(xml_cluster.hm0fac[0].value)
-        #         if hasattr(xml_cluster, "boundary_twl_margin"):
-        #             cl.boundary_twl_margin = float(xml_cluster.boundary_twl_margin[0].value)
-        #         if hasattr(xml_cluster, "use_threshold"):
-        #             if xml_cluster.use_threshold[0].value == "y":
-        #                 cl.use_threshold = True
-        #             else:    
-        #                 cl.use_threshold = False                        
-        #         if cl.run_condition == "topn":
-        #             cl.ready = False
-                    
-        #         # Add models to this cluster    
-        #         region_list       = [] # List of regions
-        #         type_list         = [] # List of types
-
-        #         if hasattr(xml_cluster, "region"):
-        #             for xml_region in xml_cluster.region:
-        #                 if not xml_region.value.lower() in region_list:
-        #                     region_list.append(xml_region.value.lower())
-        #         if hasattr(xml_cluster, "type"):
-        #             for xml_type in xml_cluster.type:                    
-        #                 type_list.append(xml_type.value.lower())
-        #         if hasattr(xml_cluster, "super_region"):
-        #             for spr in xml_cluster.super_region:
-        #                 super_region_name = spr.value.lower()
-        #                 for region in cosmos.super_region[super_region_name]:
-        #                     if not region in region_list:
-        #                         region_list.append(region)
-
-        #         # Loop through all available models
-        #         for model in self.model:
-        #             okay = True
-        #             if type_list:
-        #                 if not model.type in type_list:
-        #                     okay = False
-        #                     continue
-        #             if not model.flow_nested_name and not model.wave_nested_name:
-        #                 okay = False
-        #                 continue                                            
-        #             # Filter by region
-        #             if region_list:
-        #                 if not model.region in region_list:
-        #                     # Region of this model is not in region_list
-        #                     okay = False
-        #                     continue
-        #             # Filter by type
-        #             if okay:
-        #                 cl.add_model(model)
-                    
-        #         cluster_dict[name] = cl                
-         
-        
-        
+                
         cosmos.log("Finished reading scenario")    
 
     def set_paths(self):

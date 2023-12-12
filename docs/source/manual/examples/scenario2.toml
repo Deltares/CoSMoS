@@ -1,0 +1,18 @@
+long_name     = "Hurricane Maria ensemble"
+cycle         = 2017-09-19T00:00:00
+runtime       = 72
+description   = ""
+meteo_track = "maria"
+lon           = -66.5
+lat           = 18.2
+zoom          = 10
+observations_path = "hurricane_maria"
+track_ensemble_nr_realizations = 10
+
+[[model]]
+super_region = ["north_atlantic"]
+type         = ["hurrywave", "sfincs", "beware"]
+
+[[model]]
+region = "puerto_rico3"
+type   = ["sfincs"]

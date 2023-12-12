@@ -76,7 +76,6 @@ def read_meteo_sources():
     # Meteo subsets
     # Read from xml file
     meteo_path = cosmos.config.meteo_database.path
-
     xml_file = os.path.join(meteo_path,
                             "meteo_subsets.xml")
     xml_obj = xml.xml2obj(xml_file)

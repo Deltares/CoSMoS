@@ -14,7 +14,6 @@ from .cosmos_argo import Argo
 import cht.misc.fileops as fo
 
 class ModelLoop():
-    
     """Pre-process, submit, move, and post-process all models and initialize webviewer once all models are finished.
 
     Parameters
@@ -35,7 +34,6 @@ class ModelLoop():
     cosmos.cosmos_hurrywave.CoSMoS_HurryWave
     cosmos.cosmos_sfincs.CoSMoS_SFINCS
     cosmos.cosmos_xbeach.CoSMoS_XBeach
-
     """
     def __init__(self):
         pass
@@ -61,12 +59,12 @@ class ModelLoop():
             self.scheduler.run()
 
     def stop(self):
-        """Stop cosmos_model_loop
+        """Stop cosmos_model_loop.
         """
         self.scheduler.cancel()
 
     def run(self):
-        """ Run all cosmos models defined in the scenario file
+        """ Run all cosmos models defined in the scenario file.
 
         - Check for finished simulations and move them to scenario folder
         - Make waiting list, preprocess and submit these models
@@ -79,7 +77,6 @@ class ModelLoop():
         cosmos.cosmos_sfincs.CoSMoS_SFINCS.pre_process
         cosmos.cosmos_model.Model.submit_job
         cosmos.cosmos_sfincs.CoSMoS_SFINCS.post_process
-        
         """
 
         # First check for finished simulations (returns a list with model objects that just finished)
@@ -362,6 +359,11 @@ def update_waiting_list():
                 if model.wave_nested.status != "finished":
                     okay = False
                 if model.wave_nested.status == "failed":
+                    model.status = "failed"
+            if model.bw_nested:
+                if model.bw_nested.status != "finished":
+                    okay = False
+                if model.bw_nested.status == "failed":
                     model.status = "failed"
                     
             if okay and model.cluster:

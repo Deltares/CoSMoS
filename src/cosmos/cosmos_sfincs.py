@@ -19,9 +19,32 @@ from .cosmos_model import Model
 import cosmos.cosmos_meteo as meteo
 
 class CoSMoS_SFINCS(Model):
-    
+    """Cosmos class for SFINCS model.
+
+    SFINCS (Super-Fast Inundation of CoastS) is a reduced-complexity model capable of simulating compound flooding 
+    with a high computational efficiency balanced with an adequate accuracy (see also https://sfincs.readthedocs.io/en/latest/).
+
+    This cosmos class reads SFINCS  model data, pre-processes, moves and post-processes SFINCS models.
+
+    Parameters
+    ----------
+    Model : class
+        Generic cosmos model attributes
+
+    See Also
+    ----------
+    cosmos.cosmos_scenario.Scenario
+    cosmos.cosmos_model_loop.ModelLoop
+    cosmos.cosmos_model.Model
+    """        
     def read_model_specific(self):
-        # Read in the SFINCS model
+        """Read SFINCS specific model attributes.
+
+        See Also
+        ----------
+        cht.sfincs.sfincs
+        """         
+        # Read in the SFINCS model                        
         input_file  = os.path.join(self.path, "input", "sfincs.inp")
         self.domain = SFINCS(input_file)
         # Copy some attributes to the model domain (needed for nesting)
@@ -31,7 +54,18 @@ class CoSMoS_SFINCS(Model):
         self.domain.runid = self.runid
                 
     def pre_process(self):
-                       
+        """Preprocess SFINCS model.
+
+        - Extract and write water level and wave conditions.
+        - Write input file. 
+        - Write meteo forcing.
+        - Add observation points for nested models and observation stations.
+        - Optional: make ensemble of models.
+
+        See Also
+        ----------
+        cht.nesting.nest2
+        """
         # Set path temporarily to job path
         pth = self.domain.path
         self.domain.path = self.job_path
@@ -68,7 +102,7 @@ class CoSMoS_SFINCS(Model):
                 self.domain.input.obsfile = "sfincs.obs"
             
             for nested_model in self.nested_flow_models:
-                nest1(self.domain, nested_model.domain)
+                nesting.nest1(self.domain, nested_model.domain)
 
         # Add other observation stations 
         if self.nested_flow_models or len(self.station)>0:
@@ -114,7 +148,7 @@ class CoSMoS_SFINCS(Model):
             self.domain.write_flow_boundary_conditions()
 
         if self.wave_nested:
-            # The actual nesting occurs in the run_job.py file 
+            # The actual nesting occurs in the run_job.py file
             self.domain.input.snapwave_bhsfile = "snapwave.bhs"
             self.domain.input.snapwave_btpfile = "snapwave.btp"
             self.domain.input.snapwave_bwdfile = "snapwave.bwd"
@@ -126,7 +160,6 @@ class CoSMoS_SFINCS(Model):
             self.domain.input.wfpfile = "sfincs.wfp"
             self.domain.input.whifile = "sfincs.whi"
             self.domain.input.wtifile = "sfincs.wti"
-#            self.domain.write_wavemaker_forcing_points()
 
         # Meteo forcing
         if self.meteo_wind or self.meteo_atmospheric_pressure or self.meteo_precipitation:
@@ -152,10 +185,13 @@ class CoSMoS_SFINCS(Model):
             fo.copy_file(os.path.join(meteo_path, self.meteo_spiderweb), self.job_path)            
             self.domain.input.baro    = 1
             self.domain.input.utmzone = self.crs.utm_zone
-            self.domain.input.amufile = None
-            self.domain.input.amvfile = None
-            self.domain.input.ampfile = None
-            self.domain.input.amprfile = None
+            if self.meteo_spiderweb or self.meteo_track:
+                self.domain.input.amufile = None
+                self.domain.input.amvfile = None
+                self.domain.input.ampfile = None
+                self.domain.input.amprfile = None
+#            self.domain.input.variables.amufile = None
+#            self.domain.input.variables.amvfile = None
 
         if self.ensemble:
             # Use spiderweb from ensemble

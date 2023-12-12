@@ -11,6 +11,8 @@ import toml
 from .cosmos_stations import Stations
 from .cosmos_meteo import read_meteo_sources
 from .cosmos_color_maps import read_color_maps
+#import cht.misc.xmlkit as xml
+from cht.misc.misc_tools import rgb2hex
 import cht.misc.fileops as fo
 
 class Path:
@@ -70,7 +72,7 @@ class CloudConfig:
         # Access key and secret (sort of like username/password) for reading/writing files to s3
         self.access_key = None
         self.secret_key = None
-        # Region in which the Kubernetes cluster is hosted
+        # Region in which the Kubernetes cluster is hosted (TODO: make this configurable)
         self.region     = "eu-west-1"
         # Namespace within the cluster where the argo installation is located
         self.namespace  = "argo"
@@ -88,6 +90,16 @@ class Cycle:
         self.only_run_ensemble = False
 
 class Configuration:
+    """CoSMoS Configuration class.
+
+    Set configuration for:
+
+    - Main CoSMoS path.
+    - Model database path.
+    - Model executable paths.
+    - Webserver and webviewer settings.
+    - Cycle settings (can be overwritten by CoSMoS initialization settings).
+    """   
     def __init__(self):
         self.path           = Path()
         self.model_database = ModelDatabase()
@@ -101,6 +113,16 @@ class Configuration:
         self.kwargs         = {}
     
     def set(self, **kwargs):
+        """Set CoSMoS configuration settings.
+        
+        - Set configuration paths.
+        - Read configuration file.
+        - Overwrite values in configuration file with input arguments.
+        - Find all available models in model database.
+        - Read all available Stations.
+        - Read all available meteo datasets.
+        - Read all available super regions.
+        """        
 
         from .cosmos import cosmos
                 
@@ -111,7 +133,8 @@ class Configuration:
         self.path.jobs      = os.path.join(self.path.main, "jobs")
         self.path.stations  = os.path.join(self.path.config, "stations")
         self.path.scenarios = os.path.join(self.path.main, "scenarios")
-
+        self.path.webviewer = os.path.join(self.path.main, "webviewers")
+        
         # Read config file
         self.read_config_file()
 
@@ -155,7 +178,6 @@ class Configuration:
         cosmos.log("Reading meteo sources ...")    
         read_meteo_sources()
 
-
         # Find all available super regions
         cosmos.log("Reading super regions ...")    
         self.super_region = {}
@@ -170,7 +192,8 @@ class Configuration:
         self.webviewer.data_path = os.path.join(cosmos.config.path.main, "webviewers", self.webviewer.name, "data")
 
     def read_config_file(self):
-        
+        """Read configuration file (.toml file).
+        """        
         config_file = os.path.join(self.path.config,
                                    self.file_name)     
 

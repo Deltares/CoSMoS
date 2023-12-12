@@ -4,25 +4,17 @@ Created on Mon May 10 14:36:35 2021
 
 @author: ormondt
 """
+from cosmos.cosmos import cosmos
 
-from cosmos.cosmos_main import cosmos
+main_path = r"c:\cosmos_run_folder\run_folder"
 
-main_path = "d:\\cosmos"
+# Initialize CoSMoS configuration
+cosmos.initialize(main_path,
+                  config_file="config.toml",
+                  make_wave_maps=True,
+                  get_meteo = False,
+                  ensemble = False)
 
-scenario_name = "michael_gfs_test02"
-
-cosmos.initialize(main_path)
-
-cosmos.run(scenario_name,
-           config_file="default.xml",
-           clean_up=False,
-           mode="single_shot",
-           make_flood_maps=True,
-           make_wave_maps=True,
-           upload=False,
-           webviewer="psips_event_viewer")
-
-# cosmos.make_webviewer(scenario_name, "psips_event_viewer")
-# cosmos.upload(webviewer="psips_event_viewer")
-# cosmos.post_process(scenario_name, model="sfincs_north_florida")
-
+cosmos.run("hurricane_fiona_coamps")
+# cosmos.post_process("hurricane_fiona_coamps", model = ['hurrywave_north_atlantic', 'hurrywave_us_east_coast',])
+# cosmos.make_webviewer("hurricane_fiona_coamps")

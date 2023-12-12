@@ -20,6 +20,9 @@ from .cosmos_track_ensemble import setup_track_ensemble
 from .cosmos_scenario import Scenario
 from .cosmos_cloud import Cloud
 from .cosmos_argo import Argo
+from .cosmos_track_ensemble import track_to_spw
+#from .cosmos_stations import Stations
+from .cosmos_scenario import Scenario
 #from .cosmos_tiling import tile_layer
 from .cosmos_webviewer import WebViewer
 
@@ -28,7 +31,7 @@ import cht.misc.fileops as fo
 #from cht.tiling.tiling import TileLayer
 
 class MainLoop:
-    """Read the xml scenario file, determine cycle times, and run cosmos model loop. 
+    """Read the scenario.toml file, determine cycle times, and run cosmos model loop. 
     
     Parameters
     ----------
@@ -38,8 +41,8 @@ class MainLoop:
         Run main loop
 
     See Also
-    -------
-    cosmos.cosmos_main.CoSMoS
+    --------
+    cosmos.cosmos.CoSMoS
     cosmos.cosmos_scenario.Scenario
     cosmos.cosmos_model_loop.ModelLoop
     cosmos.cosmos_model.Model
@@ -52,18 +55,17 @@ class MainLoop:
         self.clean_up        = True
     
     def start(self, cycle=None): 
-        """Read the xml scenario file, determine cycle times, and start cosmos_main_loop.run with scheduler. 
+        """Read the scenario.toml file, determine cycle times, and start cosmos_main_loop.run with scheduler. 
 
         Parameters
         ----------
-        cycle_time : int
+        cycle : int
             Datestring of cycle time
 
         See Also
-        -------
-        cosmos.cosmos_configuration.read_config_file
-        cosmos.cosmos_main_loop.MainLoop.start
-
+        --------
+        cosmos.cosmos_configuration.Configuration
+        cosmos.cosmos_main_loop.MainLoop.run
         """
             
         # Determines cycle time and runs main loop
@@ -141,28 +143,24 @@ class MainLoop:
         self.scheduler.run()
 
     def run(self):
-        """Run main loop: 
+        """Run main loop.
 
-        - Read configuration file, stations, meteo sources, super regions, scenario.
         - Initialize models
         - Remove old cycles
         - Get list of nested models
         - Check if models are finished
         - Get start and stop times
         - Download and collect meteo
+        - Optional: Make track ensemble
         - Start model loop
 
         See Also
-        -------
-        cosmos.cosmos_configuration.read_config_file
-        cosmos.cosmos_stations.Stations
-        cosmos.cosmos_meteo.read_meteo_sources
-        cosmos.cosmos_scenario.Scenario
-        cosmos.cosmos_scenario.Scenario.read
-        cosmos.cosmos_model.Model.prepare
+        --------
+        cosmos.cosmos_model.Model.get_nested_models
+        cosmos.cosmos_model.Model.set_paths
         cosmos.cosmos_meteo.Meteo.download_and_collect_meteo
+        cosmos.cosmos_track_ensemble.setup_track_ensemble
         cosmos.cosmos_model_loop.ModelLoop.start
-
         """
 
         # Start by reading all available models, stations, etc.
@@ -217,6 +215,28 @@ class MainLoop:
             if model.priority == 0:
                 model.run_simulation = False
 
+        # Check if model data needs to be uploaded to webviewer (only upload for high-res nested models)
+        modelopt = ["flow", "wave"]
+        modeloptnames = ["tide_gauge", "wave_buoy"]
+        for model in cosmos.scenario.model:
+            for iopt, opts in enumerate(modelopt):
+                all_nested_models = model.get_all_nested_models(opts)
+
+                if all_nested_models:
+                    all_nested_stations = []
+                    if all_nested_models[0].type == 'beware':
+                        all_nested_models= [model]
+                        bw=1
+                    else:
+                        bw=0
+                    for mdl in all_nested_models:
+                        for st in mdl.station:
+                            all_nested_stations.append(st.name)
+                    for station in model.station:
+                        if station.type == modeloptnames[iopt]:
+                            if station.name in all_nested_stations and bw==0:                            
+                                station.upload = False 
+        
         # Start and stop times
         cosmos.log('Getting start and stop times ...')
         get_start_and_stop_times()
@@ -265,13 +285,17 @@ class MainLoop:
                     model.run_simulation = False
                     break            
 
+        # Make spiderweb if does not exist yet
+        if cosmos.scenario.meteo_spiderweb:
+            track_to_spw()
+        
         if self.run_models:
             # And now start the model loop
             cosmos.log("Starting model loop ...")
             cosmos.model_loop.start()
 
 def get_start_and_stop_times():
-    """Get cycle start and stop times
+    """Get cycle start and stop times.
     """    
         
     y = cosmos.cycle.year
@@ -399,7 +423,7 @@ def get_start_and_stop_times():
                 model.flow_stop_time = model.wave_stop_time
 
 def check_for_wave_restart_files(model):
-    """Check if there are wave restart files
+    """Check if there are wave restart files.
     """    
     restart_time = None
     restart_file = None
@@ -429,7 +453,7 @@ def check_for_wave_restart_files(model):
     return restart_time, restart_file
 
 def check_for_flow_restart_files(model):
-    """Check if there are flow restart files
+    """Check if there are flow restart files.
     """   
     restart_time = None
     restart_file = None

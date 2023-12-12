@@ -10,6 +10,7 @@ import pandas as pd
 import numpy as np
 from pyproj import CRS
 from pyproj import Transformer
+from pathlib import Path
 
 from .cosmos import cosmos
 from .cosmos_model import Model
@@ -19,13 +20,37 @@ import cht.misc.fileops as fo
 from cht.nesting.nesting import nest1
 from cht.nesting.nesting import nest2
 import cosmos.cosmos_meteo as meteo
+import hydrolib.core.dflowfm as hcdfm
 
 from cht.misc.misc_tools import findreplace
 
 class CoSMoS_Delft3DFM(Model):
+    """Cosmos class for Delft3d FM model.
+
+    Delft3D FM is a hydrodynamic and morphodynamic numerical model used for simulating and predicting water flow, sediment transport, 
+    and morphological changes in rivers, estuaries, coasts, and oceans (see also https://oss.deltares.nl/web/delft3dfm).
+
+    This cosmos class reads Delft3D FM model data, pre-processes, moves and post-processes Delft3D FM models.
+
+    Parameters
+    ----------
+    Model : class
+        Generic cosmos model attributes
+
+    See Also
+    ----------
+    cosmos.cosmos_scenario.Scenario
+    cosmos.cosmos_model_loop.ModelLoop
+    cosmos.cosmos_model.Model
+    """    
     
     def read_model_specific(self):
-        
+        """Read Delft3D FM specific model attributes.
+
+        See Also
+        ----------
+        cht.delft3dfm.delft3dfm
+        """   
         # First set some defaults
 #        self.flow_spinup_time = 0.0
         
@@ -51,7 +76,17 @@ class CoSMoS_Delft3DFM(Model):
         self.domain.runid = self.runid        
         
     def pre_process(self):
+        """Preprocess Delft3D FM model.
         
+        - Extract and write wave and water level conditions.
+        - Write input file. 
+        - Write meteo forcing.
+        - Add observation points for nested models and observation stations.
+
+        See Also
+        ----------
+        cht.nesting.nest2
+        """   
         # Set path temporarily to job path
 #        pth = self.domain.path
         
@@ -64,9 +99,9 @@ class CoSMoS_Delft3DFM(Model):
         job_path_wave = os.path.join(self.job_path, "wave")
         
         # Start and stop times
-        self.domain.input.refdate = cosmos.scenario.ref_date
-        self.domain.input.tstart  = self.flow_start_time
-        self.domain.input.tstop   = self.flow_stop_time
+        refdate = cosmos.scenario.ref_date
+        tstart  = self.flow_start_time
+        tstop   = self.flow_stop_time
         
         # Change refdate in mdw file
         if self.wave:
@@ -74,8 +109,8 @@ class CoSMoS_Delft3DFM(Model):
             mdw_file = os.path.join(job_path_wave, "wave.mdw")
             findreplace(mdw_file, "REFDATEKEY", tstr)
             
-            t0 = (self.domain.input.tstart - self.domain.input.refdate).total_seconds()
-            t1 = (self.domain.input.tstop  - self.domain.input.refdate).total_seconds()
+            t0 = (tstart - refdate).total_seconds()
+            t1 = (tstop  - refdate).total_seconds()
             dt = 1800.0
 #            tstr = str(0.0) + " " + str(dt) + " " + str(t1 - t0)
             tstr = str(0.0) + " " + str(dt) + " " + str(t1)
@@ -83,19 +118,28 @@ class CoSMoS_Delft3DFM(Model):
             findreplace(dmr_file, "TIMEKEY", tstr)
         
         # Make sure model starts and stops automatically
-        self.domain.input.autostart = 2
+        self.domain.input.general.autostart = 2
         # Turn off pressure correction at open boundaries
         if self.flow_nested:
-            self.domain.input.pavbnd = -999.0
+            self.domain.input.wind.pavbnd = -999.0
 
         # Boundary conditions        
         if self.flow_nested:
 
+            # Correct boundary water levels. Assuming that output from overall
+            # model is in MSL !!!
+            zcor = self.boundary_water_level_correction - self.vertical_reference_level_difference_with_msl
+
             # Get boundary conditions from overall model (Nesting 2)
 #            output_path = os.path.join(self.flow_nested.cycle_path, "output")    
+            # Deterministic    
             nest2(self.flow_nested.domain,
                   self.domain,
-                  output_path=self.flow_nested.cycle_output_path)
+                  output_path=self.flow_nested.cycle_output_path,
+                  output_file = self.flow_nested.domain.runid + '_his.nc',
+                  boundary_water_level_correction=zcor,
+                  option = "flow",
+                  bc_path=self.job_path)
 
         if self.wave_nested:
             # TODO
@@ -106,7 +150,7 @@ class CoSMoS_Delft3DFM(Model):
                     
             meteo.write_meteo_input_files(self,
                                           "delft3dfm",
-                                          self.domain.input.refdate,
+                                          refdate,
                                           path=job_path_flow)
             
             if self.meteo_wind:                
@@ -126,11 +170,24 @@ class CoSMoS_Delft3DFM(Model):
             #                        "spiderwebs",
             #                        self.meteo_spiderweb)
             #     fo.copy_file(src, self.job_path)
-            if not self.domain.input.extforcefile:
-                self.domain.input.extforcefile = "meteo.ext"
-                self.domain.write_ext_meteo()
+
+        if self.meteo_spiderweb:
+            # self.domain.input.baro    = 1
+            self.domain.meteo.spw_file = self.meteo_spiderweb
+            meteo_path = os.path.join(cosmos.config.meteo_database.path, "spiderwebs")
+            src = os.path.join(meteo_path, self.meteo_spiderweb)
+            fo.copy_file(os.path.join(meteo_path, self.meteo_spiderweb), os.path.join(self.job_path, 'flow'))
+
+        if self.meteo_wind or self.meteo_atmospheric_pressure or self.meteo_precipitation or self.meteo_spiderweb:
+            if not self.domain.input.external_forcing.extforcefile:
+                self.domain.input.external_forcing.extforcefile = hcdfm.ExtOldModel()
+                self.domain.input.external_forcing.extforcefile.filepath = Path("meteo.ext")                                        
+            self.domain.write_ext_meteo(file_name = os.path.join(job_path_flow, 
+                                                                    self.domain.input.external_forcing.extforcefile.filepath))
             
         # Make observation points
+        if self.domain.input.output.obsfile:
+            self.domain.read_observation_points(file_name=os.path.join(job_path_flow, self.domain.input.output.obsfile[0].filepath))   
         for station in self.station:
             self.domain.add_observation_point(station.x,
                                               station.y,
@@ -139,8 +196,9 @@ class CoSMoS_Delft3DFM(Model):
         # Add observation points for nested models (Nesting 1)
         if self.nested_flow_models:
 
-            if not self.domain.input.obsfile:
-                self.domain.input.obsfile = "dflowfm.xyn"
+            if not self.domain.input.output.obsfile:
+                self.domain.input.output.obsfile[0] = hcdfm.XYNModel()
+                self.domain.input.output.obsfile[0].filepath = Path("dflowfm.xyn")
 
             for nested_model in self.nested_flow_models:
                 nest1(self.domain, nested_model.domain)
@@ -150,19 +208,20 @@ class CoSMoS_Delft3DFM(Model):
 
         # Add other observation stations 
         if self.nested_flow_models or len(self.station)>0:
-            if not self.domain.input.obsfile:
-                self.domain.input.obsfile = self.runid + ".xyn"
+            if not self.domain.input.output.obsfile:
+                self.domain.input.output.obsfile[0] = hcdfm.XYNModel()
+                self.domain.input.output.obsfile[0].filepath = Path(self.runid + ".xyn")
             self.domain.write_observation_points(path=job_path_flow)       
-        if self.nested_wave_models:
+        if self.wave:
             self.domain.write_observation_points(path=job_path_wave)    
-            findreplace(mdw_file, "OBSFILEKEY", self.domain.input.obsfile)    
+            findreplace(mdw_file, "OBSFILEKEY", os.path.join(self.domain.input.output.obsfile[0].filepath))    
 
         # Make restart file
-        trstsec = self.domain.input.tstop.replace(tzinfo=None) - self.domain.input.refdate            
+        trstsec = tstop.replace(tzinfo=None) - refdate            
         if self.meteo_subset:
             if self.meteo_subset.last_analysis_time:
-                trstsec = self.meteo_subset.last_analysis_time.replace(tzinfo=None) - self.domain.input.refdate
-        self.domain.input.rstinterval = trstsec.total_seconds()
+                trstsec = self.meteo_subset.last_analysis_time.replace(tzinfo=None) - refdate
+        self.domain.input.output.rstinterval = [trstsec.total_seconds()]
         
         # # Get restart file from previous cycle
         # if self.flow_restart_file:
@@ -177,6 +236,11 @@ class CoSMoS_Delft3DFM(Model):
         
         # Now write input file
         mdufile = os.path.join(job_path_flow, self.runid + ".mdu")
+        self.domain.input.time.startdatetime = tstart.strftime('%Y%m%d%H%M%S')
+        self.domain.input.time.stopdatetime  = tstop.strftime('%Y%m%d%H%M%S')
+        self.domain.input.time.tstart= (tstart - refdate).total_seconds()
+        self.domain.input.time.tstop=  (tstop - refdate).total_seconds()
+        self.domain.input.time.refdate= int(refdate.strftime('%Y%m%d'))
         self.domain.write_input_file(input_file=mdufile)
         
 
@@ -184,8 +248,8 @@ class CoSMoS_Delft3DFM(Model):
         fid = open(batch_file, "w")            
         fid.write("@ echo off\n")
         fid.write("DATE /T > running.txt\n")
-        exe_path = os.path.join("call " + cosmos.config.delft3dfm_exe_path,
-                                 "x64\\dimr\\scripts\\run_dimr.bat dimr_config.xml\n")
+        exe_path = os.path.join("call \"" + cosmos.config.executables.delft3dfm_path,
+                                 "x64\\dimr\\scripts\\run_dimr.bat\" dimr_config.xml\n")
         fid.write(exe_path)
         fid.write("move running.txt finished.txt\n")
         fid.write("exit\n")
@@ -196,7 +260,8 @@ class CoSMoS_Delft3DFM(Model):
 #        self.domain.path = pth
 
     def move(self):
-        
+        """Move Delft3D FM model input, output, and restart files.
+        """     
         # Move files from job folder to archive folder
         
         # First clear archive folder      
@@ -222,15 +287,16 @@ class CoSMoS_Delft3DFM(Model):
             fo.move_file(rstfile0,
                          os.path.join(self.restart_flow_path, rstfile1))
         
-        # Output        
+        # Output & diag
         fo.move_file(os.path.join(joboutpath, "*.nc"), output_path)
-        
+        fo.move_file(os.path.join(joboutpath, "*.diag"), output_path)
+
 #        fo.move_file(os.path.join(job_path, "sfincs.rst"), input_path)
 
 
         # Input
         # Delete net file (this is typically quite big)
-        fo.delete_file(os.path.join(job_path, "flow", self.domain.input.netfile))
+        fo.delete_file(os.path.join(job_path, "flow", self.domain.input.geometry.netfile.filepath))
         fo.move_file(os.path.join(job_path, "flow", "*.*"), input_path)
         
         # WAVE
@@ -246,21 +312,29 @@ class CoSMoS_Delft3DFM(Model):
         #     fo.move_file(rstfile0,
         #                  os.path.join(self.restart_path, "flow", rstfile1))
         
-        # Output        
-        fo.move_file(os.path.join(joboutpath, "wav*.nc"), output_path)
-        fo.delete_file(os.path.join(joboutpath, "*.nc"))
-        fo.delete_file(os.path.join(joboutpath, "wavm-wave.d*"))
+        # Output
+        if os.path.isdir(joboutpath):
+            fo.move_file(os.path.join(joboutpath, "wav*.nc"), output_path)
+            fo.delete_file(os.path.join(joboutpath, "*.nc"))
+            fo.delete_file(os.path.join(joboutpath, "wavm-wave.d*"))
 
-        # Input
-        fo.move_file(os.path.join(joboutpath, "*.*"), input_path)
+            # Input
+            fo.move_file(os.path.join(joboutpath, "*.*"), input_path)
 
     def post_process(self):
-        
+        """Post-process Delft3D FM output: generate wave and water level timeseries.        
+        """         
+        import cht.misc.misc_tools
+
         # Extract water levels
 
         output_path = self.cycle_output_path
-        post_path   = self.cycle_post_path
-
+        # post_path   = self.cycle_post_path
+        post_path =  os.path.join(cosmos.config.path.webviewer, 
+                                  cosmos.config.webviewer.name,
+                                  "data",
+                                  cosmos.scenario.name)
+        
         hisfile = os.path.join(output_path, self.runid + "_his.nc")
         
         if self.station:
@@ -269,15 +343,21 @@ class CoSMoS_Delft3DFM(Model):
 
             v = self.domain.read_timeseries_output(file_name=hisfile)
             for station in self.station:
-                vv=v[station.name]
-                vv.index.name='date_time'
-                vv.name='wl'
-                vv = vv + station.water_level_correction
-                file_name = os.path.join(post_path,
-                                         "waterlevel." + station.name + ".csv")
-                vv.to_csv(file_name,
-                          date_format='%Y-%m-%dT%H:%M:%S',
-                          float_format='%.3f')
+                if station.upload:
+                    vv=v[station.name]
+                    vv.index.name='date_time'
+                    vv.name='wl'
+                    vv += self.vertical_reference_level_difference_with_msl
+
+                    fo.mkdir(os.path.join(post_path, 'timeseries'))
+                    csv_file = os.path.join(post_path,
+                                             "timeseries",
+                                            "waterlevel." + self.name + "." + station.name + ".csv.js")
+                    
+                    s = vv.to_csv(date_format='%Y-%m-%dT%H:%M:%S',
+                                    float_format='%.3f',
+                                    header=False) 
+                    cht.misc.misc_tools.write_csv_js(csv_file, s, "var csv = `date_time,wl")
 
         # Extract waves
         if self.wave:
@@ -285,13 +365,16 @@ class CoSMoS_Delft3DFM(Model):
             if self.station:
 
                 cosmos.log("Extracting wave time series from model " + self.name)    
-                wavefile = [os.path.join(output_path, "wavh-wave-nest.nc"), os.path.join(output_path, "wavh-wave-Entire_swn.nc")]
+                wavefile = [os.path.join(output_path, "wavh-wave-wave.nc")]
                 v = self.domain.read_timeseries_output(file_name=hisfile, file_name_wave = wavefile)
                 for station in self.station:
-                    vv=v[station.name]
-                    vv.index.name='date_time'
-                    file_name = os.path.join(post_path,
-                                            "waves." + station.name + ".csv")
-                    vv.to_csv(file_name,
-                            date_format='%Y-%m-%dT%H:%M:%S',
-                            float_format='%.3f')        
+                    if station.upload:
+                        vv=v[station.name]
+                        vv.index.name='date_time'
+                        csv_file = os.path.join(post_path,
+                                                 "timeseries",
+                                                "waves." + self.name + "." + station.name + ".csv.js")
+                        s = vv.to_csv(date_format='%Y-%m-%dT%H:%M:%S',
+                                    float_format='%.3f',
+                                    header=False)       
+                        cht.misc.misc_tools.write_csv_js(csv_file, s, "var csv = `date_time,hm0,tp") 

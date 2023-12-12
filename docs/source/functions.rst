@@ -1,6 +1,6 @@
 .. currentmodule:: cosmos
 
-Functions
+API reference
 =====
 
 Main classes
@@ -8,13 +8,25 @@ Main classes
 .. autosummary:: 
    :toctree: _generated/  
    
-   cosmos.cosmos_main.CoSMoS
+   cosmos.cosmos.CoSMoS
    cosmos.cosmos_main_loop.MainLoop
    cosmos.cosmos_model_loop.ModelLoop
-   cosmos.cosmos_scenario.Scenario
-   cosmos.cosmos_model.Model
 
-Model classes
+Additional classes
+^^^^^^^^^^^^
+Classes for pre-processing, running, and post-processing.
+
+.. autosummary:: 
+   :toctree: _generated/  
+
+   cosmos.cosmos_model.Model
+   cosmos.cosmos_scenario.Scenario
+   cosmos.cosmos_configuration.Configuration
+   cosmos.cosmos_stations.Stations
+   cosmos.cosmos_webviewer.WebViewer
+   cosmos.cosmos_cluster.Cluster
+
+Model-specific classes
 ^^^^^^^^^^^^
 .. autosummary:: 
    :toctree: _generated/  
@@ -25,31 +37,17 @@ Model classes
    cosmos.cosmos_sfincs.CoSMoS_SFINCS
    cosmos.cosmos_xbeach.CoSMoS_XBeach
 
-Additional classes
-^^^^^^^^^^^^
-Classes for pre-processing, running, and post-processing.
-
-.. autosummary:: 
-   :toctree: _generated/  
-
-   cosmos.cosmos_cluster.Cluster
-   cosmos.cosmos_meteo.Meteo
-   cosmos.cosmos_run_parallel.CosmosRunParallel
-   cosmos.cosmos_stations.Stations
-   cosmos.cosmos_webviewer.WebViewer
-   cosmos.cosmos_ww3.CoSMoS_WW3
-
 CoSMoS functions
 ^^^^^^^^^^^^
 .. autosummary:: 
    :toctree: _generated/  
    
-   cosmos.cosmos_main.CoSMoS.initialize
-   cosmos.cosmos_main.CoSMoS.log
-   cosmos.cosmos_main.CoSMoS.make_webviewer
-   cosmos.cosmos_main.CoSMoS.post_process
-   cosmos.cosmos_main.CoSMoS.run
-   cosmos.cosmos_main.CoSMoS.stop
+   cosmos.cosmos.CoSMoS.initialize
+   cosmos.cosmos.CoSMoS.run
+   cosmos.cosmos.CoSMoS.stop
+   cosmos.cosmos.CoSMoS.log
+   cosmos.cosmos.CoSMoS.make_webviewer
+   cosmos.cosmos.CoSMoS.post_process
 
 MainLoop and ModelLoop functions
 ^^^^^^^^^^^^
@@ -67,6 +65,13 @@ Model functions
 .. autosummary:: 
    :toctree: _generated/  
    
+   cosmos.cosmos_model.Model.read_generic
+   cosmos.cosmos_model.Model.set_paths
+   cosmos.cosmos_model.Model.get_nested_models
+   cosmos.cosmos_model.Model.submit_job
+   cosmos.cosmos_model.Model.get_all_nested_models
+   cosmos.cosmos_model.Model.add_stations
+   cosmos.cosmos_model.Model.get_peak_boundary_conditions
    cosmos.cosmos_beware.CoSMoS_BEWARE.read_model_specific
    cosmos.cosmos_beware.CoSMoS_BEWARE.pre_process
    cosmos.cosmos_beware.CoSMoS_BEWARE.move
@@ -87,4 +92,5 @@ Model functions
    cosmos.cosmos_xbeach.CoSMoS_XBeach.pre_process
    cosmos.cosmos_xbeach.CoSMoS_XBeach.move
    cosmos.cosmos_xbeach.CoSMoS_XBeach.post_process
-   
+
+

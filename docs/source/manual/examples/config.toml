@@ -1,0 +1,29 @@
+[model_database]
+path = "c:\\cosmos_run_folder\\model_database"
+
+[meteo_database]
+path = "c:\\cosmos_run_folder\\meteo_database"
+
+[conda]
+path = "c:\\Users\\%username%\\Anaconda3"
+
+[executables]
+delft3dfm_path = "c:\\Program Files (x86)\\Deltares\\Delft3D Flexible Mesh Suite HMWQ (2021.03)\\plugins\\DeltaShell.Dimr\\kernels"
+sfincs_path    = "c:\\cosmos_run_folder\\exe\\sfincs"
+hurrywave_path = "c:\\cosmos_run_folder\\exe\\hurrywave"
+beware_path    = "c:\\cosmos_run_folder\\exe\\beware"
+xbeach_path    = "yourxbeachpath"
+
+[webviewer]
+name    = "2psips_event_viewer"
+version = "version03"
+
+[cycle]
+mode            = "single_shot"
+interval        = 6
+clean_up        = false
+make_flood_maps = true
+make_wave_maps  = true
+upload          = false
+get_meteo       = true
+run_mode        = "serial"

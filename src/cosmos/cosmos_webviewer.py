@@ -24,13 +24,20 @@ import cht.misc.fileops as fo
 import cht.misc.misc_tools
 
 class WebViewer:
-    
+    """Cosmos webviewer class
+    """    
+
     def __init__(self, name):
-        # Makes local copy of the web viewer
-        # If such a copy already exists, data will be copied to the existing web viewer
+        """Initialize webviewer. 
+        - Makes local copy of the webviewer from a template. If such a copy already exists, data will be copied to the existing webviewer.
+        - Updating the scenario.js with the current scenario.
+        - Make a variable file defining the variables that are mapped for the current scenario.
 
-        cosmos.log("Preparing web viewer " + name + " ...")
-
+        Parameters
+        ----------
+        name : str
+            Name of webviewer.
+        """
         self.name    = name
         self.path    = os.path.join(cosmos.config.path.main, "webviewers", name)
         self.version = cosmos.config.webviewer.version
@@ -81,8 +88,6 @@ class WebViewer:
 
 #        # In cloud mode, also make a path on S3
 #        if cosmos.config.cycle.run_mode == "cloud":
-
-
 
         # Stations and buoys
         cosmos.log("Copying time series ...")                
@@ -258,18 +263,18 @@ class WebViewer:
         
         cosmos.log("Making meteo map tiles ...")
 
-        # Wind
-        meteo_dataset = cosmos.scenario.meteo_dataset
+        try:
 
-        for meteo_subset in cosmos.meteo_subset:
-            if meteo_dataset == meteo_subset.name:
-                
-                # TODO these ranges should be in the config file
-                xlim = [-99.0, -55.0]
-                ylim = [8.0, 45.0]
-                
-                if meteo_subset.x is not None:
-                                        
+            # Wind
+            meteo_dataset = cosmos.scenario.meteo_dataset
+
+            for meteo_subset in cosmos.meteo_subset:
+                if meteo_dataset == meteo_subset.name:
+                    
+                    # TODO these ranges should be in the config file
+                    xlim = [-99.0, -55.0]
+                    ylim = [8.0, 45.0]
+                                                        
                     subset = meteo_subset.subset(xlim=xlim,
                                                  ylim=ylim,
                                                  time_range=[],
@@ -366,6 +371,8 @@ class WebViewer:
                         cht.misc.misc_tools.write_json_js(file_name,
                                                           feature_collection,
                                                           "var track_data =")
+        except:
+            pass                
 
         if cosmos.scenario.track_ensemble:
             feature_collection = cosmos.scenario.track_ensemble.get_feature_collection()
@@ -373,8 +380,6 @@ class WebViewer:
             cht.misc.misc_tools.write_json_js(file_name,
                                               feature_collection,
                                               "var track_ensemble_data =")
-
-
 
         return
         # Cumulative rainfall
@@ -386,120 +391,122 @@ class WebViewer:
         t0 = cosmos.cycle.replace(tzinfo=None)    
         t1 = cosmos.stop_time
         
-        # First determine max precip for all simulations 
-        pmx = 0.0
-        okay  = False
-        for model in cosmos.scenario.model:
-            if model.type=="sfincs":
-                index_path = os.path.join(model.path, "tiling", "indices")
-#                if model.make_precip_map and os.path.exists(index_path):            
-                if os.path.exists(index_path):            
-                    file_name = os.path.join(model.cycle_output_path, "sfincs_map.nc")
-                    # p0max = model.domain.read_cumulative_precipitation(file_name=file_name,
-                    #                                                    time_range=[t0 + dt1, t1 + dt1])
-                    # pmx = max(pmx, np.nanmax(p0max))
-                    okay = True
+#         # First determine max precip for all simulations 
+#         pmx = 0.0
+#         okay  = False
+#         for model in cosmos.scenario.model:
+#             if model.type=="sfincs":
+#                 index_path = os.path.join(model.path, "tiling", "indices")
+# #                if model.make_precip_map and os.path.exists(index_path):            
+#                 if os.path.exists(index_path):            
+#                     file_name = os.path.join(model.cycle_output_path, "sfincs_map.nc")
+#                     # p0max = model.domain.read_cumulative_precipitation(file_name=file_name,
+#                     #                                                    time_range=[t0 + dt1, t1 + dt1])
+#                     # pmx = max(pmx, np.nanmax(p0max))
+#                     okay = True
 
-        if okay:
+#         if okay:
 
-            cosmos.log("Making precipitation tiles ...")                
+#             cosmos.log("Making precipitation tiles ...")                
                 
-            print("Maximum precipitation : " + '%6.2f'%pmx + " mm")                         
+#             print("Maximum precipitation : " + '%6.2f'%pmx + " mm")                         
 
-            contour_set = "precip_log"    
+#             contour_set = "precip_log"    
 
-            pathstr = []
-            namestr = []
+#             pathstr = []
+#             namestr = []
             
-            # 24-hour increments
-            requested_times = pd.date_range(start=t0 + dt24,
-                                            end=t1,
-                                            freq='24H').to_pydatetime().tolist()
+#             # 24-hour increments
+#             requested_times = pd.date_range(start=t0 + dt24,
+#                                             end=t1,
+#                                             freq='24H').to_pydatetime().tolist()
 
-            for it, t in enumerate(requested_times):
-                pathstr.append((t - dt24).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
-                namestr.append((t - dt24).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC")
+#             for it, t in enumerate(requested_times):
+#                 pathstr.append((t - dt24).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
+#                 namestr.append((t - dt24).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC")
 
-            pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
-            td = t1 - t0
-            hrstr = str(int(td.days * 24 + td.seconds/3600))
-            namestr.append("Combined " + hrstr + "-hour forecast")
+#             pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
+#             td = t1 - t0
+#             hrstr = str(int(td.days * 24 + td.seconds/3600))
+#             namestr.append("Combined " + hrstr + "-hour forecast")
 
-            for model in cosmos.scenario.model:
-                if model.type=="sfincs" and model.meteo_precipitation:
-                    index_path = os.path.join(model.path, "tiling", "indices")            
-#                    if model.make_wave_map and os.path.exists(index_path):                            
-                    if os.path.exists(index_path):                            
+#             for model in cosmos.scenario.model:
+#                 if model.type=="sfincs" and model.meteo_precipitation:
+#                     index_path = os.path.join(model.path, "tiling", "indices")            
+# #                    if model.make_wave_map and os.path.exists(index_path):                            
+#                     if os.path.exists(index_path):                            
                         
-                        cosmos.log("Making precip tiles for model " + model.long_name + " ...")                
+#                         cosmos.log("Making precip tiles for model " + model.long_name + " ...")                
     
-                        file_name = os.path.join(model.cycle_output_path, "sfincs_map.nc")
+#                         file_name = os.path.join(model.cycle_output_path, "sfincs_map.nc")
                         
-                        # Precip map over 24-hour increments                    
-                        for it, t in enumerate(requested_times):
-                            p = model.domain.read_cumulative_precipitation(file_name=file_name,
-                                                                           time_range=[t - dt24 + dt1, t + dt1])                        
-                            p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-                                                        "precipitation",
-                                                        pathstr[it])                        
-                            make_precipitation_tiles(p, index_path, p_map_path, contour_set)
+#                         # Precip map over 24-hour increments                    
+#                         for it, t in enumerate(requested_times):
+#                             p = model.domain.read_cumulative_precipitation(file_name=file_name,
+#                                                                            time_range=[t - dt24 + dt1, t + dt1])                        
+#                             p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+#                                                         "precipitation",
+#                                                         pathstr[it])                        
+#                             make_precipitation_tiles(p, index_path, p_map_path, contour_set)
 
 
-                        # Full simulation       
-                        p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-                                                  "precipitation",
-                                                   pathstr[-1])                        
-                        p = model.domain.read_cumulative_precipitation(file_name=file_name,
-                                                                       time_range=[t0 + dt1, t1 + dt1])                        
-                        make_precipitation_tiles(p, index_path, p_map_path, contour_set)
+#                         # Full simulation       
+#                         p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+#                                                   "precipitation",
+#                                                    pathstr[-1])                        
+#                         p = model.domain.read_cumulative_precipitation(file_name=file_name,
+#                                                                        time_range=[t0 + dt1, t1 + dt1])                        
+#                         make_precipitation_tiles(p, index_path, p_map_path, contour_set)
             
-            # Check if wave maps are available
-            p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-                                          "precipitation")
+#             # Check if wave maps are available
+#             p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
+#                                           "precipitation")
             
-            ppath = os.path.join(scenario_path)
-            fo.copy_file(p_map_path, ppath)
-            dct={}
-            dct["name"]        = "precipitation" 
-            dct["long_name"]   = "Cumulative rainfall"
-            dct["description"] = "These are cumulative precipitations."
-            dct["format"]      = "xyz_tile_layer"
-            dct["max_native_zoom"]  = 10
+#             ppath = os.path.join(scenario_path)
+#             fo.copy_file(p_map_path, ppath)
+#             dct={}
+#             dct["name"]        = "precipitation" 
+#             dct["long_name"]   = "Cumulative rainfall"
+#             dct["description"] = "These are cumulative precipitations."
+#             dct["format"]      = "xyz_tile_layer"
+#             dct["max_native_zoom"]  = 10
             
-            tms = []            
-            for it, pth in enumerate(pathstr):
-                tm = {}
-                tm["name"]   = pth
-                tm["string"] = namestr[it]
-                tms.append(tm)
+#             tms = []            
+#             for it, pth in enumerate(pathstr):
+#                 tm = {}
+#                 tm["name"]   = pth
+#                 tm["string"] = namestr[it]
+#                 tms.append(tm)
 
-            dct["times"]        = tms  
+#             dct["times"]        = tms  
             
-            mp = next((x for x in cosmos.config.map_contours if x["name"] == contour_set), None)    
+#             mp = next((x for x in cosmos.config.map_contours if x["name"] == contour_set), None)    
             
-            lgn = {}
-            lgn["text"] = mp["string"]
+#             lgn = {}
+#             lgn["text"] = mp["string"]
 
-            cntrs = mp["contours"]
+#             cntrs = mp["contours"]
 
-            contours = []
+#             contours = []
             
-            for cntr in cntrs:
-                contour = {}
-                contour["text"]  = cntr["string"]
-                contour["color"] = "#" + cntr["hex"]
-                contours.append(contour)
+#             for cntr in cntrs:
+#                 contour = {}
+#                 contour["text"]  = cntr["string"]
+#                 contour["color"] = "#" + cntr["hex"]
+#                 contours.append(contour)
     
-            lgn["contours"] = contours
-            dct["legend"]   = lgn
+#             lgn["contours"] = contours
+#             dct["legend"]   = lgn
             
-            self.map_variables.append(dct)
+#             self.map_variables.append(dct)
 
 
 
             
 
     def make_runup_map(self):        
+        """Make runup markers and timeseries for webviewer.
+        """   
 
         output_path = self.cycle_path
 
@@ -507,77 +514,13 @@ class WebViewer:
 
         for model in cosmos.scenario.model:
             if model.type == 'beware':
-                
+           
                 try:
-
-                    model.domain.read_data(os.path.join(model.cycle_output_path,
-                                                        "beware_his.nc"))                
-    
-                    features = []
-                    transformer = Transformer.from_crs(model.crs,
-                                                       'WGS 84',
-                                                       always_xy=True)
-                    
-                    for ip in range(len(model.domain.filename)):
-                        x, y = transformer.transform(model.domain.xp[ip],
-                                                     model.domain.yp[ip])
-                        point = Point((x, y))
-                        name = 'Loc nr: ' +  str(model.domain.filename[ip])
-                                    
-                        id = np.argmax(model.domain.R2[ip,:])                                                                       
-                        features.append(Feature(geometry=point,
-                                                properties={"model_name":model.name,
-                                                            "LocNr":int(model.domain.filename[ip]),
-                                                            "Lon":x,
-                                                            "Lat":y,                                                
-                                                            "Setup":round(model.domain.R2_setup[ip, id],2),
-                                                            "Swash":round(model.domain.swash[ip, id],2),
-                                                            "TWL":round(model.domain.R2[ip, id],2)}))
-                    
-                    feature_collection = FeatureCollection(features)
-                    
-                    if features:
-                        feature_collection = FeatureCollection(features)
-                        output_path_runup =  os.path.join(output_path, 'extreme_runup_height\\')
-                        fo.mkdir(output_path_runup)
-                        file_name = os.path.join(output_path_runup,
-                                                "extreme_runup_height.geojson.js")
-                        cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var runup =")
-    
-                    dct={}
-                    dct["name"]        = "extreme_runup_height"
-                    dct["long_name"]   = "Total water levels"
-                    dct["description"] = "These are the predicted total water levels"
-                    dct["format"]      = "geojson"
-    
-                    mp = cosmos.config.map_contours["run_up"]    
-#                    mp = next((x for x in cosmos.config.map_contours if x["name"] == "run_up"), None)                    
-     
-                    lgn = {}
-                    lgn["text"] = mp["string"]
-        
-                    cntrs = mp["contours"]
-        
-                    contours = []
-                    
-                    for cntr in cntrs:
-                        contour = {}
-                        contour["text"]  = cntr["string"]
-                        contour["color"] = "#" + cntr["hex"]
-                        contours.append(contour)
-            
-                    lgn["contours"] = contours
-                    dct["legend"]   = lgn
-    
-        
-                    self.map_variables.append(dct)
-    
-                    # Probabilistic runup
-
                     if os.path.exists(os.path.join(model.cycle_output_path,
-                                                            "beware_his_ensemble.nc")):
+                                            "beware_his.nc")):
+
                         model.domain.read_data(os.path.join(model.cycle_output_path,
-                                                            "beware_his_ensemble.nc"), prcs= [0.05, 0.5, 0.95])                
+                                                            "beware_his.nc"))                
         
                         features = []
                         transformer = Transformer.from_crs(model.crs,
@@ -590,18 +533,82 @@ class WebViewer:
                             point = Point((x, y))
                             name = 'Loc nr: ' +  str(model.domain.filename[ip])
                                         
-                            id = np.argmax(model.domain.R2p[ip,:])                                                                       
+                            id = np.argmax(model.domain.R2[ip,:])                                                                       
                             features.append(Feature(geometry=point,
                                                     properties={"model_name":model.name,
                                                                 "LocNr":int(model.domain.filename[ip]),
                                                                 "Lon":x,
                                                                 "Lat":y,                                                
-                                                                "Setup":round(model.domain.setup_prc["95"][ip, id],2),
+                                                                "Setup":round(model.domain.R2_setup[ip, id],2),
                                                                 "Swash":round(model.domain.swash[ip, id],2),
-                                                                "TWL":round(model.domain.R2p_prc["95"][ip, id],2)}))
+                                                                "TWL":round(model.domain.R2[ip, id] + model.domain.WL[ip, id],2)}))
+                                            
+                        if features:
+                            feature_collection = FeatureCollection(features)
+                            output_path_runup =  os.path.join(output_path, 'extreme_runup_height\\')
+                            fo.mkdir(output_path_runup)
+                            file_name = os.path.join(output_path_runup,
+                                                    "extreme_runup_height.geojson.js")
+                            cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var runup =")
+        
+                        dct={}
+                        dct["name"]        = "extreme_runup_height"
+                        dct["long_name"]   = "Maximum Total Water Level (best track)"
+                        dct["description"] = "These are the predicted total water levels"
+                        dct["format"]      = "geojson"
+                        dct["infographic"] = "twl"
+        
+                        dct["legend"] = make_legend(type = 'run_up')
+
+                    # mp = next((x for x in cosmos.config.map_contours if x["name"] == "run_up"), None)                    
+     
+                    # lgn = {}
+                    # lgn["text"] = mp["string"]
+        
+                    # cntrs = mp["contours"]
+        
+                    # contours = []
+                    
+                    # for cntr in cntrs:
+                    #     contour = {}
+                    #     contour["text"]  = cntr["string"]
+                    #     contour["color"] = "#" + cntr["hex"]
+                    #     contours.append(contour)
+            
+                    # lgn["contours"] = contours
+                    # dct["legend"]   = lgn
+    
+        
+                        self.map_variables.append(dct)
+    
+                    # Probabilistic runup
+
+                    if os.path.exists(os.path.join(model.cycle_output_path,
+                                                            "beware_his_ensemble.nc")):
+                        model.domain.read_data(os.path.join(model.cycle_output_path,
+                                                            "beware_his_ensemble.nc"), prcs= [5, 50, 95])                
+        
+                        features = []
+                        transformer = Transformer.from_crs(model.crs,
+                                                        'WGS 84',
+                                                        always_xy=True)
                         
-                        feature_collection = FeatureCollection(features)
-                        
+                        for ip in range(len(model.domain.filename)):
+                            x, y = transformer.transform(model.domain.xp[ip],
+                                                        model.domain.yp[ip])
+                            point = Point((x, y))
+                            name = 'Loc nr: ' +  str(model.domain.filename[ip])
+                                        
+                            id = np.argmax(model.domain.R2[ip,:])                                                                       
+                            features.append(Feature(geometry=point,
+                                                    properties={"model_name":model.name,
+                                                                "LocNr":int(model.domain.filename[ip]),
+                                                                "Lon":x,
+                                                                "Lat":y,                                                
+                                                                "Setup":round(model.domain.R2_setup_prc["95"][ip, id],2),
+                                                                "Swash":round(model.domain.swash[ip, id],2),
+                                                                "TWL":round(model.domain.R2_prc["95"][ip, id]+model.domain.WL[ip, id],2)}))
+                                                
                         if features:
                             feature_collection = FeatureCollection(features)
                             output_path_runup =  os.path.join(output_path, 'extreme_runup_height_prc95\\')
@@ -612,30 +619,73 @@ class WebViewer:
         
                         dct={}
                         dct["name"]        = "extreme_runup_height_prc95"
-                        dct["long_name"]   = "Total water levels 95 %"
+                        dct["long_name"]   = "Maximum Total Water Level (95 % of ensemble)"
                         dct["description"] = "These are the predicted extreme run-up heights"
                         dct["format"]      = "geojson"
+                        dct["infographic"]   = "twl"
         
-                        mp = cosmos.config.map_contours["run_up"]    
+                        dct["legend"] = make_legend(type = 'run_up')
+
+                        # mp = next((x for x in cosmos.config.map_contours if x["name"] == "run_up"), None)                    
         
-                        lgn = {}
-                        lgn["text"] = mp["string"]
+                        # lgn = {}
+                        # lgn["text"] = mp["string"]
             
-                        cntrs = mp["contours"]
+                        # cntrs = mp["contours"]
             
-                        contours = []
+                        # contours = []
                         
-                        for cntr in cntrs:
-                            contour = {}
-                            contour["text"]  = cntr["string"]
-                            contour["color"] = "#" + cntr["hex"]
-                            contours.append(contour)
+                        # for cntr in cntrs:
+                        #     contour = {}
+                        #     contour["text"]  = cntr["string"]
+                        #     contour["color"] = "#" + cntr["hex"]
+                        #     contours.append(contour)
                 
-                        lgn["contours"] = contours
-                        dct["legend"]   = lgn
+                        # lgn["contours"] = contours
+                        # dct["legend"]   = lgn
         
             
                         self.map_variables.append(dct)
+
+                    # Offshore water level and wave height
+
+                    features = []
+                        
+                    for ip in range(len(model.domain.filename)):
+                        x, y = transformer.transform(model.domain.xo[ip],
+                                                     model.domain.yo[ip])
+                        point = Point((x, y))
+                        name = 'Loc nr: ' +  str(model.domain.filename[ip])
+                                    
+                        id = np.argmax(model.domain.R2[ip,:])                                                               
+                        features.append(Feature(geometry=point,
+                                                properties={"model_name":model.name,
+                                                            "LocNr":int(model.domain.filename[ip]),
+                                                            "Lon": round(x,3),
+                                                            "Lat": round(y,3),
+                                                            "Hs":round(model.domain.Hs[ip, id],2),
+                                                            "Tp":round(model.domain.Tp[ip, id],1),
+                                                            "WL":round(model.domain.WL[ip, id],2)}))
+                        
+                    if features:
+                        feature_collection = FeatureCollection(features)
+                        output_path_waves =  os.path.join(output_path, 'extreme_sea_level_and_wave_height\\')
+                        fo.mkdir(output_path_waves)
+                        file_name = os.path.join(output_path_waves,     
+                                                "extreme_sea_level_and_wave_height.geojson.js")
+                        cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var swl =")
+
+
+                    dct={}
+                    dct["name"]        = "extreme_sea_level_and_wave_height"
+                    dct["long_name"]   = "Offshore WL and Hs"
+                    dct["description"] = "This is the total offshore water level (tide + surge) and wave conditions."
+                    dct["format"]      = "geojson"
+                    dct["legend"]      = {"text": "Offshore Hs", "contours": [{"text": " 0.0&nbsp-&nbsp;1.0&#8201;m", "color": "#CCFFFF"}, {"text": " 1.0&nbsp;-&nbsp;3.0&#8201;m", "color": "#40E0D0"}, {"text": " 3.0&nbsp-&nbsp;5.0&#8201;m", "color": "#00BFFF"}, {"text": "&gt; 5.0&#8201;m", "color": "#0909FF"}]}
+                    dct["infographic"]   = "offshore"
+
+                    self.map_variables.append(dct)
+
 
                     # Horizontal runup
 
@@ -666,12 +716,11 @@ class WebViewer:
                                                             "Lat":y,                                                
                                                             "Setup":round(model.domain.R2_setup[ip, id],2),
                                                             "Swash":round(model.domain.swash[ip, id],2),
-                                                            "TWL":round(model.domain.R2[ip, id],2)}))
-                    feature_collection = FeatureCollection(features)
+                                                            "TWL":round(model.domain.R2[ip, id] + model.domain.WL[ip, id],2)}))
 
                     if features:
                         feature_collection = FeatureCollection(features)
-                        output_path_runup =  os.path.join(output_path, 'extreme_horizontal_runup_height')
+                        output_path_runup =  os.path.join(output_path, 'extreme_horizontal_runup_height\\')
                         fo.mkdir(output_path_runup)
                         file_name = os.path.join(output_path_runup,     
                                                 "extreme_horizontal_runup_height.geojson.js")
@@ -680,94 +729,61 @@ class WebViewer:
 
                     dct={}
                     dct["name"]        = "extreme_horizontal_runup_height"
-                    dct["long_name"]   = "Horizontal projection of TWL"
+                    dct["long_name"]   = "Horizontal extent of Total Water Level"
                     dct["description"] = "This is the extreme horizontal runup."
                     dct["format"]      = "geojson"
+                    dct["infographic"]   = "twl_hor"
                     # dct["legend"]      = {"text": "Offshore WL", "contours": [{"text": " 0.0&nbsp-&nbsp;0.33&#8201;m", "color": "#CCFFFF"}, {"text": " 0.33&nbsp;-&nbsp;1.0&#8201;m", "color": "#40E0D0"}, {"text": " 1.0&nbsp-&nbsp;2.0&#8201;m", "color": "#00BFFF"}, {"text": "&gt; 2.0&#8201;m", "color": "#0909FF"}]}
                     
-                    mp = cosmos.config.map_contours["run_up"]    
+                    dct["legend"] = make_legend(type = 'run_up')
+
+                    # mp = next((x for x in cosmos.config.map_contours if x["name"] == "run_up"), None)                    
      
-                    lgn = {}
-                    lgn["text"] = mp["string"]
+                    # lgn = {}
+                    # lgn["text"] = mp["string"]
         
-                    cntrs = mp["contours"]
+                    # cntrs = mp["contours"]
         
-                    contours = []
+                    # contours = []
                     
-                    for cntr in cntrs:
-                        contour = {}
-                        contour["text"]  = cntr["string"]
-                        contour["color"] = "#" + cntr["hex"]
-                        contours.append(contour)
+                    # for cntr in cntrs:
+                    #     contour = {}
+                    #     contour["text"]  = cntr["string"]
+                    #     contour["color"] = "#" + cntr["hex"]
+                    #     contours.append(contour)
             
-                    lgn["contours"] = contours
-                    dct["legend"]   = lgn
+                    # lgn["contours"] = contours
+                    # dct["legend"]   = lgn
 
                     self.map_variables.append(dct)                
-
-
-                    features = []
-                        
-                    for ip in range(len(model.domain.filename)):
-                        x, y = transformer.transform(model.domain.xo[ip],
-                                                     model.domain.yo[ip])
-                        point = Point((x, y))
-                        name = 'Loc nr: ' +  str(model.domain.filename[ip])
-                                    
-                        id = np.argmax(model.domain.R2[ip,:])                                                               
-                        features.append(Feature(geometry=point,
-                                                properties={"model_name":model.name,
-                                                            "LocNr":int(model.domain.filename[ip]),
-                                                            "Lon": round(x,3),
-                                                            "Lat": round(y,3),
-                                                            "Hs":round(model.domain.Hs[ip, id],2),
-                                                            "Tp":round(model.domain.Tp[ip, id],1),
-                                                            "WL":round(model.domain.WL[ip, id],2)}))
-                    feature_collection = FeatureCollection(features)
-
-                    if features:
-                        feature_collection = FeatureCollection(features)
-                        output_path_waves =  os.path.join(output_path, 'extreme_sea_level_and_wave_height')
-                        fo.mkdir(output_path_waves)
-                        file_name = os.path.join(output_path_waves,     
-                                                "extreme_sea_level_and_wave_height.geojson.js")
-                        cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var swl =")
-
-
-                    dct={}
-                    dct["name"]        = "extreme_sea_level_and_wave_height"
-                    dct["long_name"]   = "Offshore SWL and Hs"
-                    dct["description"] = "This is the total offshore water level (tide + surge) and wave conditions."
-                    dct["format"]      = "geojson"
-                    dct["legend"]      = {"text": "Offshore WL", "contours": [{"text": " 0.0&nbsp-&nbsp;0.33&#8201;m", "color": "#CCFFFF"}, {"text": " 0.33&nbsp;-&nbsp;1.0&#8201;m", "color": "#40E0D0"}, {"text": " 1.0&nbsp-&nbsp;2.0&#8201;m", "color": "#00BFFF"}, {"text": "&gt; 2.0&#8201;m", "color": "#0909FF"}]}
-                    
-                    self.map_variables.append(dct)
                 
-                    # Time series                         
-                    for ip in range(len(model.domain.filename)):
+
+                    # Time series 
                         
-                        if os.path.exists(os.path.join(model.cycle_output_path,
-                                                            "beware_his_ensemble.nc")):  
-                            d= {'WL': model.domain.WL[ip,:],'Setup': model.domain.setup[ip,:], 'Swash': model.domain.swash[ip,:], 'Runup': model.domain.R2p[ip,:],
-                                'Setup_5': model.domain.setup_prc["5"][ip,:],'Setup_50': model.domain.setup_prc["50"][ip,:],'Setup_95': model.domain.setup_prc["95"][ip,:],
-                                'Runup_5': model.domain.R2p_prc["5"][ip,:],'Runup_50': model.domain.R2p_prc["50"][ip,:],'Runup_95': model.domain.R2p_prc["95"][ip,:],}       
-                        else:
-                            d= {'WL': model.domain.WL[ip,:],'Setup': model.domain.R2_setup[ip,:], 'Swash': model.domain.swash[ip,:], 'Runup': model.domain.R2[ip,:]}       
+                    # for ip in range(len(model.domain.filename)):
+                        
+                    #     if os.path.exists(os.path.join(model.cycle_output_path,
+                    #                                         "beware_his_ensemble.nc")):  
+                    #         d= {'WL': model.domain.WL[ip,:],'Setup': model.domain.setup[ip,:], 'Swash': model.domain.swash[ip,:], 'Runup': model.domain.R2p[ip,:],
+                    #             'Setup_5': model.domain.setup_prc["5"][ip,:],'Setup_50': model.domain.setup_prc["50"][ip,:],'Setup_95': model.domain.setup_prc["95"][ip,:],
+                    #             'Runup_5': model.domain.R2p_prc["5"][ip,:],'Runup_50': model.domain.R2p_prc["50"][ip,:],'Runup_95': model.domain.R2p_prc["95"][ip,:],}       
+                    #     else:
+                    #         d= {'WL': model.domain.WL[ip,:],'Setup': model.domain.setup[ip,:], 'Swash': model.domain.swash[ip,:], 'Runup': model.domain.R2p[ip,:]}       
             
-                        v= pd.DataFrame(data=d, index =  pd.date_range(model.domain.input.tstart, periods=len(model.domain.swash[ip,:]), freq= '0.5H'))
-                        obs_file = "extreme_runup_height." + model.domain.name + "." + str(model.domain.filename[ip]) + ".csv.js"
+                    #     v= pd.DataFrame(data=d, index =  pd.date_range(model.domain.input.tstart, periods=len(model.domain.swash[ip,:]), freq= '0.5H'))
+                    #     obs_file = "extreme_runup_height." + model.domain.runid + "." +str(model.domain.filename[ip]) + ".csv.js"
             
-                        local_file_path = os.path.join(output_path,  "timeseries",
-                                                           obs_file)
-                        s= v.to_csv(path_or_buf=None,
-                                     date_format='%Y-%m-%dT%H:%M:%S',
-                                     float_format='%.3f',
-                                     header= False, index_label= 'datetime') 
+                    #     local_file_path = os.path.join(output_path,  "timeseries",
+                    #                                        obs_file)
+                    #     s= v.to_csv(path_or_buf=None,
+                    #                  date_format='%Y-%m-%dT%H:%M:%S',
+                    #                  float_format='%.3f',
+                    #                  header= False, index_label= 'datetime') 
                                
-                        if os.path.exists(os.path.join(model.cycle_output_path, "beware_his_ensemble.nc")):
-                            cht.misc.misc_tools.write_csv_js(local_file_path, s, "var csv = `date_time,wl,setup,swash,runup, setup_5, setup_50, setup_95, runup_5, runup_50, runup_95")
-                        else:
-                            cht.misc.misc_tools.write_csv_js(local_file_path, s, "var csv = `date_time,wl,setup,swash,runup")
+                    #     if os.path.exists(os.path.join(model.cycle_output_path, "beware_his_ensemble.nc")):
+                    #         cht.misc.misc_tools.write_csv_js(local_file_path, s, "var csv = `date_time,wl,setup,swash,runup, setup_5, setup_50, setup_95, runup_5, runup_50, runup_95")
+                    #     else:
+                    #         cht.misc.misc_tools.write_csv_js(local_file_path, s, "var csv = `date_time,wl,setup,swash,runup")
 
                 except:
                     cosmos.log("An error occurred when making BEWARE webviewer !")
@@ -804,7 +820,7 @@ class WebViewer:
                         obs_file = None
                         
                         # Merge time series from previous cycles
-                        v  = self.merge_timeseries(path, model.name, station.name, ts_type,
+                        v  = merge_timeseries(path, model.name, station.name, ts_type,
                                                    t0=t0.replace(tzinfo=None),
                                                    t1=t1.replace(tzinfo=None))
                         
@@ -917,9 +933,9 @@ class WebViewer:
         cosmos.log("Uploading web viewer ...")        
         # Upload entire copy of local web viewer to web server        
         try:
-            f = SSHSession(cosmos.config.ftp_hostname,
-                           username=cosmos.config.ftp_username,
-                           password=cosmos.config.ftp_password)
+            f = SSHSession(cosmos.config.webserver.hostname,
+                           username=cosmos.config.webserver.username,
+                           password=cosmos.config.webserver.password)
         except:
             cosmos.log("Error! Could not connect to sftp server !")
             return
@@ -932,21 +948,17 @@ class WebViewer:
                 make_wv_on_ftp = True
             else:
                 # Check if web viewer exists on FTP
-                if not self.name in f.sftp.listdir(cosmos.config.ftp_path):
+                if not self.name in f.sftp.listdir(cosmos.config.webserver.path):
                     make_wv_on_ftp = True
                     
             if make_wv_on_ftp:
                 # Copy entire webviewer
-                f.put_all(self.path, cosmos.config.ftp_path)
+                f.put_all(self.path, cosmos.config.webserver.path)
     
             else:
                 # Webviewer already on ftp server
                 
-                # Only copy scenario output
-                scenario_path = os.path.join(self.path,
-                                             "data",
-                                             cosmos.scenario.name)
-                remote_path = cosmos.config.ftp_path + "/" + self.name + "/data"
+                remote_path = cosmos.config.webserver.path + "/" + self.name + "/data"
                 # Check if scenario is already on ftp server
                 cosmos.log("Removing existing data on web server ...")
                 if cosmos.scenario.name in f.sftp.listdir(remote_path):
@@ -997,65 +1009,65 @@ class WebViewer:
             cosmos.log("An error occurred while uploading !")
             cosmos.log(str(e))
 
-    def merge_timeseries(self, path, model_name, station, prefix,
-                         t0=None,
-                         t1=None,
-                         resample=None):
-        
-        name_str = prefix
-        available_times = []    
-        cycle_list = fo.list_folders(os.path.join(path,'*z'))
-        for it, cycle_string in enumerate(cycle_list):
-            available_times.append(datetime.datetime.strptime(cycle_list[it][-12:],"%Y%m%d_%Hz"))
-        if t0==None or t1==None:
-            t0 = available_times[0]
-            t1 = available_times[-1]
-                
-        # New pandas series
-        wl=[]
-        idx=[]
-        wl.append(0.0)
-        idx.append(pd.Timestamp("2100-01-01"))
-        vv = pd.Series(wl, index=idx)
-        vv.index.name = "date_time"
-        vv.name       = name_str
-        okay = False
-        for it, t in enumerate(available_times):        
-            if t>=t0 and t<=t1:                       
-                csv_file = os.path.join(path,
-                                        cycle_list[it][-12:],
-                                        "models",
-                                        model_name,
-                                        "timeseries",
-                                        prefix + "." + station + ".csv")
-                if os.path.exists(csv_file):
-                    df = pd.read_csv(csv_file, header=0,
-                                    index_col=0,
-                                    parse_dates=True).squeeze()
-                    df.index.name = "date_time"
-                    df.name       = name_str                    
-                    okay = True
-                    # Find last time in merged time series that is smaller than first time in new timeseries
-                    ilast = np.where(vv.index<df.index[0])[-1]
-                    if ilast.any():
-                        ilast = ilast[-1]
-                        vv = vv[0:ilast]
-                        vv = vv.append(df)
-                    else:
-                        vv = df
-                        
-        if okay:                                                
-            if resample:                        
-                t0 = (vv.index - vv.index[0]).total_seconds()
-                t1 = np.arange(0.0,t0[-1], resample)
-                f  = interpolate.interp1d(t0, vv)
-                v1 = f(t1)
-                t1 = vv.index[0] + t1*datetime.timedelta(seconds=1)                
-                vv = pd.Series(v1, index=t1)
-                vv.index.name = "date_time"
-                vv.name       = name_str                            
-        if okay:                                    
-            return vv                
-        else:
-            return None
- 
+def merge_timeseries(path, model_name, station, prefix,
+                        t0=None,
+                        t1=None,
+                        resample=None):
+    
+    name_str = prefix
+    available_times = []    
+    cycle_list = fo.list_folders(os.path.join(path,'*z'))
+    for it, cycle_string in enumerate(cycle_list):
+        available_times.append(datetime.datetime.strptime(cycle_list[it][-12:],"%Y%m%d_%Hz"))
+    if t0==None or t1==None:
+        t0 = available_times[0]
+        t1 = available_times[-1]
+            
+    # New pandas series
+    wl=[]
+    idx=[]
+    wl.append(0.0)
+    idx.append(pd.Timestamp("2100-01-01"))
+    vv = pd.Series(wl, index=idx)
+    vv.index.name = "date_time"
+    vv.name       = name_str
+    okay = False
+    for it, t in enumerate(available_times):        
+        if t>=t0 and t<=t1:                       
+            csv_file = os.path.join(path,
+                                    cycle_list[it][-12:],
+                                    "models",
+                                    model_name,
+                                    "timeseries",
+                                    prefix + "." + station + ".csv")
+            if os.path.exists(csv_file):
+                df = pd.read_csv(csv_file, header=0,
+                                index_col=0,
+                                parse_dates=True).squeeze()
+                df.index.name = "date_time"
+                df.name       = name_str                    
+                okay = True
+                # Find last time in merged time series that is smaller than first time in new timeseries
+                ilast = np.where(vv.index<df.index[0])[-1]
+                if ilast.any():
+                    ilast = ilast[-1]
+                    vv = vv[0:ilast]
+                    vv = vv.append(df)
+                else:
+                    vv = df
+                    
+    if okay:                                                
+        if resample:                        
+            t0 = (vv.index - vv.index[0]).total_seconds()
+            t1 = np.arange(0.0,t0[-1], resample)
+            f  = interpolate.interp1d(t0, vv)
+            v1 = f(t1)
+            t1 = vv.index[0] + t1*datetime.timedelta(seconds=1)                
+            vv = pd.Series(v1, index=t1)
+            vv.index.name = "date_time"
+            vv.name       = name_str                            
+    if okay:                                    
+        return vv                
+    else:
+        return None
+

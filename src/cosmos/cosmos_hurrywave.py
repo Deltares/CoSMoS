@@ -14,15 +14,39 @@ from .cosmos import cosmos
 from .cosmos_model import Model
 #from .cosmos_tiling import make_wave_map_tiles
 import cosmos.cosmos_meteo as meteo
+from cht.misc.misc_tools import dict2yaml
 
 from cht.hurrywave.hurrywave import HurryWave
 import cht.misc.fileops as fo
 import cht.nesting.nesting as nesting
 
 class CoSMoS_HurryWave(Model):
-    
+    """Cosmos class for HurryWave model.
+
+    HurryWave is a computationally efficient third generation spectral wave model, with physics similar to 
+    those of SWAN and WAVEWATCH III.
+
+    This cosmos class reads HurryWave model data, pre-processes, moves and post-processes HurryWave models.
+
+    Parameters
+    ----------
+    Model : class
+        Generic cosmos model attributes
+
+    See Also
+    ----------
+    cosmos.cosmos_scenario.Scenario
+    cosmos.cosmos_model_loop.ModelLoop
+    cosmos.cosmos_model.Model
+    """  
+
     def read_model_specific(self):
-        
+        """Read HurryWave specific model attributes.
+
+        See Also
+        ----------
+        cht.hurrywave.hurrywave
+        """ 
         # Read in the HurryWave model
         
         # Now read in the domain data
@@ -35,7 +59,18 @@ class CoSMoS_HurryWave(Model):
         self.domain.runid = self.runid        
         
     def pre_process(self):
-        
+        """Preprocess HurryWave model.
+
+        - Extract and write wave conditions.
+        - Write input file. 
+        - Write meteo forcing.
+        - Add observation points for nested models and observation stations.
+        - Optional: make ensemble of models.
+
+        See Also
+        ----------
+        cht.nesting.nest2
+        """
         # Set path temporarily to job path
         pth = self.domain.path
         self.domain.path = self.job_path
@@ -49,6 +84,7 @@ class CoSMoS_HurryWave(Model):
         self.domain.input.variables.dtmaxout = 21600.0
         self.domain.input.variables.dtmapout = 21600.0
         self.domain.input.variables.outputformat = "net"
+
 
         # Boundary conditions        
         if self.wave_nested:
@@ -64,11 +100,11 @@ class CoSMoS_HurryWave(Model):
                                           self.domain.input.variables.tref)
             self.domain.input.variables.amufile = "hurrywave.amu"
             self.domain.input.variables.amvfile = "hurrywave.amv"
-    
+                
         if self.meteo_spiderweb:            
             # Single spiderweb file given, copy to job folder
             self.domain.input.variables.spwfile = self.meteo_spiderweb
-            meteo_path = os.path.join(cosmos.config.main_path, "meteo", "spiderwebs")
+            meteo_path = os.path.join(cosmos.config.meteo_database.path, "spiderwebs")
             fo.copy_file(os.path.join(meteo_path, self.meteo_spiderweb), self.job_path)
 
         if self.ensemble:
