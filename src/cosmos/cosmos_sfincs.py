@@ -180,16 +180,18 @@ class CoSMoS_SFINCS(Model):
         if self.meteo_spiderweb:            
             # Spiderweb file given, copy to job folder
             self.domain.input.spwfile = self.meteo_spiderweb
-            meteo_path = os.path.join(cosmos.config.main_path, "meteo", "spiderwebs")
+            meteo_path = os.path.join(cosmos.config.meteo_database.path, "spiderwebs")
             src = os.path.join(meteo_path, self.meteo_spiderweb)
             fo.copy_file(os.path.join(meteo_path, self.meteo_spiderweb), self.job_path)            
             self.domain.input.baro    = 1
-            self.domain.input.utmzone = self.crs.utm_zone
-            if self.meteo_spiderweb or self.meteo_track:
-                self.domain.input.amufile = None
-                self.domain.input.amvfile = None
-                self.domain.input.ampfile = None
-                self.domain.input.amprfile = None
+            if self.crs.is_projected:
+                self.domain.input.utmzone = self.crs.utm_zone
+        
+        if self.meteo_spiderweb or self.meteo_track:
+            self.domain.input.amufile = None
+            self.domain.input.amvfile = None
+            self.domain.input.ampfile = None
+            self.domain.input.amprfile = None
 #            self.domain.input.variables.amufile = None
 #            self.domain.input.variables.amvfile = None
 

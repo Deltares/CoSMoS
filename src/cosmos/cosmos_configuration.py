@@ -88,7 +88,9 @@ class Cycle:
         self.get_meteo       = True
         self.run_mode        = "serial"
         self.only_run_ensemble = False
-
+        self.just_initialize = False
+        self.run_models = False
+        
 class Configuration:
     """CoSMoS Configuration class.
 

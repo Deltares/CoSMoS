@@ -277,6 +277,10 @@ class MainLoop:
         # Make track ensemble (this also add 'new' ensemble models that fall within the cone)
         if cosmos.scenario.track_ensemble_nr_realizations > 0:
             setup_track_ensemble()
+        
+        # Make spiderweb if does not exist yet
+        if cosmos.scenario.meteo_spiderweb or cosmos.scenario.meteo_track:
+            track_to_spw()
 
         # Get list of models that have already finished and set their status to finished
         finished_list = os.listdir(cosmos.scenario.cycle_job_list_path)
@@ -287,10 +291,6 @@ class MainLoop:
                     model.status = "finished"
                     model.run_simulation = False
                     break            
-
-        # Make spiderweb if does not exist yet
-        if cosmos.scenario.meteo_spiderweb:
-            track_to_spw()
         
         if self.run_models:
             # And now start the model loop
