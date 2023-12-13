@@ -17,7 +17,7 @@ import toml
 import geopandas as gpd
 import shapely
 
-from .cosmos import cosmos
+from .cosmos_main import cosmos
 from .cosmos_cluster import cluster_dict as cluster
 
 from cht.nesting.nest2 import nest2

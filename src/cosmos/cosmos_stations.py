@@ -38,7 +38,7 @@ class Stations():
     def read(self):
         """Read cosmos observation stations from observation station xml file.
         """
-        from .cosmos import cosmos
+        from .cosmos_main import cosmos
 
         file_list = fo.list_files(os.path.join(cosmos.config.path.stations,
                                                "*.xml"))

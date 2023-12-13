@@ -6,16 +6,13 @@ Created on Tue May 11 16:02:04 2021
 """
 
 import os
-import numpy as np
 import datetime
 import xarray as xr
 
-from .cosmos import cosmos
+from .cosmos_main import cosmos
 from .cosmos_model import Model
 from .cosmos_tiling import make_sedero_tiles
 from .cosmos_tiling import make_bedlevel_tiles
-
-
 
 import cht.misc.xmlkit as xml
 import cht.misc.fileops as fo
@@ -48,9 +45,7 @@ class CoSMoS_XBeach(Model):
         ----------
         cht.xbeach.xbeach
         """
-
-        # Read in the XBeach model
-        
+      
         # First set some defaults
         
         flow_nesting_point_x = []
@@ -97,11 +92,13 @@ class CoSMoS_XBeach(Model):
             for ipnt, pnt in enumerate(flow_nesting_point_x):            
                 self.domain.flow_boundary_point[ipnt].geometry.x = flow_nesting_point_x[ipnt]
                 self.domain.flow_boundary_point[ipnt].geometry.y = flow_nesting_point_y[ipnt]
+                #TODO change tideloc in the params as a function of the new boundary points?
 
         if wave_nesting_point_x:
             for ipnt, pnt in enumerate(wave_nesting_point_x):            
                 self.domain.wave_boundary_point[ipnt].geometry.x = wave_nesting_point_x[ipnt]
                 self.domain.wave_boundary_point[ipnt].geometry.y = wave_nesting_point_y[ipnt]
+                #TODO remove loop, since we allways have one point?
 
         if hasattr(xml_obj, "zb_deshoal"):
             self.domain.zb_deshoal = xml_obj.zb_deshoal[0].value

@@ -7,7 +7,7 @@ Created on Tue May 11 14:29:26 2021
 import os
 import toml
 
-from .cosmos import cosmos
+from .cosmos_main import cosmos
 from .cosmos_cluster import cluster_dict
 from .cosmos_cluster import Cluster
 

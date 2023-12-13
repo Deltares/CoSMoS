@@ -12,14 +12,17 @@ import os
 import numpy as np
 #import toml
 
-from .cosmos import cosmos
+from .cosmos_main import cosmos
 #from .cosmos_meteo import read_meteo_sources
 from .cosmos_meteo import download_and_collect_meteo
 from .cosmos_track_ensemble import setup_track_ensemble
 #from .cosmos_stations import Stations
 from .cosmos_scenario import Scenario
 from .cosmos_cloud import Cloud
-from .cosmos_argo import Argo
+try:
+    from .cosmos_argo import Argo
+except:
+    print("Argo not available")
 from .cosmos_track_ensemble import track_to_spw
 #from .cosmos_stations import Stations
 from .cosmos_scenario import Scenario

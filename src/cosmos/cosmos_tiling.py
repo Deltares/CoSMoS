@@ -6,7 +6,7 @@ Created on Mon Sep 20 12:17:22 2021
 """
 import numpy as np
 
-from .cosmos import cosmos
+from .cosmos_main import cosmos
 from cht.tiling.tiling import make_png_tiles
 from cht.tiling.tiling import make_floodmap_tiles
 

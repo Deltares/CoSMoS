@@ -3,7 +3,7 @@ from hera.workflows.models import WorkflowTemplateRef
 from hera.shared import GlobalConfig
 import time
 
-from .cosmos import cosmos
+from .cosmos_main import cosmos
 
 GlobalConfig.namespace = cosmos.config.cloud_config.namespace
 GlobalConfig.host = cosmos.config.cloud_config.host

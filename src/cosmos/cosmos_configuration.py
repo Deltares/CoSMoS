@@ -124,7 +124,7 @@ class Configuration:
         - Read all available super regions.
         """        
 
-        from .cosmos import cosmos
+        from .cosmos_main import cosmos
                 
         if kwargs:
             self.kwargs = kwargs

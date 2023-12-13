@@ -7,7 +7,7 @@ Created on Tue May 11 16:02:04 2021
 import shutil
 import os
 
-from .cosmos import cosmos
+from .cosmos_main import cosmos
 from .cosmos_model import Model
 import cht.misc.xmlkit as xml
 

@@ -12,7 +12,7 @@ from pyproj import CRS
 from pyproj import Transformer
 from pathlib import Path
 
-from .cosmos import cosmos
+from .cosmos_main import cosmos
 from .cosmos_model import Model
 import cht.misc.xmlkit as xml
 from cht.delft3dfm.delft3dfm import Delft3DFM

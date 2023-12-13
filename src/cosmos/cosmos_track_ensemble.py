@@ -11,7 +11,7 @@ import datetime
 import shapely
 import copy
 
-from .cosmos import cosmos
+from .cosmos_main import cosmos
 from cht.tropical_cyclone.tropical_cyclone import TropicalCycloneEnsemble
 from cht.meteo.meteo import filter_cyclones_TCvitals, find_priorityTC
 import cht.misc.fileops as fo

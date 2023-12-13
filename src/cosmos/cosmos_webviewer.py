@@ -15,7 +15,7 @@ from pyproj import CRS
 from pyproj import Transformer
 import boto3
 
-from .cosmos import cosmos
+from .cosmos_main import cosmos
 #from .cosmos_timeseries import merge_timeseries as merge
 #from .cosmos_tiling import make_wave_map_tiles
 from .cosmos_tiling import make_precipitation_tiles

@@ -8,9 +8,12 @@ import time
 import sched
 import os
 
-from .cosmos import cosmos
+from .cosmos_main import cosmos
 from .cosmos_cluster import cluster_dict as cluster
-from .cosmos_argo import Argo
+try:
+    from .cosmos_argo import Argo
+except:
+    print("Argo not available")
 import cht.misc.fileops as fo
 
 class ModelLoop():

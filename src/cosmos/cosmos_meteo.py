@@ -9,7 +9,7 @@ from pyproj import CRS
 import numpy as np
 import datetime
 
-from .cosmos import cosmos
+from .cosmos_main import cosmos
 from cht.meteo.meteo import MeteoSource
 from cht.meteo.meteo import MeteoGrid
 import cht.misc.xmlkit as xml

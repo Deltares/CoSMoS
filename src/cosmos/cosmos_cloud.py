@@ -1,4 +1,4 @@
-from .cosmos import cosmos
+from .cosmos_main import cosmos
 import boto3
 import os
 

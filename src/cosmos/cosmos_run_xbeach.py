@@ -9,19 +9,11 @@ import datetime
 
 import cht.misc.fileops as fo
 from cht.misc.misc_tools import yaml2dict
-from cht.misc.prob_maps import merge_nc_his
-from cht.misc.prob_maps import merge_nc_map
 from cht.tiling.tiling import make_floodmap_tiles
 from cht.tiling.tiling import make_png_tiles
-from cht.sfincs.sfincs import SFINCS
+from cht.xbeach.xbeach import XBeach
 from cht.nesting.nest2 import nest2
 #from cht.misc.argo import Argo
-
-def read_ensemble_members():
-    with open('ensemble_members.txt') as f:
-        ensemble_members = f.readlines()
-    ensemble_members = [x.strip() for x in ensemble_members]
-    return ensemble_members
 
 def get_s3_client(config):
     # Create an S3 client
@@ -31,18 +23,6 @@ def get_s3_client(config):
         region_name=config["cloud"]["region"]
     )
     return session.client('s3')
-
-def prepare_ensemble(config):
-    # In case of ensemble, make folders for each ensemble member and copy necessary scripts to these folders
-    # Read in the list of ensemble members
-    ensemble_members = read_ensemble_members()
-    for member in ensemble_members:
-        print('Making folder for ensemble member ' + member)
-        # Make folder for ensemble member and copy all input files
-        fo.mkdir(member)            
-        fo.copy_file(os.path.join("base_input", "run_job_2.py"), member)
-        fo.copy_file(os.path.join("base_input", "config.yml"), member)
-        fo.copy_file(os.path.join("base_input", "ensemble_members.txt"), member)
 
 def prepare_single(config, member=None):
     # Copying, nesting, spiderweb
@@ -196,31 +176,6 @@ def prepare_single(config, member=None):
                 overall_crs=config["bw_nested"]["overall_crs"])
         sf.write_wavemaker_forcing_points()
 
-def merge_ensemble(config):
-    print("Merging ...")
-    if config["run_mode"] == "cloud":
-        folder_path = '/input'
-        his_output_file_name = os.path.join("/output/sfincs_his.nc")
-        map_output_file_name = os.path.join("/output/sfincs_map.nc")
-        # Make output folder_path
-        os.mkdir("output")
-    else:
-        folder_path = './'
-        his_output_file_name = "./sfincs_his.nc"
-        map_output_file_name = "./sfincs_map.nc"
-    # Read in the list of ensemble members
-    ensemble_members = read_ensemble_members()
-    # Merge output files
-    his_files = []
-    map_files = []
-    for member in ensemble_members:
-        his_files.append(os.path.join(folder_path, member, "sfincs_his.nc"))
-        map_files.append(os.path.join(folder_path, member, "sfincs_map.nc"))
-    merge_nc_his(his_files, ["point_zs"], output_file_name=his_output_file_name)
-    if "flood_map" in config:
-        merge_nc_map(map_files, ["zsmax"], output_file_name=map_output_file_name)
-    # Copy restart files from the first ensemble member (restart files are the same for all members)
-    fo.copy_file(os.path.join(folder_path, ensemble_members[0], 'sfincs.*.rst'), folder_path)    
 
 def map_tiles(config):
 

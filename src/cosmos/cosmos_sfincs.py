@@ -14,7 +14,7 @@ import cht.misc.fileops as fo
 from cht.tide.tide_predict import predict
 from cht.nesting.nest1 import nest1
 
-from .cosmos import cosmos
+from .cosmos_main import cosmos
 from .cosmos_model import Model
 import cosmos.cosmos_meteo as meteo
 

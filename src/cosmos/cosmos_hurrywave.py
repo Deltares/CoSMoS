@@ -10,7 +10,7 @@ import pandas as pd
 #import datetime
 #import shutil
 
-from .cosmos import cosmos
+from .cosmos_main import cosmos
 from .cosmos_model import Model
 #from .cosmos_tiling import make_wave_map_tiles
 import cosmos.cosmos_meteo as meteo
