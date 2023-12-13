@@ -73,22 +73,7 @@ class Scenario:
                 pass
             else:    
 #                for key, value in sc_dict[key].items():
-                setattr(self, key, value)
-        
-        # Read scenario file
-        cosmos.log("Reading scenario file ...")        
-        self.path = os.path.join(cosmos.config.path.scenarios, self.name)
-        scenario_file = os.path.join(self.path, "scenario.toml")     
-        sc_dict = toml.load(scenario_file)
-
-        # Turn into object        
-        for key, value in sc_dict.items():
-            if key == "model":
-                pass
-            else:    
-#                for key, value in sc_dict[key].items():
-                setattr(self, key, value)
-        
+                setattr(self, key, value)        
             
         # First find all the models and store in dict models_in_scenario
         models_in_scenario = {}
@@ -213,6 +198,10 @@ class Scenario:
                 model.meteo_atmospheric_pressure = False
             if not self.meteo_precipitation and model.meteo_precipitation:
                 model.meteo_precipitation = False
+            if not self.meteo_dataset and not model.meteo_dataset:
+                model.meteo_wind = False
+                model.meteo_atmospheric_pressure = False
+                model.meteo_precipitation = False
 
             model.flow_start_time            = None
             model.flow_stop_time             = None
@@ -238,6 +227,8 @@ class Scenario:
         cosmos.log("Finished reading scenario")    
 
     def set_paths(self):
+        """Set cycle paths.
+        """   
         self.cycle_path            = os.path.join(self.path, cosmos.cycle_string)
         self.cycle_models_path     = os.path.join(self.path, cosmos.cycle_string, "models")
         self.cycle_tiles_path      = os.path.join(self.path, cosmos.cycle_string, "tiles")
@@ -245,6 +236,7 @@ class Scenario:
         self.cycle_track_ensemble_path    = os.path.join(self.path, cosmos.cycle_string, "track_ensemble")
         self.cycle_track_ensemble_cyc_path    = os.path.join(self.path, cosmos.cycle_string, "track_ensemble", "cyc")
         self.cycle_track_ensemble_spw_path    = os.path.join(self.path, cosmos.cycle_string, "track_ensemble", "spw")
+        self.cycle_track_spw_path    = os.path.join(self.path, cosmos.cycle_string, "track")
         self.restart_path          = os.path.join(self.path, "restart")
         self.timeseries_path       = os.path.join(self.path, "timeseries")
         self.cycle_timeseries_path = os.path.join(self.path, "timeseries", cosmos.cycle_string)
