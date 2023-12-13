@@ -89,7 +89,7 @@ class Cycle:
         self.run_mode        = "serial"
         self.only_run_ensemble = False
         self.just_initialize = False
-        self.run_models = False
+        self.run_models = True
         
 class Configuration:
     """CoSMoS Configuration class.
