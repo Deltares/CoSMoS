@@ -223,3 +223,27 @@ def write_meteo_input_files(model, prefix, tref, path=None):
 #         src = os.path.join(meteo_path, model.meteo_spiderweb)
 #         fo.copy_file(src, model.job_path)
     
+def track_to_spw():
+            
+    from cht.tropical_cyclone.tropical_cyclone import TropicalCyclone
+    tc= TropicalCyclone()
+
+    if cosmos.scenario.meteo_spiderweb:
+        cyc = cosmos.scenario.meteo_spiderweb.split('.')[0] + ".cyc"
+    elif cosmos.scenario.meteo_track:
+        cyc = cosmos.scenario.meteo_track.split('.')[0] + ".cyc"
+        cosmos.scenario.meteo_track_ = cosmos.scenario.meteo_track.split('.')[0] + ".spw"
+
+    cycfile = os.path.join(cosmos.config.meteo_database.path,
+                    "tracks",
+                    cyc)
+    
+    spwfile = os.path.join(cosmos.scenario.cycle_track_spw_path,
+                        cosmos.scenario.meteo_spiderweb)
+
+    try:
+        tc.read_track(cycfile, 'ddb_cyc')
+        tc.include_rainfall = True
+        tc.to_spiderweb(spwfile, format_type='ascii')
+    except:
+        pass
