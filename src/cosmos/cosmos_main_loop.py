@@ -23,7 +23,7 @@ try:
     from .cosmos_argo import Argo
 except:
     print("Argo not available")
-from .cosmos_track_ensemble import track_to_spw
+from .cosmos_meteo import track_to_spw
 #from .cosmos_stations import Stations
 from .cosmos_scenario import Scenario
 #from .cosmos_tiling import tile_layer
