@@ -17,7 +17,6 @@ from .cosmos_tiling import make_bedlevel_tiles
 import cht.misc.xmlkit as xml
 import cht.misc.fileops as fo
 from cht.xbeach.xbeach import XBeach
-import cht.nesting.nesting as nesting
 
 class CoSMoS_XBeach(Model):
     """Cosmos class for XBeach model.
@@ -151,60 +150,62 @@ class CoSMoS_XBeach(Model):
 
         # Boundary conditions        
         if self.flow_nested:
-
-            # Get boundary conditions from overall model (Nesting 2)
-            
-            # Correct boundary water levels. Assuming that output from overall
-            # model is in MSL !!!
-            zcor = self.boundary_water_level_correction - self.vertical_reference_level_difference_with_msl
-
-            nesting.nest2(self.flow_nested.domain,
-                          self.domain,
-                          output_path=self.flow_nested.cycle_output_path,
-                          boundary_water_level_correction=zcor)
-
-            self.domain.write_flow_boundary_conditions()
+            pass
 
         # Boundary conditions        
         if self.wave_nested:
-
-            # Get boundary conditions from overall model (Nesting 2)
             
             #define whether you want to use jonstable or sp2-files as boundary conditions
             option = "timeseries"
                             
-            nesting.nest2(self.wave_nested.domain,
-                          self.domain,
-                          output_path=self.wave_nested.cycle_output_path,
-                          option=option)
-
             if option == "sp2":
                 self.domain.params["bcfile"] = "sp2list.txt"
                 self.domain.params["instat"] = 5
             elif option == "timeseries":
                 self.domain.params["bcfile"] = "jonswap.txt"
                 self.domain.params["wbctype"] = "jonstable"
-                                            
-            self.domain.write_wave_boundary_conditions(option=option)
-                    
+                                                                
         # Now write input file (params.txt)
         params_file = os.path.join(self.job_path, "params.txt")
         self.domain.params.tofile(filename=params_file)
 
-        # Make run batch file
-        batch_file = os.path.join(self.job_path, "run.bat")
-        fid = open(batch_file, "w")
-        fid.write("@ echo off\n")
-        fid.write("DATE /T > running.txt\n")
-        fid.write("set xbeachdir=" + cosmos.config.xbeach_exe_path + "\n")
-        fid.write('set mpidir="c:\\Program Files\\MPICH2\\bin"\n')
-        fid.write("set PATH=%xbeachdir%;%PATH%\n")
-        fid.write("set PATH=%mpidir%;%PATH%\n")
-        fid.write("mpiexec.exe -n 5 %xbeachdir%\\xbeach.exe\n")
-        fid.write("del q_*\n")
-        fid.write("del E_*\n")
-        fid.write("move running.txt finished.txt\n")
-        fid.close()
+        # And now prepare the job files
+
+        # Copy the correct run script to run_job.py
+        pth = os.path.dirname(__file__)
+        fo.copy_file(os.path.join(pth, "cosmos_run_xbeach.py"), os.path.join(self.job_path, "run_job_2.py"))
+
+        # Write config.yml file to be used in job
+        self.write_config_yml()
+
+        if self.ensemble:
+            # Write ensemble members to file
+            with open(os.path.join(self.job_path, "ensemble_members.txt"), "w") as f:
+                for member in cosmos.scenario.ensemble_names:
+                    f.write(member + "\n")
+
+        if cosmos.config.cycle.run_mode != "cloud":
+            # Make run batch file (only for windows)
+            batch_file = os.path.join(self.job_path, "run_xbeach.bat")
+            fid = open(batch_file, "w")
+            fid.write("@ echo off\n")
+            fid.write("DATE /T > running.txt\n")
+            fid.write("set xbeachdir=" + cosmos.config.executables.xbeach_path + "\n")
+            fid.write('set mpidir="c:\\Program Files\\MPICH2\\bin"\n')
+            fid.write("set PATH=%xbeachdir%;%PATH%\n")
+            fid.write("set PATH=%mpidir%;%PATH%\n")
+            fid.write("mpiexec.exe -n 5 %xbeachdir%\\xbeach.exe\n")
+            fid.write("del q_*\n")
+            fid.write("del E_*\n")
+            fid.write("move running.txt finished.txt\n")
+            fid.close()
+ 
+        if cosmos.config.cycle.run_mode == "cloud":
+            # Set workflow names
+            if self.ensemble:
+                self.workflow_name = "xbeach-ensemble-workflow"
+            else:
+                self.workflow_name = "xbeach-deterministic-workflow"   
 
         # Set the path back to the one in cosmos\models\etc.
         self.domain.path = pth
