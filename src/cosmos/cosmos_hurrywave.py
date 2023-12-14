@@ -18,7 +18,7 @@ from cht.misc.misc_tools import dict2yaml
 
 from cht.hurrywave.hurrywave import HurryWave
 import cht.misc.fileops as fo
-import cht.nesting.nest1 as nest1
+from cht.nesting.nest1 import nest1
 
 class CoSMoS_HurryWave(Model):
     """Cosmos class for HurryWave model.
