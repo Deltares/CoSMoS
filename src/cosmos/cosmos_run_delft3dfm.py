@@ -1,4 +1,4 @@
-# Run BEWARE model (including some pre and post processing)
+# Run SFINCS model ensemble (including some pre and post processing)
 
 import os
 import pandas as pd  
@@ -13,7 +13,7 @@ from cht.misc.prob_maps import merge_nc_his
 from cht.misc.prob_maps import merge_nc_map
 from cht.tiling.tiling import make_floodmap_tiles
 from cht.tiling.tiling import make_png_tiles
-from cht.beware.beware import BEWARE
+from cht.delft3dfm.delft3dfm import Delft3DFM
 from cht.nesting.nest2 import nest2
 #from cht.misc.argo import Argo
 
@@ -77,11 +77,28 @@ def prepare_single(config, member=None):
             # We're already in the right member path
             fo.copy_file(os.path.join("..", "base_input", "*.*"), ".")
 
-    # Read BEWARE model (necessary for nesting)
-    bw = BEWARE()
-    bw.name = config["model"]
-    bw.type = "beware"
-    bw.path = "."
+    # Copy spiderweb file
+    if config["ensemble"]:
+        print("Copying spiderweb file ...")
+        if config["run_mode"] == "cloud":
+            s3_key = config["scenario"] + "/" + "track_ensemble" + "/" + "spw" + "/ensemble" + member + ".spw"
+            local_file_path = f'/input/delft3dfm.spw'  # Replace with the local path where you want to save the file
+            # Download the file from S3
+            try:
+                s3_client.download_file(bucket_name, s3_key, local_file_path)
+                print(f"File downloaded successfully to '{local_file_path}'")
+            except Exception as e:
+                print(f"Error: {e}")
+        else:
+            # Copy all spiderwebs to jobs folder
+            fname0 = os.path.join(config["spw_path"], "ensemble" + member + ".spw")
+            fo.copy_file(fname0, "delft3dfm.spw")
+
+    # Read DFM model (necessary for nesting)
+    sf = Delft3DFM("flow//flow.mdu")
+    sf.name = config["model"]
+    sf.type = "delft3dfm"
+    sf.path = "."
 
     # Nesting
     if "flow_nested" in config:
@@ -104,7 +121,7 @@ def prepare_single(config, member=None):
         # Get boundary conditions from overall model (Nesting 2)
         if config["ensemble"]:
             nest2(config["flow_nested"]["overall_type"],
-                bw,
+                sf,
                 output_path=config["flow_nested"]["overall_path"],
                 boundary_water_level_correction=zcor,
                 option="flow",
@@ -113,58 +130,43 @@ def prepare_single(config, member=None):
         else:
             # Deterministic    
             nest2(config["flow_nested"]["overall_type"],
-                bw,
+                sf,
                 output_path=config["flow_nested"]["overall_path"],
                 boundary_water_level_correction=zcor,
                 option="flow",
                 bc_path=".")
         
     if "wave_nested" in config:
-        print("Nesting wave ...")
-        # Get boundary conditions from overall model (Nesting 2)
-        if config["run_mode"] == "cloud":
-            file_name = config["wave_nested"]["overall_file"]    
-            s3_key = config["scenario"] + "/" + "models" + "/" + config["wave_nested"]["overall_model"] + "/" + file_name
-            local_file_path = f'/input/boundary'
-            fo.mkdir(local_file_path)
-            # Download the file from S3
-            s3_client.download_file(bucket_name, s3_key, os.path.join(local_file_path, os.path.basename(s3_key)))
-            # Change path in config
-            config["flow_nested"]["overall_path"] = local_file_path   
+        pass
 
-        # Get boundary conditions from overall model (Nesting 2)
-        if config["ensemble"]:
-            nest2(config["wave_nested"]["overall_type"],
-                bw,
-                output_path=config["wave_nested"]["overall_path"],
-                option="wave",
-                bc_path=".",
-                ensemble_member_index=int(member))
-        else:
-            # Deterministic    
-            nest2(config["wave_nested"]["overall_type"],
-                bw,
-                output_path=config["wave_nested"]["overall_path"],
-                option="wave",
-                bc_path=".")
+    if "bw_nested" in config:
+        pass
 
 def merge_ensemble(config):
     print("Merging ...")
     if config["run_mode"] == "cloud":
         folder_path = '/input'
-        his_output_file_name = os.path.join("/output/beware_his.nc")
+        his_output_file_name = os.path.join("/output/flow_his.nc")
+        map_output_file_name = os.path.join("/output/flow_map.nc")
         # Make output folder_path
         os.mkdir("output")
     else:
         folder_path = './'
-        his_output_file_name = "./beware_his.nc"
+        his_output_file_name = "./flow_his.nc"
+        map_output_file_name = "./flow_map.nc"
     # Read in the list of ensemble members
     ensemble_members = read_ensemble_members()
     # Merge output files
     his_files = []
+    map_files = []
     for member in ensemble_members:
-        his_files.append(os.path.join(folder_path, member, "beware_his.nc"))
-    merge_nc_his(his_files, ["R2", "R2_setup", "WL"], output_file_name=his_output_file_name)
+        his_files.append(os.path.join(folder_path, member, "flow_his.nc"))
+        map_files.append(os.path.join(folder_path, member, "flow_map.nc"))
+    merge_nc_his(his_files, ["point_zs"], output_file_name=his_output_file_name)
+    if "flood_map" in config:
+        merge_nc_map(map_files, ["zsmax"], output_file_name=map_output_file_name)
+    # Copy restart files from the first ensemble member (restart files are the same for all members)
+    fo.copy_file(os.path.join(folder_path, ensemble_members[0], 'delft3dfm.*.rst'), folder_path)    
 
 def clean_up(config):
     if config["ensemble"]:
@@ -192,7 +194,7 @@ def clean_up(config):
                     print(error)
                     print("Directory can not be removed : " + member)
 
-# BEWARE job script
+# SFINCS job script
 
 member_name = None
 option = sys.argv[1]
@@ -223,13 +225,13 @@ elif option == "simulate":
         for member in ensemble_members:
             print('Running ensemble member ' + member)
             os.chdir(member)
-            # Run the BEWARE model
+            # Run the Delft3D-FM model
             prepare_single(config, member=member)
-            os.system("call run_beware.bat\n")
+            os.system("call run_delft3dfm.bat\n")
             os.chdir(curdir)
     else:
         prepare_single(config)
-        os.system("call run_beware.bat\n")
+        os.system("call run_delft3dfm.bat\n")
 
 elif option == "prepare_single":
     # Only occurs in cloud mode (running single is done in workflow)

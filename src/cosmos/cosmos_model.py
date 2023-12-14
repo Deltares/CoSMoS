@@ -151,8 +151,8 @@ class Model:
                 file_name = "sfincs_his.nc"
             elif self.flow_nested.type == "xbeach":
                 file_name = "xbeach_his.nc"
-            elif self.flow_nested.type == "dflowfm":
-                file_name = "dflowfm_his.nc"
+            elif self.flow_nested.type == "delft3dfm":
+                file_name = "flow_his.nc"
             elif self.flow_nested.type == "delft3d":
                 file_name = "delft3d_his.nc"
             config["flow_nested"]["overall_file"]  = file_name
