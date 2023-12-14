@@ -85,8 +85,8 @@ class CoSMoS:
             Only initialize cosmos models, by default False
         clean_up : bool, optional
             Option to clean up job folder, by default False
-        cycle : _type_, optional
-            _description_, by default None
+        cycle : str, optional
+            Cycle to start with (e.g. 20231213_00z), by default None
 
         See Also
         -------
