@@ -18,7 +18,7 @@ from cht.misc.misc_tools import dict2yaml
 
 from cht.hurrywave.hurrywave import HurryWave
 import cht.misc.fileops as fo
-import cht.nesting.nesting as nesting
+import cht.nesting.nest1 as nest1
 
 class CoSMoS_HurryWave(Model):
     """Cosmos class for HurryWave model.
@@ -128,16 +128,16 @@ class CoSMoS_HurryWave(Model):
                 specout = False
                 if nested_model.type=="xbeach":
                     specout = True
-                    nesting.nest1(self.domain, nested_model.domain, option="sp2")
+                    nest1(self.domain, nested_model.domain, option="sp2")
                 elif nested_model.type=="sfincs":
                     # No sp2 output
                     nested_model.domain.input.bwvfile = "snapwave.bnd"
                     nested_model.domain.read_wave_boundary_points()
-                    nesting.nest1(self.domain, nested_model.domain)
+                    nest1(self.domain, nested_model.domain)
                     nested_model.domain.input.bwvfile = None
                 else:
                     specout = True
-                    nesting.nest1(self.domain, nested_model.domain)
+                    nest1(self.domain, nested_model.domain)
                     
             if specout:        
                 if not self.domain.input.variables.ospfile:

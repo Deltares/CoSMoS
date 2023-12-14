@@ -17,8 +17,8 @@ from .cosmos_model import Model
 import cht.misc.xmlkit as xml
 from cht.delft3dfm.delft3dfm import Delft3DFM
 import cht.misc.fileops as fo
-from cht.nesting.nesting import nest1
-from cht.nesting.nesting import nest2
+from cht.nesting.nest1 import nest1
+from cht.nesting.nest2 import nest2
 import cosmos.cosmos_meteo as meteo
 import hydrolib.core.dflowfm as hcdfm
 
@@ -66,7 +66,7 @@ class CoSMoS_Delft3DFM(Model):
 #            self.input_path_flow = os.path.join(self.path, "input")
 #            self.input_path_wave = None
                 
-        input_file  = os.path.join(self.input_path_flow, self.runid + ".mdu")
+        input_file  = os.path.join(self.input_path_flow, "flow.mdu")
         self.domain = Delft3DFM(input_file, crs=self.crs)
 
         # Copy some attributes to the model domain (needed for nesting)
@@ -226,7 +226,7 @@ class CoSMoS_Delft3DFM(Model):
 
         
         # Now write input file
-        mdufile = os.path.join(job_path_flow, self.runid + ".mdu")
+        mdufile = os.path.join(job_path_flow, "flow.mdu")
         self.domain.input.time.startdatetime = tstart.strftime('%Y%m%d%H%M%S')
         self.domain.input.time.stopdatetime  = tstop.strftime('%Y%m%d%H%M%S')
         self.domain.input.time.tstart= (tstart - refdate).total_seconds()
@@ -347,7 +347,7 @@ class CoSMoS_Delft3DFM(Model):
                                   "data",
                                   cosmos.scenario.name)
         
-        hisfile = os.path.join(output_path, self.runid + "_his.nc")
+        hisfile = os.path.join(output_path, "flow_his.nc")
         
         if self.station:
 

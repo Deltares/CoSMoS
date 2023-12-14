@@ -22,8 +22,6 @@ from .cosmos_main import cosmos
 from .cosmos_model import Model
 from .cosmos_tiling import make_flood_map_tiles
 
-import cht.nesting.nesting as nesting
-
 class CoSMoS_BEWARE(Model):
     """Cosmos class for BEWARE model.
 
