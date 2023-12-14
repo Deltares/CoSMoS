@@ -240,7 +240,8 @@ def track_to_spw():
     
     spwfile = os.path.join(cosmos.scenario.cycle_track_spw_path,
                         cosmos.scenario.meteo_spiderweb)
-
+    
+    os.makedirs(os.path.dirname(spwfile), exist_ok=True)      
     try:
         tc.read_track(cycfile, 'ddb_cyc')
         tc.include_rainfall = True
