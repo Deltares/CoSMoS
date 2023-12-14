@@ -69,7 +69,7 @@ class Scenario:
 
         # Turn into object        
         for key, value in sc_dict.items():
-            if key == "model":
+            if key == "model" or key == "cluster":
                 pass
             else:    
 #                for key, value in sc_dict[key].items():
@@ -222,7 +222,64 @@ class Scenario:
                        break
                         
             self.model.append(model)
-                
+
+        # Add models to clusters 
+        if "cluster" in sc_dict:
+            for cld in sc_dict["cluster"]:
+                cl = Cluster()
+                if "run_condition" in cld:
+                    cl.run_condition = cld["run_condition"]
+                if "topn" in cld:
+                    cl.topn = cld["topn"]
+                if "hm0fac" in cld:
+                    cl.hm0fac = cld["hm0fac"]
+                if "boundary_twl_margin" in cld:
+                    cl.boundary_twl_margin = cld["boundary_twl_margin"]
+                if "use_threshold" in cld:
+                    if cld["use_threshold"] == "y":
+                        cl.use_threshold = True
+                    else:
+                        cl.use_threshold = False
+                if cl.run_condition == "topn":
+                    cl.ready = False
+                # Add models to this cluster    
+                region_list       = [] # List of regions
+                type_list         = [] # List of types
+                if "region" in cld:
+                    for region in cld["region"]:
+                        if not region in region_list:
+                            region_list.append(region)
+                if "type" in cld:
+                    for tp in cld["type"]:
+                        type_list.append(tp)
+                if "super_region" in cld:
+                    super_region_name = cld["super_region"].lower()
+                    for region in cosmos.config.super_region[super_region_name]["region"]:
+                        if not region in region_list:
+                            region_list.append(region)
+
+                # Loop through all available models
+                for model in self.model:
+                    okay = True
+                    if type_list:
+                        if not model.type in type_list:
+                            okay = False
+                            continue
+                    if not model.flow_nested_name and not model.wave_nested_name:
+                        okay = False
+                        continue                                            
+                    # Filter by region
+                    if region_list:
+                        if not model.region in region_list:
+                            # Region of this model is not in region_list
+                            okay = False
+                            continue
+                    # Filter by type
+                    if okay:
+                        cl.add_model(model)
+                    
+                cluster_dict[name] = cl                
+
         cosmos.log("Finished reading scenario")    
 
     def set_paths(self):
