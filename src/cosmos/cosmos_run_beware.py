@@ -78,7 +78,7 @@ def prepare_single(config, member=None):
             fo.copy_file(os.path.join("..", "base_input", "*.*"), ".")
 
     # Read BEWARE model (necessary for nesting)
-    bw = BEWARE()
+    bw = BEWARE("beware.inp")
     bw.name = config["model"]
     bw.type = "beware"
     bw.path = "."
