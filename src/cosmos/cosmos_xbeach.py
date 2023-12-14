@@ -7,6 +7,7 @@ Created on Tue May 11 16:02:04 2021
 
 import os
 import datetime
+import toml
 import xarray as xr
 
 from .cosmos_main import cosmos
@@ -14,7 +15,6 @@ from .cosmos_model import Model
 from .cosmos_tiling import make_sedero_tiles
 from .cosmos_tiling import make_bedlevel_tiles
 
-import cht.misc.xmlkit as xml
 import cht.misc.fileops as fo
 from cht.xbeach.xbeach import XBeach
 
@@ -45,36 +45,6 @@ class CoSMoS_XBeach(Model):
         cht.xbeach.xbeach
         """
       
-        # First set some defaults
-        
-        flow_nesting_point_x = []
-        flow_nesting_point_y = []
-        wave_nesting_point_x = []
-        wave_nesting_point_y = []
-                  
-        xml_obj = xml.xml2obj(self.file_name)        
-        if hasattr(xml_obj, "flow_nesting_point_1"):
-            xystr = xml_obj.flow_nesting_point_1[0].value.split(",")
-            flow_nesting_point_x.append(float(xystr[0]))
-            flow_nesting_point_y.append(float(xystr[1]))
-        if hasattr(xml_obj, "flow_nesting_point_2"):
-            xystr = xml_obj.flow_nesting_point_2[0].value.split(",")
-            flow_nesting_point_x.append(float(xystr[0]))
-            flow_nesting_point_y.append(float(xystr[1]))
-        if hasattr(xml_obj, "flow_nesting_point_3"):
-            xystr = xml_obj.flow_nesting_point_3[0].value.split(",")
-            flow_nesting_point_x.append(float(xystr[0]))
-            flow_nesting_point_y.append(float(xystr[1]))
-        if hasattr(xml_obj, "flow_nesting_point_4"):
-            xystr = xml_obj.flow_nesting_point_4[0].value.split(",")
-            flow_nesting_point_x.append(float(xystr[0]))
-            flow_nesting_point_y.append(float(xystr[1]))            
-                        
-        if hasattr(xml_obj, "wave_nesting_point_1"):
-            xystr = xml_obj.wave_nesting_point_1[0].value.split(",")
-            wave_nesting_point_x.append(float(xystr[0]))
-            wave_nesting_point_y.append(float(xystr[1]))   
-                        
         # Now read in the domain data
         input_file  = os.path.join(self.path, "input", "params.txt")
         self.domain = XBeach(input_file=input_file, get_boundary_coordinates=False)
@@ -84,23 +54,24 @@ class CoSMoS_XBeach(Model):
         for ipnt, pnt in enumerate(self.domain.wave_boundary_point):
             pnt.name = str(ipnt + 1).zfill(4)
         
-        # Replace boundary points for nesting    
-        if flow_nesting_point_x:
+        mdl_dict = toml.load(self.file_name)
+        if "flow_nesting_points" in mdl_dict:
+            flow_nesting_points = mdl_dict["flow_nesting_points"]
+
             #remove the default found boundary locations based on the tideloc and xbeach routine
-            self.domain.flow_boundary_point[len(flow_nesting_point_x):] = []
-            for ipnt, pnt in enumerate(flow_nesting_point_x):            
-                self.domain.flow_boundary_point[ipnt].geometry.x = flow_nesting_point_x[ipnt]
-                self.domain.flow_boundary_point[ipnt].geometry.y = flow_nesting_point_y[ipnt]
+            self.domain.flow_boundary_point[len(flow_nesting_points):] = []
+            for ipnt, pnt in enumerate(flow_nesting_points):
+                self.domain.flow_boundary_point[ipnt].geometry.x = pnt[0]
+                self.domain.flow_boundary_point[ipnt].geometry.y = pnt[1]
                 #TODO change tideloc in the params as a function of the new boundary points?
 
-        if wave_nesting_point_x:
-            for ipnt, pnt in enumerate(wave_nesting_point_x):            
-                self.domain.wave_boundary_point[ipnt].geometry.x = wave_nesting_point_x[ipnt]
-                self.domain.wave_boundary_point[ipnt].geometry.y = wave_nesting_point_y[ipnt]
-                #TODO remove loop, since we allways have one point?
+        if "wave_nesting_point" in mdl_dict:
+            wave_nesting_point = mdl_dict["wave_nesting_point"]
+            self.domain.wave_boundary_point[0].geometry.x = wave_nesting_point[0]
+            self.domain.wave_boundary_point[0].geometry.y = wave_nesting_point[1]
 
-        if hasattr(xml_obj, "zb_deshoal"):
-            self.domain.zb_deshoal = xml_obj.zb_deshoal[0].value
+        if "zb_deshoal" in mdl_dict:
+            self.domain.zb_deshoal = mdl_dict["zb_deshoal"]
             
         # Copy some attributes to the model domain (needed for nesting)
         self.domain.crs   = self.crs
