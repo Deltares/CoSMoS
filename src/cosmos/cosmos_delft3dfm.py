@@ -301,7 +301,7 @@ class CoSMoS_Delft3DFM(Model):
         
         # Output & diag
         fo.move_file(os.path.join(joboutpath, "*.nc"), output_path)
-        fo.move_file(os.path.join(joboutpath, "*.diag"), output_path)
+        fo.move_file(os.path.join(joboutpath, "*.dia"), output_path)
 
 #        fo.move_file(os.path.join(job_path, "sfincs.rst"), input_path)
 
@@ -310,7 +310,8 @@ class CoSMoS_Delft3DFM(Model):
         # Delete net file (this is typically quite big)
         fo.delete_file(os.path.join(job_path, "flow", self.domain.input.geometry.netfile.filepath))
         fo.move_file(os.path.join(job_path, "flow", "*.*"), input_path)
-        
+        fo.delete_folder(os.path.join(job_path, "flow"))        
+
         # WAVE
 
         # Restart files 
@@ -332,6 +333,7 @@ class CoSMoS_Delft3DFM(Model):
 
             # Input
             fo.move_file(os.path.join(joboutpath, "*.*"), input_path)
+            fo.delete_folder(joboutpath)        
 
     def post_process(self):
         """Post-process Delft3D FM output: generate wave and water level timeseries.        
