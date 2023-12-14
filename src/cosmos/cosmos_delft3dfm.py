@@ -125,21 +125,9 @@ class CoSMoS_Delft3DFM(Model):
 
         # Boundary conditions        
         if self.flow_nested:
-
+            pass
             # Correct boundary water levels. Assuming that output from overall
             # model is in MSL !!!
-            zcor = self.boundary_water_level_correction - self.vertical_reference_level_difference_with_msl
-
-            # Get boundary conditions from overall model (Nesting 2)
-#            output_path = os.path.join(self.flow_nested.cycle_path, "output")    
-            # Deterministic    
-            nest2(self.flow_nested.domain,
-                  self.domain,
-                  output_path=self.flow_nested.cycle_output_path,
-                  output_file = self.flow_nested.domain.runid + '_his.nc',
-                  boundary_water_level_correction=zcor,
-                  option = "flow",
-                  bc_path=self.job_path)
 
         if self.wave_nested:
             # TODO
@@ -171,12 +159,15 @@ class CoSMoS_Delft3DFM(Model):
             #                        self.meteo_spiderweb)
             #     fo.copy_file(src, self.job_path)
 
-        if self.meteo_spiderweb:
+        if self.meteo_spiderweb or self.meteo_track and not self.ensemble:   
+            # Spiderweb file given, copy to job folder
+            if self.meteo_spiderweb:
+                spwfile = os.path.join(cosmos.scenario.cycle_track_spw_path, self.meteo_spiderweb)
+            elif self.meteo_track:
+                spwfile = os.path.join(cosmos.scenario.cycle_track_spw_path, self.meteo_track.split('.')[0] + ".spw")
             # self.domain.input.baro    = 1
-            self.domain.meteo.spw_file = self.meteo_spiderweb
-            meteo_path = os.path.join(cosmos.config.meteo_database.path, "spiderwebs")
-            src = os.path.join(meteo_path, self.meteo_spiderweb)
-            fo.copy_file(os.path.join(meteo_path, self.meteo_spiderweb), os.path.join(self.job_path, 'flow'))
+            self.domain.meteo.spw_file = "delft3dfm.spw"
+            fo.copy_file(spwfile, os.path.join(self.job_path, "flow", "delft3dfm.spw"))          
 
         if self.meteo_wind or self.meteo_atmospheric_pressure or self.meteo_precipitation or self.meteo_spiderweb:
             if not self.domain.input.external_forcing.extforcefile:
@@ -243,18 +234,39 @@ class CoSMoS_Delft3DFM(Model):
         self.domain.input.time.refdate= int(refdate.strftime('%Y%m%d'))
         self.domain.write_input_file(input_file=mdufile)
         
+        # And now prepare the job files
 
-        batch_file = os.path.join(self.job_path, "run.bat")
-        fid = open(batch_file, "w")            
-        fid.write("@ echo off\n")
-        fid.write("DATE /T > running.txt\n")
-        exe_path = os.path.join("call \"" + cosmos.config.executables.delft3dfm_path,
-                                 "x64\\dimr\\scripts\\run_dimr.bat\" dimr_config.xml\n")
-        fid.write(exe_path)
-        fid.write("move running.txt finished.txt\n")
-        fid.write("exit\n")
-        fid.close()
-            
+        # Copy the correct run script to run_job.py
+        pth = os.path.dirname(__file__)
+        fo.copy_file(os.path.join(pth, "cosmos_run_delft3dfm.py"), os.path.join(self.job_path, "run_job_2.py"))
+
+        # Write config.yml file to be used in job
+        self.write_config_yml()
+
+        if self.ensemble:
+            # Write ensemble members to file
+            with open(os.path.join(self.job_path, "ensemble_members.txt"), "w") as f:
+                for member in cosmos.scenario.ensemble_names:
+                    f.write(member + "\n")
+
+        if cosmos.config.cycle.run_mode != "cloud":
+            batch_file = os.path.join(self.job_path, "run_delft3dfm.bat")
+            fid = open(batch_file, "w")            
+            fid.write("@ echo off\n")
+            fid.write("DATE /T > running.txt\n")
+            exe_path = os.path.join("call \"" + cosmos.config.executables.delft3dfm_path,
+                                    "x64\\dimr\\scripts\\run_dimr.bat\" dimr_config.xml\n")
+            fid.write(exe_path)
+            fid.write("move running.txt finished.txt\n")
+            fid.write("exit\n")
+            fid.close()
+             
+        if cosmos.config.cycle.run_mode == "cloud":
+            # Set workflow names
+            if self.ensemble:
+                self.workflow_name = "delft3dfm-ensemble-workflow"
+            else:
+                self.workflow_name = "delft3dfm-deterministic-workflow"
   
         # Set the path back
 #        self.domain.path = pth
