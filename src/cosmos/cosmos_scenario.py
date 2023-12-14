@@ -107,11 +107,10 @@ class Scenario:
                 if "region" in mdl:
                     region_list = mdl["region"]
                 if "super_region" in mdl:
-                    for spr in mdl["super_region"]:
-                        super_region_name = spr.lower()
-                        for region in cosmos.config.super_region[super_region_name]["region"]:
-                            if not region in region_list:
-                                region_list.append(region)
+                    super_region_name = mdl["super_region"].lower()
+                    for region in cosmos.config.super_region[super_region_name]["region"]:
+                        if not region in region_list:
+                            region_list.append(region)
 
                 # Loop through all available models
                 for name in cosmos.all_models.keys():
