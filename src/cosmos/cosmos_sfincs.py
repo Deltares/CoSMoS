@@ -184,7 +184,7 @@ class CoSMoS_SFINCS(Model):
                 spwfile = os.path.join(cosmos.scenario.cycle_track_spw_path, self.meteo_spiderweb)
             elif self.meteo_track:
                 spwfile = os.path.join(cosmos.scenario.cycle_track_spw_path, self.meteo_track.split('.')[0] + ".spw")
-            fo.copy_file(spwfile, os.path.join(self.job_path, "input", "sfincs.spw"))            
+            fo.copy_file(spwfile, os.path.join(self.job_path, "sfincs.spw"))            
             self.domain.input.baro    = 1
             if self.crs.is_projected:
                 self.domain.input.utmzone = self.crs.utm_zone
