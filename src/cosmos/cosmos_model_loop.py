@@ -155,7 +155,18 @@ class ModelLoop():
                     fid = open(os.path.join(model.job_path, "run.bat"), "w")
                     fid.write("@ echo off\n")
                     fid.write("DATE /T > running.txt\n")
-                    fid.write("call run_beware.bat\n")
+                    fid.write('set CONDAPATH=' + cosmos.config.conda.path + '\n')
+                    if hasattr(cosmos.config.conda, "env"):
+                        fid.write(r"call %CONDAPATH%\Scripts\activate.bat "+ cosmos.config.conda.env + "\n")
+                    else:
+                        fid.write(r"call %CONDAPATH%\Scripts\activate.bat cosmos" + "\n")
+                    if model.ensemble:
+                        fid.write("python run_job_2.py prepare_ensemble\n")
+                        fid.write("python run_job_2.py simulate\n")
+                        fid.write("python run_job_2.py merge_ensemble\n") 
+                        fid.write("python run_job_2.py clean_up\n")   
+                    else:
+                        fid.write("python run_job_2.py simulate\n")
                     fid.write("move running.txt finished.txt\n")
                     fid.write("exit\n")
                     fid.close()
