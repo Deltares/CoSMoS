@@ -78,32 +78,8 @@ class CoSMoS_BEWARE(Model):
         
         # Boundary conditions        
         if self.flow_nested:
-            # Get boundary conditions from overall model (Nesting 2)
-            # Correct boundary water levels. Assuming that output from overall
-            # model is in MSL !!!
-            zcor = self.boundary_water_level_correction - self.vertical_reference_level_difference_with_msl       
-
+            # The actual nesting occurs in the run_job.py file
             self.domain.input.bzsfile = 'beware.bzs'
-            # Get boundary conditions from overall model (Nesting 2)
-            if self.ensemble:
-                # Loop through ensemble members
-                for iens in range(cosmos.scenario.track_ensemble_nr_realizations):
-                    name = cosmos.scenario.ensemble_names[iens]
-                    nesting.nest2(self.flow_nested.domain,
-                          self.domain,
-                          output_path=os.path.join(self.flow_nested.cycle_output_path, name),
-                          boundary_water_level_correction=zcor,
-                          option="flow",
-                          bc_file=os.path.join(self.job_path, name, self.domain.input.bzsfile))
-
-            else:
-                nesting.nest2(self.flow_nested.domain,
-                    self.domain,
-                    output_path=self.flow_nested.cycle_output_path,
-                    boundary_water_level_correction=zcor,
-                    option = 'flow',
-                    bc_file=os.path.join(self.job_path, self.domain.input.bzsfile))
-
             self.domain.input.bndfile = 'beware.bnd'
             self.domain.write_flow_boundary_points()
 
@@ -112,39 +88,41 @@ class CoSMoS_BEWARE(Model):
             self.domain.input.btpfile = 'beware.btp'
             self.domain.input.bhsfile = 'beware.bhs'
             self.domain.input.bwvfile = 'beware.bwv'
-            
-            # Get boundary conditions from overall model (Nesting 2)
-            if self.ensemble:
-                # Loop through ensemble members
-                for iens in range(cosmos.scenario.track_ensemble_nr_realizations):
-                    name = cosmos.scenario.ensemble_names[iens]
-                    nesting.nest2(self.wave_nested.domain,
-                        self.domain,
-                        output_path=os.path.join(self.wave_nested.cycle_output_path, name),
-                        option= 'wave',
-                        bc_path =  os.path.join(self.job_path, name))
-
-            else:
-                nesting.nest2(self.wave_nested.domain,
-                    self.domain,
-                    output_path=self.wave_nested.cycle_output_path,
-                    option= 'wave',
-                    bc_path = self.job_path)
-
             self.domain.write_wave_boundary_points()
         
         # Now write input file (sfincs.inp)
         self.domain.write_input_file()
-
-        # Make run batch file
-        src = os.path.join(cosmos.config.executables.beware_path, "run_bw.bas")
-        batch_file = os.path.join(self.job_path, "run.bat")
-        shutil.copyfile(src, batch_file)
-        findreplace(batch_file, "EXEPATHKEY", cosmos.config.executables.beware_path)
-
         # Set the path back to the one in cosmos\models\etc.
-        self.domain.path = pth           
+        self.domain.path = pth    
 
+        # And now prepare the job files
+
+        # Copy the correct run script to run_job.py
+        pth = os.path.dirname(__file__)
+        fo.copy_file(os.path.join(pth, "cosmos_run_beware.py"), os.path.join(self.job_path, "run_job_2.py"))
+
+        # Write config.yml file to be used in job
+        self.write_config_yml()
+
+        if self.ensemble:
+            # Write ensemble members to file
+            with open(os.path.join(self.job_path, "ensemble_members.txt"), "w") as f:
+                for member in cosmos.scenario.ensemble_names:
+                    f.write(member + "\n")
+
+        if cosmos.config.cycle.run_mode != "cloud":
+            # Make run batch file
+            src = os.path.join(cosmos.config.executables.beware_path, "run_bw.bas")
+            batch_file = os.path.join(self.job_path, "run_beware.bat")
+            shutil.copyfile(src, batch_file)
+            findreplace(batch_file, "EXEPATHKEY", cosmos.config.executables.beware_path)     
+
+        if cosmos.config.cycle.run_mode == "cloud":
+            # Set workflow names
+            if self.ensemble:
+                self.workflow_name = "beware-ensemble-workflow"
+            else:
+                self.workflow_name = "beware-deterministic-workflow"
         
     def move(self):
         """Move BEWARE model input and output files.
@@ -156,17 +134,7 @@ class CoSMoS_BEWARE(Model):
         job_path    = self.job_path         
         output_path = self.cycle_output_path
         input_path  = self.cycle_input_path
-                      
-        if self.ensemble:
-            # And now for the ensemble members
-            # Only output
-            for member_name in cosmos.scenario.ensemble_names:                
-                pth0 = os.path.join(job_path, member_name)
-                pth1 = os.path.join(output_path, member_name)
-                fo.mkdir(pth1)
-                fo.move_file(os.path.join(pth0, "beware_his.nc"), pth1)
-        else:
-            fo.move_file(os.path.join(job_path, "beware_his.nc"), output_path)
+        fo.move_file(os.path.join(job_path, "beware_his.nc"), output_path)
 
         # Input
         fo.move_file(os.path.join(job_path, "*.*"), input_path)
@@ -192,18 +160,6 @@ class CoSMoS_BEWARE(Model):
 
         if self.ensemble:
             
-            # Make probabilistic runup timeseries
-            file_list = []
-            for member in cosmos.scenario.ensemble_names:
-                file_list.append(os.path.join(output_path, member, "beware_his.nc"))
-            prcs= [5, 50, 95]
-            vars= ["R2", "R2_setup", "WL"]
-            output_file_name = os.path.join(output_path, "beware_his_ensemble.nc")
-            pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
-
-            # Write timeseries
-            self.domain.read_data(os.path.join(output_path, "beware_his_ensemble.nc"), prcs= prcs)       
-
             for ip in range(len(self.domain.filename)):
                 
                 d= {'WL': self.domain.WL[ip,:],'Setup': self.domain.R2_setup[ip,:], 'Swash': self.domain.swash[ip,:], 'Runup': self.domain.R2[ip,:],
