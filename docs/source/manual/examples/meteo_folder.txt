@@ -1,0 +1,13 @@
+meteo
+└── meteo_subsets.xml
+├── gfs_forecast_0p25_north_atlantic
+    ├── 20170704_00z
+        └── gfs_forecast_0p25_north_atlantic.20170704_0000.nc
+        └── gfs_forecast_0p25_north_atlantic.20170704_0300.nc
+├── gfs_anl_0p50_north_atlantic
+    └── gfs_anl_0p50_north_atlantic.20170704_0000.nc
+    └── gfs_anl_0p50_north_atlantic.20170704_0300.nc
+├── spiderwebs
+    └── irma.spw/cyc
+├── tracks
+    └── irma.cyc

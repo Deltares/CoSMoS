@@ -1,0 +1,7 @@
+scenarios
+├── hurricane_irma
+    └── scenario.toml
+    ├── 20170904_00z
+        ├── job_list
+        ├── models
+    ├── restart

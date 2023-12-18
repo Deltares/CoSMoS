@@ -18,6 +18,7 @@ dependencies:
   - binaryornot=0.4.4
   - black=19.3b0
   - bleach=3.2.1
+  - boto3
   - brotli=1.0.9
   - brotli-bin=1.0.9
   - brotlipy=0.7.0
@@ -48,6 +49,7 @@ dependencies:
   - geos=3.10.2
   - hdf4=4.2.15
   - hdf5=1.12.1
+  - hera
   - icu=58.2
   - idna=3.3
   - imagesize=1.2.0

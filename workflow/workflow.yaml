@@ -1,0 +1,183 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: spiderweb-ensemble-
+spec:
+  entrypoint: ensembles
+  templates:
+    - name: ensembles
+      steps:
+      - - name: runjob
+          template: run-job
+      - - name: readmembers
+          template: read-members
+      - - name: sfincs
+          template: run-sfincs
+          arguments:
+            parameters:
+            - name: member
+              value: "{{item}}"
+          withParam: "{{steps.readmembers.outputs.result}}"
+      - - name: probmapensembles
+          template: probmap-ensembles
+
+    - name: run-job
+      container:
+        image: 012053003218.dkr.ecr.eu-west-1.amazonaws.com/run_job
+        command: [python, run_job.py]
+      inputs:
+        artifacts:
+          - name: input-from-s3
+            path: "/input"
+            archive: 
+              none: {}
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: sfincs-input
+              region: eu-west-1
+              key: scenario_input
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+      outputs:
+        artifacts:
+          - name: upload-to-s3
+            path: "/input"
+            archive: 
+              none: {}
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: sfincs-input
+              region: eu-west-1
+              key: scenario_output
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+    
+    - name: read-members
+      script:
+        image: 012053003218.dkr.ecr.eu-west-1.amazonaws.com/boto3
+        workingDir: /data 
+        command: [python]
+        source: |
+          # generate list of members
+          import json
+          import boto3
+          bucket = 'sfincs-input'
+          #Make sure you provide / in the end
+          prefix = 'scenario_output/'
+
+          client = boto3.client(
+            's3',
+            aws_access_key_id='<<enter access key here>>',
+            aws_secret_access_key='<<enter secret key here>>')
+
+          members = []
+
+          response = client.list_objects_v2(Bucket=bucket, Prefix=prefix, Delimiter='/')
+
+          for common_prefix in response.get('CommonPrefixes', []):
+              folder_name = common_prefix['Prefix'].split('/')[1]
+              members.append(folder_name)
+
+          print(json.dumps(members))
+
+    - name: run-sfincs
+      # To select a nodegroup with a specific instance type
+      # nodeSelector:
+      #   beta.kubernetes.io/instance-type: m5.large
+      container:
+        image: deltares/sfincs-cpu:latest
+        name: sfincs-cpu-argo
+        command: [ "/bin/bash", "-c", "--" ]
+        args: [ "sfincs" ]
+      # Define resources that are needed at max and at minimum
+      resources:
+        requests:
+          memory: "1Gi"
+          cpu: "1000m"
+        limits:
+          memory: "2Gi"
+          cpu: "2000m"
+      inputs:
+        parameters:
+          - name: member
+        artifacts:
+        - name: my-art
+          path: /data
+          s3:
+            endpoint: s3.amazonaws.com
+            bucket: sfincs-input
+            key: scenario_output/{{inputs.parameters.member}}
+            region: eu-west-1
+            accessKeySecret:
+              name: my-s3-credentials
+              key: accessKey
+            secretKeySecret:
+              name: my-s3-credentials
+              key: secretKey
+          archive:
+            none: {}
+      outputs:
+        artifacts:
+        - name: my-art
+          path: /data
+          s3:
+            endpoint: s3.amazonaws.com
+            bucket: sfincs-input
+            key: sfincs_output/{{inputs.parameters.member}}
+            region: eu-west-1
+            accessKeySecret:
+              name: my-s3-credentials
+              key: accessKey
+            secretKeySecret:
+              name: my-s3-credentials
+              key: secretKey
+          archive:
+            none: {}
+    
+    - name: probmap-ensembles
+      container:
+        image: 012053003218.dkr.ecr.eu-west-1.amazonaws.com/run_job
+        command: [python, run_pm.py]
+      inputs:
+        artifacts:
+          - name: input-from-s3
+            path: "/data"
+            archive: 
+              none: {}
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: sfincs-input
+              region: eu-west-1
+              key: sfincs_output
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+      outputs:
+        artifacts:
+          - name: upload-to-s3
+            path: "/output"
+            archive: 
+              none: {}
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: sfincs-input
+              region: eu-west-1
+              key: sfincs_his
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+    

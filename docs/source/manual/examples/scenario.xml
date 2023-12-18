@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!-- Written on 29-Oct-2009 02:19:49 using the XML Toolbox for Matlab -->
+<root>
+  <longname>Hurrycane Maria - Puerto Rico (coamps)</longname>
+  <shortname>hurricane_maria_ensemble</shortname>
+  <cycle type="datetime">20170919 060000</cycle> 
+  <lon type="float">-66.5</lon>
+  <lat type="float">18.2</lat>
+  <zoom type="int">10</zoom> 
+  <runtime type="float">24</runtime>
+  <runinterval type="float">6</runinterval>
+  <observations_path>hurricane_fiona</observations_path>
+  <track_ensemble>ensemble_maria_2</track_ensemble>
+  <ensemble_nrtracks type="int">1</ensemble_nrtracks>
+<model>
+    <name>sfincs_puerto_rico</name>
+    <wind>yes</wind>
+    <atmospheric_pressure>yes</atmospheric_pressure>
+    <ensemble>yes</ensemble>
+  </model>  
+<model>
+    <name>hurrywave_puerto_rico</name>
+    <wind>yes</wind>
+    <atmospheric_pressure>yes</atmospheric_pressure>
+    <ensemble>yes</ensemble>
+  </model>  
+<model>
+    <name>hurrywave_us_east_coast</name>
+    <wind>yes</wind>
+    <atmospheric_pressure>yes</atmospheric_pressure>
+    <ensemble>yes</ensemble>
+  </model>  
+<model>
+    <name>hurrywave_north_atlantic</name>
+    <wind>yes</wind>
+    <atmospheric_pressure>yes</atmospheric_pressure>
+    <ensemble>yes</ensemble>
+  </model>  
+<model>
+    <name>beware_puertorico2</name>
+    <ensemble>yes</ensemble>
+  </model>
+<model>
+    <region>puerto_rico3</region>
+    <ensemble>yes</ensemble>
+  </model>
+</root>

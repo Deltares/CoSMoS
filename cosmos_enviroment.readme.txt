@@ -18,6 +18,8 @@ pip install siphon
 pip install metpy
 pip install isodate
 pip install noaa-coops
+pip install boto3
+pip install hera
 
 pip install -e c:\work\git\CoastalHazardsToolkit
 pip install -e c:\work\git\CoSMoS

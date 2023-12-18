@@ -7,12 +7,12 @@ Created on Tue May 18 12:00:56 2021
 
 import os
 
-from .cosmos_main import cosmos
 from cht.misc import xmlkit as xml
 from cht.misc import fileops as fo
 
 class Station():
-    
+    """Initialize single observation station.
+    """    
     def __init__(self):
         
         self.name      = None
@@ -29,14 +29,18 @@ class Station():
         self.upload    = True
 
 class Stations():
-
+    """Cosmos observation stations.
+    """
     def __init__(self):
 
         self.station = []                 
 
     def read(self):
+        """Read cosmos observation stations from observation station xml file.
+        """
+        from .cosmos_main import cosmos
 
-        file_list = fo.list_files(os.path.join(cosmos.config.stations_path,
+        file_list = fo.list_files(os.path.join(cosmos.config.path.stations,
                                                "*.xml"))
         
         for file_name in file_list:
@@ -69,7 +73,8 @@ class Stations():
                 self.station.append(station) 
 
     def find_by_name(self, name):      
-        
+        """Find station name in station list.
+        """
         for station in self.station:
             if station.name.lower() == name:
                 return station
@@ -77,7 +82,9 @@ class Stations():
         return None
 
     def find_by_file(self, name):
-        
+        """Find station filename.
+        """
+
         station_list = []
         
         for station in self.station:

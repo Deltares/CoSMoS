@@ -75,12 +75,11 @@ def read_meteo_sources():
 
     # Meteo subsets
     # Read from xml file
-    xml_file = os.path.join(cosmos.config.main_path,
-                            "meteo",
+    meteo_path = cosmos.config.meteo_database.path
+    xml_file = os.path.join(meteo_path,
                             "meteo_subsets.xml")
     xml_obj = xml.xml2obj(xml_file)
     
-    meteo_path = os.path.join(cosmos.config.main_path, "meteo")
     parameters = ["wind","barometric_pressure","precipitation"]
     
     has_source_list = []
@@ -140,7 +139,7 @@ def download_and_collect_meteo():
                      t1 = max(t1, model.flow_stop_time)
         if download:
             # Download the data
-            if cosmos.config.get_meteo:
+            if cosmos.config.cycle.get_meteo:
                 cosmos.log("Downloading meteo data : " + meteo_subset.name)
                 meteo_subset.download([t0, t1])
             # Collect the data from netcdf files    
@@ -224,3 +223,28 @@ def write_meteo_input_files(model, prefix, tref, path=None):
 #         src = os.path.join(meteo_path, model.meteo_spiderweb)
 #         fo.copy_file(src, model.job_path)
     
+def track_to_spw():
+            
+    from cht.tropical_cyclone.tropical_cyclone import TropicalCyclone
+    tc= TropicalCyclone()
+
+    if cosmos.scenario.meteo_spiderweb:
+        cyc = cosmos.scenario.meteo_spiderweb.split('.')[0] + ".cyc"
+    elif cosmos.scenario.meteo_track:
+        cyc = cosmos.scenario.meteo_track.split('.')[0] + ".cyc"
+        cosmos.scenario.meteo_track_ = cosmos.scenario.meteo_track.split('.')[0] + ".spw"
+
+    cycfile = os.path.join(cosmos.config.meteo_database.path,
+                    "tracks",
+                    cyc)
+    
+    spwfile = os.path.join(cosmos.scenario.cycle_track_spw_path,
+                        cosmos.scenario.meteo_spiderweb)
+    
+    os.makedirs(os.path.dirname(spwfile), exist_ok=True)      
+    try:
+        tc.read_track(cycfile, 'ddb_cyc')
+        tc.include_rainfall = True
+        tc.to_spiderweb(spwfile, format_type='ascii')
+    except:
+        pass

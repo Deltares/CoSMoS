@@ -10,21 +10,31 @@ import datetime
 import sched
 import os
 import numpy as np
+#import toml
 
 from .cosmos_main import cosmos
-from .cosmos_meteo import read_meteo_sources
+#from .cosmos_meteo import read_meteo_sources
 from .cosmos_meteo import download_and_collect_meteo
-from .cosmos_stations import Stations
+from .cosmos_track_ensemble import setup_track_ensemble
+#from .cosmos_stations import Stations
 from .cosmos_scenario import Scenario
-from .cosmos_configuration import read_config_file
+from .cosmos_cloud import Cloud
+try:
+    from .cosmos_argo import Argo
+except:
+    print("Argo not available")
+from .cosmos_meteo import track_to_spw
+#from .cosmos_stations import Stations
+from .cosmos_scenario import Scenario
 #from .cosmos_tiling import tile_layer
+from .cosmos_webviewer import WebViewer
 
 import cht.misc.fileops as fo
-import cht.misc.xmlkit as xml
+#import cht.misc.xmlkit as xml
 #from cht.tiling.tiling import TileLayer
 
 class MainLoop:
-    """Read the xml scenario file, determine cycle times, and run cosmos model loop. 
+    """Read the scenario.toml file, determine cycle times, and run cosmos model loop. 
     
     Parameters
     ----------
@@ -34,8 +44,8 @@ class MainLoop:
         Run main loop
 
     See Also
-    -------
-    cosmos.cosmos_main.CoSMoS
+    --------
+    cosmos.cosmos.CoSMoS
     cosmos.cosmos_scenario.Scenario
     cosmos.cosmos_model_loop.ModelLoop
     cosmos.cosmos_model.Model
@@ -47,288 +57,191 @@ class MainLoop:
         self.run_models      = True
         self.clean_up        = True
     
-    def start(self, cycle_time=None): 
-        """Read the xml scenario file, determine cycle times, and start cosmos_main_loop.run with scheduler. 
+    def start(self, cycle=None): 
+        """Read the scenario.toml file, determine cycle times, and start cosmos_main_loop.run with scheduler. 
 
         Parameters
         ----------
-        cycle_time : int
+        cycle : int
             Datestring of cycle time
 
         See Also
-        -------
-        cosmos.cosmos_configuration.read_config_file
-        cosmos.cosmos_main_loop.MainLoop.start
-
+        --------
+        cosmos.cosmos_configuration.Configuration
+        cosmos.cosmos_main_loop.MainLoop.run
         """
             
         # Determines cycle time and runs main loop
 
         cosmos.log("Starting main loop ...")
+
+        # Update config (it's possible that this was changed while running a forecast scenario)
+        cosmos.config.set()
+
+        # Set cloud object 
+        if cosmos.config.cycle.run_mode == "cloud":
+            cosmos.cloud = Cloud()
+            cosmos.argo = Argo()
+
+        # Read scenario
+        cosmos.scenario = Scenario(cosmos.scenario_name)
+        # This also determines which models are part of this scenario
+        cosmos.scenario.read()
         
-        # Read xml config file
-        read_config_file()
-        
-        xml_file = os.path.join(cosmos.config.main_path,
-                    "scenarios",
-                    cosmos.config.scenario_name,
-                    cosmos.config.scenario_name + ".xml")
-        xml_obj = xml.xml2obj(xml_file)
-        
-        # Determine cycle time
-        if not cycle_time:
-            
-            # Cycle time not given. This is the first time this loop is run.
-            # Check if this is a forecast or hindcast.
-            
-            if hasattr(xml_obj, "cycle"):
-                # First cycle in hindcast
-                cosmos.config.forecast = False
-                cosmos.cycle_time = xml_obj.cycle[0].value.replace(tzinfo=datetime.timezone.utc)
+        if not cycle:            
+            # Determine cycle time
+            if cosmos.scenario.cycle:
+                # Cycle provided in scenario file
+                cosmos.cycle = cosmos.scenario.cycle.replace(tzinfo=datetime.timezone.utc)
             else:
-                # First cycle in forecast
-                cosmos.config.forecast = True
+                # First main loop in forecast scenario 
+                # Determine which cycle to run
                 delay = 0
                 t = datetime.datetime.now(datetime.timezone.utc) - \
                     datetime.timedelta(hours=delay)
                 h0 = t.hour
-                h0 = h0 - np.mod(h0, cosmos.config.cycle_interval)
-                cosmos.cycle_time = t.replace(microsecond=0, second=0, minute=0, hour=h0)
-
-            cosmos.stop_time = cosmos.cycle_time + \
-                datetime.timedelta(hours=xml_obj.runtime[0].value)    
-            cosmos.next_cycle_time = cosmos.cycle_time + datetime.timedelta(hours=cosmos.config.cycle_interval)
-            
-            # Cycle given in config, so override cycle_time
-            if cosmos.config.cycle:
-                cosmos.next_cycle_time = cosmos.cycle_time + datetime.timedelta(hours=cosmos.config.cycle_interval)
-                cosmos.cycle_time = cosmos.config.cycle
-                cosmos.stop_time = cosmos.cycle_time + \
-                    datetime.timedelta(hours=xml_obj.runtime[0].value)    
-                # Set back to None, so it's not used anymore in the next cycle                
-                cosmos.config.cycle = None
-                                
-            if hasattr(xml_obj, "last_cycle"):
-                cosmos.cycle_stop_time = xml_obj.last_cycle[0].value.replace(tzinfo=datetime.timezone.utc)                        
-            
+                h0 = h0 - np.mod(h0, cosmos.config.cycle.interval)
+                cosmos.cycle = t.replace(microsecond=0, second=0, minute=0, hour=h0)
         else:
-            # Cycle time given as input from last model loop iteration
-            cosmos.cycle_time = cycle_time
-            cosmos.stop_time = cosmos.cycle_time + \
-                datetime.timedelta(hours=xml_obj.runtime[0].value)    
-            cosmos.next_cycle_time = cosmos.cycle_time + datetime.timedelta(hours=cosmos.config.cycle_interval)
-                    
-        cosmos.cycle_string = cosmos.cycle_time.strftime("%Y%m%d_%Hz")
+            cosmos.cycle = cycle.replace(tzinfo=datetime.timezone.utc)
 
+        # Determine end time of cycle and next cycle time                
+        cosmos.stop_time = cosmos.cycle + \
+            datetime.timedelta(hours=cosmos.scenario.runtime)    
+        cosmos.next_cycle_time = cosmos.cycle + datetime.timedelta(hours=cosmos.config.cycle.interval)
+            
+        # Cycle string (used for file and folder names)                   
+        cosmos.cycle_string = cosmos.cycle.strftime("%Y%m%d_%Hz")
 
-        delay = datetime.timedelta(hours=0) # Delay in hours
+        # Web viewer
+        if cosmos.config.webviewer:
+            # Prepare new web viewer, or copy scenario data to existing viewer        
+            # Add scenario folder, cycle folder to web viewer
+            cosmos.webviewer = WebViewer(cosmos.config.webviewer.name)
+
+        # Set scenario paths
+        cosmos.scenario.set_paths()
         
-        # Check whether last cycle is currently running. If so, next_cycle_time is set to None
-        if cosmos.cycle_stop_time:
-            if cosmos.cycle_time>cosmos.cycle_stop_time:
+        # Check if this is the last cycle provided in the scenario file
+        # If so, make sure the next cycle will not be run
+        if cosmos.scenario.last_cycle:
+            if cosmos.cycle>=cosmos.scenario.last_cycle:
                 cosmos.next_cycle_time = None
 
         # Determine time at which this cycle should start running
-        
+        delay = datetime.timedelta(hours=0) # Delay in hours        
         tnow = datetime.datetime.now(datetime.timezone.utc)
-        if tnow > cosmos.cycle_time + delay:
+        if tnow > cosmos.cycle + delay:
             # start now
             start_time = tnow + datetime.timedelta(seconds=1)
         else:
             # start after delay
-            start_time = cosmos.cycle_time + delay
+            start_time = cosmos.cycle + delay
         self.scheduler = sched.scheduler(time.time, time.sleep)
         dt = start_time - tnow
         
-        cosmos.log("Next cycle " + cosmos.cycle_string + " will start at " + start_time.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
-        
         # Kick off main_loop run
+        cosmos.log("Next cycle " + cosmos.cycle_string + " will start at " + start_time.strftime("%Y-%m-%d %H:%M:%S") + " UTC")
         self.scheduler.enter(dt.seconds, 1, self.run, ())
         self.scheduler.run()
 
     def run(self):
-        """Run main loop: 
+        """Run main loop.
 
-        - Read configuration file, stations, meteo sources, super regions, scenario.
         - Initialize models
         - Remove old cycles
         - Get list of nested models
         - Check if models are finished
         - Get start and stop times
         - Download and collect meteo
+        - Optional: Make track ensemble
         - Start model loop
 
         See Also
-        -------
-        cosmos.cosmos_configuration.read_config_file
-        cosmos.cosmos_stations.Stations
-        cosmos.cosmos_meteo.read_meteo_sources
-        cosmos.cosmos_scenario.Scenario
-        cosmos.cosmos_scenario.Scenario.read
-        cosmos.cosmos_model.Model.prepare
+        --------
+        cosmos.cosmos_model.Model.get_nested_models
+        cosmos.cosmos_model.Model.set_paths
         cosmos.cosmos_meteo.Meteo.download_and_collect_meteo
+        cosmos.cosmos_track_ensemble.setup_track_ensemble
         cosmos.cosmos_model_loop.ModelLoop.start
-
         """
 
         # Start by reading all available models, stations, etc.
         cosmos.log("Starting cycle ...")    
- 
-        # Read xml config file (again, but maybe something was changed while cosmos was waiting)
-        cosmos.log("Reading config file ...")    
-        read_config_file()
-        
-        # Available stations
-        cosmos.log("Reading stations ...")    
-        cosmos.stations = Stations()
-        cosmos.stations.read()
+         
+#         if self.clean_up:
+#             # Don't allow clean up when just initializing or continuous mode
+#             if not self.just_initialize and cosmos.config.cycle_mode == "single_shot":           
+#                 # Remove old directories
+#                 pths = fo.list_folders(os.path.join(cosmos.scenario.path,"*"))
+#                 for pth in pths:
+#                     fo.rmdir(pth)
+#                 fo.rmdir(os.path.join(cosmos.config.job_path,
+#                                       cosmos.config.scenario_name))
 
-        # Available meteo sources
-        cosmos.log("Reading meteo sources ...")    
-        read_meteo_sources()
+#         # Remove older cycles
+#         if not self.just_initialize and cosmos.config.cycle_mode == "continuous":           
+#             if cosmos.config.remove_old_cycles>0 and not cosmos.storm_flag:
+#                 # Get list of all cycles
+#                 cycle_list = fo.list_folders(os.path.join(cosmos.scenario.path,"*z"))
 
-
-        # Find all available super regions
-        cosmos.log("Reading super regions ...")    
-        cosmos.super_region = {}
-        super_region_path = os.path.join(cosmos.config.main_path, "super_regions")
-        super_region_list = fo.list_files(os.path.join(super_region_path, "*.xml"))
-        for super_file in super_region_list:
-            name = os.path.splitext(os.path.basename(super_file))[0]
-            cosmos.super_region[name] = []
-            xml_obj = xml.xml2obj(super_file)
-            for region in xml_obj.region:
-                cosmos.super_region[name].append(region.value.lower())
-        
-        # Find all available models and store in dict cosmos.all_models
-        cosmos.log("Finding available models ...")    
-        cosmos.all_models = {}
-        region_list = fo.list_folders(os.path.join(cosmos.config.main_path,
-                                                   "models", "*"))
-        for region_path in region_list:
-            region_name = os.path.basename(region_path)
-            type_list = fo.list_folders(os.path.join(region_path,"*"))
-            for type_path in type_list:
-                type_name = os.path.basename(type_path)
-                name_list = fo.list_folders(os.path.join(type_path,"*"))
-                for name_path in name_list:
-                    name = os.path.basename(name_path).lower()
-                    # Check if xml file exists
-                    xml_file = os.path.join(name_path, name + ".xml")
-                    if os.path.exists(xml_file):
-                        cosmos.all_models[name] = {"type": type_name,
-                                                   "region": region_name}
-                
-        # Scenario
-        cosmos.log("Reading scenario ...")
-        cosmos.scenario = Scenario(cosmos.config.scenario_name)
-        cosmos.scenario.path = os.path.join(cosmos.config.main_path,
-                                          "scenarios",
-                                          cosmos.config.scenario_name)
-        cosmos.scenario.file_name = os.path.join(cosmos.scenario.path,
-                                                 cosmos.config.scenario_name + ".xml")
-
-        # Read scenario and add models (the models are also initialized here)
-        # This is also where all the scenario and model paths are set
-        cosmos.scenario.read()
-        
-        if self.clean_up:
-            # Don't allow clean up when just initializing or continuous mode
-            if not self.just_initialize and cosmos.config.cycle_mode == "single_shot":           
-                # Remove old directories
-                pths = fo.list_folders(os.path.join(cosmos.scenario.path,"*"))
-                for pth in pths:
-                    fo.rmdir(pth)
-                fo.rmdir(os.path.join(cosmos.config.job_path,
-                                      cosmos.config.scenario_name))
-
-        # Remove older cycles
-        if not self.just_initialize and cosmos.config.cycle_mode == "continuous":           
-            if cosmos.config.remove_old_cycles>0 and not cosmos.storm_flag:
-                # Get list of all cycles
-                cycle_list = fo.list_folders(os.path.join(cosmos.scenario.path,"*z"))
-
-                tkeep = cosmos.cycle_time.replace(tzinfo=None) - datetime.timedelta(hours=cosmos.config.remove_old_cycles)
-                for cycle in cycle_list:
-                    if cycle in cosmos.storm_keeplist:
-                        continue
-                    keepfile_name = os.path.join(cycle, "keep.txt")
-                    if os.path.exists(keepfile_name):
-                        cosmos.storm_keeplist.append(cycle)
-                        continue
-                    t = datetime.datetime.strptime(cycle[-12:],"%Y%m%d_%Hz")
-                    if t<tkeep:
-                        pass
-                    # Commented out for now
-#                        cosmos.log("Removing older cycle : " + cycle[-12:])
-#                        fo.rmdir(cycle)
-            elif cosmos.storm_flag:
-                cycle_list = fo.list_folders(os.path.join(cosmos.scenario.path,"*z"))
-                cosmos.storm_keeplist.append(cycle_list[-1])
+#                 tkeep = cosmos.cycle_time.replace(tzinfo=None) - datetime.timedelta(hours=cosmos.config.remove_old_cycles)
+#                 for cycle in cycle_list:
+#                     if cycle in cosmos.storm_keeplist:
+#                         continue
+#                     keepfile_name = os.path.join(cycle, "keep.txt")
+#                     if os.path.exists(keepfile_name):
+#                         cosmos.storm_keeplist.append(cycle)
+#                         continue
+#                     t = datetime.datetime.strptime(cycle[-12:],"%Y%m%d_%Hz")
+#                     if t<tkeep:
+#                         pass
+#                     # Commented out for now
+# #                        cosmos.log("Removing older cycle : " + cycle[-12:])
+# #                        fo.rmdir(cycle)
+#             elif cosmos.storm_flag:
+#                 cycle_list = fo.list_folders(os.path.join(cosmos.scenario.path,"*z"))
+#                 cosmos.storm_keeplist.append(cycle_list[-1])
                         
         # Create scenario cycle paths
         fo.mkdir(cosmos.scenario.cycle_path)
         fo.mkdir(cosmos.scenario.cycle_models_path)
-        fo.mkdir(cosmos.scenario.cycle_tiles_path)
+#        fo.mkdir(cosmos.scenario.cycle_tiles_path)
         fo.mkdir(cosmos.scenario.cycle_job_list_path)
 
-        # Prepare models and determine which models are nested in which
-        cosmos.log("Preparing models ...")
+        # Prepare some stuff for each model
         for model in cosmos.scenario.model:
-
-            model.prepare()
-            
-            if model.flow_nested_name:
-                # Look up model from which it gets it boundary conditions
-                for model2 in cosmos.scenario.model:
-                    if model2.name == model.flow_nested_name:
-                        model.flow_nested = model2
-                        model2.nested_flow_models.append(model)
-                        break
-            if model.wave_nested_name:
-                # Look up model from which it gets it boundary conditions
-                for model2 in cosmos.scenario.model:
-                    if model2.name == model.wave_nested_name:
-                        model.wave_nested = model2
-                        model2.nested_wave_models.append(model)
-                        break
-            if model.bw_nested_name:
-                # Look up model from which it gets it boundary conditions
-                for model2 in cosmos.scenario.model:
-                    if model2.name == model.bw_nested_name:
-                        model.bw_nested = model2
-                        model2.nested_bw_models.append(model)
-                        break
-
-        # Get list of models that have already finished
-        finished_list = os.listdir(cosmos.scenario.cycle_job_list_path)
-
-        # Set initial durations and what needs to be done for each model
-        for model in cosmos.scenario.model:
-
+            model.get_nested_models()
+            model.set_paths()
+            # Set model status
             model.status = "waiting"
-
-            # Check finished models
-            for file_name in finished_list:
-                model_name = file_name.split('.')[0]
-                if model.name.lower() == model_name.lower():
-                    model.status = "finished"
-                    model.run_simulation = False
-                    break
-            
             if model.priority == 0:
                 model.run_simulation = False
-                
-            # Find matching meteo subset
-            if model.meteo_dataset:
-               for subset in cosmos.meteo_subset:
-                   if subset.name == model.meteo_dataset:
-                       model.meteo_subset = subset
-                       break
 
+        # Check if model data needs to be uploaded to webviewer (only upload for high-res nested models)
+        modelopt = ["flow", "wave"]
+        modeloptnames = ["tide_gauge", "wave_buoy"]
+        for model in cosmos.scenario.model:
+            for iopt, opts in enumerate(modelopt):
+                all_nested_models = model.get_all_nested_models(opts)
+
+                if all_nested_models:
+                    all_nested_stations = []
+                    if all_nested_models[0].type == 'beware':
+                        all_nested_models= [model]
+                        bw=1
+                    else:
+                        bw=0
+                    for mdl in all_nested_models:
+                        for st in mdl.station:
+                            all_nested_stations.append(st.name)
+                    for station in model.station:
+                        if station.type == modeloptnames[iopt]:
+                            if station.name in all_nested_stations and bw==0:                            
+                                station.upload = False 
+        
         # Start and stop times
         cosmos.log('Getting start and stop times ...')
-        # In case of a forecast ...
         get_start_and_stop_times()
         
         # Set reference date to minimum of all start times
@@ -354,28 +267,44 @@ class MainLoop:
                            model.wave_start_time.strftime("%Y%m%d %H%M%S") + " - " + \
                            model.wave_stop_time.strftime("%Y%m%d %H%M%S"))
 
-        # # Initialize tile layers
-        # tile_layer              = {}
-        # tile_layer["flood_map"] = TileLayer("flood_map")
+        # if self.just_initialize:
+        #     # No need to do anything else here 
+        #     return
+            
+        # Get meteo data (in case of forcing with track file, this is also where the spiderweb is generated)
+        download_and_collect_meteo()
 
-        if not self.just_initialize:
-            
-            # Get meteo data
-            download_and_collect_meteo()
-            
-            if self.run_models:        
-                # And now start the model loop
-                cosmos.log("Starting model loop ...")
-                cosmos.model_loop.start()
+        # Make track ensemble (this also add 'new' ensemble models that fall within the cone)
+        if cosmos.scenario.track_ensemble_nr_realizations > 0:
+            setup_track_ensemble()
+        
+        # Make spiderweb if does not exist yet
+        if cosmos.scenario.meteo_spiderweb or cosmos.scenario.meteo_track:
+            track_to_spw()
+
+        # Get list of models that have already finished and set their status to finished
+        finished_list = os.listdir(cosmos.scenario.cycle_job_list_path)
+        for model in cosmos.scenario.model:
+            for file_name in finished_list:
+                model_name = file_name.split('.')[0]
+                if model.name.lower() == model_name.lower():
+                    model.status = "finished"
+                    model.run_simulation = False
+                    break            
+        
+        if self.run_models:
+            # And now start the model loop
+            cosmos.log("Starting model loop ...")
+            cosmos.model_loop.start()
 
 def get_start_and_stop_times():
-    """Get cycle start and stop times
+    """Get cycle start and stop times.
     """    
         
-    y = cosmos.cycle_time.year
+    y = cosmos.cycle.year
     cosmos.reference_time = datetime.datetime(y, 1, 1)
     
-    start_time  = cosmos.cycle_time
+    start_time  = cosmos.cycle
         
     stop_time = cosmos.stop_time    
         
@@ -497,7 +426,7 @@ def get_start_and_stop_times():
                 model.flow_stop_time = model.wave_stop_time
 
 def check_for_wave_restart_files(model):
-    """Check if there are wave restart files
+    """Check if there are wave restart files.
     """    
     restart_time = None
     restart_file = None
@@ -527,7 +456,7 @@ def check_for_wave_restart_files(model):
     return restart_time, restart_file
 
 def check_for_flow_restart_files(model):
-    """Check if there are flow restart files
+    """Check if there are flow restart files.
     """   
     restart_time = None
     restart_file = None

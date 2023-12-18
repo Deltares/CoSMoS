@@ -1,0 +1,388 @@
+metadata:
+  name: sfincs-ensemble-workflow
+  namespace: argo
+spec:
+  templates:
+    - name: ensembles
+      inputs: {}
+      outputs: {}
+      metadata: {}
+      steps:
+        - - name: readmembers
+            template: read-members
+            arguments: {}
+        - - name: makefolders
+            template: make-folders
+            arguments:
+              parameters:
+                - name: subfolder
+                  value: '{{workflow.parameters.subfolder}}'
+        - - name: runmodel
+            template: run-model
+            arguments:
+              parameters:
+                - name: member
+                  value: '{{item}}'
+            withParam: '{{steps.readmembers.outputs.result}}'
+        - - name: merge
+            template: merge-members
+            arguments: {}
+        - - name: cleanup
+            template: clean-up
+            arguments: {}
+    - name: read-members
+      inputs:
+        artifacts:
+          - name: input-from-s3
+            path: /data
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.subfolder}}'
+            archive:
+              none: {}
+      outputs: {}
+      metadata: {}
+      script:
+        name: ''
+        image: 012053003218.dkr.ecr.eu-west-1.amazonaws.com/boto3
+        command:
+          - python
+        workingDir: /data
+        resources: {}
+        source: >
+          # generate list of members
+
+          import json
+
+          with open('ensemble_members.txt') as f:
+              members = f.readlines()
+              members = [x.strip() for x in members]
+          print(json.dumps(members))
+
+          #import boto3
+
+          #bucket = 'cosmos-scenarios'
+
+          ##Make sure you provide / in the end
+
+          #prefix = '{{workflow.parameters.subfolder}}/'
+
+          #print("prefix: " + prefix)
+
+          #client = boto3.client( #  's3', # 
+          #aws_access_key_id='AKIAQFTTKHPJJBQN6AER', # 
+          #aws_secret_access_key='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') #
+          #members = [] # 
+
+          #response = client.list_objects_v2(Bucket=bucket, Prefix=prefix,
+          #Delimiter='/')
+
+          #for common_prefix in response.get('CommonPrefixes', []): #   
+          #folder_name = common_prefix['Prefix'].split('/')[2] #   
+          #print(folder_name) #    members.append(folder_name)
+
+          #print(json.dumps(members))
+    - name: make-folders
+      inputs:
+        artifacts:
+          - name: input-from-s3
+            path: /input
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.subfolder}}'
+            archive:
+              none: {}
+      outputs:
+        artifacts:
+          - name: upload-to-s3
+            path: /input
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.subfolder}}'
+            archive:
+              none: {}
+      metadata: {}
+      container:
+        name: ''
+        image: 012053003218.dkr.ecr.eu-west-1.amazonaws.com/run_job
+        command:
+          - python
+          - run_job_2.py
+          - prepare_ensemble
+        resources: {}
+    - name: run-model
+      inputs:
+        parameters:
+          - name: member
+      steps:
+        - - name: preparesimulation
+            template: prepare-simulation
+            arguments:
+              parameters:
+                - name: member
+                  value: '{{inputs.parameters.member}}'
+        - - name: runsimulation
+            template: run-simulation
+            arguments:
+              parameters:
+                - name: member
+                  value: '{{inputs.parameters.member}}'          
+    - name: prepare-simulation
+      inputs:
+        parameters:
+          - name: member
+        artifacts:
+          - name: my-art
+            path: /input
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.subfolder}}/{{inputs.parameters.member}}'
+            archive:
+              none: {}
+      outputs:
+        artifacts:
+          - name: my-art
+            path: /input
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.subfolder}}/{{inputs.parameters.member}}'
+            archive:
+              none: {}
+      metadata: {}
+      container:
+        name: ''
+        image: 012053003218.dkr.ecr.eu-west-1.amazonaws.com/run_job
+        command:
+          - python
+          - run_job_2.py
+          - prepare_single
+          - '{{inputs.parameters.member}}'
+        resources: {}
+    - name: run-simulation
+      inputs:
+        parameters:
+          - name: member
+        artifacts:
+          - name: my-art
+            path: /data
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.subfolder}}/{{inputs.parameters.member}}'
+            archive:
+              none: {}
+      outputs:
+        artifacts:
+          - name: my-art
+            path: /data
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.subfolder}}/{{inputs.parameters.member}}'
+            archive:
+              none: {}
+      metadata: {}
+      container:
+        name: sfincs-cpu-argo
+        image: deltares/sfincs-cpu:latest
+        command:
+          - /bin/bash
+          - '-c'
+          - '--'
+        args:
+          - sfincs
+        resources: {}
+    - name: merge-members
+      inputs:
+        artifacts:
+          - name: input-from-s3
+            path: /input
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.subfolder}}'
+            archive:
+              none: {}
+      outputs:
+        artifacts:
+          - name: upload-to-s3
+            path: /output
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.subfolder}}'
+            archive:a
+              none: {}
+      metadata: {}
+      container:
+        name: ''
+        image: 012053003218.dkr.ecr.eu-west-1.amazonaws.com/run_job
+        command:
+          - python
+          - run_job_2.py
+          - merge_ensemble
+        resources: {}
+    - name: make-tiles
+      inputs:
+        artifacts:
+          - name: input-from-s3
+            path: /input
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.subfolder}}'
+            archive:
+              none: {}
+          - name: tiles
+            path: /tiles
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.tilingfolder}}'
+            archive:
+              none: {}
+      outputs:
+        artifacts:
+          - name: upload-to-s3
+            path: /output
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.webviewerlocation}}'
+            archive:
+              none: {}
+      metadata: {}
+      container:
+        name: ''
+        image: 012053003218.dkr.ecr.eu-west-1.amazonaws.com/run_job
+        command:
+          - python
+          - run_job_2.py
+          - map_tiles
+        resources: {}
+    - name: clean-up
+      inputs:
+        artifacts:
+          - name: input-from-s3
+            path: /input
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.subfolder}}'
+            archive:
+              none: {}
+      outputs: {}
+      metadata: {}
+      container:
+        name: ''
+        image: 012053003218.dkr.ecr.eu-west-1.amazonaws.com/run_job
+        command:
+          - python
+          - run_job_2.py
+          - clean_up
+        resources: {}
+  entrypoint: ensembles
+  arguments:
+    parameters:
+      - name: subfolder
+        value: subfolder
+      - name: tilingfolder
+        value: tilingfolder
+      - name: webviewerlocation
+        value: webviewerlocation

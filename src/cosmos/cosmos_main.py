@@ -10,6 +10,7 @@ import datetime
 
 import cht.misc.fileops as fo
 
+
 class CoSMoS:
 
     """This is the main CoSMoS class.
@@ -42,59 +43,26 @@ class CoSMoS:
     """
     
     def __init__(self):
+
+        os.environ['HDF5_DISABLE_VERSION_CHECK'] = '2'
         
-        self.config          = Config()
-        self.cycle_time      = None        
-        self.cycle_stop_time = None  
-        self.storm_flag      = False
-        self.storm_keeplist  = []
-        
-    def initialize(self, main_path):        
-        """Set the path of the CoSMoS main folder.
+#        self.config          = Config()
+        # self.cycle_time      = None        
+        # self.cycle_stop_time = None  
+        # self.storm_flag      = False
+        # self.storm_keeplist  = []
+
+    def initialize(self, main_path, **kwargs):
+        """Initialize CoSMoS configuration based on configuration file and input arguments.
 
         Parameters
         ----------
         main_path : str
             Path of CoSMoS main folder.
-
-        """
-        
-        self.config.main_path = main_path
-        
-        os.environ['HDF5_DISABLE_VERSION_CHECK'] = '2'
-
-    def run(self,
-            scenario_name:str,
-            main_path:str=None,
-            config_file:str="default.xml",
-            mode:str="single",
-#            forecast=False,
-            run_models:bool=True,
-            make_flood_maps:bool=True,
-            make_wave_maps:bool=True,
-            get_meteo:bool=True,
-            make_figures:bool=True,
-            upload:bool=False,
-            ensemble:bool=False,
-            webviewer:str=None,
-            just_initialize:bool=False,
-            clean_up:bool=False,
-            cycle=None):     
-        """Run a CoSMoS scenario:
-
-        - Save input to self.config
-        - Change settings for cosmos_main_loop
-        - Initialize cosmos_main_loop and cosmos_model_loop
-        - Start cosmos_main_loop
-
-        Parameters
-        ----------
         scenario_name : str
             Name of the scenario to be run.
-        main_path : str, optional
-            Overrides *main_path* specified in ``cosmos.initialize()``., by default None
         config_file : str, optional
-            Configuration file in folder 'configurations', by default "default.xml"
+            Configuration file in folder 'configurations', by default "config.toml"
         mode : str, optional
             _description_, by default "single"
         run_models : bool, optional
@@ -117,8 +85,8 @@ class CoSMoS:
             Only initialize cosmos models, by default False
         clean_up : bool, optional
             Option to clean up job folder, by default False
-        cycle : _type_, optional
-            _description_, by default None
+        cycle : str, optional
+            Cycle to start with (e.g. 20231213_00z), by default None
 
         See Also
         -------
@@ -127,45 +95,165 @@ class CoSMoS:
         cosmos.cosmos_webviewer.WebViewer
 
         """
-           
-        if main_path:
-            self.config.main_path   = main_path            
-        self.config.scenario_name   = scenario_name
-        self.config.cycle_mode      = mode
-        self.config.make_flood_maps = make_flood_maps
-        self.config.make_wave_maps  = make_wave_maps
-        self.config.upload          = upload
-        self.config.webviewer       = webviewer
-#        self.config.forecast        = forecast
-        self.config.config_file     = config_file
-        self.config.get_meteo       = get_meteo
-        if cycle:
-            self.config.cycle = datetime.datetime.strptime(cycle, "%Y%m%d_%HZ").replace(tzinfo=datetime.timezone.utc)        
-        else:
-            self.config.cycle = None
+        from .cosmos_configuration import Configuration
 
-        # Make folder to store log files
-        # And set some other paths
-        self.config.job_path      = os.path.join(self.config.main_path, "jobs")
-        self.config.stations_path = os.path.join(self.config.main_path, "stations")
+        self.config          = Configuration()
+
+        # Set main path        
+        self.config.path.main = main_path
+
+        self.config.file_name = "config.toml"
+        for key, value in kwargs.items():
+            if key == "config_file":
+                self.config.file_name = value       
+                break
+
+        # Read in configuration
+        self.config.set(**kwargs)
+
+    # def set_main_path(self, main_path):
+    #     """Set the path of the CoSMoS main folder.
+
+    #     Parameters
+    #     ----------
+    #     main_path : str
+    #         Path of CoSMoS main folder.
+
+    #     """
         
-        if not self.config.main_path:
+    #     self.config.main_path = main_path
+        
+    #     os.environ['HDF5_DISABLE_VERSION_CHECK'] = '2'
+
+    def run(self, *args):
+
+        """Run a CoSMoS scenario:
+    
+        - Initialize cosmos_main_loop and cosmos_model_loop
+        - Start cosmos_main_loop
+    
+        """
+
+        # Determine which cycle is needs to be run
+        # If no cycle is given, then it will be determined later on        
+        cycle = None
+        self.scenario_name = args[0]
+        if len(args)>1:
+            cycle = args[1]
+
+        if cycle:
+            cycle = datetime.datetime.strptime(cycle, "%Y%m%d_%HZ").replace(tzinfo=datetime.timezone.utc)        
+        else:
+            cycle = None
+
+        
+        if not self.config.path.main:
             cosmos.log("Error: CoSMoS main path not set! Do this by running cosmos.initialize(main_path) or passing main_path as input argument to cosmos.run().")
             return
-
-#        cosmos.config.make_figures    = make_figures
-#        cosmos.config.run_ensemble    = ensemble
 
         from .cosmos_main_loop import MainLoop
         from .cosmos_model_loop import ModelLoop
         self.main_loop  = MainLoop()
         self.model_loop = ModelLoop()
 
-        self.main_loop.just_initialize = just_initialize
-        self.main_loop.run_models      = run_models
-        self.main_loop.clean_up        = clean_up
+        self.main_loop.just_initialize = self.config.cycle.just_initialize
+        self.main_loop.run_models      = self.config.cycle.run_models
+        # self.main_loop.clean_up        = self.config.cycle.clean_up
         
-        self.main_loop.start()
+        self.main_loop.start(cycle=cycle)
+
+#     def run(self,
+#             scenario_name:str,
+#             main_path:str=None,
+#             config_file:str="default.xml",
+#             mode:str="single",
+# #            forecast=False,
+#             run_models:bool=True,
+#             make_flood_maps:bool=True,
+#             make_wave_maps:bool=True,
+#             get_meteo:bool=True,
+#             make_figures:bool=True,
+#             upload:bool=False,
+#             ensemble:bool=False,
+#             webviewer:str=None,
+#             just_initialize:bool=False,
+#             clean_up:bool=False,
+#             cycle=None):     
+#         """Run a CoSMoS scenario:
+
+#         - Save input to self.config
+#         - Change settings for cosmos_main_loop
+#         - Initialize cosmos_main_loop and cosmos_model_loop
+#         - Start cosmos_main_loop
+
+#         Parameters
+#         ----------
+#         scenario_name : str
+#             Name of the scenario to be run.
+#         main_path : str, optional
+#             Overrides *main_path* specified in ``cosmos.initialize()``., by default None
+#         config_file : str, optional
+#             Configuration file in folder 'configurations', by default "default.xml"
+#         mode : str, optional
+#             _description_, by default "single"
+#         run_models : bool, optional
+#             Option to run models, by default True
+#         make_flood_maps : bool, optional
+#             Option to make flood maps, by default True
+#         make_wave_maps : bool, optional
+#             Option to make wave maps, by default True
+#         get_meteo : bool, optional
+#             Option to upload results, by default True
+#         make_figures : bool, optional
+#             Option to make figures, by default True
+#         upload : bool, optional
+#             Option to upload results, by default False
+#         ensemble : bool, optional
+#             Option to run in ensemble mode, by default False
+#         webviewer : str, optional
+#             Webviewer version, by default None
+#         just_initialize : bool, optional
+#             Only initialize cosmos models, by default False
+#         clean_up : bool, optional
+#             Option to clean up job folder, by default False
+#         cycle : _type_, optional
+#             _description_, by default None
+
+#         See Also
+#         -------
+#         cosmos.cosmos_main_loop.MainLoop
+#         cosmos.cosmos_model_loop.ModelLoop
+#         cosmos.cosmos_webviewer.WebViewer
+
+#         """
+
+#         # Determine which cycle is needs to be run
+#         # If no cycle is given, then it will be determined later on        
+#         cycle = None
+#         self.scenario_name = args[0]
+#         if len(args)>1:
+#             cycle = args[1]
+
+#         if cycle:
+#             cycle = datetime.datetime.strptime(cycle, "%Y%m%d_%HZ").replace(tzinfo=datetime.timezone.utc)        
+#         else:
+#             cycle = None
+
+        
+#         if not self.config.path.main:
+#             cosmos.log("Error: CoSMoS main path not set! Do this by running cosmos.initialize(main_path) or passing main_path as input argument to cosmos.run().")
+#             return
+
+#         from .cosmos_main_loop import MainLoop
+#         from .cosmos_model_loop import ModelLoop
+#         self.main_loop  = MainLoop()
+#         self.model_loop = ModelLoop()
+
+#         # self.main_loop.just_initialize = self.config.cycle.just_initialize
+#         # self.main_loop.run_models      = self.config.cycle.run_models
+#         # self.main_loop.clean_up        = self.config.cycle.clean_up
+        
+#         self.main_loop.start(cycle=cycle)
 
     def stop(self): 
         """Stop main loop and model loop.
@@ -182,27 +270,19 @@ class CoSMoS:
             Log message
         """
         print(message)
-        log_file = os.path.join(self.config.main_path,"cosmos.log")
+        log_file = os.path.join(self.config.path.main, "cosmos.log")
         tstr = "[" + datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S") + " UTC] "
         with open(log_file, 'a') as f:
             f.write(tstr + message + "\n")
             f.close()
 
-    def make_webviewer(self, sc_name:str, wv_name:str, upload:bool=False, cycle=None,config_file:str="default.xml"):   
+    def make_webviewer(self, sc_name:str):   
         """Just make webviewer
 
         Parameters
         ----------
         sc_name : str
             Scenario name
-        wv_name : str
-            Webviewer version name
-        upload : bool, optional
-            Option to upload webviewer, by default False
-        cycle : datestr, optional
-            Cycle name, by default None
-        config_file : str, optional
-            Configuration file name, by default "default.xml"
         
         See Also
         -------
@@ -212,23 +292,25 @@ class CoSMoS:
 
         """
         
-        if not cosmos.config.main_path:
+        if not cosmos.config.path.main:
             cosmos.log("Error: CoSMoS main path not set! Do this by running cosmos.initialize(main_path) or passing main_path as input argument to cosmos.run().")
             return
         
-        self.run(sc_name,config_file=config_file, just_initialize=True, cycle=cycle)
+        self.config.cycle.just_initialize  = True
+        self.config.cycle.run_models = False
+        self.run(sc_name)
                 
         from .cosmos_webviewer import WebViewer
         
-        wv = WebViewer(wv_name)
+        wv = WebViewer(cosmos.config.webviewer.name)
         wv.make()
 
         # Delete job folder that was just created
-        if cosmos.config.run_mode != "parallel":
-            fo.rmdir(os.path.join(cosmos.config.job_path,
-                                  cosmos.config.scenario_name))
+        if cosmos.config.cycle.run_mode != "parallel":
+            fo.rmdir(os.path.join(cosmos.config.path.jobs,
+                                  cosmos.scenario_name))
         
-        if upload:
+        if cosmos.config.cycle.upload:
             wv.upload()
 
     def post_process(self, sc_name:str, model=None, cycle:str=None):   
@@ -250,20 +332,24 @@ class CoSMoS:
 
         """
                 
-        if not cosmos.config.main_path:
+        if not cosmos.config.path.main:
             cosmos.log("Error: CoSMoS main path not set! Do this by running cosmos.initialize(main_path) or passing main_path as input argument to cosmos.run().")
             return
         
-        self.run(sc_name,just_initialize=True, cycle=cycle)
+        # Overwrite settings for just_initialize and run_models
+        self.config.cycle.just_initialize  = True
+        self.config.cycle.run_models = False
+        self.run(sc_name)
         
         mdls = []
         if model == "all":
             for mdl in cosmos.scenario.model:
                 mdls.append(mdl)
         else:    
-            for mdl in cosmos.scenario.model:
-                if mdl.name == model:
-                    mdls.append(mdl)
+            for model2 in model:
+                for mdl in cosmos.scenario.model:
+                    if mdl.name == model2:
+                        mdls.append(mdl)
                 
         for mdl in mdls:
             fo.mkdir(mdl.cycle_path)
@@ -276,13 +362,13 @@ class CoSMoS:
             mdl.post_process()
 
         # Delete job folder that was just created
-        if cosmos.config.run_mode != "parallel":
-            fo.rmdir(os.path.join(cosmos.config.job_path,
-                                  cosmos.config.scenario_name))
+        if cosmos.config.cycle.run_mode != "parallel":
+            fo.rmdir(os.path.join(cosmos.config.path.jobs,
+                                  cosmos.scenario_name))
 
-class Config:
-    def __init__(self):        
-        self.main_path = None
-        self.run_mode  = "serial"
+# class Config:
+#     def __init__(self):        
+#         self.main_path = None
+#         self.run_mode  = "serial"
                         
 cosmos = CoSMoS()

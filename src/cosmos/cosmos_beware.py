@@ -22,12 +22,12 @@ from .cosmos_main import cosmos
 from .cosmos_model import Model
 from .cosmos_tiling import make_flood_map_tiles
 
-from cht.nesting.nest2 import nest2
-
 class CoSMoS_BEWARE(Model):
     """Cosmos class for BEWARE model.
 
     BEWARE is a meta-model based on XBeach for predicting nearshore wave heights and total water levels at reef-lined coasts.
+
+    This cosmos class reads BEWARE model data, pre-processes, moves and post-processes BEWARE models.
 
     Parameters
     ----------
@@ -36,38 +36,36 @@ class CoSMoS_BEWARE(Model):
 
     See Also
     ----------
-    cosmos.cosmos_model_loop: invokes current class
-    cosmos.cosmos_model: function call
+    cosmos.cosmos_scenario.Scenario
+    cosmos.cosmos_model_loop.ModelLoop
+    cosmos.cosmos_model.Model
     """    
     def read_model_specific(self):
-        """Read BEWARE specific model attributes
+        """Read BEWARE specific model attributes.
 
         See Also
         ----------
         cht.beware.beware
-
         """        
         # Read in the BEWARE model
-
-        # Now read in the domain data
-        # input_file  = os.path.join(self.path, "input", "profile_characteristics.mat")
         input_file  = os.path.join(self.path, "input", "beware.inp")
-        self.domain = BEWARE(input_file)
-        
+        self.domain = BEWARE(input_file)        
         self.domain.crs   = self.crs
         self.domain.type  = self.type
         self.domain.name  = self.name
         self.domain.runid = self.runid
 
     def pre_process(self):
-        """Preprocess BEWARE model: write wave and water level conditions, input file, run.bat
+        """Preprocess BEWARE model.
+        
+        - Extract and write wave and water level conditions.
+        - Write input file. 
+        - Optional: make ensemble of models.
 
         See Also
         ----------
-        cht.nesting.nest2
-        
+        cht.nesting.nest2 
         """   
-        # First generate input that is identical for all members
         
         # Set path temporarily to job path
         pth = self.domain.path
@@ -78,152 +76,54 @@ class CoSMoS_BEWARE(Model):
         
         # Boundary conditions        
         if self.flow_nested:
-            # Get boundary conditions from overall model (Nesting 2)
-#            output_path = os.path.join(self.flow_nested.cycle_path, "output")   
-            # output_path = os.path.join(r'p:\11204750-onr-westernpacific\Year2-3\cosmos\version01\cosmos\scenarios\hurricane_michael_coamps_spw\models\northamerica\delft3dfm\delft3dfm_gom\archive\20181009_00z\\',
-            #                             "output")   
-
-            # Correct boundary water levels. Assuming that output from overall
-            # model is in MSL !!!
-            zcor = self.boundary_water_level_correction - self.vertical_reference_level_difference_with_msl       
-
-            nest2(self.flow_nested.domain,
-                  self.domain,
-                  output_path=self.flow_nested.cycle_output_path,
-                  option = 'flow',
-                  boundary_water_level_correction=zcor)
+            # The actual nesting occurs in the run_job.py file
             self.domain.input.bzsfile = 'beware.bzs'
-            self.domain.write_flow_boundary_conditions()
             self.domain.input.bndfile = 'beware.bnd'
             self.domain.write_flow_boundary_points()
 
 
         if self.wave and self.wave_nested:
-            
-            # Get wave boundary conditions from overall model (Nesting 2)
-#            output_path = os.path.join(self.wave_nested.cycle_path, "output")   
-            # output_path = os.path.join(r'p:\11204750-onr-westernpacific\Year2-3\cosmos\version01\cosmos\scenarios\hurricane_michael_coamps_spw\models\northamerica\delft3dfm\delft3dfm_gom\archive\20181009_00z\\',
-            #                             "output")   
-
-            nest2(self.wave_nested.domain,
-                  self.domain,
-                  output_path=self.wave_nested.cycle_output_path,
-                  option= 'wave')
-
             self.domain.input.btpfile = 'beware.btp'
             self.domain.input.bhsfile = 'beware.bhs'
             self.domain.input.bwvfile = 'beware.bwv'
-            self.domain.write_wave_boundary_conditions()
             self.domain.write_wave_boundary_points()
         
         # Now write input file (sfincs.inp)
         self.domain.write_input_file()
-
-        # Make inp file
-        #inp_file = os.path.join(self.job_path, "beware.inp")
-        #with open(inp_file,'w') as fid:
-#       #     fid.write(f'folder   = {self.job_path} \n')
-        #    fid.write(f'tref     = {self.domain.input.tref.strftime("%Y%m%d %H%M%S")} \n')
-        #    fid.write(f'tstart   = {self.domain.input.tstart.strftime("%Y%m%d %H%M%S")} \n')
-        #    fid.write(f'tstop    = {self.domain.input.tstop.strftime("%Y%m%d %H%M%S")} \n')
-        #    fid.write(f'dT       = {self.domain.input.dT} \n')
-        #    fid.write(f'runup    = {self.domain.input.runup} \n')
-        #    fid.write(f'flooding = {self.domain.input.flooding} \n')
-        #fid.close()
-
-        # Make run batch file
-        src = os.path.join(cosmos.config.beware_exe_path, "run_bw.bas")
-        batch_file = os.path.join(self.job_path, "run.bat")
-
-        shutil.copyfile(src, batch_file)
-        # findreplace(batch_file, "DISKKEY", 'P')
-        findreplace(batch_file, "EXEPATHKEY", cosmos.config.beware_exe_path)
-#        findreplace(batch_file, "RUNPATHKEY", self.job_path)
-#         fid = open(batch_file, "w")
-#         fid.write("@ echo off\n")
-#         fid.write("DATE /T > running.txt\n")
-#         exe_path = os.path.join(cosmos.config.beware_exe_path, "run_beware.py")
-#         fid.write(exe_path + "\n")
-# #        fid.write("d:\\checkouts\\SFINCS\\branches\\subgrid_openacc_12_wavemaker\\sfincs\\x64\\Release\\sfincs.exe\n")
-#         fid.write("move " + os.path.join(cosmos.config.beware_exe_path, "beware.inp") + " " +  os.path.join(self.domain.path, "beware.inp") + " \n")
-#         fid.write("move running.txt finished.txt\n")
-# #        fid.write("exit\n")
-#         fid.close()
-
-        if cosmos.scenario.track_ensemble and self.ensemble:
-            profsfile = self.domain.input.profsfile
-            if self.domain.input.r2matchfile is not None:
-                r2matchfile = self.domain.input.r2matchfile
-
-            if self.domain.input.flmatchfile is not None:
-                flmatchfile = self.domain.input.flmatchfile
-
-            for member_name in cosmos.scenario.member_names:
-
-                # Job path for this ensemble member
-                member_path = self.job_path + "_" + member_name
-                fo.mkdir(member_path)
-
-                 # Boundary conditions        
-                if self.flow_nested:
-                    # Get boundary conditions from overall model (Nesting 2)
-
-                    # Correct boundary water levels. Assuming that output from overall
-                    # model is in MSL !!!
-                    zcor = self.boundary_water_level_correction - self.vertical_reference_level_difference_with_msl       
-
-                    if self.flow_nested.ensemble:
-                        if self.flow_nested.type == "sfincs":
-                            output_file = "sfincs_his_" + member_name + '.nc'
-                    else:
-                        output_file= None
-
-                    nest2(self.flow_nested.domain,
-                        self.domain,
-                        output_path=self.flow_nested.cycle_output_path,
-                        output_file= output_file,
-                        option = 'flow',
-                        boundary_water_level_correction=zcor)
-                    self.domain.input.bzsfile = 'beware.bzs'
-                    self.domain.write_flow_boundary_conditions(file_name= os.path.join(member_path, self.domain.input.bzsfile))
-                    self.domain.input.bndfile = r"..\\" + os.path.basename(self.domain.path) + r"\\beware.bnd"
-
-                if self.wave and self.wave_nested:
-        
-                    # Get wave boundary conditions from overall model (Nesting 2)
-                    if self.flow_nested.ensemble:
-                        if self.wave_nested.type == "hurrywave":
-                            output_file = "hurrywave_his_" + member_name + '.nc'
-                        else:
-                            output_file= None
-
-                    nest2(self.wave_nested.domain,
-                        self.domain,
-                        output_path=self.wave_nested.cycle_output_path,
-                        output_file= output_file,
-                        option= 'wave')
-
-                    self.domain.input.btpfile = 'beware.btp'
-                    self.domain.input.bhsfile = 'beware.bhs'
-                    self.domain.write_bhs_file(file_name = os.path.join(member_path, self.domain.input.bhsfile))
-                    self.domain.write_btp_file(file_name = os.path.join(member_path, self.domain.input.btpfile))
-                    self.domain.input.bwvfile = r"..\\" + os.path.basename(self.domain.path) + r"\\beware.bwv"
-
-                # Copy inp & run.bat files to member folder
-                fo.copy_file(os.path.join(self.job_path, 'run.bat'), member_path)
-                self.domain.input.profsfile = r"..\\" + os.path.basename(self.domain.path) + r"\\" + profsfile
-                if self.domain.input.r2matchfile is not None:
-                    self.domain.input.r2matchfile = r"..\\" + os.path.basename(self.domain.path) + r"\\" + r2matchfile
-                if self.domain.input.flmatchfile is not None:
-                    self.domain.input.flmatchfile = r"..\\" + os.path.basename(self.domain.path) + r"\\" + flmatchfile
-                self.domain.write_input_file(input_file= os.path.join(member_path, "beware.inp"))
-
         # Set the path back to the one in cosmos\models\etc.
-        self.domain.path = pth           
+        self.domain.path = pth    
 
+        # And now prepare the job files
+
+        # Copy the correct run script to run_job.py
+        pth = os.path.dirname(__file__)
+        fo.copy_file(os.path.join(pth, "cosmos_run_beware.py"), os.path.join(self.job_path, "run_job_2.py"))
+
+        # Write config.yml file to be used in job
+        self.write_config_yml()
+
+        if self.ensemble:
+            # Write ensemble members to file
+            with open(os.path.join(self.job_path, "ensemble_members.txt"), "w") as f:
+                for member in cosmos.scenario.ensemble_names:
+                    f.write(member + "\n")
+
+        if cosmos.config.cycle.run_mode != "cloud":
+            # Make run batch file
+            src = os.path.join(cosmos.config.executables.beware_path, "run_bw.bas")
+            batch_file = os.path.join(self.job_path, "run_beware.bat")
+            shutil.copyfile(src, batch_file)
+            findreplace(batch_file, "EXEPATHKEY", cosmos.config.executables.beware_path)     
+
+        if cosmos.config.cycle.run_mode == "cloud":
+            # Set workflow names
+            if self.ensemble:
+                self.workflow_name = "beware-ensemble-workflow"
+            else:
+                self.workflow_name = "beware-deterministic-workflow"
         
     def move(self):
-        """Move BEWARE model input and output files
+        """Move BEWARE model input and output files.
         """        
         # Move files from job folder to archive folder
         
@@ -232,51 +132,64 @@ class CoSMoS_BEWARE(Model):
         job_path    = self.job_path         
         output_path = self.cycle_output_path
         input_path  = self.cycle_input_path
-        
-        # Output        
-        fo.move_file(os.path.join(job_path, "*.nc"), output_path)
-        
+        fo.move_file(os.path.join(job_path, "beware_his.nc"), output_path)
+
         # Input
         fo.move_file(os.path.join(job_path, "*.*"), input_path)
-        
-        if cosmos.scenario.track_ensemble and self.ensemble:
-            # And now for the ensemble members
-            # Only output
-            for member_name in cosmos.scenario.member_names:
-                pth = self.job_path + "_" + member_name
-                if os.path.isfile(os.path.join(pth, "beware_his.nc")):
-                    fo.move_file(os.path.join(pth, "beware_his.nc"), os.path.join(self.cycle_output_path, 'beware_his_'+ member_name +'.nc'))
-
-                try:
-                    shutil.rmtree(pth)
-                except:
-                    # Folder was probably open in another application
-                    pass
 
     def post_process(self):
-        """Post-process BEWARE output
+        """Post-process BEWARE output: generate (probabilistic) runup timeseries.
         
         See Also
         ----------
         cht.misc.prob_maps
-        
         """        
         # Post-processing occurs in cosmos_webviewer.py
         import numpy as np
         import cht.misc.prob_maps as pm
+        import cht.misc.misc_tools
         
         output_path = self.cycle_output_path
-        post_path   = self.cycle_post_path
+        # post_path   = self.cycle_post_path
+        post_path =  os.path.join(cosmos.config.path.webviewer, 
+                            cosmos.config.webviewer.name,
+                            "data",
+                            cosmos.scenario.name)
 
-        if cosmos.scenario.track_ensemble and self.ensemble:
+        if self.ensemble:
             
-            # Make probabilistic runup timeseries
-            file_list= fo.list_files(os.path.join(output_path, "beware_his_*"))
-            prcs= [0.05, 0.5, 0.95] #np.concatenate((np.arange(0, 0.9, 0.1), np.arange(0.9, 1, 0.01)))
-            vars= ["R2_tot", "R2_set", "WL"]
-            output_file_name = os.path.join(output_path, "beware_his_ensemble.nc")
-            pm.prob_floodmaps(file_list=file_list, variables=vars, prcs=prcs, delete = False, output_file_name=output_file_name)
+            for ip in range(len(self.domain.filename)):
+                
+                d= {'WL': self.domain.WL[ip,:],'Setup': self.domain.R2_setup[ip,:], 'Swash': self.domain.swash[ip,:], 'Runup': self.domain.R2[ip,:],
+                        'Setup_5': self.domain.R2_setup_prc["5"][ip,:],'Setup_50': self.domain.R2_setup_prc["50"][ip,:],'Setup_95': self.domain.R2_setup_prc["95"][ip,:],
+                        'Runup_5': self.domain.R2_prc["5"][ip,:],'Runup_50': self.domain.R2_prc["50"][ip,:],'Runup_95': self.domain.R2_prc["95"][ip,:],}    
 
+                v= pd.DataFrame(data=d, index =  pd.date_range(self.domain.input.tstart, periods=len(self.domain.swash[ip,:]), freq= '0.5H'))
+                local_file_path = os.path.join(post_path,  
+                                                "timeseries",
+                                                     "extreme_runup_height." + self.name + "." + str(self.domain.filename[ip]) + ".csv.js")
+                                                     
+                s= v.to_csv(path_or_buf=None,
+                                date_format='%Y-%m-%dT%H:%M:%S',
+                                float_format='%.3f',
+                                header= False, index_label= 'datetime') 
+                        
+                cht.misc.misc_tools.write_csv_js(local_file_path, s, "var csv = `date_time,wl,setup,swash,runup, setup_5, setup_50, setup_95, runup_5, runup_50, runup_95")
+
+        else:
+            self.domain.read_data(os.path.join(output_path, "beware_his.nc"))       
+            for ip in range(len(self.domain.filename)):
+                d= {'WL': self.domain.WL[ip,:],'Setup': self.domain.R2_setup[ip,:], 'Swash': self.domain.swash[ip,:], 'Runup': self.domain.R2[ip,:]}       
+        
+                v= pd.DataFrame(data=d, index =  pd.date_range(self.domain.input.tstart, periods=len(self.domain.swash[ip,:]), freq= '0.5H'))
+                local_file_path = os.path.join(post_path,  
+                                                "timeseries",
+                                                     "extreme_runup_height." + self.name + "." + str(self.domain.filename[ip]) + ".csv.js")
+                s= v.to_csv(path_or_buf=None,
+                                date_format='%Y-%m-%dT%H:%M:%S',
+                                float_format='%.3f',
+                                header= False, index_label= 'datetime') 
+                cht.misc.misc_tools.write_csv_js(local_file_path, s, "var csv = `date_time,wl,setup,swash,runup")
        
         # output_path = self.cycle_output_path
         # post_path   = self.cycle_post_path
