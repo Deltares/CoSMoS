@@ -85,6 +85,7 @@ class CoSMoS_SFINCS(Model):
         self.domain.input.tref     = cosmos.scenario.ref_date
         self.domain.input.tstart   = self.flow_start_time
         self.domain.input.tstop    = self.flow_stop_time
+        self.domain.input.tspinup  = self.flow_spinup_time*3600
         self.domain.input.dtmapout = 21600.0
         self.domain.input.dtmaxout = 21600.0
         self.domain.input.outputformat = "net"
@@ -304,11 +305,6 @@ class CoSMoS_SFINCS(Model):
         if self.ensemble or self.meteo_spiderweb or self.meteo_track:
             self.domain.input.baro    = 1
             self.domain.input.utmzone = self.crs.utm_zone
-            if self.meteo_spiderweb or self.meteo_track:
-                self.domain.input.amufile = None
-                self.domain.input.amvfile = None
-                self.domain.input.ampfile = None
-                self.domain.input.amprfile = None
 #            self.domain.input.variables.amufile = None
 #            self.domain.input.variables.amvfile = None
 
