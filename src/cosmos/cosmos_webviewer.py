@@ -175,7 +175,7 @@ class WebViewer:
                                 obs_pth = os.path.join(cosmos.config.path.main,
                                                 "observations",
                                                 cosmos.scenario.observations_path,
-                                                "water_levels")                        
+                                                "waterlevel")                        
                                 fname = "waterlevel." + station.id + ".observed.csv.js"
                                 if os.path.exists(os.path.join(obs_pth, fname)):
                                     obs_file = fname
@@ -185,6 +185,7 @@ class WebViewer:
                                                                 "long_name":name,
                                                                 "id": station.id,
                                                                 "mllw":station.mllw,
+                                                                "wlc":station.water_level_correction,
                                                                 "model_name":model.name,
                                                                 "model_type":model.type,
                                                                 "cycle": cosmos.cycle_string,
