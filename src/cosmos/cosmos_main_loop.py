@@ -58,7 +58,7 @@ class MainLoop:
         self.clean_up        = True
     
     def start(self, cycle=None): 
-        """Read the scenario.toml file, determine cycle times, and start cosmos_main_loop.run with scheduler. 
+        """Read the scenario.toml file, determine cycle times, initialize webviewer, and start cosmos_main_loop.run with scheduler. 
 
         Parameters
         ----------
@@ -148,10 +148,9 @@ class MainLoop:
     def run(self):
         """Run main loop.
 
-        - Initialize models
-        - Remove old cycles
         - Get list of nested models
         - Check if models are finished
+        - Check if model data needs to be uploaded to webviewer
         - Get start and stop times
         - Download and collect meteo
         - Optional: Make track ensemble
