@@ -9,6 +9,7 @@ import os
 import datetime
 import toml
 import xarray as xr
+import pandas as pd
 
 from .cosmos_main import cosmos
 from .cosmos_model import Model
@@ -17,6 +18,7 @@ from .cosmos_tiling import make_bedlevel_tiles
 
 import cht.misc.fileops as fo
 from cht.xbeach.xbeach import XBeach
+from cht.xbeach.xbeach_output_morphology import Map 
 
 class CoSMoS_XBeach(Model):
     """Cosmos class for XBeach model.
@@ -244,5 +246,21 @@ class CoSMoS_XBeach(Model):
             make_bedlevel_tiles(zbend, index_path, zbend_map_path)
             cosmos.log("Bed level tiles done.")
             
+            # get Sallenger regimes
+            x_grid = dt['globalx'].values
+            y_grid = dt['globaly'].values
+            zsmean = dt['zs_mean'].values    
+            zsmax = dt['zs_max'].values
+
+            # make object for 2D XBeach output
+            map2D = Map(x2D=x_grid, y2D=y_grid, zb02D=zb0, zbend2D=zbend, plot_dir=output_path)
+            # get Sallenger regimes
+            # 1) still need to fix something for MHW, for now a fixed value
+            # 2) for now no figures are generated, takes too long to do operationally, but would be nice to include
+            x_crest, y_crest, regimenos = map2D.alongshore_sallenger_regimes(zsmean, zsmax, MHW=0.25, plot_transects=False, plot_map=False)
+            df = pd.DataFrame({'X': x_crest, 'Y': y_crest, 'regime': regimenos})
+            csv_file_path = os.path.join(output_path,"Sallengerregimes.csv")
+            # Save DataFrame to CSV
+            df.to_csv(csv_file_path, index=False)
 
                 
