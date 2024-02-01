@@ -150,46 +150,59 @@ class CoSMoS_BEWARE(Model):
         import cht.misc.misc_tools
         
         output_path = self.cycle_output_path
-        # post_path   = self.cycle_post_path
-        post_path =  os.path.join(cosmos.config.path.webviewer, 
-                            cosmos.config.webviewer.name,
-                            "data",
-                            cosmos.scenario.name)
+        post_path   = self.cycle_post_path
+        web_path  =   os.path.join(cosmos.webviewer.path,
+                                       "data",
+                                       cosmos.scenario.name,
+                                       cosmos.cycle_string)
+        os.makedirs(web_path, exist_ok=True)
+
 
         if self.ensemble:
-            
+            self.domain.read_data(os.path.join(output_path, "beware_his.nc"), prcs = [5,50,95])       
+
             for ip in range(len(self.domain.filename)):
                 
-                d= {'WL': self.domain.WL[ip,:],'Setup': self.domain.R2_setup[ip,:], 'Swash': self.domain.swash[ip,:], 'Runup': self.domain.R2[ip,:],
+                d= {'WL': self.domain.WL[ip,:,0],'Setup': self.domain.R2_setup[ip,:,0], 'Swash': self.domain.swash[ip,:,0], 'Runup': self.domain.R2[ip,:,0],
                         'Setup_5': self.domain.R2_setup_prc["5"][ip,:],'Setup_50': self.domain.R2_setup_prc["50"][ip,:],'Setup_95': self.domain.R2_setup_prc["95"][ip,:],
                         'Runup_5': self.domain.R2_prc["5"][ip,:],'Runup_50': self.domain.R2_prc["50"][ip,:],'Runup_95': self.domain.R2_prc["95"][ip,:],}    
 
                 v= pd.DataFrame(data=d, index =  pd.date_range(self.domain.input.tstart, periods=len(self.domain.swash[ip,:]), freq= '0.5H'))
-                local_file_path = os.path.join(post_path,  
-                                                "timeseries",
-                                                     "extreme_runup_height." + self.name + "." + str(self.domain.filename[ip]) + ".csv.js")
-                                                     
+                file_name = os.path.join(post_path,  
+                                                    "extreme_runup_height." + str(self.domain.filename[ip]) + ".csv")
+                v.index.name='date_time'                                     
+                s= v.to_csv(file_name,
+                                date_format='%Y-%m-%dT%H:%M:%S's,
+                                float_format='%.3f') 
                 s= v.to_csv(path_or_buf=None,
                                 date_format='%Y-%m-%dT%H:%M:%S',
                                 float_format='%.3f',
                                 header= False, index_label= 'datetime') 
-                        
-                cht.misc.misc_tools.write_csv_js(local_file_path, s, "var csv = `date_time,wl,setup,swash,runup, setup_5, setup_50, setup_95, runup_5, runup_50, runup_95")
-
+                file_name = os.path.join(web_path,  
+                                                    "extreme_runup_height." + str(self.domain.filename[ip]) + ".csv.js")
+                cht.misc.misc_tools.write_csv_js(file_name, s, "var csv = `date_time,wl,setup,swash,runup, setup_5, setup_50, setup_95, runup_5, runup_50, runup_95")
+ 
         else:
             self.domain.read_data(os.path.join(output_path, "beware_his.nc"))       
             for ip in range(len(self.domain.filename)):
                 d= {'WL': self.domain.WL[ip,:],'Setup': self.domain.R2_setup[ip,:], 'Swash': self.domain.swash[ip,:], 'Runup': self.domain.R2[ip,:]}       
         
                 v= pd.DataFrame(data=d, index =  pd.date_range(self.domain.input.tstart, periods=len(self.domain.swash[ip,:]), freq= '0.5H'))
-                local_file_path = os.path.join(post_path,  
-                                                "timeseries",
-                                                     "extreme_runup_height." + self.name + "." + str(self.domain.filename[ip]) + ".csv.js")
+                file_name = os.path.join(post_path,  
+                                                     "extreme_runup_height." + str(self.domain.filename[ip]) + ".csv")
+                v.index.name='date_time' 
+                s= v.to_csv(file_name,
+                                date_format='%Y-%m-%dT%H:%M:%S',
+                                float_format='%.3f',
+                                header= False, index_label= 'datetime') 
+                
                 s= v.to_csv(path_or_buf=None,
                                 date_format='%Y-%m-%dT%H:%M:%S',
                                 float_format='%.3f',
                                 header= False, index_label= 'datetime') 
-                cht.misc.misc_tools.write_csv_js(local_file_path, s, "var csv = `date_time,wl,setup,swash,runup")
+                file_name = os.path.join(web_path,  
+                                                    "extreme_runup_height." + str(self.domain.filename[ip]) + ".csv.js")
+                cht.misc.misc_tools.write_csv_js(file_name, s, "var csv = `date_time,wl,setup,swash,runup")
        
         # output_path = self.cycle_output_path
         # post_path   = self.cycle_post_path
