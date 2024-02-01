@@ -122,11 +122,10 @@ def prepare_single(config, member=None):
         if config["ensemble"]:
             nest2(config["flow_nested"]["overall_type"],
                 sf,
-                output_path=config["flow_nested"]["overall_path"],
+                output_path=os.path.join(config["flow_nested"]["overall_path"], member),
                 boundary_water_level_correction=zcor,
                 option="flow",
-                bc_path=".",
-                ensemble_member_index=int(member))
+                bc_path=".")
         else:
             # Deterministic    
             nest2(config["flow_nested"]["overall_type"],
@@ -147,16 +146,15 @@ def prepare_single(config, member=None):
             # Download the file from S3
             s3_client.download_file(bucket_name, s3_key, os.path.join(local_file_path, os.path.basename(s3_key)))
             # Change path in config
-            config["flow_nested"]["overall_path"] = local_file_path   
+            config["wave_nested"]["overall_path"] = local_file_path   
 
         # Get boundary conditions from overall model (Nesting 2)
         if config["ensemble"]:
             nest2(config["wave_nested"]["overall_type"],
                 sf,
-                output_path=config["wave_nested"]["overall_path"],
+                output_path=os.path.join(config["wave_nested"]["overall_path"], member),
                 option="wave",
-                bc_path=".",
-                ensemble_member_index=int(member))
+                bc_path=".")
         else:
             # Deterministic    
             nest2(config["wave_nested"]["overall_type"],
@@ -181,10 +179,9 @@ def prepare_single(config, member=None):
         if config["ensemble"]:
             nest2(config["bw_nested"]["overall_type"],
                 sf,
-                output_path=config["wave_nested"]["overall_path"],
+                output_path=os.path.join(config["wave_nested"]["overall_path"], member),
                 option="wave",
-                bc_path=".",
-                ensemble_member_index=int(member))
+                bc_path=".")
         else:
             # Deterministic    
             nest2(config["bw_nested"]["overall_type"],
@@ -201,24 +198,32 @@ def merge_ensemble(config):
     if config["run_mode"] == "cloud":
         folder_path = '/input'
         his_output_file_name = os.path.join("/output/sfincs_his.nc")
-        map_output_file_name = os.path.join("/output/sfincs_map.nc")
-        # Make output folder_path
-        os.mkdir("output")
+        map_output_file_name = os.path.join("/sfincs_map.nc")
     else:
         folder_path = './'
-        his_output_file_name = "./sfincs_his.nc"
+        his_output_file_name = "./output/sfincs_his.nc"
         map_output_file_name = "./sfincs_map.nc"
+    output_path = './output'
+    os.makedirs("output", exist_ok=True)
+
     # Read in the list of ensemble members
     ensemble_members = read_ensemble_members()
     # Merge output files
     his_files = []
     map_files = []
     for member in ensemble_members:
-        his_files.append(os.path.join(folder_path, member, "sfincs_his.nc"))
+        os.makedirs(os.path.join(output_path, member), exist_ok=True)
+        if os.path.exists(os.path.join(folder_path, member, "sfincs_his.nc")):
+            his_files.append(os.path.join(folder_path, member, "sfincs_his.nc"))
+            fo.copy_file(os.path.join(folder_path, member, "sfincs_his.nc"), os.path.join(output_path, member, "sfincs_his.nc"))
         map_files.append(os.path.join(folder_path, member, "sfincs_map.nc"))
+
     merge_nc_his(his_files, ["point_zs"], output_file_name=his_output_file_name)
     if "flood_map" in config:
-        merge_nc_map(map_files, ["zsmax"], output_file_name=map_output_file_name)
+        try:
+            merge_nc_map(map_files, ["zsmax"], output_file_name=map_output_file_name)
+        except:
+            print('Merging does not work for quadtree yet')
     # Copy restart files from the first ensemble member (restart files are the same for all members)
     fo.copy_file(os.path.join(folder_path, ensemble_members[0], 'sfincs.*.rst'), folder_path)    
 
