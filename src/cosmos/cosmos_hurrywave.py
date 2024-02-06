@@ -140,10 +140,6 @@ class CoSMoS_HurryWave(Model):
             fname1 = os.path.join(self.job_path, "hurrywave.spw")
             fo.copy_file(fname0, fname1)
 
-        if self.meteo_spiderweb or self.meteo_track:
-            self.domain.input.variables.amufile = None
-            self.domain.input.variables.amvfile = None
-
         # Make observation points
         if self.station:
             for station in self.station:
