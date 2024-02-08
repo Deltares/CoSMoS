@@ -154,7 +154,8 @@ class CoSMoS_BEWARE(Model):
         web_path  =   os.path.join(cosmos.webviewer.path,
                                        "data",
                                        cosmos.scenario.name,
-                                       cosmos.cycle_string)
+                                       cosmos.cycle_string,
+                                       "timeseries")
         os.makedirs(web_path, exist_ok=True)
 
 
@@ -172,7 +173,7 @@ class CoSMoS_BEWARE(Model):
                                                     "extreme_runup_height." + str(self.domain.filename[ip]) + ".csv")
                 v.index.name='date_time'                                     
                 s= v.to_csv(file_name,
-                                date_format='%Y-%m-%dT%H:%M:%S's,
+                                date_format='%Y-%m-%dT%H:%M:%S',
                                 float_format='%.3f') 
                 s= v.to_csv(path_or_buf=None,
                                 date_format='%Y-%m-%dT%H:%M:%S',
