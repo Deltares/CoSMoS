@@ -180,7 +180,7 @@ class CoSMoS_BEWARE(Model):
                                 float_format='%.3f',
                                 header= False, index_label= 'datetime') 
                 file_name = os.path.join(web_path,  
-                                                    "extreme_runup_height." + str(self.domain.filename[ip]) + ".csv.js")
+                                                    "extreme_runup_height."  + self.name + "." + str(self.domain.filename[ip]) + ".csv.js")
                 cht.misc.misc_tools.write_csv_js(file_name, s, "var csv = `date_time,wl,setup,swash,runup, setup_5, setup_50, setup_95, runup_5, runup_50, runup_95")
  
         else:
@@ -202,7 +202,7 @@ class CoSMoS_BEWARE(Model):
                                 float_format='%.3f',
                                 header= False, index_label= 'datetime') 
                 file_name = os.path.join(web_path,  
-                                                    "extreme_runup_height." + str(self.domain.filename[ip]) + ".csv.js")
+                                                    "extreme_runup_height."  + self.name + "." + str(self.domain.filename[ip]) + ".csv.js")
                 cht.misc.misc_tools.write_csv_js(file_name, s, "var csv = `date_time,wl,setup,swash,runup")
        
         # output_path = self.cycle_output_path
