@@ -58,7 +58,7 @@ class MainLoop:
         self.clean_up        = True
     
     def start(self, cycle=None): 
-        """Read the scenario.toml file, determine cycle times, and start cosmos_main_loop.run with scheduler. 
+        """Read the scenario.toml file, determine cycle times, initialize webviewer, and start cosmos_main_loop.run with scheduler. 
 
         Parameters
         ----------
@@ -148,10 +148,9 @@ class MainLoop:
     def run(self):
         """Run main loop.
 
-        - Initialize models
-        - Remove old cycles
         - Get list of nested models
         - Check if models are finished
+        - Check if model data needs to be uploaded to webviewer
         - Get start and stop times
         - Download and collect meteo
         - Optional: Make track ensemble
@@ -274,12 +273,11 @@ class MainLoop:
         # Get meteo data (in case of forcing with track file, this is also where the spiderweb is generated)
         download_and_collect_meteo()
 
-        # Make track ensemble (this also add 'new' ensemble models that fall within the cone)
         if cosmos.scenario.track_ensemble_nr_realizations > 0:
+            # Make track ensemble (this also add 'new' ensemble models that fall within the cone)
             setup_track_ensemble()
-        
-        # Make spiderweb if does not exist yet
-        if cosmos.scenario.meteo_spiderweb or cosmos.scenario.meteo_track:
+        elif cosmos.scenario.meteo_spiderweb or cosmos.scenario.meteo_track:
+            # Make spiderweb if does not exist yet
             track_to_spw()
 
         # Get list of models that have already finished and set their status to finished

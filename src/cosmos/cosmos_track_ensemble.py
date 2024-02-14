@@ -99,13 +99,12 @@ def setup_track_ensemble():
                            cosmos.scenario.name,
                            cosmos.cycle_string,
                            "track_ensemble.geojson.js")
-    fclc = cosmos.scenario.track_ensemble.get_feature_collection()
-#    cht.misc.misc_tools.write_json_js(file_name, fclc, "var track_ensemble =")
+    cosmos.scenario.track_ensemble.to_geojson(file_name, text="var track_ensemble_data =")
 
     # Loop through all models and check if they fall within cone
     models_to_add = []
     for model in cosmos.scenario.model:
-        if shapely.intersects(cone.loc[0]["geometry"], model.outline.loc[0]["geometry"]):
+        if model.type == 'beware' or shapely.intersects(cone.loc[0]["geometry"], model.outline.loc[0]["geometry"]):
             # Add model
             # Make a shallow copy of the model
             ensemble_model = copy.copy(model)

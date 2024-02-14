@@ -79,6 +79,7 @@ class CoSMoS_HurryWave(Model):
         self.domain.input.variables.tref     = cosmos.scenario.ref_date
         self.domain.input.variables.tstart   = self.wave_start_time
         self.domain.input.variables.tstop    = self.wave_stop_time
+        self.domain.input.variables.tspinup  = self.wave_spinup_time*3600
 #        nsecs = (self.wave_stop_time - self.wave_start_time).total_seconds()
 #        self.domain.input.dtmaxout = nsecs
         self.domain.input.variables.dtmaxout = 21600.0
@@ -92,8 +93,6 @@ class CoSMoS_HurryWave(Model):
             self.domain.boundary_conditions.forcing = "spectra"
                     
         # Meteo forcing
-        self.meteo_atmospheric_pressure = False
-        self.meteo_precipitation = False
         if self.meteo_wind:
             meteo.write_meteo_input_files(self,
                                           "hurrywave",
@@ -101,16 +100,21 @@ class CoSMoS_HurryWave(Model):
             self.domain.input.variables.amufile = "hurrywave.amu"
             self.domain.input.variables.amvfile = "hurrywave.amv"
                 
-        if self.meteo_spiderweb:            
-            # Single spiderweb file given, copy to job folder
-            self.domain.input.variables.spwfile = self.meteo_spiderweb
-            meteo_path = os.path.join(cosmos.config.meteo_database.path, "spiderwebs")
-            fo.copy_file(os.path.join(meteo_path, self.meteo_spiderweb), self.job_path)
+        if self.meteo_spiderweb or self.meteo_track and not self.ensemble:   
+            self.domain.input.variables.spwfile = "hurrywave.spw"
+            # Spiderweb file given, copy to job folder
+            if cosmos.scenario.track_ensemble_nr_realizations>0:
+                spwfile = os.path.join(cosmos.scenario.cycle_track_ensemble_spw_path, "ensemble00000.spw")
+            elif self.meteo_spiderweb:
+                spwfile = os.path.join(cosmos.scenario.cycle_track_spw_path, self.meteo_spiderweb)
+            elif self.meteo_track:
+                spwfile = os.path.join(cosmos.scenario.cycle_track_spw_path, self.meteo_track.split('.')[0] + ".spw")        
+            fo.copy_file(spwfile, os.path.join(self.job_path, "hurrywave.spw"))            
 
         if self.ensemble:
             # Copy all spiderwebs to jobs folder
             self.domain.input.variables.spwfile = "hurrywave.spw"
-
+        
         # Make observation points
         if self.station:
             for station in self.station:
@@ -135,6 +139,9 @@ class CoSMoS_HurryWave(Model):
                     nested_model.domain.read_wave_boundary_points()
                     nest1(self.domain, nested_model.domain)
                     nested_model.domain.input.bwvfile = None
+                elif nested_model.type=="beware":
+                    specout = False
+                    nest1(self.domain, nested_model.domain)
                 else:
                     specout = True
                     nest1(self.domain, nested_model.domain)
