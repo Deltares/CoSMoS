@@ -131,6 +131,8 @@ class Scenario:
 
         ### Add missing models
         # We know which models need to be added. Check if all models that provide boundary conditions are there as well.
+        # TO DO: the above ...                        
+                                
                         
         ### Clear model list
         self.model = []

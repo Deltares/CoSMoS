@@ -104,7 +104,7 @@ def setup_track_ensemble():
     # Loop through all models and check if they fall within cone
     models_to_add = []
     for model in cosmos.scenario.model:
-        if model.type == 'beware' or shapely.intersects(cone.loc[0]["geometry"], model.outline.loc[0]["geometry"]):
+        if shapely.intersects(cone.loc[0]["geometry"], model.outline.loc[0]["geometry"]):
             # Add model
             # Make a shallow copy of the model
             ensemble_model = copy.copy(model)
