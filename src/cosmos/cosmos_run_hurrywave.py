@@ -15,6 +15,7 @@ from cht.tiling.tiling import make_floodmap_tiles
 from cht.tiling.tiling import make_png_tiles
 from cht.hurrywave.hurrywave import HurryWave
 from cht.nesting.nest2 import nest2
+#from cht.misc.argo import Argo
 
 def read_ensemble_members():
     with open('ensemble_members.txt') as f:
@@ -94,7 +95,7 @@ def prepare_single(config, member=None):
             fo.copy_file(fname0, "hurrywave.spw")
 
     # Read HurryWave model (necessary for nesting)
-    hw = HurryWave()
+    hw = HurryWave(load=True)
     hw.name = config["model"]
     hw.type = "hurrywave"
     hw.path = "."
@@ -118,15 +119,13 @@ def prepare_single(config, member=None):
         if config["ensemble"]:
             nest2(config["wave_nested"]["overall_type"],
                 hw,
-                output_path=config["wave_nested"]["overall_path"],
-                bc_path=".",
-                ensemble_member_index=int(member))
+                output_path=os.path.join(config["wave_nested"]["overall_path"], member),
+                bc_path=".")
         else:
             # Deterministic    
             nest2(config["wave_nested"]["overall_type"],
                 hw,
                 output_path=config["wave_nested"]["overall_path"],
-                option="flow",
                 bc_path=".")
         
 
@@ -135,24 +134,31 @@ def merge_ensemble(config):
     if config["run_mode"] == "cloud":
         folder_path = '/input'
         his_output_file_name = os.path.join("/output/hurrywave_his.nc")
-#        map_output_file_name = os.path.join("/output/hurrywave_map.nc")
-        # Make output folder_path
-        os.mkdir("output")
+#        map_output_file_name = os.path.join("/hurrywave_map.nc")
     else:
         folder_path = './'
-        his_output_file_name = "./hurrywave_his.nc"
+        his_output_file_name = "./output/hurrywave_his.nc"
         map_output_file_name = "./hurrywave_map.nc"
+    output_path = './output'
+    os.makedirs("output", exist_ok=True)
+
     # Read in the list of ensemble members
     ensemble_members = read_ensemble_members()
     # Merge output files
     his_files = []
     map_files = []
     for member in ensemble_members:
-        his_files.append(os.path.join(folder_path, member, "hurrywave_his.nc"))
+        os.makedirs(os.path.join(output_path, member), exist_ok=True)
+        if os.path.exists(os.path.join(folder_path, member, "hurrywave_his.nc")):
+            his_files.append(os.path.join(folder_path, member, "hurrywave_his.nc"))
+            fo.copy_file(os.path.join(folder_path, member, "hurrywave_his.nc"), os.path.join(output_path, member, "hurrywave_his.nc"))
+        if os.path.exists(os.path.join(folder_path, member, "hurrywave_sp2.nc")):
+            fo.copy_file(os.path.join(folder_path, member, "hurrywave_sp2.nc"), os.path.join(output_path, member, "hurrywave_sp2.nc"))
         map_files.append(os.path.join(folder_path, member, "hurrywave_map.nc"))
-    merge_nc_his(his_files, ["point_zs"], output_file_name=his_output_file_name)
-    # if "hm0_map" in config:
-    #     merge_nc_map(map_files, ["zsmax"], output_file_name=map_output_file_name)
+
+    merge_nc_his(his_files, ["point_hm0", "point_tp"], output_file_name=his_output_file_name)
+    if "hm0_map" in config:
+        merge_nc_map(map_files, ["hm0max"], output_file_name=map_output_file_name)
     # Copy restart files from the first ensemble member (restart files are the same for all members)
     fo.copy_file(os.path.join(folder_path, ensemble_members[0], 'hurrywave.*.rst'), folder_path)    
 
@@ -161,7 +167,7 @@ def map_tiles(config):
     # Make flood map tiles
     if "hm0_map" in config:
 
-        # Make SFINCS object
+        # Make HW object
         hw = HurryWave()
 
         print("Making Hm0 map ...")
@@ -171,7 +177,7 @@ def map_tiles(config):
                 
         if os.path.exists(index_path):
             
-            print("Making flood map tiles for model " + config["model"] + " ...")                
+            print("Making wave map tiles for model " + config["model"] + " ...")                
 
             # 24 hour increments  
             dtinc = 12
@@ -241,7 +247,7 @@ def map_tiles(config):
                                 quiet=True)
 
             except:
-                print("An error occured while making flood map tiles")
+                print("An error occured while making wave map tiles")
 
 def clean_up(config):
     if config["ensemble"]:

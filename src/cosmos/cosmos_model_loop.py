@@ -70,8 +70,8 @@ class ModelLoop():
         """ Run all cosmos models defined in the scenario file.
 
         - Check for finished simulations and move them to scenario folder
-        - Make waiting list, preprocess and submit these models
-        - Post process models from Step 1
+        - Make waiting list, prepare input and submit these models
+        - Post process models from Step 1 (time series data)
         - Check if all models are finished. If true: make webviewer 
 
         See Also
@@ -149,49 +149,30 @@ class ModelLoop():
             if cosmos.config.cycle.run_mode == "cloud":
                 # No need for a bach file. Workflow template will take care of different steps.
                 pass
-            else:
-                if model.type == "beware": # For now ...
-                    # Make windows batch file (run.bat) that activates the correct environment and runs run_job.py   
-                    fid = open(os.path.join(model.job_path, "run.bat"), "w")
-                    fid.write("@ echo off\n")
-                    fid.write("DATE /T > running.txt\n")
-                    fid.write('set CONDAPATH=' + cosmos.config.conda.path + '\n')
-                    if hasattr(cosmos.config.conda, "env"):
-                        fid.write(r"call %CONDAPATH%\Scripts\activate.bat "+ cosmos.config.conda.env + "\n")
-                    else:
-                        fid.write(r"call %CONDAPATH%\Scripts\activate.bat cosmos" + "\n")
-                    if model.ensemble:
-                        fid.write("python run_job_2.py prepare_ensemble\n")
-                        fid.write("python run_job_2.py simulate\n")
-                        fid.write("python run_job_2.py merge_ensemble\n") 
-                        fid.write("python run_job_2.py clean_up\n")   
-                    else:
-                        fid.write("python run_job_2.py simulate\n")
-                    fid.write("move running.txt finished.txt\n")
-                    fid.write("exit\n")
-                    fid.close()
-                else:    
-                    # Make windows batch file (run.bat) that activates the correct environment and runs run_job.py   
-                    fid = open(os.path.join(model.job_path, "run.bat"), "w")
-                    fid.write("@ echo off\n")
-                    fid.write("DATE /T > running.txt\n")
-                    fid.write('set CONDAPATH=' + cosmos.config.conda.path + '\n')
-                    if hasattr(cosmos.config.conda, "env"):
-                        fid.write(r"call %CONDAPATH%\Scripts\activate.bat "+ cosmos.config.conda.env + "\n")
-                    else:
-                        fid.write(r"call %CONDAPATH%\Scripts\activate.bat cosmos" + "\n")
-                    if model.ensemble:
-                        fid.write("python run_job_2.py prepare_ensemble\n")
-                        fid.write("python run_job_2.py simulate\n")
-                        fid.write("python run_job_2.py merge_ensemble\n")
+            else:  
+                # Make windows batch file (run.bat) that activates the correct environment and runs run_job.py   
+                fid = open(os.path.join(model.job_path, "run.bat"), "w")
+                fid.write("@ echo off\n")
+                fid.write("DATE /T > running.txt\n")
+                fid.write('set CONDAPATH=' + cosmos.config.conda.path + '\n')
+                if hasattr(cosmos.config.conda, "env"):
+                    fid.write(r"call %CONDAPATH%\Scripts\activate.bat "+ cosmos.config.conda.env + "\n")
+                else:
+                    fid.write(r"call %CONDAPATH%\Scripts\activate.bat cosmos" + "\n")
+                if model.ensemble:
+                    fid.write("python run_job_2.py prepare_ensemble\n")
+                    fid.write("python run_job_2.py simulate\n")
+                    fid.write("python run_job_2.py merge_ensemble\n")
+                    if not model.type == "beware":
                         fid.write("python run_job_2.py map_tiles\n")   
-                        fid.write("python run_job_2.py clean_up\n")   
-                    else:
-                        fid.write("python run_job_2.py simulate\n")
+                    fid.write("python run_job_2.py clean_up\n")   
+                else:
+                    fid.write("python run_job_2.py simulate\n")
+                    if not model.type == "beware":
                         fid.write("python run_job_2.py map_tiles\n")   
-                    fid.write("move running.txt finished.txt\n")
-                    fid.write("exit\n")
-                    fid.close()
+                fid.write("move running.txt finished.txt\n")
+                fid.write("exit\n")
+                fid.close()
 
             # And now actually kick off this job
             if cosmos.config.cycle.run_mode == "serial":

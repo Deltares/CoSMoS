@@ -105,11 +105,10 @@ def prepare_single(config, member=None):
         if config["ensemble"]:
             nest2(config["flow_nested"]["overall_type"],
                 bw,
-                output_path=config["flow_nested"]["overall_path"],
+                output_path=os.path.join(config["flow_nested"]["overall_path"], member),
                 boundary_water_level_correction=zcor,
                 option="flow",
-                bc_path=".",
-                ensemble_member_index=int(member))
+                bc_path=".")
         else:
             # Deterministic    
             nest2(config["flow_nested"]["overall_type"],
@@ -136,10 +135,9 @@ def prepare_single(config, member=None):
         if config["ensemble"]:
             nest2(config["wave_nested"]["overall_type"],
                 bw,
-                output_path=config["wave_nested"]["overall_path"],
+                output_path=os.path.join(config["wave_nested"]["overall_path"], member),
                 option="wave",
-                bc_path=".",
-                ensemble_member_index=int(member))
+                bc_path=".")
         else:
             # Deterministic    
             nest2(config["wave_nested"]["overall_type"],
@@ -153,17 +151,20 @@ def merge_ensemble(config):
     if config["run_mode"] == "cloud":
         folder_path = '/input'
         his_output_file_name = os.path.join("/output/beware_his.nc")
-        # Make output folder_path
-        os.mkdir("output")
     else:
         folder_path = './'
-        his_output_file_name = "./beware_his.nc"
+        his_output_file_name = "./output/beware_his.nc"
+    output_path = './output'
+    os.makedirs("output", exist_ok=True)
+
     # Read in the list of ensemble members
     ensemble_members = read_ensemble_members()
     # Merge output files
     his_files = []
     for member in ensemble_members:
+        os.makedirs(os.path.join(output_path, member), exist_ok=True)
         his_files.append(os.path.join(folder_path, member, "beware_his.nc"))
+        fo.copy_file(os.path.join(folder_path, member, "beware_his.nc"), os.path.join(output_path, member, "beware_his.nc"))
     merge_nc_his(his_files, ["R2", "R2_setup", "WL"], output_file_name=his_output_file_name)
 
 def clean_up(config):

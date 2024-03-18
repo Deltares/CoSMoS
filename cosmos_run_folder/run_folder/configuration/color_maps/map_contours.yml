@@ -120,25 +120,25 @@ color_range:
     - 48
     - 97
     text: '>= 1.5'
-- name: Hm0_2m
+- name: hm0_2m
   legend_text: Wave height (m)
   color_map: cyan_purple_jet
   lower: 0.25
   upper: 2.0
   step: 0.25
-- name: Hm0_5m
+- name: hm0_5m
   legend_text: Wave height (m)
   color_map: cyan_purple_jet
   lower: 0.5
   upper: 5.0
   step: 0.5
-- name: Hm0_10m
+- name: hm0_10m
   legend_text: Wave height (m)
   color_map: cyan_purple_jet
   lower: 1.0
   upper: 10.0
   step: 1.0
-- name: Hm0_20m
+- name: hm0_20m
   legend_text: Wave height (m)
   color_map: cyan_purple_jet
   lower: 2.0
@@ -204,7 +204,7 @@ color_range:
   lower: 1.0
   upper: 1000.0
   scale: log16
-- name: Hm0
+- name: hm0
   legend_text: Wave height (m)
   color_map: cyan_purple_jet
   lower: 1.0

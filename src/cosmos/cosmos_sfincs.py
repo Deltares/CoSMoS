@@ -74,6 +74,7 @@ class CoSMoS_SFINCS(Model):
         self.domain.input.tref     = cosmos.scenario.ref_date
         self.domain.input.tstart   = self.flow_start_time
         self.domain.input.tstop    = self.flow_stop_time
+        self.domain.input.tspinup  = self.flow_spinup_time*3600
         self.domain.input.dtmapout = 21600.0 # should this not be configurable?
         self.domain.input.dtmaxout = 86400.0 # should this not be configurable?
         self.domain.input.dtout    = None
@@ -180,7 +181,9 @@ class CoSMoS_SFINCS(Model):
         if self.meteo_spiderweb or self.meteo_track and not self.ensemble:   
             self.domain.input.spwfile = "sfincs.spw"         
             # Spiderweb file given, copy to job folder
-            if self.meteo_spiderweb:
+            if cosmos.scenario.track_ensemble_nr_realizations>0:
+                spwfile = os.path.join(cosmos.scenario.cycle_track_ensemble_spw_path, "ensemble00000.spw")
+            elif self.meteo_spiderweb:
                 spwfile = os.path.join(cosmos.scenario.cycle_track_spw_path, self.meteo_spiderweb)
             elif self.meteo_track:
                 spwfile = os.path.join(cosmos.scenario.cycle_track_spw_path, self.meteo_track.split('.')[0] + ".spw")
@@ -189,9 +192,6 @@ class CoSMoS_SFINCS(Model):
             if self.crs.is_projected:
                 self.domain.input.utmzone = self.crs.utm_zone
         
-#            self.domain.input.variables.amufile = None
-#            self.domain.input.variables.amvfile = None
-
         if self.ensemble:
             # Use spiderweb from ensemble
             self.domain.input.spwfile = "sfincs.spw"

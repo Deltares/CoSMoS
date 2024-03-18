@@ -99,13 +99,13 @@ class Scenario:
                 
                 # Model by region and type                
                 # First make list of all regions to include
-                region_list       = [] # List of regions
-                type_list         = [] # List of types
+                region_list       = ["empty"] # List of regions
+                type_list         = ["empty"] # List of types
 
                 if "type" in mdl:
                     type_list = mdl["type"]
                 if "region" in mdl:
-                    region_list = mdl["region"]
+                    region_list.append(mdl["region"])
                 if "super_region" in mdl:
                     super_region_name = mdl["super_region"].lower()
                     for region in cosmos.config.super_region[super_region_name]["region"]:
@@ -114,7 +114,7 @@ class Scenario:
 
                 # Loop through all available models
                 for name in cosmos.all_models.keys():
-                    if cosmos.all_models[name]["region"] in region_list:
+                    if any(cosmos.all_models[name]["region"] == item for item in region_list):
                         if cosmos.all_models[name]["type"] in type_list:
                             models_in_scenario[name] = cosmos.all_models[name]
                             # Set meteo to one give in scenario
@@ -131,6 +131,8 @@ class Scenario:
 
         ### Add missing models
         # We know which models need to be added. Check if all models that provide boundary conditions are there as well.
+        # TO DO: the above ...                        
+                                
                         
         ### Clear model list
         self.model = []
