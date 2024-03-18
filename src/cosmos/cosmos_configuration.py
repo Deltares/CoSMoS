@@ -84,6 +84,7 @@ class Cycle:
         self.clean_up        = False
         self.make_flood_maps = True
         self.make_wave_maps  = True
+        self.make_sedero_maps = False
         self.upload          = True
         self.get_meteo       = True
         self.run_mode        = "serial"
