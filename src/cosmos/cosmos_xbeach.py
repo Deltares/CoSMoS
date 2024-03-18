@@ -12,8 +12,6 @@ import xarray as xr
 
 from .cosmos_main import cosmos
 from .cosmos_model import Model
-from .cosmos_tiling import make_sedero_tiles
-from .cosmos_tiling import make_bedlevel_tiles
 
 import cht.misc.fileops as fo
 from cht.xbeach.xbeach import XBeach
@@ -48,27 +46,23 @@ class CoSMoS_XBeach(Model):
         # Now read in the domain data
         input_file  = os.path.join(self.path, "input", "params.txt")
         self.domain = XBeach(input_file=input_file, get_boundary_coordinates=False)
-        # Give names to the boundary points
-        for ipnt, pnt in enumerate(self.domain.flow_boundary_point):
-            pnt.name = str(ipnt + 1).zfill(4)
-        for ipnt, pnt in enumerate(self.domain.wave_boundary_point):
-            pnt.name = str(ipnt + 1).zfill(4)
         
         mdl_dict = toml.load(self.file_name)
         if "flow_nesting_points" in mdl_dict:
-            flow_nesting_points = mdl_dict["flow_nesting_points"]
-
+            self.flow_nesting_points = mdl_dict["flow_nesting_points"]
             #remove the default found boundary locations based on the tideloc and xbeach routine
-            self.domain.flow_boundary_point[len(flow_nesting_points):] = []
-            for ipnt, pnt in enumerate(flow_nesting_points):
+            self.domain.flow_boundary_point[len(self.flow_nesting_points):] = []
+            for ipnt, pnt in enumerate(self.flow_nesting_points):
+                self.domain.flow_boundary_point[ipnt].name = str(ipnt + 1).zfill(4)
                 self.domain.flow_boundary_point[ipnt].geometry.x = pnt[0]
                 self.domain.flow_boundary_point[ipnt].geometry.y = pnt[1]
                 #TODO change tideloc in the params as a function of the new boundary points?
 
         if "wave_nesting_point" in mdl_dict:
-            wave_nesting_point = mdl_dict["wave_nesting_point"]
-            self.domain.wave_boundary_point[0].geometry.x = wave_nesting_point[0]
-            self.domain.wave_boundary_point[0].geometry.y = wave_nesting_point[1]
+            self.wave_nesting_point = mdl_dict["wave_nesting_point"]
+            self.domain.wave_boundary_point[0].name = str(1).zfill(4)
+            self.domain.wave_boundary_point[0].geometry.x = self.wave_nesting_point[0]
+            self.domain.wave_boundary_point[0].geometry.y = self.wave_nesting_point[1]
 
         if "zb_deshoal" in mdl_dict:
             self.domain.zb_deshoal = mdl_dict["zb_deshoal"]
@@ -203,46 +197,5 @@ class CoSMoS_XBeach(Model):
         """Post-process XBeach output: generate sedimentation/erosion maps.        
         """
         
-        output_path = self.cycle_output_path
-        post_path =  os.path.join(cosmos.config.path.webviewer, 
-                            cosmos.config.webviewer.name,
-                            "data",
-                            cosmos.scenario.name)
-        sedero_map_path = os.path.join(post_path,
-                                       "sedero")
-        zb0_map_path = os.path.join(post_path,
-                                       "zb0")  
-        zbend_map_path = os.path.join(post_path,
-                                       "zbend")              
-        index_path = os.path.join(self.path, "tiling", "indices")
-        
-        if os.path.exists(index_path):
-            # settings
-            try:
-                # read xbeach output
-                output_file = os.path.join(output_path, 'xboutput.nc')
-                dt = xr.open_dataset(output_file)
-            except:
-                print("ERROR while making xbeach tiles")
-                return
-        
-            var = 'sedero'
-            elev_min = -2
-            # mask xbeach output based on a min elevation of the initial topobathymetry
-            val = dt[var][-1, :, :].where(dt['zb'][0, :, :] > elev_min)
-            val_masked = val.values
-            
-            cosmos.log("Making sedimenation/erosion tiles for model " + self.name)
-            # make pngs
-            make_sedero_tiles(val_masked, index_path, sedero_map_path)
-            cosmos.log("Sedimentation/erosion tiles done.")
-            
-            zb0 = dt['zb'][0, :, :].values
-            zbend = dt['zb'][-1, :, :].values
-            cosmos.log("Making bedlevel tiles for model " + self.name)
-            make_bedlevel_tiles(zb0, index_path, zb0_map_path)
-            make_bedlevel_tiles(zbend, index_path, zbend_map_path)
-            cosmos.log("Bed level tiles done.")
-            
-
+        pass
                 
