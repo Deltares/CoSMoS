@@ -11,8 +11,8 @@ import toml
 import xarray as xr
 import pandas as pd
 
-from .cosmos_main import cosmos
-from .cosmos_model import Model
+from cosmos.cosmos_main import cosmos
+from cosmos.cosmos_model import Model
 
 import cht.misc.fileops as fo
 from cht.xbeach.xbeach import XBeach

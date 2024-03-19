@@ -12,8 +12,8 @@ from cht.xbeach.xbeach import XBeach
 from cht.nesting.nest2 import nest2
 #from cht.misc.argo import Argo
 
-from .cosmos_tiling import make_sedero_tiles
-from .cosmos_tiling import make_bedlevel_tiles
+from cosmos.cosmos_tiling import make_sedero_tiles
+from cosmos.cosmos_tiling import make_bedlevel_tiles
 
 def get_s3_client(config):
     # Create an S3 client
