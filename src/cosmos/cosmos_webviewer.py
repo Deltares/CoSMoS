@@ -145,6 +145,8 @@ class WebViewer:
         self.make_runup_map()
         cosmos.log("Adding XBeach markers ...")                
         self.make_xb_markers()
+        cosmos.log("Adding XBeach regimes ...")                
+        self.make_xb_regimes()
 
         # Write map variables to file
         cosmos.log("Writing variables ...")                
@@ -495,8 +497,88 @@ class WebViewer:
             
 #             self.map_variables.append(dct)
 
+    def make_xb_regimes(self):        
+        """Make Sallenger regimes markers for webviewer.
+        """   
 
+        output_path = self.cycle_path
 
+        # Sallenger regimes
+
+        for model in cosmos.scenario.model:
+            if model.type == 'xbeach':
+
+                #if os.path.exists(os.path.join(model.cycle_output_path,
+                 #                           "beware_his.nc")) and not model.ensemble:
+           
+        
+                csv_file = os.path.join(model.cycle_post_path,"Sallengerregimes.csv")
+                df = pd.read_csv(csv_file)
+                
+                transformer = Transformer.from_crs(model.crs,
+                                                        'WGS 84',
+                                                        always_xy=True)
+                features = []    
+                for ip in range(len(df)):
+                    lon, lat = transformer.transform(df.X[ip],df.Y[ip])
+                    point = Point((lon, lat))
+                                
+                    features.append(Feature(geometry=point,
+                    properties={"model_name":model.name,
+                                "LocNr":int(ip),
+                                "Lon":lon,
+                                "Lat":lat,                                                
+                                "regime":int(df.sallregime[ip]),
+                                "erosionregime":int(df.erosionregime[ip])}))
+
+                # Save xbeach geojson file for Sallenger regimes
+                if features:
+                    feature_collection = FeatureCollection(features)
+                    output_path_regime = os.path.join(output_path, 'xbeach_regimes\\')
+                    fo.mkdir(output_path_regime)
+                    file_name = os.path.join(output_path_regime,
+                                        "sallenger_regimes_XBeach.geojson.js")
+                    cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var regimes =")
+            
+                dct={}
+                dct["name"]        = "sallenger_regimes"
+                dct["long_name"]   = "Sallenger regimes XBeach"
+                dct["description"] = "These are the Sallenger regimes"
+                dct["format"]      = "geojson"
+                dct["legend"] = make_legend(type = 'sallregimes')
+
+                self.map_variables.append(dct)
+
+                # now same for Erosion regimes
+                features_ero = []    
+                for ip in range(len(df)):
+                    lon, lat = transformer.transform(df.X[ip],df.Y[ip])
+                    point = Point((lon, lat))
+                                
+                    features_ero.append(Feature(geometry=point,
+                    properties={"model_name":model.name,
+                                "LocNr":int(ip),
+                                "Lon":lon,
+                                "Lat":lat,                                                
+                                "erosionregime":int(df.erosionregime[ip])}))
+
+                # Save xbeach geojson file for Sallenger regimes
+                if features_ero:
+                    feature_collection_ero = FeatureCollection(features_ero)
+                    output_path_regime = os.path.join(output_path, 'xbeach_regimes\\')
+                    fo.mkdir(output_path_regime)
+                    file_name = os.path.join(output_path_regime,
+                                        "erosion_regimes_XBeach.geojson.js")
+                    cht.misc.misc_tools.write_json_js(file_name, feature_collection_ero, "var regimes =")
+            
+                dct={}
+                dct["name"]        = "erosion_regimes"
+                dct["long_name"]   = "Erosion regimes XBeach"
+                dct["description"] = "These are the Erosion regimes"
+                dct["format"]      = "geojson"
+                dct["legend"] = make_legend(type = 'eroregimes')
+
+                self.map_variables.append(dct)
             
 
     def make_runup_map(self):        
