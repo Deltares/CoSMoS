@@ -40,7 +40,15 @@ def setup_track_ensemble():
                                                   vcyc=40.0,
                                                   vmin=18.0)
         # Filter cyclone based on TCvitals
-        tc = find_priorityTC(tracks, "priority_storm.txt")
+        # Use coordinates specified in meteo file to extract nearest track from gridded meteo data (if present)
+        if cosmos.scenario.meteo_lon: 
+            meteo_lon = cosmos.scenario.meteo_lon
+            meteo_lat = cosmos.scenario.meteo_lat
+        else:
+            meteo_lon = None
+            meteo_lat = None
+
+        tc = find_priorityTC(tracks, "priority_storm.txt", meteo_lon, meteo_lat)
 #        tc = tracks[0]
 
         # Use the first track to make ensembles
