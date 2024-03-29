@@ -528,20 +528,22 @@ class WebViewer:
                                 "LocNr":int(ip),
                                 "Lon":lon,
                                 "Lat":lat,                                                
-                                "regime":int(df.sallregime[ip]),
-                                "erosionregime":int(df.erosionregime[ip])}))
+                                "regimes":int(df.sallregime[ip]),
+                                #"erosionregime":int(df.erosionregime[ip])
+                                })
+                                )
 
                 # Save xbeach geojson file for Sallenger regimes
                 if features:
                     feature_collection = FeatureCollection(features)
-                    output_path_regime = os.path.join(output_path, 'xbeach_regimes\\')
+                    output_path_regime = os.path.join(output_path, 'sallenger\\')
                     fo.mkdir(output_path_regime)
                     file_name = os.path.join(output_path_regime,
-                                        "sallenger_regimes_XBeach.geojson.js")
+                                        "sallenger.geojson.js")
                     cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var regimes =")
             
                 dct={}
-                dct["name"]        = "sallenger_regimes"
+                dct["name"]        = "sallenger"
                 dct["long_name"]   = "Sallenger regimes XBeach"
                 dct["description"] = "These are the Sallenger regimes"
                 dct["format"]      = "geojson"
@@ -560,15 +562,15 @@ class WebViewer:
                                 "LocNr":int(ip),
                                 "Lon":lon,
                                 "Lat":lat,                                                
-                                "erosionregime":int(df.erosionregime[ip])}))
+                                "regimes":int(df.erosionregime[ip])}))
 
                 # Save xbeach geojson file for Sallenger regimes
                 if features_ero:
                     feature_collection_ero = FeatureCollection(features_ero)
-                    output_path_regime = os.path.join(output_path, 'xbeach_regimes\\')
+                    output_path_regime = os.path.join(output_path, 'erosionregimes\\')
                     fo.mkdir(output_path_regime)
                     file_name = os.path.join(output_path_regime,
-                                        "erosion_regimes_XBeach.geojson.js")
+                                        "erosionregimes.geojson.js")
                     cht.misc.misc_tools.write_json_js(file_name, feature_collection_ero, "var regimes =")
             
                 dct={}
