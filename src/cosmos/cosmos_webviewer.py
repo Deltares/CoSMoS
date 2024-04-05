@@ -562,7 +562,7 @@ class WebViewer:
                                 "Lat":lat,                                                
                                 "erosionregime":int(df.erosionregime[ip])}))
 
-                # Save xbeach geojson file for Sallenger regimes
+                # Save xbeach geojson file for erosion regimes
                 if features_ero:
                     feature_collection_ero = FeatureCollection(features_ero)
                     output_path_regime = os.path.join(output_path, 'xbeach_regimes\\')
