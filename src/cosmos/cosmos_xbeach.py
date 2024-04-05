@@ -159,7 +159,7 @@ class CoSMoS_XBeach(Model):
             fid.write('set mpidir="c:\\Program Files\\MPICH2\\bin"\n')
             fid.write("set PATH=%xbeachdir%;%PATH%\n")
             fid.write("set PATH=%mpidir%;%PATH%\n")
-            fid.write("mpiexec.exe -n 5 %xbeachdir%\\xbeach.exe\n")
+            fid.write("mpiexec.exe -n 5 -mapall %xbeachdir%\\xbeach.exe\n")
             fid.write("del q_*\n")
             fid.write("del E_*\n")
             fid.write("move running.txt finished.txt\n")
