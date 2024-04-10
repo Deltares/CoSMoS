@@ -9,12 +9,14 @@ import os
 import datetime
 import toml
 import xarray as xr
+import pandas as pd
 
-from .cosmos_main import cosmos
-from .cosmos_model import Model
+from cosmos.cosmos_main import cosmos
+from cosmos.cosmos_model import Model
 
 import cht.misc.fileops as fo
 from cht.xbeach.xbeach import XBeach
+from cht.xbeach.xbeach_output_morphology import Map 
 
 class CoSMoS_XBeach(Model):
     """Cosmos class for XBeach model.
@@ -194,8 +196,37 @@ class CoSMoS_XBeach(Model):
         fo.move_file(os.path.join(job_path, "*.*"), input_path)
 
     def post_process(self):
-        """Post-process XBeach output: generate sedimentation/erosion maps.        
+        """Post-process XBeach output: generate Sallenger regimes.        
         """
         
-        pass
+        output_path = self.cycle_output_path
+        post_path   = self.cycle_post_path
+    
+        try:
+            # read xbeach output
+            output_file = os.path.join(output_path, 'xboutput.nc')
+            dt = xr.open_dataset(output_file)
+        except:
+            print("ERROR while making xbeach regimes")
+            return
+                    
+        # get Sallenger regimes
+        x_grid = dt['globalx'].values
+        y_grid = dt['globaly'].values
+        zsmean = dt['zs_mean'].values    
+        zsmax = dt['zs_max'].values
+        zb0 = dt['zb'][0, :, :].values # todo: check if this is needed 
+        zbend = dt['zb'][-1, :, :].values
+        
+        # make object for 2D XBeach output
+        map2D = Map(x2D=x_grid, y2D=y_grid, zb02D=zb0, zbend2D=zbend, plot_dir=output_path)
+        # get Sallenger regimes
+        # 1) still need to fix something for MHW, for now a fixed value
+        # 2) for now no figures are generated, takes too long to do operationally, but would be nice to include
+        x_crest, y_crest, regimenos, erosionregimenos = map2D.alongshore_sallenger_regimes(zsmean, zsmax, MHW=0.25, plot_transects=False, plot_map=False)
+        df = pd.DataFrame({'X': x_crest, 'Y': y_crest, 'sallregime': regimenos, 'erosionregime': erosionregimenos})
+        # Save DataFrame to CSV
+        file_name = os.path.join(post_path,"Sallengerregimes.csv")
+        df.to_csv(file_name, index=False)
+
                 
