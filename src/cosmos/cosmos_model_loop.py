@@ -171,7 +171,7 @@ class ModelLoop():
                     if not model.type == "beware":
                         fid.write("python run_job_2.py map_tiles\n")   
                 fid.write("move running.txt finished.txt\n")
-                fid.write("exit\n")
+                # fid.write("exit\n")
                 fid.close()
 
             # And now actually kick off this job
@@ -207,13 +207,21 @@ class ModelLoop():
                 cosmos.log("Submitting to S3 : " + s3key)
                 model.cloud_job = cosmos.argo.submit_template_job(model.workflow_name, model.name, s3key, tilesfolder, webviewerfolder)
 
+
+            elif cosmos.config.cycle.run_mode == "parallel":
+                # Model will be run on WCP node
+                # Write ready file (WCP nodes will pick up this job)
+
+                file_name = os.path.join(cosmos.config.path.jobs,
+                                          f"{model.name}_{cosmos.cycle_string}.txt")
+                fid = open(file_name, "w")
+                fid.write(model.job_path)
+                fid.close()
+
             else:
                 # Model will be run on WCP node
                 # Write ready file (WCP nodes will pick up this job)
-                file_name = os.path.join(cosmos.config.path.jobs,
-                                         cosmos.scenario.name,
-                                         model.name,
-                                         "ready.txt")
+                file_name = os.path.join(model.job_path, "ready.txt")
                 fid = open(file_name, "w")
                 fid.write(model.job_path)
                 fid.close()
