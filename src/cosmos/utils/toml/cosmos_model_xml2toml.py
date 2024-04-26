@@ -9,7 +9,7 @@ import toml
 import cht.misc.xmlkit as xml
 import cht.misc.fileops as fo
 
-model_database_path = "c:\\work\\cosmos\\cosmos_clean_floris_02\\model_database"
+model_database_path = r"p:\11206085-onr-fhics\03_cosmos\models"
 region_list = fo.list_folders(os.path.join(model_database_path,
                                            "*"))
 for region_path in region_list:
@@ -20,17 +20,14 @@ for region_path in region_list:
         name_list = fo.list_folders(os.path.join(type_path,"*"))
         for name_path in name_list:
             name = os.path.basename(name_path).lower()
+            
             # Check if xml file exists
             xml_file = os.path.join(name_path, name + ".xml")
             tml_file = os.path.join(name_path, "model.toml")
 
-            try:
+            print(name)
 
-# region = "puerto_rico"
-# name = "sfincs_puerto_rico"
-# path = os.path.join("c:\work\cosmos\model_database", region, "sfincs", name)
-# xml_file = os.path.join(path, name + ".xml")
-# tml_file = os.path.join(path, "model.toml")
+            try:
                 xml_obj = xml.xml2obj(xml_file)
                 
                 model = {}
@@ -79,17 +76,31 @@ for region_path in region_list:
                             key = "wave_nested"
                         else:
                             key = None
+
                     if key == "coordsys":
                         key = "crs"
+
                     if key == "coordsystype":
                         key = None
+
                     if key == "station":
                         val = [val]
-                        
-                        pass
-                            
-                        
-                            
+
+                    if key == "flow_nesting_point_1":
+                        key = "flow_nesting_points"
+                        val = [[float(val.split(',')[0]), float(val.split(',')[1])]]
+                    
+                    if key == "flow_nesting_point_2":
+                        coor_2 = [float(val.split(',')[0]), float(val.split(',')[1])]
+                        model["flow_nesting_points"].append(coor_2)
+                        key = None
+
+                    if key == "wave_nesting_point_1":
+                        key = "wave_nesting_point"
+                        val = [float(val.split(',')[0]), float(val.split(',')[1])]
+
+                                                
+           
                     # # Read polygon around model
                     # polygon_file  = os.path.join(self.path, "misc", self.name + ".txt")
                     # if os.path.exists(polygon_file):
@@ -120,13 +131,15 @@ for region_path in region_list:
                 if model["type"] == "sfincs" or model["type"] == "hurrywave" or model["type"] == "xbeach":
                     if "runid" in model:
                         model.pop("runid")
+
+                
                 
                 with open(tml_file, "w") as f:
                     new_toml_string = toml.dump(model, f)
-                    
-                    
-                    
+                
                 xxx = toml.load(tml_file)
+
                 pass    
             except:
                 print("error " + name)
+            
