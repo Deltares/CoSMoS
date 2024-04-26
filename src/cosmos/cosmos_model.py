@@ -401,7 +401,7 @@ class Model:
                 self.domain.tref  = self.flow_start_time
                 self.domain.tstop = self.flow_stop_time
 
-            z_max = nesting.nest2(self.flow_nested.domain,
+            z_max = nest2(self.flow_nested.domain,
                           self.domain,
                           output_path=self.flow_nested.cycle_output_path,
                           boundary_water_level_correction=zcor,

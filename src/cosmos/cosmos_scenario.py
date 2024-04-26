@@ -280,7 +280,7 @@ class Scenario:
                     if okay:
                         cl.add_model(model)
                     
-                cluster_dict[name] = cl                
+                cluster_dict[cld['name']] = cl                   
 
         cosmos.log("Finished reading scenario")    
 
