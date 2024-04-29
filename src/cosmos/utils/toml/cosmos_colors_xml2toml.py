@@ -9,8 +9,9 @@ import toml
 import yaml
 import cht.misc.xmlkit as xml
 
-path = "c:\\work\\cosmos\\run_folder\\configuration\\color_maps"
+path = r"p:\11206085-onr-fhics\03_cosmos\configurations"
 name = "map_contours"
+
 xml_file = os.path.join(path, name + ".xml")
 tml_file = os.path.join(path, name + ".toml")
 yml_file = os.path.join(path, name + ".yml")
