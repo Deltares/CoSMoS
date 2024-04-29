@@ -228,7 +228,7 @@ class Scenario:
         # Add models to clusters 
         if "cluster" in sc_dict:
             for cld in sc_dict["cluster"]:
-                cl = Cluster()
+                cl = Cluster(name = cld['name'])
                 if "run_condition" in cld:
                     cl.run_condition = cld["run_condition"]
                 if "topn" in cld:
@@ -280,7 +280,7 @@ class Scenario:
                     if okay:
                         cl.add_model(model)
                     
-                cluster_dict[name] = cl                
+                cluster_dict[cld['name']] = cl                   
 
         cosmos.log("Finished reading scenario")    
 

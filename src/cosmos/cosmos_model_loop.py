@@ -171,7 +171,7 @@ class ModelLoop():
                     if not model.type == "beware":
                         fid.write("python run_job_2.py map_tiles\n")   
                 fid.write("move running.txt finished.txt\n")
-                fid.write("exit\n")
+                #fid.write("exit\n")
                 fid.close()
 
             # And now actually kick off this job
