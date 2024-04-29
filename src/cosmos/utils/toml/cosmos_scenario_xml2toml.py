@@ -10,15 +10,15 @@ import cht.misc.xmlkit as xml
 import cht.misc.fileops as fo
 
 
-model_database_path = r"p:\11206085-onr-fhics\03_cosmos\scenarios"
-scenario_list = fo.list_folders(os.path.join(model_database_path,
+scenario_database_path = r"p:\11206085-onr-fhics\03_cosmos\scenarios"
+scenario_list = fo.list_folders(os.path.join(scenario_database_path,
                                            "*"))
 for name_path in scenario_list:
     name = os.path.basename(name_path).lower()
     xml_file = os.path.join(name_path, name + ".xml")
 
     print(xml_file)
-    tml_file = os.path.join(name_path, "model.toml")
+    tml_file = os.path.join(name_path, "scenario.toml")
     
     try:
         xml_obj = xml.xml2obj(xml_file)
