@@ -21,10 +21,12 @@ class CosmosRunParallel:
                running = running + 1
         self.running = running
     
-    def start(self, job_path,local_path):    
+    def start(self, job_path, local_path, scenario):    
 
         self.status = "searching"
         self.job_path = job_path
+        self.scenario = scenario
+        
         self.local_path = local_path
         attempts = 0
         while self.status == "searching":
@@ -60,43 +62,53 @@ class CosmosRunParallel:
                running = running + 1
                
         if running == self.running:
-            attempts = 0
             try:
-                # model_list = [ f.path for f in os.scandir(self.job_path) if f.is_dir() ]
-                model_list = [ f.name for f in os.scandir(self.job_path) if f.is_dir() ]
+                model_name_list = [f.name for f in os.scandir(self.job_path)]
+                job_path_list = [f.path for f in os.scandir(self.job_path)]
+   
+
             except:
                 time.sleep(10)
                 return None
-        
-            for model in model_list:
-                #
-                file_name = os.path.join(self.job_path,model,
-                                         "ready.txt")
-                       
-                if os.path.exists(file_name):
+
+
+            for ijob, job_path in enumerate(job_path_list):
+                
+                model_name = model_name_list[ijob].split('.')[0]
+
+                if os.path.exists(job_path):
+                    
                     try:
-                        os.remove(file_name)
+                        fid = open(job_path, "r")
+                        model_path = fid.read()
+                        fid.close()
+                        os.remove(job_path)
+                    
                     except:
-                        return  
+                        # model is already been copied to another instance
+                        continue
                     
                     # Make run batch file
                     fid = open("tmp.bat", "w")
                     fid.write("title Running CoSMoS" + "\n")
-                    fid.write("mkdir " + os.path.join(self.local_path,model) + "\n")
-                    fid.write("xcopy " + os.path.join(self.job_path,model) + " " + os.path.join(self.local_path,model) + " /E /Q /Y" + "\n")
+                    fid.write("mkdir " + os.path.join(self.local_path, model_name) + "\n")
+                    fid.write("xcopy " + os.path.join(model_path) + " " + os.path.join(self.local_path, model_name) + " /E /Q /Y" + "\n")
                     fid.write(self.local_path[0:2] + "\n")
-                    fid.write("cd " + os.path.join(self.local_path,model) + "\n")
+                    fid.write("cd " + os.path.join(self.local_path, model_name) + "\n")
                     fid.write("call run.bat\n")
                     fid.write("move finished.txt finished_local.txt" + " \n")
                     fid.write("echo " + socket.gethostname() + ">> finished_local.txt"  + " \n" )
-                    fid.write("xcopy " + os.path.join(self.local_path,model) + " " + os.path.join(self.job_path,model) + " /E /Q /Y" + "\n")
-                    fid.write(self.job_path[0:2] + "\n")
-                    fid.write("cd " + os.path.join(self.job_path,model) + "\n")
+                    fid.write("xcopy " + os.path.join(self.local_path, model_name) + " " + os.path.join(model_path) + " /E /Q /Y" + "\n")
+                    fid.write(model_path[0:2] + "\n")
+                    fid.write("cd " + os.path.join(model_path) + "\n")
                     fid.write("move finished_local.txt finished.txt" + " \n")
-                    fid.write("rmdir " + os.path.join(self.local_path,model) + " /s /q" + "\n")
+                    fid.write("rmdir " + os.path.join(self.local_path, model_name) + " /s /q" + "\n")
                     fid.write("exit\n")
                     fid.close()
                     
                     os.system('start tmp.bat')
-                    print("Running " + model)
+                    print("Running " + model_name)
                     break
+
+
+
