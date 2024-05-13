@@ -8,6 +8,7 @@ from .cosmos_main import cosmos
 GlobalConfig.namespace = cosmos.config.cloud_config.namespace
 GlobalConfig.host = cosmos.config.cloud_config.host
 GlobalConfig.verify_ssl = False
+GlobalConfig.token = cosmos.config.cloud_config.token
 
 class Argo:
 

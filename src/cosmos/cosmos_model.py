@@ -141,6 +141,7 @@ class Model:
             config["cloud"]["access_key"] = cosmos.config.cloud_config.access_key
             config["cloud"]["secret_key"] = cosmos.config.cloud_config.secret_key
             config["cloud"]["region"] = cosmos.config.cloud_config.region
+            config["cloud"]["token"] = cosmos.config.cloud_config.token
             config["cloud"]["namespace"] = cosmos.config.cloud_config.namespace
         if self.flow_nested:
             # Water level forcing

@@ -76,6 +76,8 @@ class CloudConfig:
         self.region     = "eu-west-1"
         # Namespace within the cluster where the argo installation is located
         self.namespace  = "argo"
+        # Token for accessing the argo installation
+        self.token = None
         
 class Cycle:
     def __init__(self):
