@@ -11,7 +11,6 @@ import toml
 from .cosmos_stations import Stations
 from .cosmos_meteo import read_meteo_sources
 from .cosmos_color_maps import read_color_maps
-#import cht.misc.xmlkit as xml
 from cht.misc.misc_tools import rgb2hex
 import cht.misc.fileops as fo
 
@@ -159,7 +158,7 @@ class Configuration:
                 name_list = fo.list_folders(os.path.join(type_path,"*"))
                 for name_path in name_list:
                     name = os.path.basename(name_path).lower()
-                    # Check if xml file exists
+                    # Check if toml file exists
                     toml_file = os.path.join(name_path, "model.toml")
                     if os.path.exists(toml_file):
                         cosmos.all_models[name] = {"type": type_name,
@@ -169,7 +168,7 @@ class Configuration:
         # Color maps
         tml_file = os.path.join(self.path.config,
                                 "color_maps",
-                                "map_contours.yml")
+                                "map_contours.toml")
         self.map_contours = read_color_maps(tml_file)
         
         # Available stations
