@@ -13,7 +13,6 @@ from cht.misc.prob_maps import merge_nc_his
 from cht.misc.prob_maps import merge_nc_map
 from cht.tiling.tiling import make_floodmap_tiles
 from cht.tiling.tiling import make_png_tiles
-from cht.tiling.tiling import make_water_level_tiles
 from cht.sfincs.sfincs import SFINCS
 from cht.nesting.nest2 import nest2
 #from cht.misc.argo import Argo
@@ -373,10 +372,20 @@ def map_tiles(config):
                                         config["cycle"],
                                         config["water_level_map"]["name"],
                                         pathstr[-1]) 
-                                    
 
-                make_water_level_tiles(zsmax, index_path, topo_path, water_level_map_path,
-                        water_level_correction, zbmax)
+                color_values = config["water_level_map"]["color_map"]["contours"]
+
+                make_png_tiles(
+                    valg=zsmax,
+                    index_path=index_path,
+                    png_path=png_path,
+                    option="water_level",
+                    zoom_range=[0,11],
+                    topo_path=topo_path,
+                    color_values=color_values,
+                    zbmax=zbmax,
+                    quiet=True,
+                )
                             
             except Exception as e:
                 print("An error occured while making flood map tiles: {}".format(str(e)))
