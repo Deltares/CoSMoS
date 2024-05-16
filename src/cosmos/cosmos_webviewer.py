@@ -528,7 +528,7 @@ class WebViewer:
                                 "LocNr":int(ip),
                                 "Lon":lon,
                                 "Lat":lat,                                                
-                                "regimes":int(df.sallregime[ip]),
+                                "regime":int(df.sallregime[ip]),
                                 #"erosionregime":int(df.erosionregime[ip])
                                 })
                                 )
@@ -547,7 +547,7 @@ class WebViewer:
                 dct["long_name"]   = "Sallenger regimes XBeach"
                 dct["description"] = "These are the Sallenger regimes"
                 dct["format"]      = "geojson"
-                dct["legend"] = make_legend(type = 'sallregimes')
+                dct["legend"] = make_legend(type = 'run_up') #Option to add other legend but needs to be defined in map_contours.toml file.
 
                 self.map_variables.append(dct)
 
@@ -562,7 +562,7 @@ class WebViewer:
                                 "LocNr":int(ip),
                                 "Lon":lon,
                                 "Lat":lat,                                                
-                                "regimes":int(df.erosionregime[ip])}))
+                                "regime":int(df.erosionregime[ip])}))
 
                 # Save xbeach geojson file for erosion regimes
                 if features_ero:
@@ -578,7 +578,7 @@ class WebViewer:
                 dct["long_name"]   = "Erosion regimes XBeach"
                 dct["description"] = "These are the Erosion regimes"
                 dct["format"]      = "geojson"
-                dct["legend"] = make_legend(type = 'eroregimes')
+                dct["legend"] = make_legend(type = 'run_up')
 
                 self.map_variables.append(dct)
             
