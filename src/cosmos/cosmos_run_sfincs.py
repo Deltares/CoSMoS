@@ -13,6 +13,7 @@ from cht.misc.prob_maps import merge_nc_his
 from cht.misc.prob_maps import merge_nc_map
 from cht.tiling.tiling import make_floodmap_tiles
 from cht.tiling.tiling import make_png_tiles
+from cht.tiling.tiling import make_water_level_tiles
 from cht.sfincs.sfincs import SFINCS
 from cht.nesting.nest2 import nest2
 #from cht.misc.argo import Argo
@@ -320,6 +321,66 @@ def map_tiles(config):
                                     quiet=True)
             except:
                 print("An error occured while making flood map tiles")
+
+    if "water_level_map" in config:
+
+        # Make SFINCS object
+        sf = SFINCS()
+        
+        # Make water level map tiles
+        print("Making water level map tiles ...")
+
+        water_level_map_path = config["water_level_map"]["png_path"]
+        index_path           = config["water_level_map"]["index_path"]
+        topo_path            = config["water_level_map"]["topo_path"]
+        zsmax_path           = config["water_level_map"]["zsmax_path"]
+        
+        if os.path.exists(index_path) and os.path.exists(topo_path):
+
+            print("Making water level map tiles for model " + config["model"] + " ...")
+
+            t0  = config["water_level_map"]["start_time"].replace(tzinfo=None)
+            t1  = config["water_level_map"]["stop_time"].replace(tzinfo=None)
+
+            pathstr = []
+            pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))            
+
+            zsmax_file = os.path.join(zsmax_path, "sfincs_map.nc")
+            
+            if config["ensemble"]:
+                varname = "zsmax_90"
+            else:
+                varname = "zsmax"
+
+            try:
+                # Full simulation        
+                zsmax = sf.read_zsmax(zsmax_file=zsmax_file, varname=varname)
+                water_level_correction = config["vertical_reference_level_difference_with_msl"]
+                zbmax = 0.0
+
+                # NOTE all overland models get a boundary_water_level_correction
+                # this causes an offset wrt the surge models
+                # correct surge models as well to align plots:
+                if water_level_correction == 0.0: # default value
+                    water_level_correction += 0.15
+                    zbmax = -1.0
+
+                zsmax += water_level_correction
+                zsmax = np.transpose(zsmax)
+
+                png_path = os.path.join(water_level_map_path,
+                                        config["scenario"],
+                                        config["cycle"],
+                                        config["water_level_map"]["name"],
+                                        pathstr[-1]) 
+                                    
+
+                make_water_level_tiles(zsmax, index_path, topo_path, water_level_map_path,
+                        water_level_correction, zbmax)
+                            
+            except Exception as e:
+                print("An error occured while making flood map tiles: {}".format(str(e)))
+
 
 def clean_up(config):
     if config["ensemble"]:

@@ -64,6 +64,7 @@ class Model:
         self.polygon            = None
         self.make_flood_map     = False
         self.make_wave_map      = False
+        self.make_water_level_map = False
         self.make_sedero_map    = False
         self.sa_correction      = None
         self.ssa_correction     = None
@@ -206,27 +207,55 @@ class Model:
             config["flood_map"]["start_time"] = cosmos.cycle
             config["flood_map"]["stop_time"]  = cosmos.stop_time
             config["flood_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["flood_map"]["color_map"]]
+        if cosmos.config.cycle.make_water_level_maps and self.make_water_level_map:
+            config["water_level_map"] = {}
+            if self.ensemble:
+                name = "water_level_map_90"
+            else:
+                name = "water_level_map"    
+            config["water_level_map"]["name"] = name
+            if cosmos.config.cycle.run_mode == "cloud":
+                config["water_level_map"]["png_path"]   = "/output"
+                config["water_level_map"]["index_path"] = "/tiles/indices"
+                config["water_level_map"]["topo_path"]  = "/tiles/topobathy"
+                config["water_level_map"]["zsmax_path"]  = "/input"
+            else:
+                config["water_level_map"]["png_path"]   = os.path.join(cosmos.config.webviewer.data_path)
+                config["water_level_map"]["index_path"] = os.path.join(self.path, "tiling", "indices")
+                config["water_level_map"]["topo_path"]  = os.path.join(self.path, "tiling", "topobathy")
+                config["water_level_map"]["zsmax_path"]  = "."
+            config["water_level_map"]["start_time"] = cosmos.cycle
+            config["water_level_map"]["stop_time"]  = cosmos.stop_time
+            config["water_level_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["water_level_map"]["color_map"]]
         if cosmos.config.cycle.make_wave_maps and self.make_wave_map:
             config["hm0_map"] = {}
             if self.ensemble:
                 name = "hm0_90"
             else:
-                name = "hm0"    
+                name = "hm0"
             config["hm0_map"]["name"]       = name
-            config["hm0_map"]["png_path"]   = os.path.join(cosmos.config.webviewer.data_path)
-            config["hm0_map"]["index_path"] = os.path.join(self.path, "tiling", "indices")
+            if cosmos.config.cycle.run_mode == "cloud":
+                config["hm0_map"]["png_path"]   = "/output"
+                config["hm0_map"]["index_path"] = "/tiles/indices"
+            else:
+                config["hm0_map"]["png_path"]   = os.path.join(cosmos.config.webviewer.data_path)
+                config["hm0_map"]["index_path"] = os.path.join(self.path, "tiling", "indices")
             config["hm0_map"]["start_time"] = cosmos.cycle
             config["hm0_map"]["stop_time"]  = cosmos.stop_time
             config["hm0_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["hm0"]["color_map"]]
         if cosmos.config.cycle.make_sedero_maps and self.make_sedero_map:
             config["sedero_map"] = {}
             config["sedero_map"]["name"] = name
-            config["sedero_map"]["index_path"] = os.path.join(self.path, "tiling", "indices")
-            config["sedero_map"]["png_path"] = os.path.join(cosmos.config.webviewer.data_path)
-            config["sedero_map"]["output_path"] = "."
+            if cosmos.config.cycle.run_mode == "cloud":
+                config["sedero_map"]["png_path"]   = "/output"
+                config["sedero_map"]["index_path"] = "/tiles/indices"
+                config["sedero_map"]["output_path"] = "/input"
+            else:
+                config["sedero_map"]["index_path"] = os.path.join(self.path, "tiling", "indices")
+                config["sedero_map"]["png_path"] = os.path.join(cosmos.config.webviewer.data_path)
+                config["sedero_map"]["output_path"] = "."
             config["sedero_map"]["start_time"] = cosmos.cycle
             config["sedero_map"]["stop_time"]  = cosmos.stop_time      
-
 
         dict2yaml(os.path.join(self.job_path, "config.yml"), config)
         
@@ -435,7 +464,7 @@ class Model:
             # Index of peak
             imax = np.argmax(twl)
             
-            self.peak_boundary_twl  = z[imax]
+            self.peak_boundary_twl  = twl[imax]
             self.peak_boundary_time = t[imax].to_pydatetime()
 
     def set_stations_to_upload(self):

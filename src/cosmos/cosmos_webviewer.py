@@ -7,6 +7,7 @@ Created on Mon May 10 14:28:48 2021
 
 import datetime
 import os
+import shutil
 import numpy as np
 import pandas as pd
 from scipy import interpolate                
@@ -368,17 +369,20 @@ class WebViewer:
                         cht.misc.misc_tools.write_json_js(file_name,
                                                           feature_collection,
                                                           "var track_data =")
-        except:
+        except Exception as e:
+            print(str(e))
             pass                
 
-        # if cosmos.scenario.track_ensemble:
-        #     feature_collection = cosmos.scenario.track_ensemble.get_feature_collection()
-        #     file_name = os.path.join(self.cycle_path, "track_ensemble.geojson.js")
-        #     cht.misc.misc_tools.write_json_js(file_name,
-        #                                       feature_collection,
-        #                                       "var track_ensemble_data =")
+        if cosmos.scenario.track_ensemble:
+            try:
+                feature_collection = cosmos.scenario.track_ensemble.get_feature_collection()
+                file_name = os.path.join(self.cycle_path, "track_ensemble.geojson.js")
+                cht.misc.misc_tools.write_json_js(file_name,
+                                                feature_collection,
+                                                "var track_ensemble_data =")
+            except:
+                print(str(e))
 
-        # return
         # Cumulative rainfall
         
         # Rainfall map for the entire simulation
@@ -388,114 +392,95 @@ class WebViewer:
         t0 = cosmos.cycle.replace(tzinfo=None)    
         t1 = cosmos.stop_time
         
-#         # First determine max precip for all simulations 
-#         pmx = 0.0
-#         okay  = False
-#         for model in cosmos.scenario.model:
-#             if model.type=="sfincs":
-#                 index_path = os.path.join(model.path, "tiling", "indices")
-# #                if model.make_precip_map and os.path.exists(index_path):            
-#                 if os.path.exists(index_path):            
-#                     file_name = os.path.join(model.cycle_output_path, "sfincs_map.nc")
-#                     # p0max = model.domain.read_cumulative_precipitation(file_name=file_name,
-#                     #                                                    time_range=[t0 + dt1, t1 + dt1])
-#                     # pmx = max(pmx, np.nanmax(p0max))
-#                     okay = True
-
-#         if okay:
-
-#             cosmos.log("Making precipitation tiles ...")                
+        try:
+            cosmos.log("Making precipitation tiles ...")                
                 
-#             print("Maximum precipitation : " + '%6.2f'%pmx + " mm")                         
+            contour_set = "precip_log"    
 
-#             contour_set = "precip_log"    
-
-#             pathstr = []
-#             namestr = []
+            pathstr = []
+            namestr = []
             
-#             # 24-hour increments
-#             requested_times = pd.date_range(start=t0 + dt24,
-#                                             end=t1,
-#                                             freq='24H').to_pydatetime().tolist()
+            # 24-hour increments
+            requested_times = pd.date_range(start=t0 + dt24,
+                                            end=t1,
+                                            freq='24H').to_pydatetime().tolist()
 
-#             for it, t in enumerate(requested_times):
-#                 pathstr.append((t - dt24).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
-#                 namestr.append((t - dt24).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC")
+            for it, t in enumerate(requested_times):
+                pathstr.append((t - dt24).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
+                namestr.append((t - dt24).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC")
 
-#             pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
-#             td = t1 - t0
-#             hrstr = str(int(td.days * 24 + td.seconds/3600))
-#             namestr.append("Combined " + hrstr + "-hour forecast")
+            pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
+            td = t1 - t0
+            hrstr = str(int(td.days * 24 + td.seconds/3600))
+            namestr.append("Combined " + hrstr + "-hour forecast")
 
-#             for model in cosmos.scenario.model:
-#                 if model.type=="sfincs" and model.meteo_precipitation:
-#                     index_path = os.path.join(model.path, "tiling", "indices")            
-# #                    if model.make_wave_map and os.path.exists(index_path):                            
-#                     if os.path.exists(index_path):                            
+            for model in cosmos.scenario.model:
+                if model.type=="sfincs" and model.meteo_precipitation:
+                    index_path = os.path.join(model.path, "tiling", "indices")            
+#                    if model.make_wave_map and os.path.exists(index_path):                            
+                    if os.path.exists(index_path):                            
                         
-#                         cosmos.log("Making precip tiles for model " + model.long_name + " ...")                
+                        cosmos.log("Making precip tiles for model " + model.long_name + " ...")                
     
-#                         file_name = os.path.join(model.cycle_output_path, "sfincs_map.nc")
+                        file_name = os.path.join(model.cycle_output_path, "sfincs_map.nc")
                         
-#                         # Precip map over 24-hour increments                    
-#                         for it, t in enumerate(requested_times):
-#                             p = model.domain.read_cumulative_precipitation(file_name=file_name,
-#                                                                            time_range=[t - dt24 + dt1, t + dt1])                        
-#                             p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-#                                                         "precipitation",
-#                                                         pathstr[it])                        
-#                             make_precipitation_tiles(p, index_path, p_map_path, contour_set)
+                        # Precip map over 24-hour increments                    
+                        for it, t in enumerate(requested_times):
+                            p = model.domain.read_cumulative_precipitation(file_name=file_name,
+                                                                           time_range=[t - dt24 + dt1, t + dt1])                        
+                            p_map_path = os.path.join(self.cycle_path,
+                                                        "precipitation",
+                                                        pathstr[it])                        
+                            make_precipitation_tiles(p, index_path, p_map_path, contour_set)
 
 
-#                         # Full simulation       
-#                         p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-#                                                   "precipitation",
-#                                                    pathstr[-1])                        
-#                         p = model.domain.read_cumulative_precipitation(file_name=file_name,
-#                                                                        time_range=[t0 + dt1, t1 + dt1])                        
-#                         make_precipitation_tiles(p, index_path, p_map_path, contour_set)
+                        # Full simulation       
+                        p_map_path = os.path.join(self.cycle_path,
+                                                  "precipitation",
+                                                   pathstr[-1])                        
+                        p = model.domain.read_cumulative_precipitation(file_name=file_name,
+                                                                       time_range=[t0 + dt1, t1 + dt1])                        
+                        make_precipitation_tiles(p, index_path, p_map_path, contour_set)
             
-#             # Check if wave maps are available
-#             p_map_path = os.path.join(cosmos.scenario.cycle_tiles_path,
-#                                           "precipitation")
+            # Add precipitation to map variables
+            dct={}
+            dct["name"]        = "precipitation" 
+            dct["long_name"]   = "Cumulative rainfall"
+            dct["description"] = "These are cumulative precipitations."
+            dct["format"]      = "xyz_tile_layer"
+            dct["max_native_zoom"]  = 10
             
-#             ppath = os.path.join(scenario_path)
-#             fo.copy_file(p_map_path, ppath)
-#             dct={}
-#             dct["name"]        = "precipitation" 
-#             dct["long_name"]   = "Cumulative rainfall"
-#             dct["description"] = "These are cumulative precipitations."
-#             dct["format"]      = "xyz_tile_layer"
-#             dct["max_native_zoom"]  = 10
-            
-#             tms = []            
-#             for it, pth in enumerate(pathstr):
-#                 tm = {}
-#                 tm["name"]   = pth
-#                 tm["string"] = namestr[it]
-#                 tms.append(tm)
+            tms = []            
+            for it, pth in enumerate(pathstr):
+                tm = {}
+                tm["name"]   = pth
+                tm["string"] = namestr[it]
+                tms.append(tm)
 
-#             dct["times"]        = tms  
+            dct["times"]        = tms  
             
-#             mp = next((x for x in cosmos.config.map_contours if x["name"] == contour_set), None)    
+            mp = next((x for x in cosmos.config.map_contours if x["name"] == contour_set), None)    
             
-#             lgn = {}
-#             lgn["text"] = mp["string"]
+            lgn = {}
+            lgn["text"] = mp["string"]
 
-#             cntrs = mp["contours"]
+            cntrs = mp["contours"]
 
-#             contours = []
+            contours = []
             
-#             for cntr in cntrs:
-#                 contour = {}
-#                 contour["text"]  = cntr["string"]
-#                 contour["color"] = "#" + cntr["hex"]
-#                 contours.append(contour)
+            for cntr in cntrs:
+                contour = {}
+                contour["text"]  = cntr["string"]
+                contour["color"] = "#" + cntr["hex"]
+                contours.append(contour)
     
-#             lgn["contours"] = contours
-#             dct["legend"]   = lgn
+            lgn["contours"] = contours
+            dct["legend"]   = lgn
             
-#             self.map_variables.append(dct)
+            self.map_variables.append(dct)
+        except Exception as e:
+            print(str(e))
+            pass
 
     def make_xb_regimes(self):        
         """Make Sallenger regimes markers for webviewer.
@@ -964,12 +949,15 @@ class WebViewer:
             # Upload to S3
             self.upload_to_s3()
         else:
-            self.upload_to_opendap()
+            if os.path.isabs(cosmos.config.webserver.path):
+                self.copy_to_opendap()
+            else:
+                self.upload_to_opendap()
             
     def upload_to_opendap(self):    
         """Upload web viewer to web server."""
         from cht.misc.sftp import SSHSession        
-        cosmos.log("Uploading web viewer ...")        
+        cosmos.log("Uploading web viewer to OpenDap ...")        
         # Upload entire copy of local web viewer to web server        
         try:
             f = SSHSession(cosmos.config.webserver.hostname,
@@ -997,7 +985,7 @@ class WebViewer:
             else:
                 # Webviewer already on ftp server
                 
-                remote_path = cosmos.config.webserver.path + "/" + self.name + "/data"
+                remote_path = cosmos.config.webserver.path + "/" + self.name + "/data" 
                 # Check if scenario is already on ftp server
                 cosmos.log("Removing existing data on web server ...")
                 if cosmos.scenario.name in f.sftp.listdir(remote_path):
@@ -1029,6 +1017,59 @@ class WebViewer:
                 f.sftp.close()    
             except:
                 pass
+
+    def copy_to_opendap(self):
+        cosmos.log("Copying webviewer to OpenDap ...")
+
+        # Upload entire copy of local web viewer to web server
+
+        try:
+            # Check if web viewer already exist
+            make_wv_on_ftp = False
+            if not self.exists:
+                # Web viewer does not even exist locally
+                make_wv_on_ftp = True
+            else:
+                # Check if web viewer exists on FTP
+                if not self.name in os.listdir(cosmos.config.webserver.path):
+                    make_wv_on_ftp = True
+                
+            if make_wv_on_ftp:
+                # Copy entire webviewer
+                shutil.copytree(self.path, cosmos.config.webserver.path)    
+            else:
+                # Webviewer already on ftp server
+    
+                # Only copy scenario output
+                remote_path = os.path.join(cosmos.config.webserver.path, self.name, "data")
+
+                # Check if scenario-cycle is already on ftp server
+                if cosmos.cycle_string in os.listdir(os.path.join(remote_path, cosmos.scenario.name)):
+                    cosmos.log("Removing cycle {} from web server ...".format(cosmos.cycle_string))
+                    shutil.rmtree(os.path.join(remote_path, cosmos.scenario.name, cosmos.cycle_string))
+                    
+                # Copy scenarios.js    
+                remote_file = os.path.join(remote_path, "scenarios.js")
+                local_file  = os.path.join(".", "scenarios.js")
+
+                shutil.copyfile(remote_file, local_file)
+                self.update_scenarios_js(local_file)                
+                # Copy new scenarios.js to server
+                shutil.copyfile(local_file, remote_file)
+                # Delete local scenarios.js
+                fo.rm(local_file)
+
+                # Copy scenario data to server
+                cosmos.log("Uploading all data to web server ...")
+                shutil.copytree(self.cycle_path, os.path.join(remote_path, cosmos.scenario.name, cosmos.cycle_string))
+                
+            cosmos.log("Done copying.")
+
+            #TODO add deletion of older cycles?
+            
+        except BaseException as e:
+            cosmos.log("An error occurred while copying !")
+            cosmos.log(str(e))
 
     def upload_to_s3(self):    
         """Upload web viewer to S3"""

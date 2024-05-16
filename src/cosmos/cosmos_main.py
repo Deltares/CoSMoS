@@ -71,6 +71,10 @@ class CoSMoS:
             Option to make flood maps, by default True
         make_wave_maps : bool, optional
             Option to make wave maps, by default True
+        make_water_level_maps : bool, optional
+            Option to make water level maps, by default True
+        make_sedero_maps : bool, optional
+            Option to make sedero maps, by default False
         get_meteo : bool, optional
             Option to upload results, by default True
         make_figures : bool, optional

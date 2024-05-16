@@ -210,3 +210,9 @@ color_range:
   lower: 1.0
   upper: 26.0
   scale: log121
+- name: water_level
+  legend_text: Water level (m + MSL)
+  color_map: cyan_purple_jet
+  lower: 0.5
+  upper: 4.0
+  step: 0.25

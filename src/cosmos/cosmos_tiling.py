@@ -90,3 +90,22 @@ def make_bedlevel_tiles(bedlevel, index_path, bedlevel_map_path):
                        zoom_range=[0, 16],
                        quiet=True)
 
+def make_water_level_tiles(zsmax, index_path, topo_path, water_level_path,
+                         water_level_correction, zbmax):
+
+    # Difference between MSL and NAVD88 (used in topo data)
+    zsmax += water_level_correction
+
+    mp = next((x for x in cosmos.config.map_contours if x["name"] == "water_level"), None)
+
+    if mp is not None:
+        color_values = mp["contours"]
+        make_png_tiles(zsmax,
+                       index_path, 
+                       water_level_path,
+                       option="water_level",
+                       zoom_range=[0,11],
+                       topo_path=topo_path,
+                       color_values=color_values,
+                       zbmax = zbmax,
+                       quiet=True)
