@@ -123,21 +123,28 @@ class WebViewer:
                             "These are worst case Hm0 wave heights.",
                             cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["hm0"]["color_map"]],
                             9)
-        # self.set_map_tile_variables("sedero",
-        #                             "Sedimentation/erosion",
-        #                             "This is a sedimentation/erosion map. It can tell if your house will wash away.",
-        #                             cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["sedero"]["color_map"]],
-        #                             16)
-        # self.set_map_tile_variables("zb0",
-        #                             "Pre-storm bed level",
-        #                             "These were the bed levels prior to the storm.",
-        #                             cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["bed_level_pre"]["color_map"]],
-        #                             16)
-        # self.set_map_tile_variables("zbend",
-        #                             "Post-storm bed level",
-        #                             "These were the bed levels after the storm.",
-        #                             cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["bed_level_pre"]["color_map"]],
-        #                             16)
+        self.set_map_tile_variables("sedero",
+                                    "Sedimentation/erosion",
+                                    "This is a sedimentation/erosion map. It can tell if your house will wash away.",
+                                    cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["sedero"]["color_map"]],
+                                    16)
+        self.set_map_tile_variables("zb0",
+                                    "Pre-storm bed level",
+                                    "These were the bed levels prior to the storm.",
+                                    cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["bed_level_pre"]["color_map"]],
+                                    16)
+        self.set_map_tile_variables("zbend",
+                                    "Post-storm bed level",
+                                    "These were the bed levels after the storm.",
+                                    cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["bed_level_pre"]["color_map"]],
+                                    16)
+        
+        self.set_map_tile_variables("water_level_map",
+                            "Post-storm water level",
+                            "These were the water levels after the storm.",
+                            cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["water_level_map"]["color_map"]],
+                            13)
+
 
         cosmos.log("Adding meteo layers ...")                
         self.make_meteo_maps()
