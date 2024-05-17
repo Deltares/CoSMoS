@@ -245,6 +245,7 @@ class Model:
             config["hm0_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["hm0"]["color_map"]]
         if cosmos.config.cycle.make_sedero_maps and self.make_sedero_map:
             config["sedero_map"] = {}
+            name = "sedero" 
             config["sedero_map"]["name"] = name
             if cosmos.config.cycle.run_mode == "cloud":
                 config["sedero_map"]["png_path"]   = "/output"
