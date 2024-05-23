@@ -63,10 +63,8 @@ class WebViewer:
         self.tile_layer["hm0"]["color_map"] = "hm0"
         self.tile_layer["sedero"] = {}
         self.tile_layer["sedero"]["color_map"] = "sedero"
-        self.tile_layer["bed_level_pre"] = {}
-        self.tile_layer["bed_level_pre"]["color_map"] = "bed_level"
-        self.tile_layer["bed_level_post"] = {}
-        self.tile_layer["bed_level_post"]["color_map"] = "bed_level"
+        self.tile_layer["bed_levels"] = {}
+        self.tile_layer["bed_levels"]["color_map"] = "bed_levels"
 
 class CloudConfig:
     def __init__(self):

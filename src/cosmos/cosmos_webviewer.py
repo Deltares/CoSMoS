@@ -131,12 +131,12 @@ class WebViewer:
         self.set_map_tile_variables("zb0",
                                     "Pre-storm bed level",
                                     "These were the bed levels prior to the storm.",
-                                    cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["bed_level_pre"]["color_map"]],
+                                    cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["bed_levels"]["color_map"]],
                                     16)
         self.set_map_tile_variables("zbend",
                                     "Post-storm bed level",
                                     "These were the bed levels after the storm.",
-                                    cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["bed_level_pre"]["color_map"]],
+                                    cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["bed_levels"]["color_map"]],
                                     16)
         
         self.set_map_tile_variables("water_level_map",
@@ -492,8 +492,8 @@ class WebViewer:
     def make_xb_regimes(self):        
         """Make Sallenger regimes markers for webviewer.
         """   
-
         output_path = self.cycle_path
+        df_all = pd.DataFrame()
 
         # Sallenger regimes
 
@@ -502,78 +502,81 @@ class WebViewer:
 
                 #if os.path.exists(os.path.join(model.cycle_output_path,
                  #                           "beware_his.nc")) and not model.ensemble:
+
+                 # Needs to be df outisde of the modle loop
            
-        
                 csv_file = os.path.join(model.cycle_post_path,"Sallengerregimes.csv")
                 df = pd.read_csv(csv_file)
                 
                 transformer = Transformer.from_crs(model.crs,
                                                         'WGS 84',
                                                         always_xy=True)
-                features = []    
-                for ip in range(len(df)):
-                    lon, lat = transformer.transform(df.X[ip],df.Y[ip])
-                    point = Point((lon, lat))
-                                
-                    features.append(Feature(geometry=point,
-                    properties={"model_name":model.name,
-                                "LocNr":int(ip),
-                                "Lon":lon,
-                                "Lat":lat,                                                
-                                "regime":int(df.sallregime[ip]),
-                                #"erosionregime":int(df.erosionregime[ip])
-                                })
-                                )
+                
+                df_all = pd.concat([df_all, df], ignore_index= True)
 
-                # Save xbeach geojson file for Sallenger regimes
-                if features:
-                    feature_collection = FeatureCollection(features)
-                    output_path_regime = os.path.join(output_path, 'sallenger\\')
-                    fo.mkdir(output_path_regime)
-                    file_name = os.path.join(output_path_regime,
-                                        "sallenger.geojson.js")
-                    cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var regimes =")
-            
-                dct={}
-                dct["name"]        = "sallenger"
-                dct["long_name"]   = "Sallenger regimes XBeach"
-                dct["description"] = "These are the Sallenger regimes"
-                dct["format"]      = "geojson"
-                dct["legend"] = make_legend(type = 'run_up') #Option to add other legend but needs to be defined in map_contours.toml file.
+           
+        features = []    
+        for ip in range(len(df_all)):
+            lon, lat = transformer.transform(df_all.X[ip],df_all.Y[ip])
+            point = Point((lon, lat))
+                        
+            features.append(Feature(geometry=point,
+            properties={"LocNr":int(ip),
+                        "Lon":lon,
+                        "Lat":lat,                                                
+                        "regime":int(df_all.sallregime[ip]),
+                        #"erosionregime":int(df.erosionregime[ip])
+                        })
+                        )
 
-                self.map_variables.append(dct)
+        # Save xbeach geojson file for Sallenger regimes
+        if features:
+            feature_collection = FeatureCollection(features)
+            output_path_regime = os.path.join(output_path, 'sallenger\\')
+            fo.mkdir(output_path_regime)
+            file_name = os.path.join(output_path_regime,
+                                "sallenger.geojson.js")
+            cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var regimes =")
+    
+        dct={}
+        dct["name"]        = "sallenger"
+        dct["long_name"]   = "Sallenger regimes XBeach"
+        dct["description"] = "These are the Sallenger regimes"
+        dct["format"]      = "geojson"
+        dct["legend"] = make_legend(type = 'run_up') #Option to add other legend but needs to be defined in map_contours.toml file.
 
-                # now same for Erosion regimes
-                features_ero = []    
-                for ip in range(len(df)):
-                    lon, lat = transformer.transform(df.X[ip],df.Y[ip])
-                    point = Point((lon, lat))
-                                
-                    features_ero.append(Feature(geometry=point,
-                    properties={"model_name":model.name,
-                                "LocNr":int(ip),
-                                "Lon":lon,
-                                "Lat":lat,                                                
-                                "regime":int(df.erosionregime[ip])}))
+        self.map_variables.append(dct)
 
-                # Save xbeach geojson file for erosion regimes
-                if features_ero:
-                    feature_collection_ero = FeatureCollection(features_ero)
-                    output_path_regime = os.path.join(output_path, 'erosionregimes\\')
-                    fo.mkdir(output_path_regime)
-                    file_name = os.path.join(output_path_regime,
-                                        "erosionregimes.geojson.js")
-                    cht.misc.misc_tools.write_json_js(file_name, feature_collection_ero, "var regimes =")
-            
-                dct={}
-                dct["name"]        = "erosion_regimes"
-                dct["long_name"]   = "Erosion regimes XBeach"
-                dct["description"] = "These are the Erosion regimes"
-                dct["format"]      = "geojson"
-                dct["legend"] = make_legend(type = 'run_up')
+        # now same for Erosion regimes
+        features_ero = []    
+        for ip in range(len(df_all)):
+            lon, lat = transformer.transform(df_all.X[ip],df_all.Y[ip])
+            point = Point((lon, lat))
+                        
+            features_ero.append(Feature(geometry=point,
+            properties={"LocNr":int(ip),
+                        "Lon":lon,
+                        "Lat":lat,                                                
+                        "regime":int(df_all.erosionregime[ip])}))
 
-                self.map_variables.append(dct)
-            
+        # Save xbeach geojson file for erosion regimes
+        if features_ero:
+            feature_collection_ero = FeatureCollection(features_ero)
+            output_path_regime = os.path.join(output_path, 'erosionregimes\\')
+            fo.mkdir(output_path_regime)
+            file_name = os.path.join(output_path_regime,
+                                "erosionregimes.geojson.js")
+            cht.misc.misc_tools.write_json_js(file_name, feature_collection_ero, "var regimes =")
+    
+        dct={}
+        dct["name"]        = "erosion_regimes"
+        dct["long_name"]   = "Erosion regimes XBeach"
+        dct["description"] = "These are the Erosion regimes"
+        dct["format"]      = "geojson"
+        dct["legend"] = make_legend(type = 'run_up')
+  
+        self.map_variables.append(dct)
+
 
     def make_runup_map(self):        
         """Make runup markers and timeseries for webviewer.
@@ -915,10 +918,15 @@ class WebViewer:
             buoys_file = os.path.join(self.cycle_path, station_file)
             cht.misc.misc_tools.write_json_js(buoys_file, feature_collection, "var " + station_var + " =")
 
-    def update_scenarios_js(self):
+    def update_scenarios_js(self, other_js_source = None):
         # Check if there is a scenarios.js file
         # If so, append it with the current scenario
-        sc_file = os.path.join(self.path, "data", "scenarios.js")
+
+        if other_js_source:
+            sc_file = os.path.join(other_js_source)
+        else:
+            sc_file = os.path.join(self.path, "data", "scenarios.js")
+            
         isame = -1
         cosmos.log("Updating scenario file : " + sc_file)
         if fo.exists(sc_file):
@@ -955,11 +963,15 @@ class WebViewer:
         if cosmos.config.cycle.run_mode == "cloud":
             # Upload to S3
             self.upload_to_s3()
+
+        elif cosmos.config.cycle.run_mode == "parallel":
+            self.copy_to_opendap()
+
+        elif cosmos.config.cycle.run_mode == "serial": # Test
+            self.copy_to_opendap()
+
         else:
-            if os.path.isabs(cosmos.config.webserver.path):
-                self.copy_to_opendap()
-            else:
-                self.upload_to_opendap()
+            self.upload_to_opendap()
             
     def upload_to_opendap(self):    
         """Upload web viewer to web server."""
@@ -1050,21 +1062,25 @@ class WebViewer:
                 # Only copy scenario output
                 remote_path = os.path.join(cosmos.config.webserver.path, self.name, "data")
 
-                # Check if scenario-cycle is already on ftp server
-                if cosmos.cycle_string in os.listdir(os.path.join(remote_path, cosmos.scenario.name)):
-                    cosmos.log("Removing cycle {} from web server ...".format(cosmos.cycle_string))
-                    shutil.rmtree(os.path.join(remote_path, cosmos.scenario.name, cosmos.cycle_string))
+                # Check if scenario is already on ftp-server
+
+                if os.path.exists(os.path.join(remote_path, cosmos.scenario.name)):
+
+                    # Check if scenario-cycle is already on ftp server
+                    if cosmos.cycle_string in os.listdir(os.path.join(remote_path, cosmos.scenario.name)):
+                        cosmos.log("Removing cycle {} from web server ...".format(cosmos.cycle_string))
+                        shutil.rmtree(os.path.join(remote_path, cosmos.scenario.name, cosmos.cycle_string))
                     
                 # Copy scenarios.js    
                 remote_file = os.path.join(remote_path, "scenarios.js")
                 local_file  = os.path.join(".", "scenarios.js")
 
                 shutil.copyfile(remote_file, local_file)
-                self.update_scenarios_js(local_file)                
+                self.update_scenarios_js(local_file)  # Why do we need to update local scenario.js file? The scneario should be already in there.
                 # Copy new scenarios.js to server
                 shutil.copyfile(local_file, remote_file)
                 # Delete local scenarios.js
-                fo.rm(local_file)
+                fo.rm(local_file) # Why delete local file?
 
                 # Copy scenario data to server
                 cosmos.log("Uploading all data to web server ...")
