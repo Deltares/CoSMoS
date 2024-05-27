@@ -42,7 +42,7 @@ def setup_track_ensemble():
                                                   dt = 3)
         # Filter cyclone based on TCvitals
         # Use coordinates specified in meteo file to extract nearest track from gridded meteo data (if present)
-        if cosmos.scenario.meteo_lon: 
+        if hasattr(cosmos.scenario, 'meteo_lon'): 
             meteo_lon = cosmos.scenario.meteo_lon
             meteo_lat = cosmos.scenario.meteo_lat
         else:
