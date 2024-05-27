@@ -177,10 +177,13 @@ class Configuration:
         self.stations = Stations()
         self.stations.read()
 
+        # Add metget_api configuration path for coamps-tc data (save only path to be able to change priority storm while cosmos is running)
+        self.metget_config_path = os.path.join(self.path.main, "configuration", "metget_config.toml")
+
         # Available meteo sources
         cosmos.log("Reading meteo sources ...")    
         read_meteo_sources()
-
+   
         # Find all available super regions
         cosmos.log("Reading super regions ...")    
         self.super_region = {}
