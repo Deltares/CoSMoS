@@ -2,6 +2,14 @@
 
 # -- Project information
 
+try:
+    import cosmos.cosmos_configuration
+    import cosmos.cosmos_delft3dfm
+    import cosmos.cosmos_hurrywave
+    print('Module imported successfully in conf.py!')
+except ImportError as e:
+    print('ImportError:', e)
+
 project = 'CoSMoS'
 copyright = 'Deltares'
 author = 'Maarten van Ormondt'

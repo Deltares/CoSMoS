@@ -3,18 +3,31 @@
 Getting started
 =====
 
+The page desribes the first steps to get started with CoSMoS. It includes the installation of the software and the running of a simulation.
 
 Installation
 ------------
 
-To use CoSMoS, first make a check-out with, for example, TortoiseSNVN, of the CoSMoS and other related code. Scripts are hosted on the Deltares' repository called Open Earth Tools. 
+Git repositories
+^^^^^^^^^^^^^^^^^
 
-You will need the following folders:
+To use CoSMoS, first, a checkout/clone of two repositories is needed. First, the CoSMoS repository itself and secondly the CoastalHazardstoolkit repository.
+This can be done using the following commands in Git Bash:
 
-1. For CoSMoS `<https://svn.oss.deltares.nl/repos/openearthtools/trunk/python/applications/cosmos>`_.
-2. For Deltashell `<https://svn.oss.deltares.nl/repos/openearthtools/trunk/python/applications/DeltaShell>`_.
-3. For Tropical Cyclones `<https://svn.oss.deltares.nl/repos/openearthtools/trunk/python/applications/tropical_cyclones>`_.
-4. For XBeach `<https://svn.oss.deltares.nl/repos/openearthtools/trunk/python/applications/xbeach>`_.
+.. code-block:: none
+
+    git clone https://github.com/Deltares/CoSMoS
+
+.. code-block:: none
+
+    git clone https://github.com/Deltares-research/CoastalHazardsToolkit.git
+
+
+.. note:: 
+    The CoastalHazardsToolkit repository is needed for the CoastalHazardsToolbox, which is used in CoSMoS. Access to Deltares-research is needed for both repositories.
+
+Python environment
+^^^^^^^^^^^^^^^^^
 
 Secondly, make an Python environment in, for example, Anaconda such that the Python interpreter, libraries and scripts installed into it are isolated from the rest. Use the provided YAML file, ``environment_cosmos.yml``, to let Python install all the relevant libaries. 
 
@@ -22,11 +35,26 @@ Secondly, make an Python environment in, for example, Anaconda such that the Pyt
 
     conda env create -f d:\checkouts\Python\OpenEarthTools\cosmos\environment_cosmos.yml
 
+Install CoSMoS and CoastalHazardsToolkit 
+^^^^^^^^^^^^^^^^
+
+After the Python environment is created, the CoSMoS and CoastalHazardsToolkit repositories can be installed in the python environment. This can be done by navigating to your local clones and running the following commands in the command prompt:
+
+CoSMoS:
+.. code-block:: none
+
+    cd c:\git\cosmos​
+    pip install -e 
+
+CHT:
+.. code-block:: none
+
+    cd c:\git\coastalhazardstoolkit​
+    pip install -e.
 
 
-Adding to path
-----------------
-
+Running CoSMoS
+------------
 Before you can run CoSmoS, you will have to add it your path. You can alter the ``cosmos_add_paths()`` function. See also an example code below:
 
 >>> # Import relevant libraries
