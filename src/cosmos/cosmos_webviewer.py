@@ -503,16 +503,19 @@ class WebViewer:
                 #if os.path.exists(os.path.join(model.cycle_output_path,
                  #                           "beware_his.nc")) and not model.ensemble:
 
-                 # Needs to be df outisde of the modle loop
-           
-                csv_file = os.path.join(model.cycle_post_path,"Sallengerregimes.csv")
-                df = pd.read_csv(csv_file)
-                
-                transformer = Transformer.from_crs(model.crs,
-                                                        'WGS 84',
-                                                        always_xy=True)
-                
-                df_all = pd.concat([df_all, df], ignore_index= True)
+                 # Check if Sallenger regimes are calculated
+
+                if os.path.exists(os.path.join(model.cycle_post_path,"Sallengerregimes.csv")):
+
+                                    
+                    csv_file = os.path.join(model.cycle_post_path,"Sallengerregimes.csv")
+                    df = pd.read_csv(csv_file)
+                    
+                    transformer = Transformer.from_crs(model.crs,
+                                                            'WGS 84',
+                                                            always_xy=True)
+                    
+                    df_all = pd.concat([df_all, df], ignore_index= True)
 
            
         features = []    

@@ -179,13 +179,16 @@ class CoSMoS:
             f.write(tstr + message + "\n")
             f.close()
 
-    def make_webviewer(self, scenario_name:str):   
+    def make_webviewer(self, scenario_name:str, cycle = None):   
         """Just make webviewer
 
         Parameters
         ----------
         scenario_name : str
             Scenario name
+
+        cycle : str, optional
+            Cycle to start with (e.g. 20231213_00z), by default None
         
         See Also
         -------
@@ -201,7 +204,7 @@ class CoSMoS:
         
         self.config.cycle.just_initialize  = True
         self.config.cycle.run_models = False
-        self.run(scenario_name)
+        self.run(scenario_name, cycle = cycle)
                 
         from .cosmos_webviewer import WebViewer
         
