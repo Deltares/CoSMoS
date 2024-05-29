@@ -479,7 +479,7 @@ class WebViewer:
             
             self.map_variables.append(dct)
         except Exception as e:
-            print(str(e))
+            cosmos.log(str(e))
             pass
 
     def make_xb_regimes(self):        
