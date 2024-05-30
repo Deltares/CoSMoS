@@ -188,6 +188,7 @@ class ModelLoop():
                 fid.write("exit\n")
                 fid.close()
                 os.system('start tmp.bat')
+                
             elif cosmos.config.cycle.run_mode == "cloud":
                 cosmos.log("Ready to submit to Argo - " + model.long_name + " ...")
                 s3key = cosmos.scenario.name + "/" + "models" + "/" + model.name
@@ -212,7 +213,7 @@ class ModelLoop():
 
             elif cosmos.config.cycle.run_mode == "parallel":
                 # Model will be run on WCP node
-                # Write ready file (WCP nodes will pick up this job)
+                # Write file to jobs folder (WCP nodes will pick up this job)
 
                 file_name = os.path.join(cosmos.config.path.jobs,
                                           f"{model.name}_{cosmos.cycle_string}.txt")
@@ -221,12 +222,7 @@ class ModelLoop():
                 fid.close()
 
             else:
-                # Model will be run on WCP node
-                # Write ready file (WCP nodes will pick up this job)
-                file_name = os.path.join(model.job_path, "ready.txt")
-                fid = open(file_name, "w")
-                fid.write(model.job_path)
-                fid.close()
+                print("No run mode defined, should be either serial, parallel or cloud")
 
 
         # Now do post-processing on simulations that were finished

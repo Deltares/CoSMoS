@@ -244,7 +244,10 @@ class Model:
             config["hm0_map"]["stop_time"]  = cosmos.stop_time
             config["hm0_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["hm0"]["color_map"]]
         if cosmos.config.cycle.make_sedero_maps and self.make_sedero_map:
+
+
             config["sedero_map"] = {}
+            name = "sedero" 
             config["sedero_map"]["name"] = name
             if cosmos.config.cycle.run_mode == "cloud":
                 config["sedero_map"]["png_path"]   = "/output"
@@ -255,7 +258,9 @@ class Model:
                 config["sedero_map"]["png_path"] = os.path.join(cosmos.config.webviewer.data_path)
                 config["sedero_map"]["output_path"] = "."
             config["sedero_map"]["start_time"] = cosmos.cycle
-            config["sedero_map"]["stop_time"]  = cosmos.stop_time      
+            config["sedero_map"]["stop_time"]  = cosmos.stop_time  
+            config["sedero_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["sedero"]["color_map"]]    
+            config["sedero_map"]["color_map_zb"]  = cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["bed_levels"]["color_map"]]    
 
         dict2yaml(os.path.join(self.job_path, "config.yml"), config)
         

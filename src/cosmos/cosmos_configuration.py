@@ -55,15 +55,16 @@ class WebViewer:
         self.tile_layer["flood_map"] = {}
         self.tile_layer["flood_map"]["interval"] = 24
         self.tile_layer["flood_map"]["color_map"] = "flood_map"
+        self.tile_layer["water_level_map"] = {}
+        self.tile_layer["water_level_map"]["interval"] = 24
+        self.tile_layer["water_level_map"]["color_map"] = "water_level_map"
         self.tile_layer["hm0"] = {}
         self.tile_layer["hm0"]["interval"] = 24
         self.tile_layer["hm0"]["color_map"] = "hm0"
         self.tile_layer["sedero"] = {}
         self.tile_layer["sedero"]["color_map"] = "sedero"
-        self.tile_layer["bed_level_pre"] = {}
-        self.tile_layer["bed_level_pre"]["color_map"] = "bed_level"
-        self.tile_layer["bed_level_post"] = {}
-        self.tile_layer["bed_level_post"]["color_map"] = "bed_level"
+        self.tile_layer["bed_levels"] = {}
+        self.tile_layer["bed_levels"]["color_map"] = "bed_levels"
 
 class CloudConfig:
     def __init__(self):

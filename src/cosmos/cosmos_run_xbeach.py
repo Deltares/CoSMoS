@@ -13,8 +13,10 @@ from cht.xbeach.xbeach import XBeach
 from cht.nesting.nest2 import nest2
 #from cht.misc.argo import Argo
 
-from cosmos.cosmos_tiling import make_sedero_tiles
-from cosmos.cosmos_tiling import make_bedlevel_tiles
+# from cosmos.cosmos_tiling import make_sedero_tiles
+# from cosmos.cosmos_tiling import make_bedlevel_tiles
+from cht.tiling.tiling import make_png_tiles
+
 
 def get_s3_client(config):
     # Create an S3 client
@@ -137,8 +139,15 @@ def map_tiles(config):
         # Get paths from config
         name = config["sedero_map"]["name"]
         index_path = config["sedero_map"]["index_path"]  
-        png_path = config["sedero_map"]["png_path"]
+        # png_path = config["sedero_map"]["png_path"]
         output_path = config["sedero_map"]["output_path"]
+
+
+        
+        png_path = os.path.join(config["sedero_map"]["png_path"],
+                                config["scenario"],
+                                config["cycle"],
+                                config["sedero_map"]["name"]) 
         
         # Create paths
         sedero_map_path = os.path.join(png_path, "sedero")
@@ -166,16 +175,35 @@ def map_tiles(config):
             # make pngs for sedimentoation/erosion
 
             print("Making sedimenation/erosion tiles for model " + name)
-            make_sedero_tiles(np.transpose(val_masked), index_path, sedero_map_path)
+            make_sedero_tiles(config, np.transpose(val_masked), index_path, sedero_map_path)
             print("Sedimentation/erosion tiles done.")
             
             # make pngs for bedlevels (pre- and post-storm)
             zb0 = dt['zb'][0, :, :].values
             zbend = dt['zb'][-1, :, :].values
             print("Making bedlevel tiles for model " + name)
-            make_bedlevel_tiles(np.transpose(zb0), index_path, zb0_map_path)
-            make_bedlevel_tiles(np.transpose(zbend), index_path, zbend_map_path)
+            make_bedlevel_tiles(config, np.transpose(zb0), index_path, zb0_map_path)
+            make_bedlevel_tiles(config, np.transpose(zbend), index_path, zbend_map_path)
             print("Bed level tiles done.")
+
+def make_sedero_tiles(config, sedero, index_path, sedero_map_path):
+
+    color_values = config["sedero_map"]["color_map"]["contours"]
+    
+    make_png_tiles(sedero, index_path, sedero_map_path,
+                    color_values=color_values,
+                    zoom_range=[0, 16],
+                    quiet=True)
+        
+def make_bedlevel_tiles(config, bedlevel, index_path, bedlevel_map_path):
+
+    color_values = config["sedero_map"]["color_map_zb"]["contours"]
+    
+    make_png_tiles(bedlevel, index_path, bedlevel_map_path,
+                    color_values=color_values,
+                    zoom_range=[0, 16],
+                    quiet=True)
+
 
 # XBEACH job script
 
@@ -194,3 +222,5 @@ if option == "simulate":
 elif option == "map_tiles":
     # Make flood map tiles
     map_tiles(config)
+
+
