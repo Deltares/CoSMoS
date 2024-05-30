@@ -59,10 +59,10 @@ def make_precipitation_tiles(pcum, index_path, p_map_path, contour_set):
     
     pcum[np.where(pcum<1.0)] = np.nan
 
-    mp = next((x for x in cosmos.config.map_contours if x["name"] == contour_set), None)
-    
+    mp = next((x for x in cosmos.config.map_contours if x == contour_set), None)
+
     if mp is not None:
-        color_values = mp["contours"]    
+        color_values = cosmos.config.map_contours[mp]["contours"]    
         make_png_tiles(pcum, index_path, p_map_path,
                        color_values=color_values,
                        zoom_range=[0, 10],
