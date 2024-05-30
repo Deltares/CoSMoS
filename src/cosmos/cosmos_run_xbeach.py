@@ -5,6 +5,7 @@ import xarray as xr
 import sys
 import boto3
 import datetime
+import numpy as np
 
 import cht.misc.fileops as fo
 from cht.misc.misc_tools import yaml2dict
@@ -170,18 +171,19 @@ def map_tiles(config):
             val_masked = val.values
             
             # TODO bring back a logger instead of print statements
-            
+
             # make pngs for sedimentoation/erosion
+
             print("Making sedimenation/erosion tiles for model " + name)
-            make_sedero_tiles(config, val_masked, index_path, sedero_map_path)
+            make_sedero_tiles(config, np.transpose(val_masked), index_path, sedero_map_path)
             print("Sedimentation/erosion tiles done.")
             
             # make pngs for bedlevels (pre- and post-storm)
             zb0 = dt['zb'][0, :, :].values
             zbend = dt['zb'][-1, :, :].values
             print("Making bedlevel tiles for model " + name)
-            make_bedlevel_tiles(config, zb0, index_path, zb0_map_path)
-            make_bedlevel_tiles(config, zbend, index_path, zbend_map_path)
+            make_bedlevel_tiles(config, np.transpose(zb0), index_path, zb0_map_path)
+            make_bedlevel_tiles(config, np.transpose(zbend), index_path, zbend_map_path)
             print("Bed level tiles done.")
 
 def make_sedero_tiles(config, sedero, index_path, sedero_map_path):

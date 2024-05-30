@@ -474,21 +474,21 @@ class WebViewer:
 
         cntrs = mp["contours"]
 
-        contours = []
-        
-        for cntr in cntrs:
-            contour = {}
-            contour["text"]  = cntr["string"]
-            contour["color"] = "#" + cntr["hex"]
-            contours.append(contour)
-
-        lgn["contours"] = contours
-        dct["legend"]   = lgn
-        
-        self.map_variables.append(dct)
-        # except Exception as e:
-        #     print(str(e))
-        #     pass
+            contours = []
+            
+            for cntr in cntrs:
+                contour = {}
+                contour["text"]  = cntr["string"]
+                contour["color"] = "#" + cntr["hex"]
+                contours.append(contour)
+    
+            lgn["contours"] = contours
+            dct["legend"]   = lgn
+            
+            self.map_variables.append(dct)
+        except Exception as e:
+            print(str(e))
+            pass
 
     def make_xb_regimes(self):        
         """Make Sallenger regimes markers for webviewer.

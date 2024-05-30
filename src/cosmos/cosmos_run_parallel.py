@@ -8,6 +8,7 @@ import time
 import sched
 import os
 import socket
+import shutil
 
 import psutil
 from random import random
@@ -65,7 +66,6 @@ class CosmosRunParallel:
             try:
                 model_name_list = [f.name for f in os.scandir(self.job_path)]
                 job_path_list = [f.path for f in os.scandir(self.job_path)]
-   
 
             except:
                 time.sleep(10)
@@ -83,6 +83,7 @@ class CosmosRunParallel:
                         model_path = fid.read()
                         fid.close()
                         os.remove(job_path)
+
                     
                     except:
                         # model is already been copied to another instance
@@ -93,6 +94,24 @@ class CosmosRunParallel:
                     fid.write("title Running CoSMoS" + "\n")
                     fid.write("mkdir " + os.path.join(self.local_path, model_name) + "\n")
                     fid.write("xcopy " + os.path.join(model_path) + " " + os.path.join(self.local_path, model_name) + " /E /Q /Y" + "\n")
+                    fid.write("exit\n")
+                    fid.close()
+                
+                    os.system('start tmp.bat')
+
+                    # Check if files in folder exist
+
+                    files_local = os.listdir(os.path.join(self.local_path, model_name))
+                    if len(files_local) == 0:
+                        time.sleep(5)
+                        try:
+                            shutil.copytree(os.path.join(model_path), os.path.join(self.local_path, model_name), exist_ok = True)
+
+                        except Exception as e:
+                            print(e)
+                            
+            
+                    fid = open("tmp2.bat", "w")
                     fid.write(self.local_path[0:2] + "\n")
                     fid.write("cd " + os.path.join(self.local_path, model_name) + "\n")
                     fid.write("call run.bat\n")
@@ -105,8 +124,8 @@ class CosmosRunParallel:
                     fid.write("rmdir " + os.path.join(self.local_path, model_name) + " /s /q" + "\n")
                     fid.write("exit\n")
                     fid.close()
-                    
-                    os.system('start tmp.bat')
+                        
+                    os.system('start tmp2.bat')
                     print("Running " + model_name)
                     break
 
