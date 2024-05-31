@@ -47,6 +47,8 @@ class WebServer:
         self.password = None
 
 class WebViewer:
+    """ Here the configuration of the webviewer is initialized, this includes for example the color maps and the intervals for the different layers.
+    """
     def __init__(self):
         self.name    = None
         self.version = None
@@ -56,7 +58,6 @@ class WebViewer:
         self.tile_layer["flood_map"]["interval"] = 24
         self.tile_layer["flood_map"]["color_map"] = "flood_map"
         self.tile_layer["water_level_map"] = {}
-        self.tile_layer["water_level_map"]["interval"] = 24
         self.tile_layer["water_level_map"]["color_map"] = "water_level_map"
         self.tile_layer["hm0"] = {}
         self.tile_layer["hm0"]["interval"] = 24
@@ -65,6 +66,8 @@ class WebViewer:
         self.tile_layer["sedero"]["color_map"] = "sedero"
         self.tile_layer["bed_levels"] = {}
         self.tile_layer["bed_levels"]["color_map"] = "bed_levels"
+        self.tile_layer["precipitation"] = {}
+        self.tile_layer["precipitation"]["color_map"] = "precip_log"
 
 class CloudConfig:
     def __init__(self):
@@ -86,7 +89,8 @@ class Cycle:
         self.make_flood_maps = True
         self.make_wave_maps  = True
         self.make_water_level_maps = True
-        self.make_sedero_maps = False
+        self.make_meteo_maps = True
+        self.make_sedero_maps = True
         self.upload          = True
         self.get_meteo       = True
         self.run_mode        = "serial"

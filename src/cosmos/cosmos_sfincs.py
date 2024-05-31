@@ -52,9 +52,6 @@ class CoSMoS_SFINCS(Model):
         self.domain.type  = self.type
         self.domain.name  = self.name
         self.domain.runid = self.runid
-
-        # TODO properly add make_water_level_map into cosmos_model and scenario
-        self.make_water_level_map = True
                         
     def pre_process(self):
         """Preprocess SFINCS model.

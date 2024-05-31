@@ -7,15 +7,14 @@ import sys
 import boto3
 import datetime
 
+#from cht.misc.argo import Argo
 import cht.misc.fileops as fo
 from cht.misc.misc_tools import yaml2dict
 from cht.misc.prob_maps import merge_nc_his
 from cht.misc.prob_maps import merge_nc_map
-from cht.tiling.tiling import make_floodmap_tiles
 from cht.tiling.tiling import make_png_tiles
 from cht.hurrywave.hurrywave import HurryWave
 from cht.nesting.nest2 import nest2
-#from cht.misc.argo import Argo
 
 def read_ensemble_members():
     with open('ensemble_members.txt') as f:
@@ -179,8 +178,8 @@ def map_tiles(config):
             
             print("Making wave map tiles for model " + config["model"] + " ...")                
 
-            # 24 hour increments  
-            dtinc = 12
+            # ... hour increments  
+            dtinc = config["hm0_map"]["interval"]
 
             # Wave map for the entire simulation
             dt1 = datetime.timedelta(hours=1)
@@ -207,8 +206,7 @@ def map_tiles(config):
                 varname = "hm0max"    
 
             try:
-
-                # Inundation map over dt-hour increments                    
+                # Wave map over dt-hour increments                    
                 for it, t in enumerate(requested_times):
 
                     hm0max = hw.read_hm0max(time_range=[t - dt + dt1, t + dt1],
@@ -246,8 +244,8 @@ def map_tiles(config):
                                 zbmax=1.0,
                                 quiet=True)
 
-            except:
-                print("An error occured while making wave map tiles")
+            except Exception as e:
+                print("An error occured while making wave map tiles: {}".format(str(e)))
 
 def clean_up(config):
     if config["ensemble"]:
