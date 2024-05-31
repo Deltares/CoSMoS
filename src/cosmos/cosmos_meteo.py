@@ -139,7 +139,7 @@ def download_and_collect_meteo():
                      t1 = max(t1, model.flow_stop_time)
         if download:
             # Download the data
-            if cosmos.config.cycle.get_meteo:
+            if cosmos.config.run.get_meteo:
                 cosmos.log("Downloading meteo data : " + meteo_subset.name)
                 meteo_subset.download([t0, t1])
             # Collect the data from netcdf files    

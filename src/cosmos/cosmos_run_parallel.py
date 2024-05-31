@@ -25,8 +25,10 @@ class CosmosRunParallel:
     def start(self, job_path, local_path, scenario):    
 
         self.status = "searching"
-        self.job_path = job_path
-        self.scenario = scenario
+        if scenario is not None:
+            self.job_path = os.path.join(job_path, scenario)
+        else:
+            self.job_path = job_path
         
         self.local_path = local_path
         attempts = 0
@@ -67,8 +69,15 @@ class CosmosRunParallel:
             
         if running == self.running:
             try:
-                model_name_list = [f.name for f in os.scandir(self.job_path)]
-                job_path_list = [f.path for f in os.scandir(self.job_path)]
+                # Get a list of all .txt files recursively
+                model_name_list = []
+                job_path_list = []
+
+                for dirpath, dirnames, filenames in os.walk(self.job_path):
+                    for filename in filenames:
+                        if filename.endswith('.txt'):
+                            model_name_list.append(filename)
+                            job_path_list.append(os.path.join(dirpath, filename))
             except:
                 time.sleep(10)
                 return None
@@ -96,7 +105,7 @@ class CosmosRunParallel:
                         try:
                             shutil.copytree(os.path.join(model_path), os.path.join(self.local_path, model_name), exist_ok = True)
                         except Exception as e:
-                            print(e)
+                            print(str(e))
                             
                     fid = open("tmp.bat", "w")
                     fid.write(self.local_path[0:2] + "\n")

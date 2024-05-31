@@ -197,7 +197,7 @@ class CoSMoS_HurryWave(Model):
                 for member in cosmos.scenario.ensemble_names:
                     f.write(member + "\n")
 
-        if cosmos.config.cycle.run_mode != "cloud":
+        if cosmos.config.run.run_mode != "cloud":
             # Make run batch file (only for windows)
             batch_file = os.path.join(self.job_path, "run_hurrywave.bat")
             fid = open(batch_file, "w")
@@ -206,7 +206,7 @@ class CoSMoS_HurryWave(Model):
             fid.write(exe_path + "\n")
             fid.close()
  
-        if cosmos.config.cycle.run_mode == "cloud":
+        if cosmos.config.run.run_mode == "cloud":
             # Set workflow names
             if self.ensemble:
                 self.workflow_name = "hurrywave-ensemble-workflow"

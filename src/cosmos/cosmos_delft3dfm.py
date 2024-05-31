@@ -249,7 +249,7 @@ class CoSMoS_Delft3DFM(Model):
                 for member in cosmos.scenario.ensemble_names:
                     f.write(member + "\n")
 
-        if cosmos.config.cycle.run_mode != "cloud":
+        if cosmos.config.run.run_mode != "cloud":
             batch_file = os.path.join(self.job_path, "run_delft3dfm.bat")
             fid = open(batch_file, "w")            
             fid.write("@ echo off\n")
@@ -261,7 +261,7 @@ class CoSMoS_Delft3DFM(Model):
             fid.write("exit\n")
             fid.close()
              
-        if cosmos.config.cycle.run_mode == "cloud":
+        if cosmos.config.run.run_mode == "cloud":
             # Set workflow names
             if self.ensemble:
                 self.workflow_name = "delft3dfm-ensemble-workflow"

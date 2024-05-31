@@ -151,7 +151,7 @@ class CoSMoS_XBeach(Model):
                 for member in cosmos.scenario.ensemble_names:
                     f.write(member + "\n")
 
-        if cosmos.config.cycle.run_mode != "cloud":
+        if cosmos.config.run.run_mode != "cloud":
             # Make run batch file (only for windows)
             batch_file = os.path.join(self.job_path, "run_xbeach.bat")
             fid = open(batch_file, "w")
@@ -167,7 +167,7 @@ class CoSMoS_XBeach(Model):
             fid.write("move running.txt finished.txt\n")
             fid.close()
  
-        if cosmos.config.cycle.run_mode == "cloud":
+        if cosmos.config.run.run_mode == "cloud":
             # Set workflow names
             if self.ensemble:
                 self.workflow_name = "xbeach-ensemble-workflow"

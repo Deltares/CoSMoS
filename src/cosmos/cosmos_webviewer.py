@@ -85,7 +85,7 @@ class WebViewer:
         fo.mkdir(os.path.join(self.path, "data", cosmos.scenario.name, cosmos.cycle_string))
 
 #        # In cloud mode, also make a path on S3
-#        if cosmos.config.cycle.run_mode == "cloud":
+#        if cosmos.config.run.run_mode == "cloud":
 
         # Stations and buoys
         cosmos.log("Copying time series ...")                
@@ -100,7 +100,7 @@ class WebViewer:
         cosmos.log("Adding tile layers ...")                
         self.map_variables = []
 
-        if cosmos.config.cycle.make_flood_maps:
+        if cosmos.config.run.make_flood_maps:
             self.set_map_tile_variables("flood_map",
                                         "Flood map",
                                         "This is a flood map. It can tell if you will drown.",
@@ -112,7 +112,7 @@ class WebViewer:
                                         cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["flood_map"]["color_map"]],
                                         13)
             
-        if cosmos.config.cycle.make_wave_maps:
+        if cosmos.config.run.make_wave_maps:
             self.set_map_tile_variables("hm0",
                                         "Wave height",
                                         "These are Hm0 wave heights.",
@@ -125,7 +125,7 @@ class WebViewer:
                                         cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["hm0"]["color_map"]],
                                         9)
         
-        if cosmos.config.cycle.make_water_level_maps:
+        if cosmos.config.run.make_water_level_maps:
             self.set_map_tile_variables("water_level",
                                         "Peak water level",
                                         "These were the peak water levels during the storm.",
@@ -137,7 +137,7 @@ class WebViewer:
                                         cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["water_level_map"]["color_map"]],
                                         13)
 
-        if cosmos.config.cycle.make_meteo_maps:
+        if cosmos.config.run.make_meteo_maps:
             self.set_map_tile_variables("precipitation",
                                         "Cumulative rainfall",
                                         "These are cumulative precipitations.",
@@ -146,7 +146,7 @@ class WebViewer:
             cosmos.log("Adding meteo layers ...")                
             self.make_meteo_maps()
 
-        if cosmos.config.cycle.make_sedero_maps:
+        if cosmos.config.run.make_sedero_maps:
             self.set_map_tile_variables("sedero",
                             "Sedimentation/erosion",
                             "This is a sedimentation/erosion map. It can tell if your house will wash away.",
@@ -180,7 +180,7 @@ class WebViewer:
 
         folders = [] 
         # Check if tiles are available
-        if cosmos.config.cycle.run_mode == "cloud":
+        if cosmos.config.run.run_mode == "cloud":
             bucket_name = 'scenario-webviewer'
             prefix = self.name + "/data/" + cosmos.scenario.name + "/" + cosmos.cycle_string + "/" + name
             folders = cosmos.cloud.list_folders(bucket_name, prefix)
@@ -855,7 +855,7 @@ class WebViewer:
         newsc["zoom"]        = cosmos.scenario.zoom    
         newsc["cycle"]       = cosmos.cycle.strftime('%Y-%m-%dT%H:%M:%S')
         newsc["cycle_string"] = cosmos.cycle_string
-        newsc["cycle_mode"]  = cosmos.config.cycle.mode
+        newsc["cycle_mode"]  = cosmos.config.run.mode
         newsc["duration"]    = str(cosmos.scenario.runtime)
         now = datetime.datetime.utcnow()
         newsc["last_update"] = now.strftime("%Y/%m/%d %H:%M:%S" + " (UTC)")
@@ -869,14 +869,14 @@ class WebViewer:
         cht.misc.misc_tools.write_json_js(sc_file, scs, "var scenario =")
 
     def upload(self):
-        if cosmos.config.cycle.run_mode == "cloud":
+        if cosmos.config.run.run_mode == "cloud":
             # Upload to S3
             self.upload_to_s3()
 
-        elif cosmos.config.cycle.run_mode == "parallel":
+        elif cosmos.config.run.run_mode == "parallel":
             self.copy_to_opendap()
 
-        elif cosmos.config.cycle.run_mode == "serial": # Test
+        elif cosmos.config.run.run_mode == "serial": # Test
             self.copy_to_opendap()
 
         else:
