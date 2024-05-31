@@ -118,7 +118,7 @@ class WebViewer:
                                     cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["hm0"]["color_map"]],
                                     9)
         
-        self.set_map_tile_variables("hm0",
+        self.set_map_tile_variables("hm0_90",
                             "Wave height (90)",
                             "These are worst case Hm0 wave heights.",
                             cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["hm0"]["color_map"]],
@@ -543,7 +543,7 @@ class WebViewer:
         dct["long_name"]   = "Sallenger regimes XBeach"
         dct["description"] = "These are the Sallenger regimes"
         dct["format"]      = "geojson"
-        dct["legend"] = make_legend(type = 'run_up') #Option to add other legend but needs to be defined in map_contours.toml file.
+        dct["legend"] = make_legend(type = 'sallenger_regimes') 
 
         self.map_variables.append(dct)
 
@@ -573,7 +573,7 @@ class WebViewer:
         dct["long_name"]   = "Erosion regimes XBeach"
         dct["description"] = "These are the Erosion regimes"
         dct["format"]      = "geojson"
-        dct["legend"] = make_legend(type = 'run_up')
+        dct["legend"] = make_legend(type = 'erosion_regimes')
   
         self.map_variables.append(dct)
 
