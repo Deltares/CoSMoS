@@ -138,8 +138,7 @@ def map_tiles(config):
         output_path = config["sedero_map"]["output_path"]
         png_path = os.path.join(config["sedero_map"]["png_path"],
                                 config["scenario"],
-                                config["cycle"],
-                                config["sedero_map"]["name"]) 
+                                config["cycle"]) 
         
         # Create paths
         sedero_map_path = os.path.join(png_path, "sedero")
