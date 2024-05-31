@@ -950,7 +950,6 @@ class WebViewer:
         cosmos.log("Copying webviewer to OpenDap ...")
 
         # Upload entire copy of local web viewer to web server
-
         try:
             # Check if web viewer already exist
             make_wv_on_ftp = False
@@ -984,21 +983,29 @@ class WebViewer:
                 remote_file = os.path.join(remote_path, "scenarios.js")
                 local_file  = os.path.join(".", "scenarios.js")
 
+                # Update scenarios.js (new cycle_string)
                 shutil.copyfile(remote_file, local_file)
-                self.update_scenarios_js(local_file)  # Why do we need to update local scenario.js file? The scneario should be already in there.
+                self.update_scenarios_js(local_file)
                 # Copy new scenarios.js to server
                 shutil.copyfile(local_file, remote_file)
                 # Delete local scenarios.js
-                fo.rm(local_file) # Why delete local file?
+                fo.rm(local_file)
 
                 # Copy scenario data to server
                 cosmos.log("Uploading all data to web server ...")
                 shutil.copytree(self.cycle_path, os.path.join(remote_path, cosmos.scenario.name, cosmos.cycle_string))
                 
-            cosmos.log("Done copying.")
+            cosmos.log("Done copying to web server ")
 
-            #TODO add deletion of older cycles?
-            
+            # Get list of all cycles in scneario folder
+            cycle_list = fo.list_folders(os.path.join(remote_path, cosmos.scenario.name, "*z"))
+            tkeep = cosmos.cycle.replace(tzinfo=None) - datetime.timedelta(hours=cosmos.config.run.remove_old_cycles)
+            for cycle in cycle_list:
+                cycle_time = datetime.datetime.strptime(cycle[-12:], "%Y%m%d_%Hz")
+                if cycle_time < tkeep:
+                    cosmos.log("Removing old cycle {} from web server ...".format(cycle))
+                    fo.rmdir(cycle)
+
         except BaseException as e:
             cosmos.log("An error occurred while copying !")
             cosmos.log(str(e))
