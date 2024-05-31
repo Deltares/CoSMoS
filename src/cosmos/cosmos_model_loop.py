@@ -188,6 +188,7 @@ class ModelLoop():
                 fid.write("exit\n")
                 fid.close()
                 os.system('start tmp.bat')
+                
             elif cosmos.config.cycle.run_mode == "cloud":
                 cosmos.log("Ready to submit to Argo - " + model.long_name + " ...")
                 s3key = cosmos.scenario.name + "/" + "models" + "/" + model.name
