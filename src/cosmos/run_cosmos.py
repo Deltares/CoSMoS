@@ -8,11 +8,18 @@ main_path = "p:\\11206085-onr-fhics\\cosmos_test\\run_folder"
 
 scenario_name = "nopp_test"
 
-cosmos.initialize(main_path,
-                  mode="single_shot",
-                  config_file="config.toml",
-                  make_wave_maps=False,
-                  only_run_ensemble=False,
-                  get_meteo=True)
+# CoSMoS is always initialized with the main path and optianlly a configuration file
+cosmos.initialize(
+    main_path,
+    config_file="config.toml",
+    )
 
-cosmos.run(scenario_name, "20230829_00z")
+# Eventually, you can overwrite configuration settings like this:
+cosmos.config.run.mode = "single_shot"
+cosmos.config.run.make_wave_maps = False
+# cosmos.config.run.make_wave_maps=False,
+# cosmos.config.run.only_run_ensemble=False,
+# cosmos.config.run.get_meteo=True
+
+# Finally, run the scenario and optionally specify the cycle
+cosmos.run(scenario_name, cycle="20230829_00z")

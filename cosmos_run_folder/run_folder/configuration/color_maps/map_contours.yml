@@ -61,6 +61,83 @@ color_range:
     - 255
     - 0
     text: 0.0 - 1.0 m
+- name: sallenger_regimes
+  legend_text: 
+  contour:
+  - lower: 3.9
+    upper: 4.1
+    rgb:
+    - 255
+    - 0
+    - 0
+    text: Breaching
+  - lower: 2.9
+    upper: 3.1
+    rgb:
+    - 255
+    - 128
+    - 0
+    text: Inundation
+  - lower: 1.9
+    upper: 2.1
+    rgb:
+    - 255
+    - 255
+    - 0
+    text: Overwash
+  - lower: 0.9
+    upper: 1.1
+    rgb:
+    - 0
+    - 255
+    - 0
+    text: Collision
+  - lower: -0.1
+    upper: 0.1
+    rgb:
+    - 0
+    - 0
+    - 255
+    text: No impact
+
+- name: erosion_regimes
+  legend_text: 
+  contour:
+  - lower: 3.9
+    upper: 4.1
+    rgb:
+    - 255
+    - 0
+    - 0
+    text: Breaching
+  - lower: 2.9
+    upper: 3.1
+    rgb:
+    - 255
+    - 128
+    - 0
+    text: Duen retreat
+  - lower: 1.9
+    upper: 2.1
+    rgb:
+    - 255
+    - 255
+    - 0
+    text: Beach/Dune face erosion
+  - lower: 0.9
+    upper: 1.1
+    rgb:
+    - 0
+    - 255
+    - 0
+    text: Minor erosion
+  - lower: -0.1
+    upper: 0.1
+    rgb:
+    - 0
+    - 0
+    - 255
+    text: No erosion
 - name: sedero
   legend_text: Sedimentation/erosion
   contour:
@@ -210,3 +287,9 @@ color_range:
   lower: 1.0
   upper: 26.0
   scale: log121
+- name: water_level
+  legend_text: Water level (m + MSL)
+  color_map: cyan_purple_jet
+  lower: 0.5
+  upper: 4.0
+  step: 0.25

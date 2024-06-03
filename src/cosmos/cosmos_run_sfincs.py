@@ -1,11 +1,12 @@
 # Run SFINCS model ensemble (including some pre and post processing)
 
 import os
-import pandas as pd  
-import numpy as np
-import sys
 import boto3
 import datetime
+import pandas as pd  
+import numpy as np
+import xarray as xr
+import sys
 
 import cht.misc.fileops as fo
 from cht.misc.misc_tools import yaml2dict
@@ -221,7 +222,7 @@ def merge_ensemble(config):
     merge_nc_his(his_files, ["point_zs"], output_file_name=his_output_file_name)
     if "flood_map" in config:
         try:
-            merge_nc_map(map_files, ["zsmax"], output_file_name=map_output_file_name)
+            merge_nc_map(map_files, ["zsmax", "cumprcp"], output_file_name=map_output_file_name)
         except Exception as e:
             print(str(e))
     # Copy restart files from the first ensemble member (restart files are the same for all members)
@@ -246,8 +247,8 @@ def map_tiles(config):
             
             print("Making flood map tiles for model " + config["model"] + " ...")                
 
-            # 24 hour increments  
-            dtinc = 24
+            # ... hour increments  
+            dtinc = config["flood_map"]["interval"]
 
             # Wave map for the entire simulation
             dt1 = datetime.timedelta(hours=1)
@@ -267,9 +268,7 @@ def map_tiles(config):
 
             pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
 
-            #zsmax_file = "/input/sfincs_map.nc"
-            zsmax_file = os.path.join(zsmax_path,
-                                      "sfincs_map.nc")
+            zsmax_file = os.path.join(zsmax_path, "sfincs_map.nc")
             
             if config["ensemble"]:
                 varname = "zsmax_90"
@@ -277,7 +276,6 @@ def map_tiles(config):
                 varname = "zsmax"    
 
             try:
-
                 # Inundation map over dt-hour increments                    
                 for it, t in enumerate(requested_times):
 
@@ -319,7 +317,135 @@ def map_tiles(config):
                                     zbmax=1.0,
                                     quiet=True)
             except Exception as e:
-                print("An error occured while making flood map tiles: ", str(e))
+                print("An error occured while making flood map tiles: ". str(e))
+
+    if "water_level_map" in config:
+
+        # Make SFINCS object
+        sf = SFINCS()
+        
+        # Make water level map tiles
+        print("Making water level map tiles ...")
+
+        water_level_map_path = config["water_level_map"]["png_path"]
+        index_path           = config["water_level_map"]["index_path"]
+        topo_path            = config["water_level_map"]["topo_path"]
+        zsmax_path           = config["water_level_map"]["zsmax_path"]
+        
+        if os.path.exists(index_path) and os.path.exists(topo_path):
+
+            print("Making water level map tiles for model " + config["model"] + " ...")
+
+            t0  = config["water_level_map"]["start_time"].replace(tzinfo=None)
+            t1  = config["water_level_map"]["stop_time"].replace(tzinfo=None)
+
+            pathstr = []
+            pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))            
+
+            zsmax_file = os.path.join(zsmax_path, "sfincs_map.nc")
+            
+            if config["ensemble"]:
+                varname = "zsmax_90"
+            else:
+                varname = "zsmax"
+
+            try:
+                # Full simulation        
+                zsmax = sf.read_zsmax(zsmax_file=zsmax_file, varname=varname)
+                water_level_correction = config["vertical_reference_level_difference_with_msl"]
+                zbmax = 0.0
+
+                # NOTE all overland models get a boundary_water_level_correction
+                # this causes an offset wrt the surge models
+                # correct surge models as well to align plots:
+                if water_level_correction == 0.0: # default value
+                    water_level_correction += 0.15
+                    zbmax = -1.0
+
+                zsmax += water_level_correction
+                zsmax = np.transpose(zsmax)
+
+                png_path = os.path.join(water_level_map_path,
+                                        config["scenario"],
+                                        config["cycle"],
+                                        config["water_level_map"]["name"],
+                                        pathstr[-1]) 
+
+                color_values = config["water_level_map"]["color_map"]["contours"]
+
+                make_png_tiles(
+                    valg=zsmax,
+                    index_path=index_path,
+                    png_path=png_path,
+                    option="water_level",
+                    zoom_range=[0,11],
+                    topo_path=topo_path,
+                    color_values=color_values,
+                    zbmax=zbmax,
+                    quiet=True,
+                )
+                            
+            except Exception as e:
+                print("An error occured while making flood map tiles: {}".format(str(e)))
+
+    if "precipitation_map" in config:
+            
+        # Make SFINCS object
+        sf = SFINCS()
+        
+        # Make precipitation map tiles
+        print("Making precipitation map tiles ...")
+
+        precipitation_map_path = config["precipitation_map"]["png_path"]
+        index_path            = config["precipitation_map"]["index_path"]
+        cumprcp_path          = config["precipitation_map"]["cumprcp_path"]
+        
+        if os.path.exists(index_path):
+
+            print("Making precipitation map tiles for model " + config["model"] + " ...")
+
+            t0  = config["precipitation_map"]["start_time"].replace(tzinfo=None)
+            t1  = config["precipitation_map"]["stop_time"].replace(tzinfo=None)
+
+            pathstr = []
+            pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))            
+
+            cumprcp_file = os.path.join(cumprcp_path, "sfincs_map.nc")
+            
+            if config["ensemble"]:
+                varname = "cumprcp_90"
+            else:
+                varname = "cumprcp"
+            try:
+                # Full simulation        
+                # TODO fix this function in CHT, now it doesnt work for different varnames
+                # cumprcp = sf.read_cumulative_precipitation(file_name=cumprcp_file)
+                ds = xr.open_dataset(cumprcp_file)
+                cumprcp = (ds[varname].isel(timemax=-1)-ds[varname].isel(timemax=0)).values
+                cumprcp = np.transpose(cumprcp)
+
+                png_path = os.path.join(precipitation_map_path,
+                                        config["scenario"],
+                                        config["cycle"],
+                                        config["precipitation_map"]["name"],
+                                        pathstr[-1]) 
+
+                color_values = config["precipitation_map"]["color_map"]["contours"]
+
+                # only show values above 1.0 mm
+                cumprcp[np.where(cumprcp<1.0)] = np.nan
+
+                make_png_tiles(
+                    valg=cumprcp,
+                    index_path=index_path,
+                    png_path=png_path,
+                    zoom_range=[0,10],
+                    color_values=color_values,
+                    quiet=True,
+                )
+                            
+            except Exception as e:
+                print("An error occured while making precipitation map tiles: {}".format(str(e)))
 
 def clean_up(config):
     if config["ensemble"]:

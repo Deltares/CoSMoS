@@ -10,7 +10,7 @@ import os
 
 # either use single copy of cosmos_run_parallel and add path (e.g. c:\\fhics)
 sys.path.append(r'c:\\fhics')
-from cosmos_run_parallel import CosmosRunParallel
+from cosmos.cosmos_run_parallel import CosmosRunParallel
 
 # or use both from cosmos-package
 # from cosmos.cosmos_run_parallel import CosmosRunParallel

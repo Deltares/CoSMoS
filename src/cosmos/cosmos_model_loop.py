@@ -54,7 +54,7 @@ class ModelLoop():
             # This will be repeated until the status of the model loop changes to "done" 
             self.scheduler = sched.scheduler(time.time,
                                               time.sleep)
-            if cosmos.config.cycle.run_mode == "cloud":
+            if cosmos.config.run.run_mode == "cloud":
                 dt = 20.0 # Execute the next model loop 1 second from now
             else:                
                 dt = 1.0 # Execute the next model loop 1 second from now
@@ -91,7 +91,7 @@ class ModelLoop():
             # (so that pre-processing of next model can commence)
             # Post-processing will happen later
             if not model.status == 'failed':
-                if cosmos.config.cycle.run_mode == "cloud":
+                if cosmos.config.run.run_mode == "cloud":
                     # Download job folder from cloud storage (ideally we do not need to do this, but then extraction of time series data needs to be done in the cloud as well)
                     # Alternatively, we could just download the his file for local post-processing
                     subfolder = cosmos.scenario.name + "/" + "models" + "/" + model.name + "/"
@@ -146,7 +146,7 @@ class ModelLoop():
             
             # Time to submit the job
             # First prepare batch file
-            if cosmos.config.cycle.run_mode == "cloud":
+            if cosmos.config.run.run_mode == "cloud":
                 # No need for a bach file. Workflow template will take care of different steps.
                 pass
             else:  
@@ -177,7 +177,7 @@ class ModelLoop():
                 fid.close()
 
             # And now actually kick off this job
-            if cosmos.config.cycle.run_mode == "serial":
+            if cosmos.config.run.run_mode == "serial":
                 #or self.type=="beware":
                 # Model needs to be run in serial mode (local on the job path of a windows machine)        
                 cosmos.log("Writing tmp.bat in " + os.getcwd() + " ...")
@@ -188,7 +188,8 @@ class ModelLoop():
                 fid.write("exit\n")
                 fid.close()
                 os.system('start tmp.bat')
-            elif cosmos.config.cycle.run_mode == "cloud":
+                
+            elif cosmos.config.run.run_mode == "cloud":
                 cosmos.log("Ready to submit to Argo - " + model.long_name + " ...")
                 s3key = cosmos.scenario.name + "/" + "models" + "/" + model.name
                 tilesfolder = model.region + "/" + model.type + "/" + model.deterministic_name
@@ -210,23 +211,20 @@ class ModelLoop():
                 model.cloud_job = cosmos.argo.submit_template_job(model.workflow_name, model.name, s3key, tilesfolder, webviewerfolder)
 
 
-            elif cosmos.config.cycle.run_mode == "parallel":
-                # Model will be run on WCP node
-                # Write ready file (WCP nodes will pick up this job)
-
-                file_name = os.path.join(cosmos.config.path.jobs,
-                                          f"{model.name}_{cosmos.cycle_string}.txt")
+            elif cosmos.config.run.run_mode == "parallel":
+                # Model will be run on WCP node, write file to jobs folder (WCP nodes will pick up this job)
+                
+                # Make directory in jobs folder (if non-existent) 
+                os.makedirs(os.path.join(cosmos.config.path.jobs, cosmos.scenario.name), exist_ok=True)
+                            
+                # write file name containing job path to jobs folder
+                file_name = os.path.join(cosmos.config.path.jobs, cosmos.scenario.name, f"{model.name}_{cosmos.cycle_string}.txt")
                 fid = open(file_name, "w")
                 fid.write(model.job_path)
                 fid.close()
 
             else:
-                # Model will be run on WCP node
-                # Write ready file (WCP nodes will pick up this job)
-                file_name = os.path.join(model.job_path, "ready.txt")
-                fid = open(file_name, "w")
-                fid.write(model.job_path)
-                fid.close()
+                print("No run mode defined, should be either serial, parallel or cloud")
 
 
         # Now do post-processing on simulations that were finished
@@ -281,7 +279,7 @@ class ModelLoop():
 
             try:
                 cosmos.webviewer.make()        
-                if cosmos.config.cycle.upload:
+                if cosmos.config.run.upload:
                     current_path = os.getcwd()
                     try:
                         cosmos.webviewer.upload()
@@ -299,13 +297,13 @@ class ModelLoop():
             fo.move_file(log_file, cosmos.scenario.cycle_path)
             
             # Delete jobs folder
-            if cosmos.config.cycle.run_mode == "serial":
+            if cosmos.config.run.run_mode == "serial":
                 pth = os.path.join(cosmos.config.path.jobs,
                                    cosmos.scenario.name)
                 fo.rmdir(pth)
 
             # Check if we need to start a new cycle
-            if cosmos.config.cycle.mode == "continuous" and cosmos.next_cycle_time:
+            if cosmos.config.run.mode == "continuous" and cosmos.next_cycle_time:
                 # Start new main loop
                 cosmos.main_loop.start(cycle=cosmos.next_cycle_time)
             else:
@@ -323,7 +321,7 @@ def check_for_finished_simulations():
     for model in cosmos.scenario.model:
         try:
             if model.status == "running":
-                if cosmos.config.cycle.run_mode == "cloud":
+                if cosmos.config.run.run_mode == "cloud":
                     #TODO: Implement handling of failed workflow. What happens
                     #      when a workflow fails?
                     if Argo.get_task_status(model.cloud_job) != "Running":
@@ -395,13 +393,13 @@ def update_waiting_list():
         
         # Sort waiting list according to prioritization
         waiting_list.sort(key=lambda x: priorities, reverse = True)
-        if cosmos.config.cycle.run_mode == "serial":
+        if cosmos.config.run.run_mode == "serial":
             # Only put first job in waiting list
             waiting_list = waiting_list[:1]        
             if running:
                 # There is already a model running. Wait for it to finish.
                 waiting_list = []
-        elif cosmos.config.cycle.run_mode == "parallel":
+        elif cosmos.config.run.run_mode == "parallel":
             # Put all jobs at certain priority level in waiting list
             waiting_list = waiting_list[:]        
 

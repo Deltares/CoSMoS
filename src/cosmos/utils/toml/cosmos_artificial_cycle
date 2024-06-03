@@ -1,0 +1,21 @@
+import os
+import shutil
+
+def move_files_to_artificial_cycle_folder(directory):
+    # Define the new folder name
+    new_folder = os.path.join(directory, 'artificial_cycle')
+
+    # Create the new folder if it doesn't exist
+    if not os.path.exists(new_folder):
+        os.makedirs(new_folder)
+
+    # Move all files and folders from the original folder to the new folder
+    for item in os.listdir(directory):
+        item_path = os.path.join(directory, item)
+        # Skip the new folder itself to avoid infinite loop
+        if item_path != new_folder:
+            shutil.move(item_path, new_folder)
+
+# Example usage
+directory = r'p:\11206085-onr-fhics\03_cosmos\webviewers\nopp_event_viewer\data\hurricane_ophelia_hindcast'  
+move_files_to_artificial_cycle_folder(directory)

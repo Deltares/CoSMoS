@@ -108,14 +108,14 @@ class CoSMoS_BEWARE(Model):
                 for member in cosmos.scenario.ensemble_names:
                     f.write(member + "\n")
 
-        if cosmos.config.cycle.run_mode != "cloud":
+        if cosmos.config.run.run_mode != "cloud":
             # Make run batch file
             src = os.path.join(cosmos.config.executables.beware_path, "run_bw.bas")
             batch_file = os.path.join(self.job_path, "run_beware.bat")
             shutil.copyfile(src, batch_file)
             findreplace(batch_file, "EXEPATHKEY", cosmos.config.executables.beware_path)     
 
-        if cosmos.config.cycle.run_mode == "cloud":
+        if cosmos.config.run.run_mode == "cloud":
             # Set workflow names
             if self.ensemble:
                 self.workflow_name = "beware-ensemble-workflow"

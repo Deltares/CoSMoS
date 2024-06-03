@@ -47,6 +47,8 @@ class WebServer:
         self.password = None
 
 class WebViewer:
+    """ Here the configuration of the webviewer is initialized, this includes for example the color maps and the intervals for the different layers.
+    """
     def __init__(self):
         self.name    = None
         self.version = None
@@ -55,15 +57,17 @@ class WebViewer:
         self.tile_layer["flood_map"] = {}
         self.tile_layer["flood_map"]["interval"] = 24
         self.tile_layer["flood_map"]["color_map"] = "flood_map"
+        self.tile_layer["water_level_map"] = {}
+        self.tile_layer["water_level_map"]["color_map"] = "water_level_map"
         self.tile_layer["hm0"] = {}
         self.tile_layer["hm0"]["interval"] = 24
         self.tile_layer["hm0"]["color_map"] = "hm0"
         self.tile_layer["sedero"] = {}
         self.tile_layer["sedero"]["color_map"] = "sedero"
-        self.tile_layer["bed_level_pre"] = {}
-        self.tile_layer["bed_level_pre"]["color_map"] = "bed_level"
-        self.tile_layer["bed_level_post"] = {}
-        self.tile_layer["bed_level_post"]["color_map"] = "bed_level"
+        self.tile_layer["bed_levels"] = {}
+        self.tile_layer["bed_levels"]["color_map"] = "bed_levels"
+        self.tile_layer["precipitation"] = {}
+        self.tile_layer["precipitation"]["color_map"] = "precip_log"
 
 class CloudConfig:
     def __init__(self):
@@ -79,20 +83,23 @@ class CloudConfig:
         # Token for accessing the argo installation
         self.token = None
         
-class Cycle:
+class Run:
     def __init__(self):
         self.mode            = "single_shot"
         self.interval        = 6
         self.clean_up        = False
         self.make_flood_maps = True
         self.make_wave_maps  = True
-        self.make_sedero_maps = False
+        self.make_water_level_maps = True
+        self.make_meteo_maps = True
+        self.make_sedero_maps = True
         self.upload          = True
         self.get_meteo       = True
         self.run_mode        = "serial"
         self.only_run_ensemble = False
         self.just_initialize = False
         self.run_models      = True
+        self.remove_old_cycles = 0
 
 class Configuration:
     """CoSMoS Configuration class.
@@ -113,11 +120,11 @@ class Configuration:
         self.executables    = Executables()
         self.webserver      = WebServer()
         self.webviewer      = WebViewer()
-        self.cycle          = Cycle()
+        self.run            = Run()
         self.cloud_config   = CloudConfig()
         self.kwargs         = {}
     
-    def set(self, **kwargs):
+    def set(self):
         """Set CoSMoS configuration settings.
         
         - Set configuration paths.
@@ -130,9 +137,6 @@ class Configuration:
         """        
 
         from .cosmos_main import cosmos
-                
-        if kwargs:
-            self.kwargs = kwargs
 
         self.path.config    = os.path.join(self.path.main, "configuration")     
         self.path.jobs      = os.path.join(self.path.main, "jobs")
@@ -142,12 +146,7 @@ class Configuration:
         
         # Read config file
         self.read_config_file()
-
-        # Now loop through kwargs to override values in config file        
-        # Note: only the cycle object in config will be updated!
-        for key, value in self.kwargs.items():
-            setattr(self.cycle, key, value)
-            
+          
         # Now read other config data
         # Find all available models and store in dict cosmos.all_models
         cosmos.log("Finding available models ...")    

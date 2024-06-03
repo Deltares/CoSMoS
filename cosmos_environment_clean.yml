@@ -1,0 +1,32 @@
+name: cosmos
+ 
+channels:
+  - conda-forge
+  - numba
+ 
+dependencies:
+  - black
+  - build
+  - datashader
+  - geopandas
+  - mypy
+  - numpy
+  - pandas
+  - plotly
+  - pydantic
+  - pytest
+  - python=3.10
+  - tomli
+  - tomli-w
+  - twine
+  - xarray
+  - pip
+  - pip:
+    - deltares-coastalhazardstoolkit
+    - noaa-coops
+    - NDBC
+    - paramiko
+    - boto3
+    - hera
+    - wget
+    - awscli

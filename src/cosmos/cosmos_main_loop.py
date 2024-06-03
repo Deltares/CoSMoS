@@ -10,13 +10,10 @@ import datetime
 import sched
 import os
 import numpy as np
-#import toml
 
 from .cosmos_main import cosmos
-#from .cosmos_meteo import read_meteo_sources
 from .cosmos_meteo import download_and_collect_meteo
 from .cosmos_track_ensemble import setup_track_ensemble
-#from .cosmos_stations import Stations
 from .cosmos_scenario import Scenario
 from .cosmos_cloud import Cloud
 try:
@@ -24,14 +21,10 @@ try:
 except:
     print("Argo not available")
 from .cosmos_meteo import track_to_spw
-#from .cosmos_stations import Stations
 from .cosmos_scenario import Scenario
-#from .cosmos_tiling import tile_layer
 from .cosmos_webviewer import WebViewer
 
 import cht.misc.fileops as fo
-#import cht.misc.xmlkit as xml
-#from cht.tiling.tiling import TileLayer
 
 class MainLoop:
     """Read the scenario.toml file, determine cycle times, and run cosmos model loop. 
@@ -55,7 +48,7 @@ class MainLoop:
         # Try to kill all instances of main loop and model loop
         self.just_initialize = False
         self.run_models      = True
-        self.clean_up        = True
+        self.clean_up        = False
     
     def start(self, cycle=None): 
         """Read the scenario.toml file, determine cycle times, initialize webviewer, and start cosmos_main_loop.run with scheduler. 
@@ -79,7 +72,7 @@ class MainLoop:
         cosmos.config.set()
 
         # Set cloud object 
-        if cosmos.config.cycle.run_mode == "cloud":
+        if cosmos.config.run.run_mode == "cloud":
             cosmos.cloud = Cloud()
             cosmos.argo = Argo()
 
@@ -100,15 +93,14 @@ class MainLoop:
                 t = datetime.datetime.now(datetime.timezone.utc) - \
                     datetime.timedelta(hours=delay)
                 h0 = t.hour
-                h0 = h0 - np.mod(h0, cosmos.config.cycle.interval)
+                h0 = h0 - np.mod(h0, cosmos.config.run.interval)
                 cosmos.cycle = t.replace(microsecond=0, second=0, minute=0, hour=h0)
         else:
             cosmos.cycle = cycle.replace(tzinfo=datetime.timezone.utc)
 
         # Determine end time of cycle and next cycle time                
-        cosmos.stop_time = cosmos.cycle + \
-            datetime.timedelta(hours=cosmos.scenario.runtime)    
-        cosmos.next_cycle_time = cosmos.cycle + datetime.timedelta(hours=cosmos.config.cycle.interval)
+        cosmos.stop_time = cosmos.cycle + datetime.timedelta(hours=cosmos.scenario.runtime)    
+        cosmos.next_cycle_time = cosmos.cycle + datetime.timedelta(hours=cosmos.config.run.interval)
             
         # Cycle string (used for file and folder names)                   
         cosmos.cycle_string = cosmos.cycle.strftime("%Y%m%d_%Hz")
@@ -168,39 +160,46 @@ class MainLoop:
         # Start by reading all available models, stations, etc.
         cosmos.log("Starting cycle ...")    
          
-#         if self.clean_up:
-#             # Don't allow clean up when just initializing or continuous mode
-#             if not self.just_initialize and cosmos.config.cycle_mode == "single_shot":           
-#                 # Remove old directories
-#                 pths = fo.list_folders(os.path.join(cosmos.scenario.path,"*"))
-#                 for pth in pths:
-#                     fo.rmdir(pth)
-#                 fo.rmdir(os.path.join(cosmos.config.job_path,
-#                                       cosmos.config.scenario_name))
+        if self.clean_up:
+            # Don't allow clean up when just initializing or continuous mode
+            if not self.just_initialize and cosmos.config.run.mode == "single_shot":           
+                # Remove all old modelruns in scenario folder
+                pths = fo.list_folders(os.path.join(cosmos.scenario.path,"*"))
+                for pth in pths:
+                    fo.rmdir(pth)
+                # Remove all the webviewer tiles from the local webviewer folder
+                pths = fo.list_folders(os.path.join(cosmos.config.webviewer.data_path, cosmos.scenario.name, "*"))
+                for pth in pths:
+                    fo.rmdir(pth)
+                # Clear the job list
+                fo.rmdir(os.path.join(cosmos.config.path.jobs, cosmos.scenario.name))
 
-#         # Remove older cycles
-#         if not self.just_initialize and cosmos.config.cycle_mode == "continuous":           
-#             if cosmos.config.remove_old_cycles>0 and not cosmos.storm_flag:
-#                 # Get list of all cycles
-#                 cycle_list = fo.list_folders(os.path.join(cosmos.scenario.path,"*z"))
+        # Remove older cycles
+        if not self.just_initialize and cosmos.config.run.mode == "continuous":           
+            if cosmos.config.run.remove_old_cycles>0 and not cosmos.storm_flag:
+                # Get list of all cycles in scneario folder
+                cycle_list = fo.list_folders(os.path.join(cosmos.scenario.path,"*z"))
+                tkeep = cosmos.cycle.replace(tzinfo=None) - datetime.timedelta(hours=cosmos.config.run.remove_old_cycles)
+                for cycle in cycle_list:
+                    if cycle in cosmos.storm_keeplist:
+                        continue
+                    keepfile_name = os.path.join(cycle, "keep.txt")
+                    if os.path.exists(keepfile_name):
+                        cosmos.storm_keeplist.append(cycle)
+                        continue
+                    t = datetime.datetime.strptime(cycle[-12:],"%Y%m%d_%Hz")
+                    if t<tkeep:
+                        cosmos.log("Removing older cycle : " + cycle[-12:])
+                        fo.rmdir(cycle)
+                        cosmos.log("Also removing webviewer tiles of older cycle : " + cycle[-12:])
+                        try:
+                            fo.rmdir(os.path.join(cosmos.config.webviewer.data_path, cosmos.scenario.name, cycle[-12:]))
+                        except:
+                            pass
 
-#                 tkeep = cosmos.cycle_time.replace(tzinfo=None) - datetime.timedelta(hours=cosmos.config.remove_old_cycles)
-#                 for cycle in cycle_list:
-#                     if cycle in cosmos.storm_keeplist:
-#                         continue
-#                     keepfile_name = os.path.join(cycle, "keep.txt")
-#                     if os.path.exists(keepfile_name):
-#                         cosmos.storm_keeplist.append(cycle)
-#                         continue
-#                     t = datetime.datetime.strptime(cycle[-12:],"%Y%m%d_%Hz")
-#                     if t<tkeep:
-#                         pass
-#                     # Commented out for now
-# #                        cosmos.log("Removing older cycle : " + cycle[-12:])
-# #                        fo.rmdir(cycle)
-#             elif cosmos.storm_flag:
-#                 cycle_list = fo.list_folders(os.path.join(cosmos.scenario.path,"*z"))
-#                 cosmos.storm_keeplist.append(cycle_list[-1])
+            elif cosmos.storm_flag:
+                cycle_list = fo.list_folders(os.path.join(cosmos.scenario.path,"*z"))
+                cosmos.storm_keeplist.append(cycle_list[-1])
                         
         # Create scenario cycle paths
         fo.mkdir(cosmos.scenario.cycle_path)
@@ -266,9 +265,9 @@ class MainLoop:
                            model.wave_start_time.strftime("%Y%m%d %H%M%S") + " - " + \
                            model.wave_stop_time.strftime("%Y%m%d %H%M%S"))
 
-        # if self.just_initialize:
-        #     # No need to do anything else here 
-        #     return
+        if self.just_initialize:
+            # No need to do anything else here 
+            return
             
         # Get meteo data (in case of forcing with track file, this is also where the spiderweb is generated)
         download_and_collect_meteo()
