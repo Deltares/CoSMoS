@@ -126,6 +126,8 @@ class Model:
         # Write config file to be used in run_job.py
         config = {}
         config["model"] = self.name
+        config["type"] = self.type
+        config["region"] = self.region
         config["scenario"] = cosmos.scenario_name
         config["cycle"]    = cosmos.cycle_string
         config["ensemble"] = self.ensemble
