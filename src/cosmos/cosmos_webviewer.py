@@ -391,88 +391,90 @@ class WebViewer:
             except:
                 print(str(e))
 
-        # Cumulative rainfall
+        try:
         
-        # Rainfall map for the entire simulation
-        dt1 = datetime.timedelta(hours=1)
-#        dt6 = datetime.timedelta(hours=6)
-        dt24 = datetime.timedelta(hours=24)
-        t0 = cosmos.cycle.replace(tzinfo=None)    
-        t1 = cosmos.stop_time
-        
-        # try:
-        cosmos.log("Making precipitation tiles ...")                
+            # Cumulative rainfall
             
-        contour_set = "precip_log"    
+            # Rainfall map for the entire simulation
+            dt1 = datetime.timedelta(hours=1)
+    #        dt6 = datetime.timedelta(hours=6)
+            dt24 = datetime.timedelta(hours=24)
+            t0 = cosmos.cycle.replace(tzinfo=None)    
+            t1 = cosmos.stop_time
+            
+            # try:
+            cosmos.log("Making precipitation tiles ...")                
+                
+            contour_set = "precip_log"    
 
-        pathstr = []
-        namestr = []
-        
-        # 24-hour increments
-        requested_times = pd.date_range(start=t0 + dt24,
-                                        end=t1,
-                                        freq='24H').to_pydatetime().tolist()
+            pathstr = []
+            namestr = []
+            
+            # 24-hour increments
+            requested_times = pd.date_range(start=t0 + dt24,
+                                            end=t1,
+                                            freq='24H').to_pydatetime().tolist()
 
-        for it, t in enumerate(requested_times):
-            pathstr.append((t - dt24).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
-            namestr.append((t - dt24).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC")
+            for it, t in enumerate(requested_times):
+                pathstr.append((t - dt24).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
+                namestr.append((t - dt24).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC")
 
-        pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
-        td = t1 - t0
-        hrstr = str(int(td.days * 24 + td.seconds/3600))
-        namestr.append("Combined " + hrstr + "-hour forecast")
+            pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
+            td = t1 - t0
+            hrstr = str(int(td.days * 24 + td.seconds/3600))
+            namestr.append("Combined " + hrstr + "-hour forecast")
 
-        for model in cosmos.scenario.model:
-            if model.type=="sfincs" and model.meteo_precipitation:
-                index_path = os.path.join(model.path, "tiling", "indices")            
-#                    if model.make_wave_map and os.path.exists(index_path):                            
-                if os.path.exists(index_path):                            
-                    
-                    cosmos.log("Making precip tiles for model " + model.long_name + " ...")                
+            for model in cosmos.scenario.model:
+                if model.type=="sfincs" and model.meteo_precipitation:
+                    index_path = os.path.join(model.path, "tiling", "indices")            
+    #                    if model.make_wave_map and os.path.exists(index_path):                            
+                    if os.path.exists(index_path):                            
+                        
+                        cosmos.log("Making precip tiles for model " + model.long_name + " ...")                
 
-                    file_name = os.path.join(model.cycle_output_path, "sfincs_map.nc")
-                    
-                    # Precip map over 24-hour increments                    
-                    for it, t in enumerate(requested_times):
-                        p = model.domain.read_cumulative_precipitation(file_name=file_name,
-                                                                        time_range=[t - dt24 + dt1, t + dt1])                        
+                        file_name = os.path.join(model.cycle_output_path, "sfincs_map.nc")
+                        
+                        # Precip map over 24-hour increments                    
+                        for it, t in enumerate(requested_times):
+                            p = model.domain.read_cumulative_precipitation(file_name=file_name,
+                                                                            time_range=[t - dt24 + dt1, t + dt1])                        
+                            p_map_path = os.path.join(self.cycle_path,
+                                                        "precipitation",
+                                                        pathstr[it])                        
+                            make_precipitation_tiles(p, index_path, p_map_path, contour_set)
+
+
+                        # Full simulation       
                         p_map_path = os.path.join(self.cycle_path,
                                                     "precipitation",
-                                                    pathstr[it])                        
+                                                    pathstr[-1])                        
+                        p = model.domain.read_cumulative_precipitation(file_name=file_name,
+                                                                        time_range=[t0 + dt1, t1 + dt1])                        
                         make_precipitation_tiles(p, index_path, p_map_path, contour_set)
+            
+            # Add precipitation to map variables
+            dct={}
+            dct["name"]        = "precipitation" 
+            dct["long_name"]   = "Cumulative rainfall"
+            dct["description"] = "These are cumulative precipitations."
+            dct["format"]      = "xyz_tile_layer"
+            dct["max_native_zoom"]  = 10
+            
+            tms = []            
+            for it, pth in enumerate(pathstr):
+                tm = {}
+                tm["name"]   = pth
+                tm["string"] = namestr[it]
+                tms.append(tm)
 
+            dct["times"]        = tms  
+            
+            mp_name = next((x for x in cosmos.config.map_contours if x == contour_set), None)    
+            mp = cosmos.config.map_contours[mp_name]
+            lgn = {}
+            lgn["text"] = mp["string"]
 
-                    # Full simulation       
-                    p_map_path = os.path.join(self.cycle_path,
-                                                "precipitation",
-                                                pathstr[-1])                        
-                    p = model.domain.read_cumulative_precipitation(file_name=file_name,
-                                                                    time_range=[t0 + dt1, t1 + dt1])                        
-                    make_precipitation_tiles(p, index_path, p_map_path, contour_set)
-        
-        # Add precipitation to map variables
-        dct={}
-        dct["name"]        = "precipitation" 
-        dct["long_name"]   = "Cumulative rainfall"
-        dct["description"] = "These are cumulative precipitations."
-        dct["format"]      = "xyz_tile_layer"
-        dct["max_native_zoom"]  = 10
-        
-        tms = []            
-        for it, pth in enumerate(pathstr):
-            tm = {}
-            tm["name"]   = pth
-            tm["string"] = namestr[it]
-            tms.append(tm)
-
-        dct["times"]        = tms  
-        
-        mp_name = next((x for x in cosmos.config.map_contours if x == contour_set), None)    
-        mp = cosmos.config.map_contours[mp_name]
-        lgn = {}
-        lgn["text"] = mp["string"]
-
-        cntrs = mp["contours"]
+            cntrs = mp["contours"]
 
             contours = []
             
@@ -481,11 +483,12 @@ class WebViewer:
                 contour["text"]  = cntr["string"]
                 contour["color"] = "#" + cntr["hex"]
                 contours.append(contour)
-    
+
             lgn["contours"] = contours
             dct["legend"]   = lgn
             
             self.map_variables.append(dct)
+
         except Exception as e:
             print(str(e))
             pass
