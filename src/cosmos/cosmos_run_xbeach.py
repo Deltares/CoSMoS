@@ -7,16 +7,12 @@ import boto3
 import datetime
 import numpy as np
 
+#from cht.misc.argo import Argo
 import cht.misc.fileops as fo
 from cht.misc.misc_tools import yaml2dict
-from cht.xbeach.xbeach import XBeach
 from cht.nesting.nest2 import nest2
-#from cht.misc.argo import Argo
-
-# from cosmos.cosmos_tiling import make_sedero_tiles
-# from cosmos.cosmos_tiling import make_bedlevel_tiles
 from cht.tiling.tiling import make_png_tiles
-
+from cht.xbeach.xbeach import XBeach
 
 def get_s3_client(config):
     # Create an S3 client
@@ -139,15 +135,10 @@ def map_tiles(config):
         # Get paths from config
         name = config["sedero_map"]["name"]
         index_path = config["sedero_map"]["index_path"]  
-        # png_path = config["sedero_map"]["png_path"]
         output_path = config["sedero_map"]["output_path"]
-
-
-        
         png_path = os.path.join(config["sedero_map"]["png_path"],
                                 config["scenario"],
-                                config["cycle"],
-                                config["sedero_map"]["name"]) 
+                                config["cycle"]) 
         
         # Create paths
         sedero_map_path = os.path.join(png_path, "sedero")
@@ -160,8 +151,8 @@ def map_tiles(config):
                 # read xbeach output
                 output_file = os.path.join(output_path, 'xboutput.nc')
                 dt = xr.open_dataset(output_file)
-            except:
-                print("ERROR while making xbeach tiles")
+            except Exception as e:
+                print("An error occured while reading xbeach output: ", str(e))
                 return
         
             var = 'sedero'
@@ -170,10 +161,7 @@ def map_tiles(config):
             val = dt[var][-1, :, :].where(dt['zb'][0, :, :] > elev_min)
             val_masked = val.values
             
-            # TODO bring back a logger instead of print statements
-
             # make pngs for sedimentoation/erosion
-
             print("Making sedimenation/erosion tiles for model " + name)
             make_sedero_tiles(config, np.transpose(val_masked), index_path, sedero_map_path)
             print("Sedimentation/erosion tiles done.")

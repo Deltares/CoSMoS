@@ -17,9 +17,6 @@ from pyproj import Transformer
 import boto3
 
 from .cosmos_main import cosmos
-#from .cosmos_timeseries import merge_timeseries as merge
-#from .cosmos_tiling import make_wave_map_tiles
-from .cosmos_tiling import make_precipitation_tiles
 
 import cht.misc.fileops as fo
 import cht.misc.misc_tools
@@ -88,7 +85,7 @@ class WebViewer:
         fo.mkdir(os.path.join(self.path, "data", cosmos.scenario.name, cosmos.cycle_string))
 
 #        # In cloud mode, also make a path on S3
-#        if cosmos.config.cycle.run_mode == "cloud":
+#        if cosmos.config.run.run_mode == "cloud":
 
         # Stations and buoys
         cosmos.log("Copying time series ...")                
@@ -102,59 +99,75 @@ class WebViewer:
         # Map tiles
         cosmos.log("Adding tile layers ...")                
         self.map_variables = []
-        self.set_map_tile_variables("flood_map",
-                                    "Flood map",
-                                    "This is a flood map. It can tell if you will drown.",
-                                    cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["flood_map"]["color_map"]],
-                                    13)
-        self.set_map_tile_variables("flood_map_90",
-                                    "Flood map (90)",
-                                    "This is a worst case flood map. It can tell if you will drown.",
-                                    cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["flood_map"]["color_map"]],
-                                    13)
-        self.set_map_tile_variables("hm0",
-                                    "Wave height",
-                                    "These are Hm0 wave heights.",
-                                    cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["hm0"]["color_map"]],
-                                    9)
+
+        if cosmos.config.run.make_flood_maps:
+            self.set_map_tile_variables("flood_map",
+                                        "Flood map",
+                                        "This is a flood map. It can tell if you will drown.",
+                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["flood_map"]["color_map"]],
+                                        13)
+            self.set_map_tile_variables("flood_map_90",
+                                        "Flood map (90)",
+                                        "This is a worst case flood map. It can tell if you will drown.",
+                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["flood_map"]["color_map"]],
+                                        13)
+            
+        if cosmos.config.run.make_wave_maps:
+            self.set_map_tile_variables("hm0",
+                                        "Wave height",
+                                        "These are Hm0 wave heights.",
+                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["hm0"]["color_map"]],
+                                        9)
+            
+            self.set_map_tile_variables("hm0_90",
+                                        "Wave height (90)",
+                                        "These are worst case Hm0 wave heights.",
+                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["hm0"]["color_map"]],
+                                        9)
         
-        self.set_map_tile_variables("hm0",
-                            "Wave height (90)",
-                            "These are worst case Hm0 wave heights.",
-                            cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["hm0"]["color_map"]],
-                            9)
-        self.set_map_tile_variables("sedero",
-                                    "Sedimentation/erosion",
-                                    "This is a sedimentation/erosion map. It can tell if your house will wash away.",
-                                    cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["sedero"]["color_map"]],
-                                    16)
-        self.set_map_tile_variables("zb0",
-                                    "Pre-storm bed level",
-                                    "These were the bed levels prior to the storm.",
-                                    cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["bed_levels"]["color_map"]],
-                                    16)
-        self.set_map_tile_variables("zbend",
-                                    "Post-storm bed level",
-                                    "These were the bed levels after the storm.",
-                                    cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["bed_levels"]["color_map"]],
-                                    16)
-        
-        self.set_map_tile_variables("water_level_map",
-                                    "Peak water level",
-                                    "These were the water levels after the storm.",
-                                    cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["water_level_map"]["color_map"]],
-                                    13)
+        if cosmos.config.run.make_water_level_maps:
+            self.set_map_tile_variables("water_level",
+                                        "Peak water level",
+                                        "These were the peak water levels during the storm.",
+                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["water_level_map"]["color_map"]],
+                                        13)
+            self.set_map_tile_variables("water_level_90",
+                                        "Peak water level (90)",
+                                        "These were the worst-case peak water levels during the storm.",
+                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["water_level_map"]["color_map"]],
+                                        13)
 
+        if cosmos.config.run.make_meteo_maps:
+            self.set_map_tile_variables("precipitation",
+                                        "Cumulative rainfall",
+                                        "These are cumulative precipitations.",
+                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["precipitation"]["color_map"]],
+                                        10)
+            cosmos.log("Adding meteo layers ...")                
+            self.make_meteo_maps()
 
-        cosmos.log("Adding meteo layers ...")                
-        self.make_meteo_maps()
-
-        cosmos.log("Adding run-up layers ...")                
-        self.make_runup_map()
-        cosmos.log("Adding XBeach markers ...")                
-        self.make_xb_markers()
-        cosmos.log("Adding XBeach regimes ...")                
-        self.make_xb_regimes()
+        if cosmos.config.run.make_sedero_maps:
+            self.set_map_tile_variables("sedero",
+                            "Sedimentation/erosion",
+                            "This is a sedimentation/erosion map. It can tell if your house will wash away.",
+                            cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["sedero"]["color_map"]],
+                            16)
+            self.set_map_tile_variables("zb0",
+                                        "Pre-storm bed level",
+                                        "These were the bed levels prior to the storm.",
+                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["bed_levels"]["color_map"]],
+                                        16)
+            self.set_map_tile_variables("zbend",
+                                        "Post-storm bed level",
+                                        "These were the bed levels after the storm.",
+                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["bed_levels"]["color_map"]],
+                                        16)
+            cosmos.log("Adding run-up layers ...")                
+            self.make_runup_map()
+            cosmos.log("Adding XBeach markers ...")                
+            self.make_xb_markers()
+            cosmos.log("Adding XBeach regimes ...")                
+            self.make_xb_regimes()
 
         # Write map variables to file
         cosmos.log("Writing variables ...")                
@@ -167,7 +180,7 @@ class WebViewer:
 
         folders = [] 
         # Check if tiles are available
-        if cosmos.config.cycle.run_mode == "cloud":
+        if cosmos.config.run.run_mode == "cloud":
             bucket_name = 'scenario-webviewer'
             prefix = self.name + "/data/" + cosmos.scenario.name + "/" + cosmos.cycle_string + "/" + name
             folders = cosmos.cloud.list_folders(bucket_name, prefix)
@@ -181,51 +194,47 @@ class WebViewer:
         if not folders:
             return
         
-        # 24 hour increments  
-        dtinc = 24
-        # Wave map for the entire simulation
-        dt  = datetime.timedelta(hours=dtinc)
+        # Get labels for the maps in the webviewer based on the folder names
         t0  = cosmos.cycle.replace(tzinfo=None)    
         t1  = cosmos.stop_time
-
+        td = t1 - t0
+        
         pathstr = []
         namestr = []
-        hrstr = "48"
+        hrstr = str(int(td.days * 24 + td.seconds/3600))
 
         for folder in folders:
             pathstr.append(folder)
             if folder[0:3] == "com":
                 namestr.append("Combined " + hrstr + "-hour forecast")
             else:
-                namestr.append(folder)
+                # Define the format of the original string
+                format_str = "%Y%m%d_%HZ"
 
-            # TODO try to get neater time labels for the web viewer
-            # # 24-hour increments
-            # requested_times = pd.date_range(start=t0 + dt,
-            #                                 end=t1,
-            #                                 freq=str(dtinc)+"H").to_pydatetime().tolist()
+                # Extract the start and end date-time substrings
+                start_str = folder[:12]  # First 12 characters, e.g.: '20240503_12Z'
+                end_str = folder[13:]    # From the 14th character to the end, e.g.: '20240504_12Z'
 
-            # for it, t in enumerate(requested_times):
-            #     pathstr.append((t - dt).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
-            #     namestr.append((t - dt).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC")
+                # Parse the start and end times
+                start_time = datetime.strptime(start_str, format_str)
+                end_time = datetime.strptime(end_str, format_str)
 
-            # pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
-            # td = t1 - t0
-            # hrstr = str(int(td.days * 24 + td.seconds/3600))
-            # namestr.append("Combined " + hrstr + "-hour forecast")
+                # Define the new format for the output
+                output_format = "%Y-%m-%d %H:%M"
 
-            # if os.path.exists(os.path.join(flood_map_path, "combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ") + "_95")):
-            #     pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ") + "_95")
-            #     namestr.append("Combined " + hrstr + "-hour forecast 95 %")
+                # Convert to the new format
+                start_nice = start_time.strftime(output_format)
+                end_nice = end_time.strftime(output_format)
 
-            # wvpath = os.path.join(scenario_path)
-            # fo.copy_file(flood_map_path, wvpath)
+                namestr.append(start_nice + " - " + end_nice + " UTC")
+
+        # Add to map variables
         dct={}
         dct["name"]        = name
         dct["long_name"]   = long_name
         dct["description"] = description
         dct["format"]      = "xyz_tile_layer"
-        dct["max_native_zoom"]  = 13
+        dct["max_native_zoom"]  = max_native_zoom
 
         tms = []            
         for it, pth in enumerate(pathstr):
@@ -269,7 +278,6 @@ class WebViewer:
         cosmos.log("Making meteo map tiles ...")
 
         try:
-
             # Wind
             meteo_dataset = cosmos.scenario.meteo_dataset
 
@@ -378,8 +386,6 @@ class WebViewer:
                                                           "var track_data =")
         except Exception as e:
             print(str(e))
-            print(e)
-            pass                
 
         if cosmos.scenario.track_ensemble:
             try:
@@ -388,110 +394,10 @@ class WebViewer:
                 cht.misc.misc_tools.write_json_js(file_name,
                                                 feature_collection,
                                                 "var track_ensemble_data =")
-            except:
+            except Exception as e:
                 print(str(e))
 
-        try:
-        
-            # Cumulative rainfall
-            
-            # Rainfall map for the entire simulation
-            dt1 = datetime.timedelta(hours=1)
-    #        dt6 = datetime.timedelta(hours=6)
-            dt24 = datetime.timedelta(hours=24)
-            t0 = cosmos.cycle.replace(tzinfo=None)    
-            t1 = cosmos.stop_time
-            
-            # try:
-            cosmos.log("Making precipitation tiles ...")                
-                
-            contour_set = "precip_log"    
 
-            pathstr = []
-            namestr = []
-            
-            # 24-hour increments
-            requested_times = pd.date_range(start=t0 + dt24,
-                                            end=t1,
-                                            freq='24H').to_pydatetime().tolist()
-
-            for it, t in enumerate(requested_times):
-                pathstr.append((t - dt24).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
-                namestr.append((t - dt24).strftime("%Y-%m-%d %H:%M") + " - " + (t).strftime("%Y-%m-%d %H:%M") + " UTC")
-
-            pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
-            td = t1 - t0
-            hrstr = str(int(td.days * 24 + td.seconds/3600))
-            namestr.append("Combined " + hrstr + "-hour forecast")
-
-            for model in cosmos.scenario.model:
-                if model.type=="sfincs" and model.meteo_precipitation:
-                    index_path = os.path.join(model.path, "tiling", "indices")            
-    #                    if model.make_wave_map and os.path.exists(index_path):                            
-                    if os.path.exists(index_path):                            
-                        
-                        cosmos.log("Making precip tiles for model " + model.long_name + " ...")                
-
-                        file_name = os.path.join(model.cycle_output_path, "sfincs_map.nc")
-                        
-                        # Precip map over 24-hour increments                    
-                        for it, t in enumerate(requested_times):
-                            p = model.domain.read_cumulative_precipitation(file_name=file_name,
-                                                                            time_range=[t - dt24 + dt1, t + dt1])                        
-                            p_map_path = os.path.join(self.cycle_path,
-                                                        "precipitation",
-                                                        pathstr[it])                        
-                            make_precipitation_tiles(p, index_path, p_map_path, contour_set)
-
-
-                        # Full simulation       
-                        p_map_path = os.path.join(self.cycle_path,
-                                                    "precipitation",
-                                                    pathstr[-1])                        
-                        p = model.domain.read_cumulative_precipitation(file_name=file_name,
-                                                                        time_range=[t0 + dt1, t1 + dt1])                        
-                        make_precipitation_tiles(p, index_path, p_map_path, contour_set)
-            
-            # Add precipitation to map variables
-            dct={}
-            dct["name"]        = "precipitation" 
-            dct["long_name"]   = "Cumulative rainfall"
-            dct["description"] = "These are cumulative precipitations."
-            dct["format"]      = "xyz_tile_layer"
-            dct["max_native_zoom"]  = 10
-            
-            tms = []            
-            for it, pth in enumerate(pathstr):
-                tm = {}
-                tm["name"]   = pth
-                tm["string"] = namestr[it]
-                tms.append(tm)
-
-            dct["times"]        = tms  
-            
-            mp_name = next((x for x in cosmos.config.map_contours if x == contour_set), None)    
-            mp = cosmos.config.map_contours[mp_name]
-            lgn = {}
-            lgn["text"] = mp["string"]
-
-            cntrs = mp["contours"]
-
-            contours = []
-            
-            for cntr in cntrs:
-                contour = {}
-                contour["text"]  = cntr["string"]
-                contour["color"] = "#" + cntr["hex"]
-                contours.append(contour)
-
-            lgn["contours"] = contours
-            dct["legend"]   = lgn
-            
-            self.map_variables.append(dct)
-
-        except Exception as e:
-            print(str(e))
-            pass
 
     def make_xb_regimes(self):        
         """Make Sallenger regimes markers for webviewer.
@@ -550,7 +456,7 @@ class WebViewer:
         dct["long_name"]   = "Sallenger regimes XBeach"
         dct["description"] = "These are the Sallenger regimes"
         dct["format"]      = "geojson"
-        dct["legend"] = make_legend(type = 'run_up') #Option to add other legend but needs to be defined in map_contours.toml file.
+        dct["legend"] = make_legend(type = 'sallenger_regimes') 
 
         self.map_variables.append(dct)
 
@@ -580,7 +486,7 @@ class WebViewer:
         dct["long_name"]   = "Erosion regimes XBeach"
         dct["description"] = "These are the Erosion regimes"
         dct["format"]      = "geojson"
-        dct["legend"] = make_legend(type = 'run_up')
+        dct["legend"] = make_legend(type = 'erosion_regimes')
   
         self.map_variables.append(dct)
 
@@ -643,11 +549,7 @@ class WebViewer:
    
         
                         self.map_variables.append(dct)
-
-                        # Copy time series
-
-
-    
+   
                     # Probabilistic runup
 
                     if os.path.exists(os.path.join(model.cycle_output_path,
@@ -953,7 +855,7 @@ class WebViewer:
         newsc["zoom"]        = cosmos.scenario.zoom    
         newsc["cycle"]       = cosmos.cycle.strftime('%Y-%m-%dT%H:%M:%S')
         newsc["cycle_string"] = cosmos.cycle_string
-        newsc["cycle_mode"]  = cosmos.config.cycle.mode
+        newsc["cycle_mode"]  = cosmos.config.run.mode
         newsc["duration"]    = str(cosmos.scenario.runtime)
         now = datetime.datetime.utcnow()
         newsc["last_update"] = now.strftime("%Y/%m/%d %H:%M:%S" + " (UTC)")
@@ -967,14 +869,14 @@ class WebViewer:
         cht.misc.misc_tools.write_json_js(sc_file, scs, "var scenario =")
 
     def upload(self):
-        if cosmos.config.cycle.run_mode == "cloud":
+        if cosmos.config.run.run_mode == "cloud":
             # Upload to S3
             self.upload_to_s3()
 
-        elif cosmos.config.cycle.run_mode == "parallel":
+        elif cosmos.config.run.run_mode == "parallel":
             self.copy_to_opendap()
 
-        elif cosmos.config.cycle.run_mode == "serial": # Test
+        elif cosmos.config.run.run_mode == "serial": # Test
             self.copy_to_opendap()
 
         else:
@@ -1048,7 +950,6 @@ class WebViewer:
         cosmos.log("Copying webviewer to OpenDap ...")
 
         # Upload entire copy of local web viewer to web server
-
         try:
             # Check if web viewer already exist
             make_wv_on_ftp = False
@@ -1082,21 +983,29 @@ class WebViewer:
                 remote_file = os.path.join(remote_path, "scenarios.js")
                 local_file  = os.path.join(".", "scenarios.js")
 
+                # Update scenarios.js (new cycle_string)
                 shutil.copyfile(remote_file, local_file)
-                self.update_scenarios_js(local_file)  # Why do we need to update local scenario.js file? The scneario should be already in there.
+                self.update_scenarios_js(local_file)
                 # Copy new scenarios.js to server
                 shutil.copyfile(local_file, remote_file)
                 # Delete local scenarios.js
-                fo.rm(local_file) # Why delete local file?
+                fo.rm(local_file)
 
                 # Copy scenario data to server
                 cosmos.log("Uploading all data to web server ...")
                 shutil.copytree(self.cycle_path, os.path.join(remote_path, cosmos.scenario.name, cosmos.cycle_string))
                 
-            cosmos.log("Done copying.")
+            cosmos.log("Done copying to web server ")
 
-            #TODO add deletion of older cycles?
-            
+            # Get list of all cycles in scneario folder
+            cycle_list = fo.list_folders(os.path.join(remote_path, cosmos.scenario.name, "*z"))
+            tkeep = cosmos.cycle.replace(tzinfo=None) - datetime.timedelta(hours=cosmos.config.run.remove_old_cycles)
+            for cycle in cycle_list:
+                cycle_time = datetime.datetime.strptime(cycle[-12:], "%Y%m%d_%Hz")
+                if cycle_time < tkeep:
+                    cosmos.log("Removing old cycle {} from web server ...".format(cycle))
+                    fo.rmdir(cycle)
+
         except BaseException as e:
             cosmos.log("An error occurred while copying !")
             cosmos.log(str(e))
