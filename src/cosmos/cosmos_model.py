@@ -181,8 +181,8 @@ class Model:
             config["bw_nested"]["detail_crs"]   = self.crs.to_epsg()
         if self.type == "xbeach":
             config["xbeach"] = {}
-            config["xbeach"]["tref"] = self.flow_start_time.strftime("%Y%m%d %H%M%S")
-            config["xbeach"]["tstop"] = self.flow_stop_time.strftime("%Y%m%d %H%M%S")
+            config["xbeach"]["tref"] = self.domain.tref.strftime("%Y%m%d %H%M%S")
+            config["xbeach"]["tstop"] = self.domain.tstop.strftime("%Y%m%d %H%M%S")
             config["xbeach"]["flow_nesting_points"] = self.flow_nesting_points
             config["xbeach"]["wave_nesting_point"] = self.wave_nesting_point
             config["xbeach"]["zb_deshoal"] = self.domain.zb_deshoal
@@ -258,8 +258,8 @@ class Model:
                 config["sedero_map"]["index_path"] = os.path.join(self.path, "tiling", "indices")
                 config["sedero_map"]["png_path"] = os.path.join(cosmos.config.webviewer.data_path)
                 config["sedero_map"]["output_path"] = "."
-            config["sedero_map"]["start_time"] = cosmos.cycle
-            config["sedero_map"]["stop_time"]  = cosmos.stop_time  
+            config["sedero_map"]["start_time"] = self.domain.tref
+            config["sedero_map"]["stop_time"]  = self.domain.tstop
             config["sedero_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["sedero"]["color_map"]]    
             config["sedero_map"]["color_map_zb"]  = cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["bed_levels"]["color_map"]]    
         if cosmos.config.run.make_meteo_maps and self.make_precipitation_map:

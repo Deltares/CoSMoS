@@ -154,7 +154,14 @@ def map_tiles(config):
             except Exception as e:
                 print("An error occured while reading xbeach output: ", str(e))
                 return
-        
+
+            # get start and stop time to determine the pathname
+            t0  = config["sedero_map"]["start_time"].replace(tzinfo=None)
+            t1  = config["sedero_map"]["stop_time"].replace(tzinfo=None)
+
+            pathstr = []
+            pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))     
+
             var = 'sedero'
             elev_min = -2
             # mask xbeach output based on a min elevation of the initial topobathymetry
@@ -163,15 +170,15 @@ def map_tiles(config):
             
             # make pngs for sedimentoation/erosion
             print("Making sedimenation/erosion tiles for model " + name)
-            make_sedero_tiles(config, np.transpose(val_masked), index_path, sedero_map_path)
+            make_sedero_tiles(config, np.transpose(val_masked), index_path, os.path.join(sedero_map_path, pathstr[0]))
             print("Sedimentation/erosion tiles done.")
             
             # make pngs for bedlevels (pre- and post-storm)
             zb0 = dt['zb'][0, :, :].values
             zbend = dt['zb'][-1, :, :].values
             print("Making bedlevel tiles for model " + name)
-            make_bedlevel_tiles(config, np.transpose(zb0), index_path, zb0_map_path)
-            make_bedlevel_tiles(config, np.transpose(zbend), index_path, zbend_map_path)
+            make_bedlevel_tiles(config, np.transpose(zb0), index_path, os.path.join(zb0_map_path, pathstr[0]))
+            make_bedlevel_tiles(config, np.transpose(zbend), index_path, os.path.join(zbend_map_path, pathstr[0]))
             print("Bed level tiles done.")
 
 def make_sedero_tiles(config, sedero, index_path, sedero_map_path):
