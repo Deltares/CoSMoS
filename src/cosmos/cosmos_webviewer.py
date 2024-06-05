@@ -216,8 +216,8 @@ class WebViewer:
                 end_str = folder[13:]    # From the 14th character to the end, e.g.: '20240504_12Z'
 
                 # Parse the start and end times
-                start_time = datetime.strptime(start_str, format_str)
-                end_time = datetime.strptime(end_str, format_str)
+                start_time = datetime.datetime.strptime(start_str, format_str)
+                end_time = datetime.datetime.strptime(end_str, format_str)
 
                 # Define the new format for the output
                 output_format = "%Y-%m-%d %H:%M"
