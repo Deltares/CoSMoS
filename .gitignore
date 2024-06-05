@@ -13,3 +13,4 @@ _generated
 /docs/_build
 /docs/source/_generated
 tmp.bat
+src/cosmos/run_cosmos.py
