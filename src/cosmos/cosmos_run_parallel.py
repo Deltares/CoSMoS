@@ -99,6 +99,7 @@ class CosmosRunParallel:
                     try:
                         shutil.copytree(os.path.join(model_path), os.path.join(self.local_path, model_name))
                     except Exception as e:
+                            os.mkdir(os.path.join(self.local_path, model_name))
                             print("Could not find model on p-drive, retry...")
                     
                     # Check if files in folder exist
