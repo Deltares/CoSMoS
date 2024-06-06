@@ -398,7 +398,7 @@ def map_tiles(config):
 
         precipitation_map_path = config["precipitation_map"]["png_path"]
         index_path            = config["precipitation_map"]["index_path"]
-        cumprcp_path          = config["precipitation_map"]["cumprcp_path"]
+        cumprcp_path          = config["precipitation_map"]["output_path"]
         
         if os.path.exists(index_path):
 

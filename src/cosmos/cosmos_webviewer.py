@@ -986,14 +986,15 @@ class WebViewer:
                 # Update scenarios.js (new cycle_string)
                 shutil.copyfile(remote_file, local_file)
                 self.update_scenarios_js(local_file)
-                # Copy new scenarios.js to server
-                shutil.copyfile(local_file, remote_file)
-                # Delete local scenarios.js
-                fo.rm(local_file)
 
                 # Copy scenario data to server
                 cosmos.log("Uploading all data to web server ...")
                 shutil.copytree(self.cycle_path, os.path.join(remote_path, cosmos.scenario.name, cosmos.cycle_string))
+                
+                # Copy new scenarios.js to server
+                shutil.copyfile(local_file, remote_file)
+                # Delete local scenarios.js
+                fo.rm(local_file)
                 
             cosmos.log("Done copying to web server ")
 
