@@ -160,7 +160,7 @@ def map_tiles(config):
             t1  = config["sedero_map"]["stop_time"].replace(tzinfo=None)
 
             pathstr = []
-            pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))     
+            pathstr.append((t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))     
 
             var = 'sedero'
             elev_min = -2
