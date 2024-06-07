@@ -194,9 +194,9 @@ def map_tiles(config):
             color_values = config["hm0_map"]["color_map"]["contours"]
 
             pathstr = []
-            pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
             for it, t in enumerate(requested_times):
                 pathstr.append((t - dt).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
+            pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
 
             hm0max_file = "./hurrywave_map.nc"
             if config["ensemble"]:
