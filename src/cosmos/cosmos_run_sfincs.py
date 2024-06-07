@@ -263,10 +263,9 @@ def map_tiles(config):
             color_values = config["flood_map"]["color_map"]["contours"]
 
             pathstr = []
-            pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
-            
             for it, t in enumerate(requested_times):
                 pathstr.append((t - dt).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
+            pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
 
             zsmax_file = os.path.join(zsmax_path, "sfincs_map.nc")
             
@@ -332,14 +331,40 @@ def map_tiles(config):
         topo_path            = config["water_level_map"]["topo_path"]
         zsmax_path           = config["water_level_map"]["zsmax_path"]
         
+        # Get the difference between MSL and local vertical reference level to correct the water level
+        water_level_correction = config["vertical_reference_level_difference_with_msl"]
+        zbmax = 0.0
+
+        # NOTE all overland models get a boundary_water_level_correction
+        # this causes an offset wrt the surge models
+        # correct surge models as well to align plots:
+        if water_level_correction == 0.0: # default value
+            water_level_correction += 0.15
+            zbmax = -1.0
+
         if os.path.exists(index_path) and os.path.exists(topo_path):
 
             print("Making water level map tiles for model " + config["model"] + " ...")
 
+            # start and stop time
             t0  = config["water_level_map"]["start_time"].replace(tzinfo=None)
             t1  = config["water_level_map"]["stop_time"].replace(tzinfo=None)
 
+            # ... hour increments  
+            dtinc = config["water_level_map"]["interval"]
+
+            # Compute interval in datetime format
+            dt1 = datetime.timedelta(hours=1)
+            dt  = datetime.timedelta(hours=dtinc)
+
+            # Compute requested times
+            requested_times = pd.date_range(start=t0 + dt,
+                                            end=t1,
+                                            freq=str(dtinc) + "H").to_pydatetime().tolist()
+            
             pathstr = []
+            for it, t in enumerate(requested_times):
+                pathstr.append((t - dt).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
             pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))            
 
             zsmax_file = os.path.join(zsmax_path, "sfincs_map.nc")
@@ -350,17 +375,37 @@ def map_tiles(config):
                 varname = "zsmax"
 
             try:
+                color_values = config["water_level_map"]["color_map"]["contours"]
+
+                # Water level map over dt-hour increments                    
+                for it, t in enumerate(requested_times):
+
+                    zsmax = sf.read_zsmax(zsmax_file=zsmax_file,
+                                          time_range=[t - dt + dt1, t + dt1],
+                                          varname=varname)
+                    zsmax += water_level_correction
+                    zsmax = np.transpose(zsmax)
+
+                    png_path = os.path.join(water_level_map_path,
+                                            config["scenario"],
+                                            config["cycle"],
+                                            config["water_level_map"]["name"],
+                                            pathstr[it]) 
+                    
+                    make_png_tiles(
+                        valg=zsmax,
+                        index_path=index_path,
+                        png_path=png_path,
+                        option="water_level",
+                        zoom_range=[0,11],
+                        topo_path=topo_path,
+                        color_values=color_values,
+                        zbmax=zbmax,
+                        quiet=True,
+                    ) 
+
                 # Full simulation        
                 zsmax = sf.read_zsmax(zsmax_file=zsmax_file, varname=varname)
-                water_level_correction = config["vertical_reference_level_difference_with_msl"]
-                zbmax = 0.0
-
-                # NOTE all overland models get a boundary_water_level_correction
-                # this causes an offset wrt the surge models
-                # correct surge models as well to align plots:
-                if water_level_correction == 0.0: # default value
-                    water_level_correction += 0.15
-                    zbmax = -1.0
 
                 zsmax += water_level_correction
                 zsmax = np.transpose(zsmax)
@@ -370,8 +415,6 @@ def map_tiles(config):
                                         config["cycle"],
                                         config["water_level_map"]["name"],
                                         pathstr[-1]) 
-
-                color_values = config["water_level_map"]["color_map"]["contours"]
 
                 make_png_tiles(
                     valg=zsmax,

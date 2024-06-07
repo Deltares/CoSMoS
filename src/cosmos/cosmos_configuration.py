@@ -58,6 +58,7 @@ class WebViewer:
         self.tile_layer["flood_map"]["interval"] = 24
         self.tile_layer["flood_map"]["color_map"] = "flood_map"
         self.tile_layer["water_level_map"] = {}
+        self.tile_layer["water_level_map"]["interval"] = 24
         self.tile_layer["water_level_map"]["color_map"] = "water_level_map"
         self.tile_layer["hm0"] = {}
         self.tile_layer["hm0"]["interval"] = 24
