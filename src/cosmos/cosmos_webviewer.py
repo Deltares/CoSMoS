@@ -193,39 +193,40 @@ class WebViewer:
 
         if not folders:
             return
-        
-        # Get labels for the maps in the webviewer based on the folder names
-        t0  = cosmos.cycle.replace(tzinfo=None)    
-        t1  = cosmos.stop_time
-        td = t1 - t0
-        
+               
         pathstr = []
         namestr = []
-        hrstr = str(int(td.days * 24 + td.seconds/3600))
 
         for folder in folders:
-            pathstr.append(folder)
+            # Define the format of the original string
+            format_str = "%Y%m%d_%HZ"
+
+            # Extract the start and end date-time substrings (without the combined_ string)
+            start_str = folder.replace("combined_", "")[:12]  # First 12 characters, e.g.: '20240503_12Z'
+            end_str = folder.replace("combined_", "")[13:]    # From the 14th character to the end, e.g.: '20240504_12Z'
+
+            # Parse the start and end times
+            start_time = datetime.datetime.strptime(start_str, format_str)
+            end_time = datetime.datetime.strptime(end_str, format_str)
+
             if folder[0:3] == "com":
-                namestr.append("Combined " + hrstr + "-hour forecast")
+                # Determine the total duration of the combined output maps
+                td = end_time - start_time
+                hrstr = str(int(td.days * 24 + td.seconds/3600))
+
+                # make sure the combined map is always the first one to show-up
+                pathstr.insert(0, folder)
+                namestr.insert(0, "Combined " + hrstr + "-hour forecast")
             else:
-                # Define the format of the original string
-                format_str = "%Y%m%d_%HZ"
-
-                # Extract the start and end date-time substrings
-                start_str = folder[:12]  # First 12 characters, e.g.: '20240503_12Z'
-                end_str = folder[13:]    # From the 14th character to the end, e.g.: '20240504_12Z'
-
-                # Parse the start and end times
-                start_time = datetime.datetime.strptime(start_str, format_str)
-                end_time = datetime.datetime.strptime(end_str, format_str)
-
-                # Define the new format for the output
+                # Define a nicer format for the output
                 output_format = "%Y-%m-%d %H:%M"
 
                 # Convert to the new format
                 start_nice = start_time.strftime(output_format)
                 end_nice = end_time.strftime(output_format)
 
+                # Append the new strings to the lists
+                pathstr.append(folder)
                 namestr.append(start_nice + " - " + end_nice + " UTC")
 
         # Add to map variables
@@ -1044,11 +1045,7 @@ def merge_timeseries(path, model_name, station, prefix,
         t1 = available_times[-1]
             
     # New pandas series
-    wl=[]
-    idx=[]
-    wl.append(0.0)
-    idx.append(pd.Timestamp("2100-01-01"))
-    vv = pd.Series(wl, index=idx)
+    vv = pd.Series([0.0], index=[pd.Timestamp("2100-01-01")])
     vv.index.name = "date_time"
     vv.name       = name_str
     okay = False
@@ -1072,7 +1069,7 @@ def merge_timeseries(path, model_name, station, prefix,
                 if ilast.any():
                     ilast = ilast[-1]
                     vv = vv[0:ilast]
-                    vv = vv.append(df)
+                    vv = pd.concat([vv,df])
                 else:
                     vv = df
                     
