@@ -15,7 +15,26 @@ class Argo:
     def __init__(self):
         pass
 
-    def submit_template_job(self, workflow_name, model_name, subfolder, tilingfolder, webviewerfolder):
+    def submit_template_job(self, workflow_name, model_name, subfolder, scenario, cycle, tilingfolder, webviewerfolder):
+        """Submit a template job to Argo.
+
+        Parameters
+        ----------
+        workflow_name : str
+            The name of the workflow template to submit.
+        model_name : str
+            The name of the model.
+        scenario : str
+            The name of the scenario.
+        cycle : str
+            The name of the cycle.
+        subfolder : str
+            The subfolder to use.
+        tilingfolder : str
+            The tiling folder to use. This is the folder where the tiling (index and topobathy) files are stored.
+        webviewerfolder : str
+            The webviewer folder to use. This is 
+        """
 
         wt_ref = WorkflowTemplateRef(name=workflow_name, cluster_scope=False)
 
@@ -25,6 +44,8 @@ class Argo:
             generate_name=mname+"-",
             workflow_template_ref=wt_ref,
             arguments={"subfolder": subfolder,
+                       "scenario": scenario,
+                       "cycle": cycle,
                        "tilingfolder": tilingfolder,
                        "webviewerfolder": webviewerfolder}
         )
