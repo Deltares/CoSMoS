@@ -25,8 +25,10 @@ class CosmosRunParallel:
     def start(self, job_path, local_path, scenario):    
 
         self.status = "searching"
-        self.job_path = job_path
-        self.scenario = scenario
+        if scenario is not None:
+            self.job_path = os.path.join(job_path, scenario)
+        else:
+            self.job_path = job_path
         
         self.local_path = local_path
         attempts = 0
@@ -67,8 +69,15 @@ class CosmosRunParallel:
             
         if running == self.running:
             try:
-                model_name_list = [f.name for f in os.scandir(self.job_path)]
-                job_path_list = [f.path for f in os.scandir(self.job_path)]
+                # Get a list of all .txt files recursively
+                model_name_list = []
+                job_path_list = []
+
+                for dirpath, dirnames, filenames in os.walk(self.job_path):
+                    for filename in filenames:
+                        if filename.endswith('.txt'):
+                            model_name_list.append(filename)
+                            job_path_list.append(os.path.join(dirpath, filename))
             except:
                 time.sleep(10)
                 return None
@@ -87,7 +96,11 @@ class CosmosRunParallel:
                         continue
                     
                     # Copy remote folder to local copy
-                    shutil.copytree(os.path.join(model_path), os.path.join(self.local_path, model_name))
+                    try:
+                        shutil.copytree(os.path.join(model_path), os.path.join(self.local_path, model_name))
+                    except Exception as e:
+                            os.mkdir(os.path.join(self.local_path, model_name))
+                            print("Could not find model on p-drive, retry...")
                     
                     # Check if files in folder exist
                     files_local = os.listdir(os.path.join(self.local_path, model_name))
@@ -96,8 +109,13 @@ class CosmosRunParallel:
                         try:
                             shutil.copytree(os.path.join(model_path), os.path.join(self.local_path, model_name), exist_ok = True)
                         except Exception as e:
-                            print(e)
-                            
+                            print("Retry to copy files failed, sending .txt file to jobs folder op p-drive.")
+                            file_name = os.path.join(job_path)
+                            fid = open(file_name, "w")
+                            fid.write(model_path)
+                            fid.close()
+                            return
+  
                     fid = open("tmp.bat", "w")
                     fid.write(self.local_path[0:2] + "\n")
                     fid.write("cd " + os.path.join(self.local_path, model_name) + "\n")

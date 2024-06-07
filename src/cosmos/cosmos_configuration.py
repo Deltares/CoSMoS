@@ -58,6 +58,7 @@ class WebViewer:
         self.tile_layer["flood_map"]["interval"] = 24
         self.tile_layer["flood_map"]["color_map"] = "flood_map"
         self.tile_layer["water_level_map"] = {}
+        self.tile_layer["water_level_map"]["interval"] = 24
         self.tile_layer["water_level_map"]["color_map"] = "water_level_map"
         self.tile_layer["hm0"] = {}
         self.tile_layer["hm0"]["interval"] = 24
@@ -81,7 +82,7 @@ class CloudConfig:
         # Namespace within the cluster where the argo installation is located
         self.namespace  = "argo"
         
-class Cycle:
+class Run:
     def __init__(self):
         self.mode            = "single_shot"
         self.interval        = 6
@@ -97,6 +98,7 @@ class Cycle:
         self.only_run_ensemble = False
         self.just_initialize = False
         self.run_models      = True
+        self.remove_old_cycles = 0
 
 class Configuration:
     """CoSMoS Configuration class.
@@ -117,11 +119,11 @@ class Configuration:
         self.executables    = Executables()
         self.webserver      = WebServer()
         self.webviewer      = WebViewer()
-        self.cycle          = Cycle()
+        self.run            = Run()
         self.cloud_config   = CloudConfig()
         self.kwargs         = {}
     
-    def set(self, **kwargs):
+    def set(self):
         """Set CoSMoS configuration settings.
         
         - Set configuration paths.
@@ -134,9 +136,6 @@ class Configuration:
         """        
 
         from .cosmos_main import cosmos
-                
-        if kwargs:
-            self.kwargs = kwargs
 
         self.path.config    = os.path.join(self.path.main, "configuration")     
         self.path.jobs      = os.path.join(self.path.main, "jobs")
@@ -146,12 +145,7 @@ class Configuration:
         
         # Read config file
         self.read_config_file()
-
-        # Now loop through kwargs to override values in config file        
-        # Note: only the cycle object in config will be updated!
-        for key, value in self.kwargs.items():
-            setattr(self.cycle, key, value)
-            
+          
         # Now read other config data
         # Find all available models and store in dict cosmos.all_models
         cosmos.log("Finding available models ...")    

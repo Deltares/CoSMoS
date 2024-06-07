@@ -137,7 +137,7 @@ def setup_track_ensemble():
         # Set and make paths for ensemble models
         model.set_paths()
     
-    if cosmos.config.cycle.only_run_ensemble:
+    if cosmos.config.run.only_run_ensemble:
         # Remove all models that are not ensembles       
         cosmos.scenario.model = [model for model in cosmos.scenario.model if model.ensemble]
 
@@ -147,7 +147,7 @@ def setup_track_ensemble():
         cosmos.scenario.ensemble_names.append(str(iens).zfill(5))
 
     # Upload spw files to S3
-    if cosmos.config.cycle.run_mode == "cloud":
+    if cosmos.config.run.run_mode == "cloud":
         cosmos.log("Uploading spiderweb files to S3")
         path = cosmos.scenario.cycle_track_ensemble_spw_path
         subfolder = cosmos.scenario.name + "/track_ensemble/spw"

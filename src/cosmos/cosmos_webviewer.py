@@ -85,7 +85,7 @@ class WebViewer:
         fo.mkdir(os.path.join(self.path, "data", cosmos.scenario.name, cosmos.cycle_string))
 
 #        # In cloud mode, also make a path on S3
-#        if cosmos.config.cycle.run_mode == "cloud":
+#        if cosmos.config.run.run_mode == "cloud":
 
         # Stations and buoys
         cosmos.log("Copying time series ...")                
@@ -100,7 +100,7 @@ class WebViewer:
         cosmos.log("Adding tile layers ...")                
         self.map_variables = []
 
-        if cosmos.config.cycle.make_flood_maps:
+        if cosmos.config.run.make_flood_maps:
             self.set_map_tile_variables("flood_map",
                                         "Flood map",
                                         "This is a flood map. It can tell if you will drown.",
@@ -112,7 +112,7 @@ class WebViewer:
                                         cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["flood_map"]["color_map"]],
                                         13)
             
-        if cosmos.config.cycle.make_wave_maps:
+        if cosmos.config.run.make_wave_maps:
             self.set_map_tile_variables("hm0",
                                         "Wave height",
                                         "These are Hm0 wave heights.",
@@ -125,7 +125,7 @@ class WebViewer:
                                         cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["hm0"]["color_map"]],
                                         9)
         
-        if cosmos.config.cycle.make_water_level_maps:
+        if cosmos.config.run.make_water_level_maps:
             self.set_map_tile_variables("water_level",
                                         "Peak water level",
                                         "These were the peak water levels during the storm.",
@@ -137,7 +137,7 @@ class WebViewer:
                                         cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["water_level_map"]["color_map"]],
                                         13)
 
-        if cosmos.config.cycle.make_meteo_maps:
+        if cosmos.config.run.make_meteo_maps:
             self.set_map_tile_variables("precipitation",
                                         "Cumulative rainfall",
                                         "These are cumulative precipitations.",
@@ -146,7 +146,7 @@ class WebViewer:
             cosmos.log("Adding meteo layers ...")                
             self.make_meteo_maps()
 
-        if cosmos.config.cycle.make_sedero_maps:
+        if cosmos.config.run.make_sedero_maps:
             self.set_map_tile_variables("sedero",
                             "Sedimentation/erosion",
                             "This is a sedimentation/erosion map. It can tell if your house will wash away.",
@@ -180,7 +180,7 @@ class WebViewer:
 
         folders = [] 
         # Check if tiles are available
-        if cosmos.config.cycle.run_mode == "cloud":
+        if cosmos.config.run.run_mode == "cloud":
             bucket_name = 'scenario-webviewer'
             prefix = self.name + "/data/" + cosmos.scenario.name + "/" + cosmos.cycle_string + "/" + name
             folders = cosmos.cloud.list_folders(bucket_name, prefix)
@@ -193,39 +193,40 @@ class WebViewer:
 
         if not folders:
             return
-        
-        # Get labels for the maps in the webviewer based on the folder names
-        t0  = cosmos.cycle.replace(tzinfo=None)    
-        t1  = cosmos.stop_time
-        td = t1 - t0
-        
+               
         pathstr = []
         namestr = []
-        hrstr = str(int(td.days * 24 + td.seconds/3600))
 
         for folder in folders:
-            pathstr.append(folder)
+            # Define the format of the original string
+            format_str = "%Y%m%d_%HZ"
+
+            # Extract the start and end date-time substrings (without the combined_ string)
+            start_str = folder.replace("combined_", "")[:12]  # First 12 characters, e.g.: '20240503_12Z'
+            end_str = folder.replace("combined_", "")[13:]    # From the 14th character to the end, e.g.: '20240504_12Z'
+
+            # Parse the start and end times
+            start_time = datetime.datetime.strptime(start_str, format_str)
+            end_time = datetime.datetime.strptime(end_str, format_str)
+
             if folder[0:3] == "com":
-                namestr.append("Combined " + hrstr + "-hour forecast")
+                # Determine the total duration of the combined output maps
+                td = end_time - start_time
+                hrstr = str(int(td.days * 24 + td.seconds/3600))
+
+                # make sure the combined map is always the first one to show-up
+                pathstr.insert(0, folder)
+                namestr.insert(0, "Combined " + hrstr + "-hour forecast")
             else:
-                # Define the format of the original string
-                format_str = "%Y%m%d_%HZ"
-
-                # Extract the start and end date-time substrings
-                start_str = folder[:12]  # First 12 characters, e.g.: '20240503_12Z'
-                end_str = folder[13:]    # From the 14th character to the end, e.g.: '20240504_12Z'
-
-                # Parse the start and end times
-                start_time = datetime.strptime(start_str, format_str)
-                end_time = datetime.strptime(end_str, format_str)
-
-                # Define the new format for the output
+                # Define a nicer format for the output
                 output_format = "%Y-%m-%d %H:%M"
 
                 # Convert to the new format
                 start_nice = start_time.strftime(output_format)
                 end_nice = end_time.strftime(output_format)
 
+                # Append the new strings to the lists
+                pathstr.append(folder)
                 namestr.append(start_nice + " - " + end_nice + " UTC")
 
         # Add to map variables
@@ -855,7 +856,7 @@ class WebViewer:
         newsc["zoom"]        = cosmos.scenario.zoom    
         newsc["cycle"]       = cosmos.cycle.strftime('%Y-%m-%dT%H:%M:%S')
         newsc["cycle_string"] = cosmos.cycle_string
-        newsc["cycle_mode"]  = cosmos.config.cycle.mode
+        newsc["cycle_mode"]  = cosmos.config.run.mode
         newsc["duration"]    = str(cosmos.scenario.runtime)
         now = datetime.datetime.utcnow()
         newsc["last_update"] = now.strftime("%Y/%m/%d %H:%M:%S" + " (UTC)")
@@ -869,14 +870,14 @@ class WebViewer:
         cht.misc.misc_tools.write_json_js(sc_file, scs, "var scenario =")
 
     def upload(self):
-        if cosmos.config.cycle.run_mode == "cloud":
+        if cosmos.config.run.run_mode == "cloud":
             # Upload to S3
             self.upload_to_s3()
 
-        elif cosmos.config.cycle.run_mode == "parallel":
+        elif cosmos.config.run.run_mode == "parallel":
             self.copy_to_opendap()
 
-        elif cosmos.config.cycle.run_mode == "serial": # Test
+        elif cosmos.config.run.run_mode == "serial": # Test
             self.copy_to_opendap()
 
         else:
@@ -950,7 +951,6 @@ class WebViewer:
         cosmos.log("Copying webviewer to OpenDap ...")
 
         # Upload entire copy of local web viewer to web server
-
         try:
             # Check if web viewer already exist
             make_wv_on_ftp = False
@@ -984,21 +984,30 @@ class WebViewer:
                 remote_file = os.path.join(remote_path, "scenarios.js")
                 local_file  = os.path.join(".", "scenarios.js")
 
+                # Update scenarios.js (new cycle_string)
                 shutil.copyfile(remote_file, local_file)
-                self.update_scenarios_js(local_file)  # Why do we need to update local scenario.js file? The scneario should be already in there.
-                # Copy new scenarios.js to server
-                shutil.copyfile(local_file, remote_file)
-                # Delete local scenarios.js
-                fo.rm(local_file) # Why delete local file?
+                self.update_scenarios_js(local_file)
 
                 # Copy scenario data to server
                 cosmos.log("Uploading all data to web server ...")
                 shutil.copytree(self.cycle_path, os.path.join(remote_path, cosmos.scenario.name, cosmos.cycle_string))
                 
-            cosmos.log("Done copying.")
+                # Copy new scenarios.js to server
+                shutil.copyfile(local_file, remote_file)
+                # Delete local scenarios.js
+                fo.rm(local_file)
+                
+            cosmos.log("Done copying to web server ")
 
-            #TODO add deletion of older cycles?
-            
+            # Get list of all cycles in scneario folder
+            cycle_list = fo.list_folders(os.path.join(remote_path, cosmos.scenario.name, "*z"))
+            tkeep = cosmos.cycle.replace(tzinfo=None) - datetime.timedelta(hours=cosmos.config.run.remove_old_cycles)
+            for cycle in cycle_list:
+                cycle_time = datetime.datetime.strptime(cycle[-12:], "%Y%m%d_%Hz")
+                if cycle_time < tkeep:
+                    cosmos.log("Removing old cycle {} from web server ...".format(cycle))
+                    fo.rmdir(cycle)
+
         except BaseException as e:
             cosmos.log("An error occurred while copying !")
             cosmos.log(str(e))
@@ -1036,11 +1045,7 @@ def merge_timeseries(path, model_name, station, prefix,
         t1 = available_times[-1]
             
     # New pandas series
-    wl=[]
-    idx=[]
-    wl.append(0.0)
-    idx.append(pd.Timestamp("2100-01-01"))
-    vv = pd.Series(wl, index=idx)
+    vv = pd.Series([0.0], index=[pd.Timestamp("2100-01-01")])
     vv.index.name = "date_time"
     vv.name       = name_str
     okay = False
@@ -1064,7 +1069,7 @@ def merge_timeseries(path, model_name, station, prefix,
                 if ilast.any():
                     ilast = ilast[-1]
                     vv = vv[0:ilast]
-                    vv = vv.append(df)
+                    vv = pd.concat([vv,df])
                 else:
                     vv = df
                     
