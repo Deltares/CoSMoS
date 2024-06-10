@@ -33,18 +33,18 @@ The CoSMoS system consists of three main Python classes:
 
 **CoSMoS class**
 
-CoSMoS is initialized with the *run_cosmos* (see :ref:`Running CoSMoS <running>`) script, calling the main CoSMoS class (red box in Figure 1 and 2, :py:class:`cosmos.cosmos.CoSMoS`). 
+CoSMoS is initialized with the *run_cosmos* (see :ref:`Running CoSMoS <running>`) script, calling the main CoSMoS class (red box in Figure 1 and 2, :py:class:`cosmos.cosmos_main.CoSMoS`). 
 
-Upon initialization (:py:class:`cosmos.cosmos.CoSMoS.initialize`) of the CoSMoS class, CoSMoS calls the Configuration class (:py:class:`cosmos.cosmos.Configuration`).
+Upon initialization (:py:class:`cosmos.cosmos_main.CoSMoS.initialize`) of the CoSMoS class, CoSMoS calls the Configuration class (:py:class:`cosmos.cosmos_configuration.Configuration`).
 The Configuration class reads the main :ref:`configuration file <configuration>` and input settings, sets the model paths, and finds available models in the model database.
 In addition, it reads all :ref:`available stations <stations>`, :ref:`meteo datasets <meteo>`, and :ref:`super region files <super_regions>`. 
 The CoSMoS class saves all input settings to *cosmos.config*, which can be accessed by other CoSMoS classes. 
 
 The CoSMoS class has three main execution options:
 
-1. run (:py:func:`cosmos.cosmos.CoSMoS.run`): The CoSMoS class starts the :py:class:`cosmos.cosmos_main_loop.MainLoop`.
-2. post-process (:py:func:`cosmos.cosmos.CoSMoS.post_process`): The CoSMoS class only starts post-processing (a selection of) finished models within the Model Loop.
-3. make webviewer (:py:func:`cosmos.cosmos.CoSMoS.make_webviewer`): The CoSMoS class only makes the webviewer based on finished and post-processed models.
+1. run (:py:func:`cosmos.cosmos_main.CoSMoS.run`): The CoSMoS class starts the :py:class:`cosmos.cosmos_main_loop.MainLoop`.
+2. post-process (:py:func:`cosmos.cosmos_main.CoSMoS.post_process`): The CoSMoS class only starts post-processing (a selection of) finished models within the Model Loop.
+3. make webviewer (:py:func:`cosmos.cosmos_main.CoSMoS.make_webviewer`): The CoSMoS class only makes the webviewer based on finished and post-processed models.
 
 **Main Loop**
 

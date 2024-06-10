@@ -12,7 +12,7 @@ This *run_cosmos.py* script requires a *scenario_name* as input (here: *hurrican
 *scenarios/hurricane_laura/scenario.toml*.
 
 Input settings to the *initialize* function of CoSMoS will overwrite :ref:`*cycle* input settings defined in the configuration file <configuration>`.  
-All input settings are described in :py:class:`cosmos.cosmos.CoSMoS`.
+All input settings are described in :py:class:`cosmos.cosmos_main.CoSMoS`.
 
 There are two options to execute model runs using CoSMoS:
 
