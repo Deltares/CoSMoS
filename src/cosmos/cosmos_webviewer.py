@@ -162,12 +162,14 @@ class WebViewer:
                                         "These were the bed levels after the storm.",
                                         cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["bed_levels"]["color_map"]],
                                         16)
-            cosmos.log("Adding run-up layers ...")                
-            self.make_runup_map()
             cosmos.log("Adding XBeach markers ...")                
             self.make_xb_markers()
             cosmos.log("Adding XBeach regimes ...")                
             self.make_xb_regimes()
+
+        # TODO add if-statement for run-up layers
+        cosmos.log("Adding run-up layers ...")                
+        self.make_runup_map()
 
         # Write map variables to file
         cosmos.log("Writing variables ...")                
@@ -452,14 +454,14 @@ class WebViewer:
                                 "sallenger.geojson.js")
             cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var regimes =")
     
-        dct={}
-        dct["name"]        = "sallenger"
-        dct["long_name"]   = "Sallenger regimes XBeach"
-        dct["description"] = "These are the Sallenger regimes"
-        dct["format"]      = "geojson"
-        dct["legend"] = make_legend(type = 'sallenger_regimes') 
+            dct={}
+            dct["name"]        = "sallenger"
+            dct["long_name"]   = "Sallenger regimes XBeach"
+            dct["description"] = "These are the Sallenger regimes"
+            dct["format"]      = "geojson"
+            dct["legend"] = make_legend(type = 'sallenger_regimes') 
 
-        self.map_variables.append(dct)
+            self.map_variables.append(dct)
 
         # now same for Erosion regimes
         features_ero = []    
@@ -482,14 +484,14 @@ class WebViewer:
                                 "erosionregimes.geojson.js")
             cht.misc.misc_tools.write_json_js(file_name, feature_collection_ero, "var regimes =")
     
-        dct={}
-        dct["name"]        = "erosion_regimes"
-        dct["long_name"]   = "Erosion regimes XBeach"
-        dct["description"] = "These are the Erosion regimes"
-        dct["format"]      = "geojson"
-        dct["legend"] = make_legend(type = 'erosion_regimes')
-  
-        self.map_variables.append(dct)
+            dct={}
+            dct["name"]        = "erosion_regimes"
+            dct["long_name"]   = "Erosion regimes XBeach"
+            dct["description"] = "These are the Erosion regimes"
+            dct["format"]      = "geojson"
+            dct["legend"] = make_legend(type = 'erosion_regimes')
+    
+            self.map_variables.append(dct)
 
 
     def make_runup_map(self):        
@@ -684,40 +686,9 @@ class WebViewer:
                         dct["description"] = "This is the extreme horizontal runup."
                         dct["format"]      = "geojson"
                         dct["infographic"]   = "twl_hor"
-                        # dct["legend"]      = {"text": "Offshore WL", "contours": [{"text": " 0.0&nbsp-&nbsp;0.33&#8201;m", "color": "#CCFFFF"}, {"text": " 0.33&nbsp;-&nbsp;1.0&#8201;m", "color": "#40E0D0"}, {"text": " 1.0&nbsp-&nbsp;2.0&#8201;m", "color": "#00BFFF"}, {"text": "&gt; 2.0&#8201;m", "color": "#0909FF"}]}
-                        
                         dct["legend"] = make_legend(type = 'run_up')
 
-
                         self.map_variables.append(dct)                
-                
-
-                    # Time series 
-                        
-                    # for ip in range(len(model.domain.filename)):
-                        
-                    #     if os.path.exists(os.path.join(model.cycle_output_path,
-                    #                                         "beware_his_ensemble.nc")):  
-                    #         d= {'WL': model.domain.WL[ip,:],'Setup': model.domain.setup[ip,:], 'Swash': model.domain.swash[ip,:], 'Runup': model.domain.R2p[ip,:],
-                    #             'Setup_5': model.domain.setup_prc["5"][ip,:],'Setup_50': model.domain.setup_prc["50"][ip,:],'Setup_95': model.domain.setup_prc["95"][ip,:],
-                    #             'Runup_5': model.domain.R2p_prc["5"][ip,:],'Runup_50': model.domain.R2p_prc["50"][ip,:],'Runup_95': model.domain.R2p_prc["95"][ip,:],}       
-                    #     else:
-                    #         d= {'WL': model.domain.WL[ip,:],'Setup': model.domain.setup[ip,:], 'Swash': model.domain.swash[ip,:], 'Runup': model.domain.R2p[ip,:]}       
-            
-                    #     v= pd.DataFrame(data=d, index =  pd.date_range(model.domain.input.tstart, periods=len(model.domain.swash[ip,:]), freq= '0.5H'))
-                    #     obs_file = "extreme_runup_height." + model.domain.runid + "." +str(model.domain.filename[ip]) + ".csv.js"
-            
-                    #     local_file_path = os.path.join(output_path,  "timeseries",
-                    #                                        obs_file)
-                    #     s= v.to_csv(path_or_buf=None,
-                    #                  date_format='%Y-%m-%dT%H:%M:%S',
-                    #                  float_format='%.3f',
-                    #                  header= False, index_label= 'datetime') 
-                               
-                    #     if os.path.exists(os.path.join(model.cycle_output_path, "beware_his_ensemble.nc")):
-                    #         cht.misc.misc_tools.write_csv_js(local_file_path, s, "var csv = `date_time,wl,setup,swash,runup, setup_5, setup_50, setup_95, runup_5, runup_50, runup_95")
-                    #     else:
-                    #         cht.misc.misc_tools.write_csv_js(local_file_path, s, "var csv = `date_time,wl,setup,swash,runup")
 
                 except:
                     cosmos.log("An error occurred when making BEWARE webviewer !")
