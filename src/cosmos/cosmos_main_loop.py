@@ -45,7 +45,7 @@ class MainLoop:
 
     See Also
     --------
-    cosmos.cosmos.CoSMoS
+    cosmos.cosmos_main.CoSMoS
     cosmos.cosmos_scenario.Scenario
     cosmos.cosmos_model_loop.ModelLoop
     cosmos.cosmos_model.Model
@@ -58,7 +58,7 @@ class MainLoop:
         self.clean_up        = True
     
     def start(self, cycle=None): 
-        """Read the scenario.toml file, determine cycle times, initialize webviewer, and start cosmos_main_loop.run with scheduler. 
+        """Update the configuration, read the scenario.toml file, determine cycle times, initialize webviewer, and start cosmos_main_loop.run with scheduler. 
 
         Parameters
         ----------
@@ -148,12 +148,12 @@ class MainLoop:
     def run(self):
         """Run main loop.
 
-        - Get list of nested models
-        - Check if models are finished
+        - Prepare models: Get list of nested models and set paths
         - Check if model data needs to be uploaded to webviewer
         - Get start and stop times
         - Download and collect meteo
-        - Optional: Make track ensemble
+        - Optional: Make track ensemble or spiderweb from track file
+        - Check which models are finished
         - Start model loop
 
         See Also

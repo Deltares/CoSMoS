@@ -99,9 +99,12 @@ class Configuration:
 
     - Main CoSMoS path.
     - Model database path.
+    - Meteo database path.
+    - Conda path
     - Model executable paths.
     - Webserver and webviewer settings.
     - Cycle settings (can be overwritten by CoSMoS initialization settings).
+    - Cloud configuration
     """   
     def __init__(self):
         self.path           = Path()
@@ -125,6 +128,7 @@ class Configuration:
         - Read all available Stations.
         - Read all available meteo datasets.
         - Read all available super regions.
+        - Load color maps.
         """        
 
         from .cosmos_main import cosmos
