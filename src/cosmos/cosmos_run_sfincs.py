@@ -59,7 +59,7 @@ def prepare_single(config, member=None):
             s3_key = config["scenario"] + "/" + "models" + "/" + config["model"] + "/" + "base_input" + "/"
         else:
             s3_key = config["scenario"] + "/" + "models" + "/" + config["model"] + "/"
-        local_file_path = f'/input/'  # Replace with the local path where you want to save the file
+        local_path = f'/input/'  # Replace with the local path where you want to save the file
         objects = s3_client.list_objects(Bucket=bucket_name, Prefix=s3_key)
         if "Contents" in objects:
             for object in objects['Contents']:
@@ -69,9 +69,9 @@ def prepare_single(config, member=None):
                     continue
                 if "/" in key.replace(s3_key, ""):
                     continue
-                local_path = os.path.join(local_file_path, os.path.basename(key))
+                local_file_path = os.path.join(local_path, os.path.basename(key))
                 print("Copying " + key + " to " + local_path) 
-                s3_client.download_file(bucket_name, key, local_path)
+                s3_client.download_file(bucket_name, key, local_file_path)
     else:
         if config["ensemble"]:
             # Copy from input folder
@@ -108,33 +108,33 @@ def prepare_single(config, member=None):
         # Correct boundary water levels. Assuming that output from overall
         # model is in MSL !!!
         zcor = config["flow_nested"]["boundary_water_level_correction"] - config["vertical_reference_level_difference_with_msl"]
-        # If cloud mode, copy boundary files from S3
+        # If cloud mode, copy boundary files from S3 - we save netcdf output of each model
         if config["run_mode"] == "cloud":
-            file_name = config["flow_nested"]["overall_file"]    
-            s3_key = config["scenario"] + "/" + "models" + "/" + config["flow_nested"]["overall_model"] + "/" + file_name
+            file_name = config["flow_nested"]["overall_file"]
+            if config["ensemble"]:
+                s3_key = config["scenario"] + "/" + "models" + "/" + config["flow_nested"]["overall_model"] + "/" + member + "/" + file_name
+            else:    
+                s3_key = config["scenario"] + "/" + "models" + "/" + config["flow_nested"]["overall_model"] + "/" + file_name
             local_file_path = f'/input/boundary'
             fo.mkdir(local_file_path)
             # Download the file from S3
             s3_client.download_file(bucket_name, s3_key, os.path.join(local_file_path, os.path.basename(s3_key)))
-            # Change path in config
-            config["flow_nested"]["overall_path"] = local_file_path   
-
-        # Get boundary conditions from overall model (Nesting 2)
-        if config["ensemble"]:
-            nest2(config["flow_nested"]["overall_type"],
-                sf,
-                output_path=os.path.join(config["flow_nested"]["overall_path"], member),
-                boundary_water_level_correction=zcor,
-                option="flow",
-                bc_path=".")
+            output_path = local_file_path   
         else:
-            # Deterministic    
-            nest2(config["flow_nested"]["overall_type"],
-                sf,
-                output_path=config["flow_nested"]["overall_path"],
-                boundary_water_level_correction=zcor,
-                option="flow",
-                bc_path=".")
+            if config["ensemble"]:
+                output_path = os.path.join(config["flow_nested"]["overall_path"], member)
+            else:
+                output_path = config["flow_nested"]["overall_path"]
+        
+        # Get boundary conditions from overall model (Nesting 2)
+        nest2(
+            overall = config["flow_nested"]["overall_type"],
+            detail = sf,
+            output_path = output_path,                
+            boundary_water_level_correction=zcor,
+            option="flow",
+            bc_path="."
+        )
         
     if "wave_nested" in config:
         print("Nesting wave ...")
@@ -199,7 +199,7 @@ def merge_ensemble(config):
     if config["run_mode"] == "cloud":
         folder_path = '/input'
         his_output_file_name = os.path.join("/output/sfincs_his.nc")
-        map_output_file_name = os.path.join("/sfincs_map.nc")
+        map_output_file_name = os.path.join("/output/sfincs_map.nc")
     else:
         folder_path = './'
         his_output_file_name = "./output/sfincs_his.nc"
@@ -223,8 +223,8 @@ def merge_ensemble(config):
     if "flood_map" in config:
         try:
             merge_nc_map(map_files, ["zsmax", "cumprcp"], output_file_name=map_output_file_name)
-        except:
-            print('Merging does not work for quadtree yet')
+        except Exception as e:
+            print(str(e))
     # Copy restart files from the first ensemble member (restart files are the same for all members)
     fo.copy_file(os.path.join(folder_path, ensemble_members[0], 'sfincs.*.rst'), folder_path)    
 
@@ -503,10 +503,18 @@ def clean_up(config):
             config["scenario"] + "/" + config["model"]
             for member in ensemble_members:
                 s3key = config["scenario"] + "/" + "models" + "/" + config["model"] + "/" + member
-                # Delete folder from S3
+
+                # List of files to keep
+                keep_files = ["sfincs_his.nc", "sfincs_map.nc"]
+
+                # List all objects in the S3 folder
                 objects = s3_client.list_objects(Bucket=bucket_name, Prefix=s3key)
+
+                # Delete all files except those in keep_files list
                 for object in objects['Contents']:
-                    s3_client.delete_object(Bucket=bucket_name, Key=object['Key'])
+                    if object['Key'].split('/')[-1] not in keep_files:
+                        s3_client.delete_object(Bucket=bucket_name, Key=object['Key'])
+
         else:
             for member in ensemble_members:
                 try:

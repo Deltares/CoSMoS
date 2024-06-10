@@ -181,7 +181,7 @@ class WebViewer:
         folders = [] 
         # Check if tiles are available
         if cosmos.config.run.run_mode == "cloud":
-            bucket_name = 'scenario-webviewer'
+            bucket_name = 'cosmos.deltares.nl'
             prefix = self.name + "/data/" + cosmos.scenario.name + "/" + cosmos.cycle_string + "/" + name
             folders = cosmos.cloud.list_folders(bucket_name, prefix)
         else:    
@@ -1017,7 +1017,7 @@ class WebViewer:
         cosmos.log("Uploading web viewer to S3 ...")        
         try:
             # Upload entire copy of local web viewer to web server
-            bucket_name = "scenario-webviewer"
+            bucket_name = "cosmos.deltares.nl"
 #            bucket_name = "cosmos.deltares.nl"
             local_folder = self.cycle_path
             s3_folder = self.name + "/" + "data" + "/" + cosmos.scenario.name + "/" + cosmos.cycle_string

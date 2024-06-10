@@ -40,8 +40,19 @@ def setup_track_ensemble():
                                                   vcyc=40.0,
                                                   vmin=18.0)
         # Filter cyclone based on TCvitals
-        tc = find_priorityTC(tracks, "priority_storm.txt")
-#        tc = tracks[0]
+        # TODO: do we need a proper fallback for when the fill is not present?
+        try:
+            tc = find_priorityTC(tracks, "priority_storm.txt")
+        except Exception as e:
+            print(str(e), "Priority storm could NOT be found - longest track was used")
+            imax = 0
+            for itrack, track in enumerate(tracks):
+                if len(track.track) > imax:
+                    itrmax  = itrack
+                    imax    = len(track.track)
+
+            # Use the first track to make ensembles
+            tc = tracks[itrmax]
 
         # Use the first track to make ensembles
         tc.account_for_forward_speed()
@@ -71,8 +82,11 @@ def setup_track_ensemble():
     cosmos.scenario.cyclone_track = tc.track
     cosmos.scenario.track_ensemble = TropicalCycloneEnsemble(TropicalCyclone=tc)
     cosmos.scenario.track_ensemble.position_method = 1
-    cosmos.scenario.track_ensemble.tstart           = cosmos.scenario.ref_date
-    cosmos.scenario.track_ensemble.tend             = cosmos.stop_time
+    # NOTE this could be before, after best-track meteo data, so why would we do this?
+    if cosmos.scenario.track_ensemble.tstart < cosmos.scenario.ref_date:
+        cosmos.scenario.track_ensemble.tstart = cosmos.scenario.ref_date
+    if cosmos.scenario.track_ensemble.tend > cosmos.stop_time:
+        cosmos.scenario.track_ensemble.tend = cosmos.stop_time
     cosmos.scenario.track_ensemble.include_best_track = 1
 
     if ens_start:
