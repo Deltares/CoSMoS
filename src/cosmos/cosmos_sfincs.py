@@ -319,6 +319,7 @@ class CoSMoS_SFINCS(Model):
         exe_path = os.path.join(cosmos.config.executables.sfincs_path, "sfincs.exe")
         fid.write(exe_path + "\n")
         fid.write("move running.txt finished.txt\n")
+        fid.write("cmd \k\n")
         fid.close()
 
         # Set the path back to the one in cosmos\models\etc.
