@@ -390,15 +390,16 @@ class WebViewer:
         except Exception as e:
             print(str(e))
 
-        if cosmos.scenario.track_ensemble:
-            try:
-                feature_collection = cosmos.scenario.track_ensemble.get_feature_collection()
-                file_name = os.path.join(self.cycle_path, "track_ensemble.geojson.js")
-                cht.misc.misc_tools.write_json_js(file_name,
-                                                feature_collection,
-                                                "var track_ensemble_data =")
-            except Exception as e:
-                print(str(e))
+        # NOTE this can be removed right? This already happens in cosmos_track_ensemble.py
+        # if cosmos.scenario.track_ensemble:
+        #     try:
+        #         feature_collection = cosmos.scenario.track_ensemble.get_feature_collection()
+        #         file_name = os.path.join(self.cycle_path, "track_ensemble.geojson.js")
+        #         cht.misc.misc_tools.write_json_js(file_name,
+        #                                         feature_collection,
+        #                                         "var track_ensemble_data =")
+        #     except Exception as e:
+        #         print(str(e))
 
 
 
