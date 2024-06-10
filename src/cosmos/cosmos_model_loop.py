@@ -192,7 +192,7 @@ class ModelLoop():
             elif cosmos.config.run.run_mode == "cloud":
                 cosmos.log("Ready to submit to Argo - " + model.long_name + " ...")
                 s3key = cosmos.scenario.name + "/" + "models" + "/" + model.name
-                tilesfolder = model.deterministic_name
+                tilesfolder = model.region + "/" + model.type + "/" + model.deterministic_name
 #                webviewerfolder = cosmos.config.webviewer.name + "/data/" + cosmos.scenario.name + "/" + cosmos.cycle_string
                 webviewerfolder = cosmos.config.webviewer.name + "/data"
                 # Delete existing folder in cloud storage
@@ -208,7 +208,15 @@ class ModelLoop():
                                                os.path.join(model.job_path, "base_input"),
                                                s3key + "/base_input")
                 cosmos.log("Submitting to S3 : " + s3key)
-                model.cloud_job = cosmos.argo.submit_template_job(model.workflow_name, model.name, s3key, tilesfolder, webviewerfolder)
+                model.cloud_job = cosmos.argo.submit_template_job(
+                    workflow_name=model.workflow_name, 
+                    model_name=model.name, 
+                    subfolder=s3key,
+                    scenario=cosmos.scenario.name,
+                    cycle=cosmos.cycle_string, 
+                    tilingfolder=tilesfolder, 
+                    webviewerfolder=webviewerfolder
+                    )
 
 
             elif cosmos.config.run.run_mode == "parallel":
