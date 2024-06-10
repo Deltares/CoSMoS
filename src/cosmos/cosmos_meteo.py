@@ -80,8 +80,9 @@ def read_meteo_sources():
                             "meteo_subsets.xml")
     xml_obj = xml.xml2obj(xml_file)
     
-    parameters = ["wind","barometric_pressure","precipitation"]
-    
+    parameters = ["wind","barometric_pressure"]
+    # parameters = ["wind","barometric_pressure","precipitation"]
+
     has_source_list = []
     for xml_subset in xml_obj.meteo_subset:
 
