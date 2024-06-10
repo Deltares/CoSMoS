@@ -231,6 +231,7 @@ class Model:
                 config["water_level_map"]["zsmax_path"]  = "."
             config["water_level_map"]["start_time"] = cosmos.cycle
             config["water_level_map"]["stop_time"]  = cosmos.stop_time
+            config["water_level_map"]["interval"] = cosmos.config.webviewer.tile_layer["water_level_map"]["interval"]
             config["water_level_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["water_level_map"]["color_map"]]
         if cosmos.config.run.make_wave_maps and self.make_wave_map:
             config["hm0_map"] = {}
