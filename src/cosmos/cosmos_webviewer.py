@@ -10,16 +10,18 @@ import os
 import shutil
 import numpy as np
 import pandas as pd
+import time
 from scipy import interpolate                
 from geojson import Point, LineString, Feature, FeatureCollection
 from pyproj import CRS
 from pyproj import Transformer
-import boto3
 
+from .cosmos_argo import Argo
 from .cosmos_main import cosmos
 
 import cht.misc.fileops as fo
 import cht.misc.misc_tools
+from cht.misc.misc_tools import dict2yaml
 
 class WebViewer:
     """Cosmos webviewer class
@@ -95,6 +97,10 @@ class WebViewer:
             model.set_stations_to_upload()
         self.make_timeseries("wl")
         self.make_timeseries("waves")
+
+        if cosmos.config.run.run_mode == "cloud":
+            # Merge the map tiles of the different models
+            self.merge_map_tiles()
 
         # Map tiles
         cosmos.log("Adding tile layers ...")                
@@ -1001,6 +1007,76 @@ class WebViewer:
         except BaseException as e:
             cosmos.log("An error occurred while uploading !")
             cosmos.log(str(e))
+
+    def merge_map_tiles(self):
+        """Merge output map-tiles from different models for web viewer. 
+        For now only used in run_mode==cloud"""
+
+        cosmos.log("Merging output tiles ...")
+
+        # Potential variables
+        variables = ["flood_map", "flood_map_90", "water_level", "water_level_90", "hm0", "hm0_90", "precipitation", "sedero", "zb0", "zbend"]
+
+        # or is this way better?      
+        # variables = []
+        # variables.append("flood_map") if cosmos.config.run.make_flood_maps and not cosmos.config.run.only_run_ensemble
+        # variables.append("flood_map_90") if cosmos.config.run.make_flood_maps and cosmos.scenario.track_ensemble_nr_realizations>0
+       
+        # create a cloud configuration for the individual files
+        config = {}
+        config["cloud"] = {}
+        config["cloud"]["host"] = cosmos.config.cloud_config.host
+        config["cloud"]["access_key"] = cosmos.config.cloud_config.access_key
+        config["cloud"]["secret_key"] = cosmos.config.cloud_config.secret_key
+        config["cloud"]["region"] = cosmos.config.cloud_config.region
+        config["cloud"]["token"] = cosmos.config.cloud_config.token
+        config["cloud"]["namespace"] = cosmos.config.cloud_config.namespace
+        
+        # settings
+        config["cloud"]["s3_bucket"] = 'cosmos-scenarios'
+        config["cloud"]["output_s3_bucket"] = 'cosmos.deltares.nl'
+        config["cloud"]["scenario"] = cosmos.scenario_name
+        config["cloud"]["cycle"] = cosmos.cycle_string
+
+        # make a list of jobs
+        jobs = []
+        # Loop through all variables
+        for variable in variables:
+            job_path = cosmos.scenario.cycle_path + "tile_jobs"
+            fo.mkdir(job_path)
+
+            # Add variable to config
+            config["variable"] = {}
+            config["variable"]["name"] = variable
+            
+            # Create a job-folder with python script and config file
+            dict2yaml(os.path.join(job_path, "config.yml"), config)
+            fo.copy_file(
+                os.path.join(os.path.dirname(__file__), "cosmos_merge_tiles.py"),
+                os.path.join(job_path, "merge_tiles.py")
+                )
+
+            # Upload "jobs" to s3
+            s3key = cosmos.scenario.name + "/" + "tile_jobs" + "/" + variable
+            # Delete existing folder
+            cosmos.cloud.delete_folder(config["cloud"]["s3_bucket"], s3key)
+            # Upload job folder to cloud storage
+            cosmos.cloud.upload_folder(config["cloud"]["s3_bucket"], job_path, s3key)
+
+            jobs.append(cosmos.argo.submit_merge_tiles_job(
+                s3_bucket=config["cloud"]["s3_bucket"],
+                scenario=config["cloud"]["scenario"],
+                cycle=config["cloud"]["cycle"],
+                variable=config["variable"]["name"]
+                ))
+                       
+        # Wait for all jobs to finish
+        finished_list = []
+        while len(finished_list) < len(jobs):
+            for job in jobs:
+                if Argo.get_task_status(job) != "Running":
+                    finished_list.append(job)
+            time.sleep(60)
 
 def merge_timeseries(path, model_name, station, prefix,
                         t0=None,

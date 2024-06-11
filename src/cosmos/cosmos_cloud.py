@@ -1,6 +1,8 @@
 from .cosmos_main import cosmos
 import boto3
 import os
+import tarfile
+from botocore.exceptions import ClientError        
 
 import cht.misc.fileops as fo
 
@@ -102,6 +104,32 @@ class Cloud:
                 subfolder_name = subfolder['Prefix'].rstrip('/').split('/')[-1]
                 folders.append(subfolder_name)
         return folders 
+
+    def download_and_extract_tgz(self, bucket_name, s3_folder, local_folder):
+        """
+        Download and extract a .tgz file from S3.
+        """
+        local_tgz_path = os.path.join('/tmp', os.path.basename(s3_folder))
+        
+        # Download the .tgz file
+        self.s3_client.download_file(bucket_name, s3_folder, local_tgz_path)
+        
+        # Extract the .tgz file
+        with tarfile.open(local_tgz_path, "r:gz") as tar:
+            tar.extractall(path=local_folder)
+        
+        # Clean up the downloaded .tgz file
+        os.remove(local_tgz_path)
+
+    def check_file_exists(self, bucket_name, s3_key):
+        try:
+            self.s3_client.head_object(Bucket=bucket_name, Key=s3_key)
+            return True
+        except ClientError as e:
+            if e.response['Error']['Code'] == '404':
+                return False
+            else:
+                raise
 
 def list_all_files(src):
     # Recursively list all files and folders in a folder

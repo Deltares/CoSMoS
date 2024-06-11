@@ -55,6 +55,34 @@ class Argo:
 
         return w
 
+    def submit_merge_tiles_job(
+            self,
+            s3_bucket,
+            scenario,
+            cycle,
+            variable
+            ):
+        
+        wt_ref = WorkflowTemplateRef(name="merge-tiles", cluster_scope=False)
+
+        mname = variable.replace("_","-")
+
+        w = Workflow(
+            generate_name=mname+"-",
+            workflow_template_ref=wt_ref,
+            arguments={
+                "s3_bucket": s3_bucket,
+                "scenario": scenario,
+                "cycle": cycle,
+                "variable": variable
+                }
+        )
+
+        cosmos.log("Cloud Workflow started")
+        w.create()
+
+        return w
+    
     def submit_single_job(model):
         with Workflow(model.name.replace('_', '-'), generate_name=True, workflow_template_ref="sfincs-workflow-xzv8r") as w:
             Task("sfincs-cpu-argo", image="deltares/sfincs-cpu:latest", command=["/bin/bash", "-c", "--"], args= ["chmod +x /data/run.sh && /data/run.sh"])
