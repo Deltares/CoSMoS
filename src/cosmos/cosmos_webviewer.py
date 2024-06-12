@@ -1084,10 +1084,10 @@ class WebViewer:
         # Wait for all jobs to finish
         finished_list = []
         while len(finished_list) < len(jobs):
+            time.sleep(60)
             for job in jobs:
                 if Argo.get_task_status(job) != "Running":
                     finished_list.append(job)
-            time.sleep(60)
 
 def merge_timeseries(path, model_name, station, prefix,
                         t0=None,
