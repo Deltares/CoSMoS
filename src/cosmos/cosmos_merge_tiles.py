@@ -23,19 +23,6 @@ class Cloud:
         # Create an S3 client
         self.s3_client = session.client('s3')
 
-    def upload_folder(self, bucket_name, local_folder, s3_folder, quiet=True):
-        local_folder = local_folder.replace('\\\\','\\')
-        local_folder = local_folder.replace('\\','/')
-        # Recursively list all files
-        flist = list_all_files(local_folder)
-        for file in flist:
-            file1 = file.replace('\\','/')
-            file1 = file1.replace(local_folder,'')
-            s3_key = s3_folder + file1
-            self.s3_client.upload_file(file, bucket_name, s3_key)
-            if not quiet:
-                print("Uploaded " + os.path.basename(file))
-
     def list_folders(self, bucket_name, folder):
         if folder[-1] != "/":
              folder = folder + "/"
@@ -126,8 +113,8 @@ def merge_model_tiles(model_tiles, merged_tiles):
 def merge_tiles(config):
     # Load the configuration file
     variable = config["variable"]["name"]
-    scenario = config["scenario"]
-    cycle = config["cycle"]
+    scenario = config["cloud"]["scenario"]
+    cycle = config["cloud"]["cycle"]
     s3_bucket = config["cloud"]["s3_bucket"]
 
     # Initialize the cloud object
@@ -136,10 +123,6 @@ def merge_tiles(config):
     # tmp directories
     local_extract_path = 'input/tmp'
     shared_directory = 'output'
-
-    # output
-    # output_s3_bucket = config["cloud"]["output_s3_bucket"]
-    # output_s3_prefix = "{}/{}/".format(scenario, cycle)
 
     # first make a list of all models within this scenario with the specific variable
     s3_keys = []
@@ -165,9 +148,6 @@ def merge_tiles(config):
 
         # Clean up the extracted directory
         shutil.rmtree(tmp_dir)
-
-    # # Upload the merged tiles back to S3
-    # cloud.upload_folder(output_s3_bucket, shared_directory, output_s3_prefix, quiet=True)
 
 # Read config file (config.yml)
 config = yaml2dict("config.yml")
