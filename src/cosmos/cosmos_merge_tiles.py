@@ -67,10 +67,11 @@ def merge_images(image1_path, image2_path, output_path):
     Merge two images by overlaying image2 on image1 and save the result.
     """
     with Image.open(image1_path) as img1, Image.open(image2_path) as img2:
-        rgb1  = np.array(img1)
-        rgb2 = np.array(img2)
-        isum = np.sum(rgb1, axis=2)
-        rgb1[isum==0,:] = rgb2[isum==0,:]
+        rgb1  = np.array(img1) # existing image
+        rgb2 = np.array(img2)  # new image
+        isum = np.sum(rgb1, axis=2) # sum of the existing image
+        # replace the existing image with the new image where the existing image is zero
+        rgb1[isum==0,:] = rgb2[isum==0,:] 
         im = Image.fromarray(rgb1)
         im.save(output_path)
 
@@ -98,7 +99,7 @@ def merge_model_tiles(model_tiles, merged_tiles):
                     os.makedirs(os.path.dirname(dest_path), exist_ok=True)
                     shutil.move(src_path, dest_path)
 
-def merge_tiles(config, quiet=False):
+def merge_tiles(config, quiet=True):
     """Merge tiles for a specific variable from individual models into a shared directory."""
     # Load the configuration file
     variable = config["variable"]["name"]
@@ -150,4 +151,4 @@ config = yaml2dict("config.yml")
 
 print("Running merge_tiles.py")
 
-merge_tiles(config, quiet=False)
+merge_tiles(config, quiet=True)
