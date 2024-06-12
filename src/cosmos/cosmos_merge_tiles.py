@@ -110,8 +110,8 @@ def merge_tiles(config, quiet=True):
     cloud = Cloud(config)
 
     # tmp directories
-    local_extract_path = './input/tmp'
-    shared_directory = './output'
+    local_extract_path = './tmp'
+    shared_directory = '/output'
 
     # first make a list of all models within this scenario with the specific variable
     s3_keys = []
