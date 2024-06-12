@@ -108,11 +108,12 @@ class CosmosRunParallel:
                         try:
                             shutil.copytree(os.path.join(model_path), os.path.join(self.local_path, model_name))
                         except Exception as e:
-                            print("Retry to copy files failed, sending .txt file to jobs folder op p-drive.")
+                            print("Retry to copy files failed, sending .txt file to jobs folder op p-drive and removing on locally.")
                             file_name = os.path.join(job_path)
                             fid = open(file_name, "w")
                             fid.write(model_path)
                             fid.close()
+                            os.rmdir(os.path.join(self.local_path, model_name))
                             return
                         
                     # Check if folder is empty
@@ -122,11 +123,12 @@ class CosmosRunParallel:
                         try:
                             shutil.copytree(os.path.join(model_path), os.path.join(self.local_path, model_name), exist_ok = True)
                         except Exception as e:
-                            print("Retry to copy files failed, sending .txt file to jobs folder op p-drive.")
+                            print("Retry to copy files failed, sending .txt file to jobs folder op p-drive and removing locally.")
                             file_name = os.path.join(job_path)
                             fid = open(file_name, "w")
                             fid.write(model_path)
                             fid.close()
+                            os.rmdir(os.path.join(self.local_path, model_name))
                             return
   
                     fid = open("tmp.bat", "w")
