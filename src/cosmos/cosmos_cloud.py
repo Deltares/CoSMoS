@@ -87,23 +87,35 @@ class Cloud:
                 if not quiet:
                     print("Downloaded " + os.path.basename(s3_key))
 
-    def delete_folder(self, bucket_name, folder):
-        objects = self.s3_client.list_objects(Bucket=bucket_name, Prefix=folder, Delimiter="/")
+    def delete_folder(self, bucket_name, s3_folder):
+        objects = self.s3_client.list_objects(Bucket=bucket_name, Prefix=s3_folder, Delimiter="/")
         if "Contents" in objects:
             for object in objects['Contents']:
                 self.s3_client.delete_object(Bucket=bucket_name, Key=object['Key'])
 
-    def list_folders(self, bucket_name, folder):
-        if folder[-1] != "/":
-             folder = folder + "/"
+    def list_folders(self, bucket_name, s3_folder):
+        if s3_folder[-1] != "/":
+             s3_folder = s3_folder + "/"
         folders = []
         paginator = self.s3_client.get_paginator('list_objects_v2')
-        iterator = paginator.paginate(Bucket=bucket_name, Prefix=folder, Delimiter='/')
+        iterator = paginator.paginate(Bucket=bucket_name, Prefix=s3_folder, Delimiter='/')
         for page in iterator:
             for subfolder in page.get('CommonPrefixes', []):
                 subfolder_name = subfolder['Prefix'].rstrip('/').split('/')[-1]
                 folders.append(subfolder_name)
         return folders 
+
+    def list_files(self, bucket_name, s3_folder):
+        paginator = self.s3_client.get_paginator('list_objects_v2')
+        
+        all_files = []
+        
+        for page in paginator.paginate(Bucket=bucket_name, Prefix=s3_folder):
+            if 'Contents' in page:
+                for obj in page['Contents']:
+                    all_files.append(obj['Key'])
+        
+        return all_files
 
     def download_and_extract_tgz(self, bucket_name, s3_folder, local_folder):
         """
@@ -130,6 +142,14 @@ class Cloud:
                 return False
             else:
                 raise
+
+    def check_folder_exists(self, bucket_name, s3_key):
+        response = self.s3_client.list_objects_v2(Bucket=bucket_name, Prefix=s3_key, Delimiter='/')
+        # Check if any items are returned
+        if 'CommonPrefixes' in response:
+            return True
+        else:
+            return False
 
 def list_all_files(src):
     # Recursively list all files and folders in a folder

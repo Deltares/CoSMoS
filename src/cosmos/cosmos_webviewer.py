@@ -1014,13 +1014,26 @@ class WebViewer:
 
         cosmos.log("Merging output tiles ...")
 
-        # Potential variables
-        variables = ["flood_map", "flood_map_90", "water_level", "water_level_90", "hm0", "hm0_90", "precipitation", "sedero", "zb0", "zbend"]
+        # settings
+        bucket_name = 'cosmos-scenarios'
+        output_bucket_name = 'cosmos.deltares.nl'
 
-        # or is this way better?      
-        # variables = []
-        # variables.append("flood_map") if cosmos.config.run.make_flood_maps and not cosmos.config.run.only_run_ensemble
-        # variables.append("flood_map_90") if cosmos.config.run.make_flood_maps and cosmos.scenario.track_ensemble_nr_realizations>0
+        # list all models in the cloud
+        models = cosmos.cloud.list_folders(bucket_name, cosmos.scenario_name + "/models/")
+
+        # create a set of all available variables to be merged
+        for model in models:
+            s3_key = cosmos.scenario_name + "/models/" + model + "/tiles"
+            if cosmos.cloud.check_folder_exists(bucket_name, s3_key):
+                # list all files
+                files = cosmos.cloud.list_files(bucket_name, s3_key)
+                # only keep .tgz files and remove the path
+                tgz_files = [os.path.basename(f) for f in files if f.endswith('.tgz')]
+                # strip extension
+                tgz_files = [f.replace('.tgz','') for f in tgz_files]
+                # remove duplicates
+                variables = list(set(tgz_files))
+
        
         # create a cloud configuration for the individual files
         config = {}
@@ -1033,8 +1046,8 @@ class WebViewer:
         config["cloud"]["namespace"] = cosmos.config.cloud_config.namespace
         
         # settings
-        config["cloud"]["s3_bucket"] = 'cosmos-scenarios'
-        config["cloud"]["output_s3_bucket"] = 'cosmos.deltares.nl'
+        config["cloud"]["s3_bucket"] = bucket_name
+        config["cloud"]["output_s3_bucket"] = output_bucket_name
         config["cloud"]["scenario"] = cosmos.scenario_name
         config["cloud"]["cycle"] = cosmos.cycle_string
 

@@ -63,12 +63,12 @@ class Argo:
             variable
             ):
         
-        wt_ref = WorkflowTemplateRef(name="merge-tiles", cluster_scope=False)
+        wt_ref = WorkflowTemplateRef(name="merge-tiles-variable", cluster_scope=False)
 
         mname = variable.replace("_","-")
 
         w = Workflow(
-            generate_name=mname+"-",
+            generate_name="merge-"+mname+"-",
             workflow_template_ref=wt_ref,
             arguments={
                 "s3_bucket": s3_bucket,

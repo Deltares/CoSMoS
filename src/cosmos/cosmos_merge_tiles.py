@@ -133,7 +133,6 @@ def merge_tiles(config):
     # Initialize the cloud object
     cloud = Cloud(config)
 
-
     # tmp directories
     local_extract_path = 'input/tmp'
     shared_directory = 'output'
