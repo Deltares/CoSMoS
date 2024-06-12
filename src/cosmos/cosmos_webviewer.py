@@ -1018,12 +1018,10 @@ class WebViewer:
         bucket_name = 'cosmos-scenarios'
         output_bucket_name = 'cosmos.deltares.nl'
 
-        # list all models in the cloud
-        models = cosmos.cloud.list_folders(bucket_name, cosmos.scenario_name + "/models/")
-
         # create a set of all available variables to be merged
-        for model in models:
-            s3_key = cosmos.scenario_name + "/models/" + model + "/tiles"
+        for model in cosmos.scenario.model:
+            # tiles are kept separately per model in the cloud, check if they exist
+            s3_key = cosmos.scenario_name + "/models/" + model.name + "/tiles"
             if cosmos.cloud.check_folder_exists(bucket_name, s3_key):
                 # list all files
                 files = cosmos.cloud.list_files(bucket_name, s3_key)
