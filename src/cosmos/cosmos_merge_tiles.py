@@ -1,4 +1,5 @@
-# Merge model tiles
+# Merge model tiles from individual models into a shared directory.
+# This is only used in the cloud
 
 import os
 import boto3
@@ -6,13 +7,11 @@ import tarfile
 import shutil
 from PIL import Image
 import numpy as np
-import yaml
 
 from cht.misc.misc_tools import yaml2dict
 
+# Helper class for cloud functions, note this is a copy of necessary functionalities of cosmos_cloud
 class Cloud:
-    # Helper class for cloud functions
-
     def __init__(self, config):  
         # Create a session using your AWS credentials (or configure it in other ways)
         session = boto3.Session(
@@ -23,12 +22,12 @@ class Cloud:
         # Create an S3 client
         self.s3_client = session.client('s3')
 
-    def list_folders(self, bucket_name, folder):
-        if folder[-1] != "/":
-             folder = folder + "/"
+    def list_folders(self, bucket_name, s3_folder):
+        if s3_folder[-1] != "/":
+             s3_folder = s3_folder + "/"
         folders = []
         paginator = self.s3_client.get_paginator('list_objects_v2')
-        iterator = paginator.paginate(Bucket=bucket_name, Prefix=folder, Delimiter='/')
+        iterator = paginator.paginate(Bucket=bucket_name, Prefix=s3_folder, Delimiter='/')
         for page in iterator:
             for subfolder in page.get('CommonPrefixes', []):
                 subfolder_name = subfolder['Prefix'].rstrip('/').split('/')[-1]
@@ -62,18 +61,7 @@ class Cloud:
             else:
                 raise
 
-def list_all_files(src):
-    # Recursively list all files and folders in a folder
-    import pathlib
-    pth = pathlib.Path(src)
-    pthlst = list(pth.rglob("*"))
-    lst = []
-    for f in pthlst:
-        if f.is_file():
-            lst.append(str(f))
-    return lst        
-
-
+# Helper functions, these should be put into cht_tiling?
 def merge_images(image1_path, image2_path, output_path):
     """
     Merge two images by overlaying image2 on image1 and save the result.
@@ -110,19 +98,19 @@ def merge_model_tiles(model_tiles, merged_tiles):
                     os.makedirs(os.path.dirname(dest_path), exist_ok=True)
                     shutil.move(src_path, dest_path)
 
-def merge_tiles(config):
+def merge_tiles(config, quiet=False):
+    """Merge tiles for a specific variable from individual models into a shared directory."""
     # Load the configuration file
     variable = config["variable"]["name"]
     scenario = config["cloud"]["scenario"]
-    cycle = config["cloud"]["cycle"]
     s3_bucket = config["cloud"]["s3_bucket"]
 
     # Initialize the cloud object
     cloud = Cloud(config)
 
     # tmp directories
-    local_extract_path = 'input/tmp'
-    shared_directory = 'output'
+    local_extract_path = './input/tmp'
+    shared_directory = './output'
 
     # first make a list of all models within this scenario with the specific variable
     s3_keys = []
@@ -140,18 +128,26 @@ def merge_tiles(config):
 
     # Download and extract each .tgz file
     for s3_key in s3_keys:
+        # create a tmp directory for each model and download
         tmp_dir = os.path.join(local_extract_path, os.path.splitext(os.path.basename(s3_key))[0])
         cloud.download_and_extract_tgz(s3_bucket, s3_key, tmp_dir)
+        if not quiet:
+            print("Downloaded and extracted {}".format(s3_key))
 
         # Process the tiles (merge model tiles with existing tiles in shared directory)
         merge_model_tiles(tmp_dir, shared_directory)
+        if not quiet:
+            print("Processed tiles from {}".format(s3_key))
 
         # Clean up the extracted directory
         shutil.rmtree(tmp_dir)
+    
+    if not quiet:
+        print("Merged tiles for variable {} in scenario {}".format(variable, scenario))
 
 # Read config file (config.yml)
 config = yaml2dict("config.yml")
 
 print("Running merge_tiles.py")
 
-merge_tiles(config)
+merge_tiles(config, quiet=False)

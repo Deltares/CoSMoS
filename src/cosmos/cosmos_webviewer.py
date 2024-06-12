@@ -1074,16 +1074,22 @@ class WebViewer:
             # Upload job folder to cloud storage
             cosmos.cloud.upload_folder(config["cloud"]["s3_bucket"], job_path, s3key)
 
-            jobs.append(cosmos.argo.submit_merge_tiles_job(
-                s3_bucket=config["cloud"]["s3_bucket"],
+            # Submit job to Argo
+            cloud_job = cosmos.argo.submit_template_job(
+                workflow_name = "merge-tiles-variable",
+                job_name = variable,
+                subfolder = s3key,
                 scenario=config["cloud"]["scenario"],
                 cycle=config["cloud"]["cycle"],
-                variable=config["variable"]["name"]
-                ))
+                webviewerfolder = cosmos.config.webviewer.name + "/data"
+                )
+            
+            jobs.append(cloud_job)
                        
-        # Wait for all jobs to finish
+        # Wait for all jobs to finish before finishing the webviewer
         finished_list = []
         while len(finished_list) < len(jobs):
+            # Check every minute
             time.sleep(60)
             for job in jobs:
                 if Argo.get_task_status(job) != "Running":

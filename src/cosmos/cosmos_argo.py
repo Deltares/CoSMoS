@@ -15,67 +15,45 @@ class Argo:
     def __init__(self):
         pass
 
-    def submit_template_job(self, workflow_name, model_name, subfolder, scenario, cycle, tilingfolder, webviewerfolder):
+    def submit_template_job(self, workflow_name, job_name, subfolder, scenario, cycle, webviewerfolder=None, tilingfolder=None):
         """Submit a template job to Argo.
 
         Parameters
         ----------
         workflow_name : str
-            The name of the workflow template to submit.
-        model_name : str
-            The name of the model.
+            The name of the Argo workflow template to submit.
+        job_name : str
+            The name of the model/varaible for which you are submitting the job.
+        subfolder : str
+            The subfolder on S3 that needs to be copied to the compute instance as input
         scenario : str
             The name of the scenario.
         cycle : str
             The name of the cycle.
-        subfolder : str
-            The subfolder to use.
-        tilingfolder : str
+        webviewerfolder : str, optional
+            The name of the webviewer folder to use. This is the folder where the webviewer files are stored.
+        tilingfolder : str, optinal
             The tiling folder to use. This is the folder where the tiling (index and topobathy) files are stored.
-        webviewerfolder : str
-            The webviewer folder to use. This is 
         """
 
+        # Get the workflow template reference
         wt_ref = WorkflowTemplateRef(name=workflow_name, cluster_scope=False)
 
-        mname = model_name.replace("_","-")
+        # Replace underscores with dashes in the job name
+        mname = job_name.replace("_","-")
 
+        # Gather the arguments
+        arguments={"subfolder": subfolder, "scenario": scenario, "cycle": cycle}
+        if webviewerfolder is not None:
+            arguments["webviewerfolder"] = webviewerfolder
+        if tilingfolder is not None:
+            arguments["tilingfolder"] = tilingfolder
+
+        # Create the workflow
         w = Workflow(
             generate_name=mname+"-",
             workflow_template_ref=wt_ref,
-            arguments={"subfolder": subfolder,
-                       "scenario": scenario,
-                       "cycle": cycle,
-                       "tilingfolder": tilingfolder,
-                       "webviewerfolder": webviewerfolder}
-        )
-
-        cosmos.log("Cloud Workflow started")
-        w.create()
-
-        return w
-
-    def submit_merge_tiles_job(
-            self,
-            s3_bucket,
-            scenario,
-            cycle,
-            variable
-            ):
-        
-        wt_ref = WorkflowTemplateRef(name="merge-tiles-variable", cluster_scope=False)
-
-        mname = variable.replace("_","-")
-
-        w = Workflow(
-            generate_name="merge-"+mname+"-",
-            workflow_template_ref=wt_ref,
-            arguments={
-                "s3_bucket": s3_bucket,
-                "scenario": scenario,
-                "cycle": cycle,
-                "variable": variable
-                }
+            arguments=arguments
         )
 
         cosmos.log("Cloud Workflow started")
