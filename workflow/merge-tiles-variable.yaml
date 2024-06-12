@@ -1,0 +1,91 @@
+metadata:
+  name: merge-tiles-variable
+  namespace: argo
+  uid: b931a685-3048-4d1e-af25-731b18b194f6
+  resourceVersion: '214267920'
+  generation: 10
+  creationTimestamp: '2024-06-12T08:29:21Z'
+  labels:
+    example: 'true'
+    workflows.argoproj.io/creator: system-serviceaccount-argo-argo
+  managedFields:
+    - manager: argo
+      operation: Update
+      apiVersion: argoproj.io/v1alpha1
+      time: '2024-06-12T12:25:56Z'
+      fieldsType: FieldsV1
+      fieldsV1:
+        f:metadata:
+          f:labels:
+            .: {}
+            f:example: {}
+            f:workflows.argoproj.io/creator: {}
+        f:spec: {}
+spec:
+  templates:
+    - name: merge-tiles-variable
+      inputs:
+        artifacts:
+          - name: my-art
+            path: /input
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.subfolder}}'
+            archive:
+              none: {}
+      outputs:
+        artifacts:
+          - name: my-art
+            path: /output
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos.deltares.nl
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: >-
+                {{workflow.parameters.webviewerfolder}}/{{workflow.parameters.scenario}}/{{workflow.parameters.cycle}}
+            archive:
+              none: {}
+      nodeSelector:
+        alpha.eksctl.io/nodegroup-name: sfincs-2xlarge
+      metadata: {}
+      container:
+        name: ''
+        image: 012053003218.dkr.ecr.eu-west-1.amazonaws.com/run_job
+        command:
+          - python
+          - merge_tiles.py
+        resources:
+          limits:
+            cpu: '6'
+            memory: 14Gi
+          requests:
+            cpu: '6'
+            memory: 14Gi
+      retryStrategy:
+        limit: '10'
+        retryPolicy: Always
+  entrypoint: merge-tiles-variable
+  arguments:
+    parameters:
+      - name: subfolder
+        value: subfdoler
+      - name: scenario
+        value: scenario
+      - name: cycle
+        value: cycle
+      - name: webviewerfolder
+        value: webviewerfolder

@@ -2,8 +2,8 @@ metadata:
   name: sfincs-deterministic-workflow
   namespace: argo
   uid: c21c8f57-cdf5-421a-9574-b8b7da72747d
-  resourceVersion: '214258573'
-  generation: 25
+  resourceVersion: '214268054'
+  generation: 26
   creationTimestamp: '2023-08-08T19:13:08Z'
   labels:
     workflows.argoproj.io/creator: system-serviceaccount-argo-argo-server
@@ -11,7 +11,7 @@ metadata:
     - manager: argo
       operation: Update
       apiVersion: argoproj.io/v1alpha1
-      time: '2024-06-12T11:50:52Z'
+      time: '2024-06-12T12:26:28Z'
       fieldsType: FieldsV1
       fieldsV1:
         f:metadata:
@@ -86,7 +86,7 @@ spec:
             memory: 14Gi
           requests:
             cpu: '6'
-            memory: 12Gi
+            memory: 14Gi
       retryStrategy:
         limit: '10'
         retryPolicy: Always
@@ -140,10 +140,10 @@ spec:
         resources:
           limits:
             cpu: '6'
-            memory: 12Gi
+            memory: 14Gi
           requests:
             cpu: '6'
-            memory: 12Gi
+            memory: 14Gi
       retryStrategy:
         limit: '10'
         retryPolicy: Always
@@ -247,7 +247,7 @@ spec:
             memory: 14Gi
           requests:
             cpu: '6'
-            memory: 12Gi
+            memory: 14Gi
       retryStrategy:
         limit: '10'
         retryPolicy: Always
