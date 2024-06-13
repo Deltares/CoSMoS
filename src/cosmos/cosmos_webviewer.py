@@ -1018,6 +1018,7 @@ class WebViewer:
         bucket_name = 'cosmos-scenarios'
         output_bucket_name = 'cosmos.deltares.nl'
 
+        variables = set()
         # create a set of all available variables to be merged
         for model in cosmos.scenario.model:
             # tiles are kept separately per model in the cloud, check if they exist
@@ -1029,9 +1030,8 @@ class WebViewer:
                 tgz_files = [os.path.basename(f) for f in files if f.endswith('.tgz')]
                 # strip extension
                 tgz_files = [f.replace('.tgz','') for f in tgz_files]
-                # remove duplicates
-                variables = list(set(tgz_files))
-
+                # keepp unique variables
+                variables.update(tgz_files)
        
         # create a cloud configuration for the individual files
         config = {}
