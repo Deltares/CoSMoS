@@ -220,7 +220,7 @@ def merge_ensemble(config):
         map_files.append(os.path.join(folder_path, member, "sfincs_map.nc"))
 
     merge_nc_his(his_files, ["point_zs"], output_file_name=his_output_file_name)
-    if "flood_map" in config:
+    if "flood_map" in config or "water_level_map" in config:
         try:
             merge_nc_map(map_files, ["zsmax", "cumprcp"], output_file_name=map_output_file_name)
         except Exception as e:

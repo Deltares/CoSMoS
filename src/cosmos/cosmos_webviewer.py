@@ -149,6 +149,11 @@ class WebViewer:
                                         "These are cumulative precipitations.",
                                         cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["precipitation"]["color_map"]],
                                         10)
+            self.set_map_tile_variables("precipitation_90",
+                                        "Cumulative rainfall (90)",
+                                        "These are worst case cumulative precipitations.",
+                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["precipitation"]["color_map"]],
+                                        10)            
             cosmos.log("Adding meteo layers ...")                
             self.make_meteo_maps()
 
@@ -1053,7 +1058,7 @@ class WebViewer:
         jobs = []
         # Loop through all variables
         for variable in variables:
-            job_path = cosmos.scenario.cycle_path + "tile_jobs"
+            job_path = cosmos.scenario.cycle_path + "/" + "tile_jobs"
             fo.mkdir(job_path)
 
             # Add variable to config
