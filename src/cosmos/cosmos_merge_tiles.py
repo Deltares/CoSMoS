@@ -41,11 +41,17 @@ class Cloud:
         local_tgz_path = os.path.join('/tmp', os.path.basename(s3_folder))
         
         # Download the .tgz file
-        self.s3_client.download_file(bucket_name, s3_folder, local_tgz_path)
+        try:
+            self.s3_client.download_file(bucket_name, s3_folder, local_tgz_path)
+        except Exception as e:
+            raise Exception("Failed to download {}: {}".format(s3_folder, e))
         
         # Extract the .tgz file
-        with tarfile.open(local_tgz_path, "r:gz") as tar:
-            tar.extractall(path=local_folder)
+        try:
+            with tarfile.open(local_tgz_path, "r:gz") as tar:
+                tar.extractall(path=local_folder)
+        except Exception as e:
+            raise Exception("Failed to extract {}: {}".format(local_tgz_path, e))
         
         # Clean up the downloaded .tgz file
         os.remove(local_tgz_path)
@@ -131,7 +137,11 @@ def merge_tiles(config, quiet=True):
     for s3_key in s3_keys:
         # create a tmp directory for each model and download
         tmp_dir = os.path.join(local_extract_path, os.path.splitext(os.path.basename(s3_key))[0])
-        cloud.download_and_extract_tgz(s3_bucket, s3_key, tmp_dir)
+        try:
+            cloud.download_and_extract_tgz(s3_bucket, s3_key, tmp_dir)
+        except Exception as e:
+            print("Failed to download and extract {}: {}".format(s3_key, e))
+            continue
         if not quiet:
             print("Downloaded and extracted {}".format(s3_key))
 
