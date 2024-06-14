@@ -5,6 +5,7 @@ Created on Tue May 25 14:28:58 2021
 @author: ormondt
 """
 import os
+import glob
 from pyproj import CRS
 import numpy as np
 import datetime
@@ -159,6 +160,13 @@ def download_and_collect_meteo():
                     fid.close()
                 else:
                     cosmos.storm_flag = False
+                
+                # Check if track was saved from coamps-tc 
+                track_files = glob.glob(os.path.join(meteo_subset.path, meteo_subset.last_analysis_time.strftime("%Y%m%d_%Hz"), "*.trk"))
+                if len(track_files)>0:
+                    track_file_name = track_files[0]
+                    # Add the track to the scenario
+                    cosmos.scenario.meteo_track = track_file_name 
 
 def write_meteo_input_files(model, prefix, tref, path=None):
     
