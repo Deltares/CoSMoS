@@ -165,6 +165,7 @@ def download_and_collect_meteo():
                 track_files = glob.glob(os.path.join(meteo_subset.path, meteo_subset.last_analysis_time.strftime("%Y%m%d_%Hz"), "*.trk"))
                 if len(track_files)>0:
                     track_file_name = track_files[0]
+                    # Add the track to the scenario
                     cosmos.scenario.meteo_track = track_file_name 
 
 def write_meteo_input_files(model, prefix, tref, path=None):
