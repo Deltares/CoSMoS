@@ -1,6 +1,24 @@
 metadata:
   name: sfincs-deterministic-workflow
   namespace: argo
+  uid: c21c8f57-cdf5-421a-9574-b8b7da72747d
+  resourceVersion: '214268054'
+  generation: 26
+  creationTimestamp: '2023-08-08T19:13:08Z'
+  labels:
+    workflows.argoproj.io/creator: system-serviceaccount-argo-argo-server
+  managedFields:
+    - manager: argo
+      operation: Update
+      apiVersion: argoproj.io/v1alpha1
+      time: '2024-06-12T12:26:28Z'
+      fieldsType: FieldsV1
+      fieldsV1:
+        f:metadata:
+          f:labels:
+            .: {}
+            f:workflows.argoproj.io/creator: {}
+        f:spec: {}
 spec:
   templates:
     - name: run-sfincs
@@ -10,8 +28,13 @@ spec:
       steps:
         - - name: preparesimulation
             template: prepare-simulation
+            arguments: {}
         - - name: runsimulation
             template: run-simulation
+            arguments: {}
+        - - name: tiles
+            template: map-tiles
+            arguments: {}
     - name: prepare-simulation
       inputs:
         artifacts:
@@ -47,6 +70,8 @@ spec:
               key: '{{workflow.parameters.subfolder}}'
             archive:
               none: {}
+      nodeSelector:
+        alpha.eksctl.io/nodegroup-name: sfincs-2xlarge
       metadata: {}
       container:
         name: ''
@@ -55,7 +80,16 @@ spec:
           - python
           - run_job_2.py
           - prepare_single
-        resources: {}
+        resources:
+          limits:
+            cpu: '6'
+            memory: 14Gi
+          requests:
+            cpu: '6'
+            memory: 14Gi
+      retryStrategy:
+        limit: '10'
+        retryPolicy: Always
     - name: run-simulation
       inputs:
         artifacts:
@@ -91,19 +125,142 @@ spec:
               key: '{{workflow.parameters.subfolder}}'
             archive:
               none: {}
+      nodeSelector:
+        alpha.eksctl.io/nodegroup-name: sfincs-2xlarge
       metadata: {}
       container:
         name: sfincs-cpu-argo
-        image: deltares/sfincs-cpu:latest
+        image: deltares/sfincs-cpu:sfincs-v2.0.3-Cauberg
         command:
           - /bin/bash
           - '-c'
           - '--'
         args:
           - sfincs
-        resources: {}
+        resources:
+          limits:
+            cpu: '6'
+            memory: 14Gi
+          requests:
+            cpu: '6'
+            memory: 14Gi
+      retryStrategy:
+        limit: '10'
+        retryPolicy: Always
+    - name: map-tiles
+      inputs:
+        artifacts:
+          - name: input-from-s3
+            path: /input
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.subfolder}}'
+            archive:
+              none: {}
+          - name: tiles
+            path: /tiles
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-models
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.tilingfolder}}/tiles.tgz'
+      outputs:
+        artifacts:
+          - name: upload-flood_map-to-s3
+            path: >-
+              /output/{{workflow.parameters.scenario}}/{{workflow.parameters.cycle}}/flood_map
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.subfolder}}/tiles/flood_map.tgz'
+            archive:
+              tar: {}
+            optional: true
+          - name: upload-water_level-to-s3
+            path: >-
+              /output/{{workflow.parameters.scenario}}/{{workflow.parameters.cycle}}/water_level
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.subfolder}}/tiles/water_level.tgz'
+            archive:
+              tar: {}
+            optional: true
+          - name: upload-precipitation-to-s3
+            path: >-
+              /output/{{workflow.parameters.scenario}}/{{workflow.parameters.cycle}}/precipitation
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.subfolder}}/tiles/precipitation.tgz'
+            archive:
+              tar: {}
+            optional: true
+      nodeSelector:
+        alpha.eksctl.io/nodegroup-name: sfincs-2xlarge
+      metadata: {}
+      container:
+        name: ''
+        image: 012053003218.dkr.ecr.eu-west-1.amazonaws.com/run_job
+        command:
+          - python
+          - run_job_2.py
+          - map_tiles
+        resources:
+          limits:
+            cpu: '6'
+            memory: 14Gi
+          requests:
+            cpu: '6'
+            memory: 14Gi
+      retryStrategy:
+        limit: '10'
+        retryPolicy: Always
   entrypoint: run-sfincs
   arguments:
     parameters:
       - name: subfolder
         value: subfolder
+      - name: scenario
+        value: scenario
+      - name: cycle
+        value: cycle
+      - name: webviewerfolder
+        value: webviewerfolder
+      - name: tilingfolder
+        value: tilingfolder

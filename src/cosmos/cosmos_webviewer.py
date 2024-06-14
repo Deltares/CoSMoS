@@ -10,16 +10,18 @@ import os
 import shutil
 import numpy as np
 import pandas as pd
+import time
 from scipy import interpolate                
 from geojson import Point, LineString, Feature, FeatureCollection
 from pyproj import CRS
 from pyproj import Transformer
-import boto3
 
+from .cosmos_argo import Argo
 from .cosmos_main import cosmos
 
 import cht.misc.fileops as fo
 import cht.misc.misc_tools
+from cht.misc.misc_tools import dict2yaml
 
 class WebViewer:
     """Cosmos webviewer class
@@ -96,6 +98,10 @@ class WebViewer:
         self.make_timeseries("wl")
         self.make_timeseries("waves")
 
+        if cosmos.config.run.run_mode == "cloud":
+            # Merge the map tiles of the different models
+            self.merge_map_tiles()
+
         # Map tiles
         cosmos.log("Adding tile layers ...")                
         self.map_variables = []
@@ -143,6 +149,11 @@ class WebViewer:
                                         "These are cumulative precipitations.",
                                         cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["precipitation"]["color_map"]],
                                         10)
+            self.set_map_tile_variables("precipitation_90",
+                                        "Cumulative rainfall (90)",
+                                        "These are worst case cumulative precipitations.",
+                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["precipitation"]["color_map"]],
+                                        10)            
             cosmos.log("Adding meteo layers ...")                
             self.make_meteo_maps()
 
@@ -1001,6 +1012,93 @@ class WebViewer:
         except BaseException as e:
             cosmos.log("An error occurred while uploading !")
             cosmos.log(str(e))
+
+    def merge_map_tiles(self):
+        """Merge output map-tiles from different models for web viewer. 
+        For now only used in run_mode==cloud"""
+
+        cosmos.log("Merging output tiles ...")
+
+        # settings
+        bucket_name = 'cosmos-scenarios'
+        output_bucket_name = 'cosmos.deltares.nl'
+
+        variables = set()
+        # create a set of all available variables to be merged
+        for model in cosmos.scenario.model:
+            # tiles are kept separately per model in the cloud, check if they exist
+            s3_key = cosmos.scenario_name + "/models/" + model.name + "/tiles"
+            if cosmos.cloud.check_folder_exists(bucket_name, s3_key):
+                # list all files
+                files = cosmos.cloud.list_files(bucket_name, s3_key)
+                # only keep .tgz files and remove the path
+                tgz_files = [os.path.basename(f) for f in files if f.endswith('.tgz')]
+                # strip extension
+                tgz_files = [f.replace('.tgz','') for f in tgz_files]
+                # keepp unique variables
+                variables.update(tgz_files)
+       
+        # create a cloud configuration for the individual files
+        config = {}
+        config["cloud"] = {}
+        config["cloud"]["host"] = cosmos.config.cloud_config.host
+        config["cloud"]["access_key"] = cosmos.config.cloud_config.access_key
+        config["cloud"]["secret_key"] = cosmos.config.cloud_config.secret_key
+        config["cloud"]["region"] = cosmos.config.cloud_config.region
+        config["cloud"]["token"] = cosmos.config.cloud_config.token
+        config["cloud"]["namespace"] = cosmos.config.cloud_config.namespace
+        
+        # settings
+        config["cloud"]["s3_bucket"] = bucket_name
+        config["cloud"]["output_s3_bucket"] = output_bucket_name
+        config["cloud"]["scenario"] = cosmos.scenario_name
+        config["cloud"]["cycle"] = cosmos.cycle_string
+
+        # make a list of jobs
+        jobs = []
+        # Loop through all variables
+        for variable in variables:
+            job_path = cosmos.scenario.cycle_path + "/" + "tile_jobs"
+            fo.mkdir(job_path)
+
+            # Add variable to config
+            config["variable"] = {}
+            config["variable"]["name"] = variable
+            
+            # Create a job-folder with python script and config file
+            dict2yaml(os.path.join(job_path, "config.yml"), config)
+            fo.copy_file(
+                os.path.join(os.path.dirname(__file__), "cosmos_merge_tiles.py"),
+                os.path.join(job_path, "merge_tiles.py")
+                )
+
+            # Upload "jobs" to s3
+            s3key = cosmos.scenario.name + "/" + "tile_jobs" + "/" + variable
+            # Delete existing folder
+            cosmos.cloud.delete_folder(config["cloud"]["s3_bucket"], s3key)
+            # Upload job folder to cloud storage
+            cosmos.cloud.upload_folder(config["cloud"]["s3_bucket"], job_path, s3key)
+
+            # Submit job to Argo
+            cloud_job = cosmos.argo.submit_template_job(
+                workflow_name = "merge-tiles-variable",
+                job_name = variable,
+                subfolder = s3key,
+                scenario=config["cloud"]["scenario"],
+                cycle=config["cloud"]["cycle"],
+                webviewerfolder = cosmos.config.webviewer.name + "/data"
+                )
+            
+            jobs.append(cloud_job)
+                       
+        # Wait for all jobs to finish before finishing the webviewer
+        finished_list = []
+        while len(finished_list) < len(jobs):
+            # Check every minute
+            time.sleep(60)
+            for job in jobs:
+                if Argo.get_task_status(job) != "Running":
+                    finished_list.append(job)
 
 def merge_timeseries(path, model_name, station, prefix,
                         t0=None,
