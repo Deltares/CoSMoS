@@ -150,7 +150,7 @@ def merge_tiles(config, quiet=True):
 
     # output
     output_s3_bucket = config["cloud"]["output_s3_bucket"]
-    output_s3_prefix = webviewer_folder + "/{}/{}/".format(scenario, cycle)
+    output_s3_prefix = webviewer_folder + "/{}/{}".format(scenario, cycle)
 
     # first make a list of all models within this scenario with the specific variable
     s3_keys = []
