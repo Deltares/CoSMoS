@@ -1051,6 +1051,7 @@ class WebViewer:
         # settings
         config["cloud"]["s3_bucket"] = bucket_name
         config["cloud"]["output_s3_bucket"] = output_bucket_name
+        config["cloud"]["webviewer_folder"] = cosmos.config.webviewer.name + "/data"
         config["cloud"]["scenario"] = cosmos.scenario_name
         config["cloud"]["cycle"] = cosmos.cycle_string
 

@@ -34,6 +34,22 @@ class Cloud:
                 folders.append(subfolder_name)
         return folders 
 
+    def upload_folder(self, bucket_name, local_folder, s3_folder, quiet=True):
+        local_folder = local_folder.replace('\\\\','\\')
+        local_folder = local_folder.replace('\\','/')
+        # Recursively list all files
+        flist = list_all_files(local_folder)
+        for file in flist:
+            file1 = file.replace('\\','/')
+            file1 = file1.replace(local_folder,'')
+            s3_key = s3_folder + file1
+            try:
+                self.s3_client.upload_file(file, bucket_name, s3_key)
+            except Exception as e:
+                raise Exception("Failed to upload {}: {}".format(file, e))
+            if not quiet:
+                print("Uploaded " + os.path.basename(file))
+
     def download_and_extract_tgz(self, bucket_name, s3_folder, local_folder):
         """
         Download and extract a .tgz file from S3.
@@ -66,6 +82,17 @@ class Cloud:
                 return False
             else:
                 raise
+
+def list_all_files(src):
+    # Recursively list all files and folders in a folder
+    import pathlib
+    pth = pathlib.Path(src)
+    pthlst = list(pth.rglob("*"))
+    lst = []
+    for f in pthlst:
+        if f.is_file():
+            lst.append(str(f))
+    return lst  
 
 # Helper functions, these should be put into cht_tiling?
 def merge_images(image1_path, image2_path, output_path):
@@ -110,7 +137,9 @@ def merge_tiles(config, quiet=True):
     # Load the configuration file
     variable = config["variable"]["name"]
     scenario = config["cloud"]["scenario"]
+    cycle = config["cloud"]["cycle"]
     s3_bucket = config["cloud"]["s3_bucket"]
+    webviewer_folder = config["cloud"]["webviewer_folder"]
 
     # Initialize the cloud object
     cloud = Cloud(config)
@@ -118,6 +147,10 @@ def merge_tiles(config, quiet=True):
     # tmp directories
     local_extract_path = './tmp'
     shared_directory = '/output'
+
+    # output
+    output_s3_bucket = config["cloud"]["output_s3_bucket"]
+    output_s3_prefix = webviewer_folder + "/{}/{}/".format(scenario, cycle)
 
     # first make a list of all models within this scenario with the specific variable
     s3_keys = []
@@ -156,9 +189,13 @@ def merge_tiles(config, quiet=True):
     if not quiet:
         print("Merged tiles for variable {} in scenario {}".format(variable, scenario))
 
+    # Upload the merged tiles back to S3
+    # TODO parallelize this, e.g. using multithreading (maybe use bulkboto3?)
+    cloud.upload_folder(output_s3_bucket, shared_directory, output_s3_prefix, quiet=quiet)
+
 # Read config file (config.yml)
 config = yaml2dict("config.yml")
 
 print("Running merge_tiles.py")
 
-merge_tiles(config, quiet=True)
+merge_tiles(config, quiet=False)
