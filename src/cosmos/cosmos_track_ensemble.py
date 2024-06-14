@@ -86,7 +86,7 @@ def setup_track_ensemble():
 
     # Set the ensemble start time, always equal to the cycle time
     # NOTE: when tc starts later than cycle, ensemble also starts to deviate later
-    cosmos.scenario.track_ensemble.tstart_ensemble  = cosmos.scenario.cycle
+    cosmos.scenario.track_ensemble.tstart_ensemble  = cosmos.cycle.replace(tzinfo=None)
 
     cosmos.scenario.track_ensemble.dt = 3
     cosmos.scenario.track_ensemble.compute_ensemble(number_of_realizations=cosmos.scenario.track_ensemble_nr_realizations)    
