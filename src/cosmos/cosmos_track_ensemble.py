@@ -36,11 +36,20 @@ def setup_track_ensemble():
 
         cosmos.log("Finding storm tracks ...")
         tracks = meteo_subset.find_cyclone_tracks(method="vorticity",
-                                                  pcyc=102000.0,
+                                                  pcyc=100000.0,
                                                   vcyc=40.0,
-                                                  vmin=18.0)
+                                                  vmin=18.0,
+                                                  dt = 3)
         # Filter cyclone based on TCvitals
-        tc = find_priorityTC(tracks, "priority_storm.txt")
+        # Use coordinates specified in meteo file to extract nearest track from gridded meteo data (if present)
+        if hasattr(cosmos.scenario, 'meteo_lon'): 
+            meteo_lon = cosmos.scenario.meteo_lon
+            meteo_lat = cosmos.scenario.meteo_lat
+        else:
+            meteo_lon = None
+            meteo_lat = None
+
+        tc = find_priorityTC(tracks, "priority_storm.txt", meteo_lon, meteo_lat)
 #        tc = tracks[0]
 
         # Use the first track to make ensembles
@@ -75,11 +84,11 @@ def setup_track_ensemble():
     cosmos.scenario.track_ensemble.tend             = cosmos.stop_time
     cosmos.scenario.track_ensemble.include_best_track = 1
 
-    if ens_start:
-        # Ensemble starts at the time of the last analysis
-        cosmos.scenario.track_ensemble.tstart_ensemble = ens_start
-    else:
-        cosmos.scenario.track_ensemble.tstart_ensemble  = cosmos.scenario.cycle
+    # if ens_start:
+    #     # Ensemble starts at the time of the last analysis
+    #     cosmos.scenario.track_ensemble.tstart_ensemble = ens_start
+    # else:
+    cosmos.scenario.track_ensemble.tstart_ensemble  = cosmos.scenario.cycle
 
     cosmos.scenario.track_ensemble.dt = 3
     cosmos.scenario.track_ensemble.compute_ensemble(number_of_realizations=cosmos.scenario.track_ensemble_nr_realizations)    
