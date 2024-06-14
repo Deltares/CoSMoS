@@ -12,7 +12,7 @@ import shapely
 import copy
 
 from .cosmos_main import cosmos
-from cht.tropical_cyclone.tropical_cyclone import TropicalCycloneEnsemble
+from cht_cyclones.tropical_cyclone import TropicalCycloneEnsemble
 from cht.meteo.meteo import filter_cyclones_TCvitals, find_priorityTC
 import cht.misc.fileops as fo
 from datetime import datetime
@@ -59,7 +59,7 @@ def setup_track_ensemble():
 
     else:
         # Read in storm track from *.cyc file
-        from cht.tropical_cyclone.tropical_cyclone import TropicalCyclone
+        from cht_cyclones.tropical_cyclone import TropicalCyclone
         tc= TropicalCyclone()
         cyc_file = os.path.join(cosmos.config.meteo_database.path, "tracks", cosmos.scenario.meteo_track + ".cyc")
         tc.from_ddb_cyc(cyc_file)

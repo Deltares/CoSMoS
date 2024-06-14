@@ -226,7 +226,7 @@ def write_meteo_input_files(model, prefix, tref, path=None):
     
 def track_to_spw():
             
-    from cht.tropical_cyclone.tropical_cyclone import TropicalCyclone
+    from cht_cyclones.tropical_cyclone import TropicalCyclone
     tc= TropicalCyclone()
 
     if cosmos.scenario.meteo_spiderweb:
