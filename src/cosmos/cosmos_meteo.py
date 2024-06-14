@@ -12,11 +12,11 @@ import datetime
 from .cosmos_main import cosmos
 from cht.meteo.meteo import MeteoSource
 from cht.meteo.meteo import MeteoGrid
-import cht.misc.xmlkit as xml
+import toml
 import cht.misc.fileops as fo
 
 def read_meteo_sources():
-    """Read meteo sources from ../meteo/meteo_subsets.xml.
+    """Read meteo sources from ../meteo/meteo_subsets.toml.
     """    
     
     # Read meteo sources
@@ -75,34 +75,34 @@ def read_meteo_sources():
     cosmos.meteo_source.append(src)
 
     # Meteo subsets
-    # Read from xml file
+    # Read from toml file
     meteo_path = cosmos.config.meteo_database.path
-    xml_file = os.path.join(meteo_path,
-                            "meteo_subsets.xml")
-    xml_obj = xml.xml2obj(xml_file)
+    file_name = os.path.join(meteo_path,
+                            "meteo_subsets.toml")
+    toml_dict = toml.load(file_name)
     
     parameters = ["wind","barometric_pressure","precipitation"]
     
     has_source_list = []
-    for xml_subset in xml_obj.meteo_subset:
+    for toml_meteo in toml_dict["meteo_subset"]:
 
-        name       = xml_subset.name[0].value
+        name       = toml_meteo['name']
         path       = os.path.join(meteo_path, name)
-        srcname    = xml_subset.source[0].value
+        srcname    = toml_meteo['source']
         # Look for matching source
         for src in cosmos.meteo_source:
             if srcname.lower() == src.name.lower():
                 x_range = None
                 y_range = None
-                if hasattr(xml_subset,"x_range"):
-                    x_range = xml_subset.x_range[0].value
-                    y_range = xml_subset.y_range[0].value
+                if "x_range" in toml_meteo:
+                    x_range = toml_meteo['x_range']
+                    y_range = toml_meteo['y_range']
                 xystride = 1    
                 tstride  = 1    
-                if hasattr(xml_subset, "xystride"):
-                    xystride = int(xml_subset.xystride[0].value)
-                if hasattr(xml_subset, "tstride"):
-                    tstride = int(xml_subset.tstride[0].value)
+                if "xystride" in toml_meteo:
+                    xystride = int(toml_meteo['xystride'])
+                if "tstride" in toml_meteo:
+                    tstride = int(toml_meteo['tstride'])
                 subset = MeteoGrid(name=name,
                                    source=src,
                                    parameters=parameters,
@@ -115,14 +115,14 @@ def read_meteo_sources():
                 cosmos.meteo_subset.append(subset)
                 break
 
-    #  # Now get the other datasets (not mentioned in the subset xml file) 
+    #  # Now get the other datasets (not mentioned in the subset toml file) 
     # data_names = []
     # data_list = fo.list_folders(os.path.join(meteo_path,"*"))
     # for data_path in data_list:
     #     data_names.append(os.path.basename(data_path))
      
 def download_and_collect_meteo():
-    """Download meteo sources listed in meteo_subsets.xml using cht.meteo.
+    """Download meteo sources listed in meteo_subsets.toml using cht.meteo.
     """    
     # Loop through all available meteo subsets
     # Determine if the need to be downloaded

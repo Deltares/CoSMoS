@@ -6,8 +6,7 @@ Created on Tue May 18 12:00:56 2021
 """
 
 import os
-
-from cht.misc import xmlkit as xml
+import toml
 from cht.misc import fileops as fo
 
 class Station():
@@ -41,32 +40,32 @@ class Stations():
         from .cosmos_main import cosmos
 
         file_list = fo.list_files(os.path.join(cosmos.config.path.stations,
-                                               "*.xml"))
+                                               "*.toml"))
         
         for file_name in file_list:
 
-            xml_obj = xml.xml2obj(file_name)
+            toml_dict = toml.load(file_name)
 
-            for xml_stat in xml_obj.station:
+            for toml_stat in toml_dict['station']:
 
                 station = Station()      
-                station.name      = xml_stat.name[0].value
-                station.long_name = xml_stat.longname[0].value
-                station.longitude = xml_stat.longitude[0].value
-                station.latitude  = xml_stat.latitude[0].value
-                station.type      = xml_stat.type[0].value
-                if hasattr(xml_stat, "water_level_correction"):
-                    station.water_level_correction = xml_stat.water_level_correction[0].value
-                if hasattr(xml_stat, "MLLW"):
-                    station.mllw = xml_stat.MLLW[0].value                
-                if hasattr(xml_stat, "coops_id"):
-                    station.coops_id = xml_stat.coops_id[0].value
-                    station.id       = xml_stat.coops_id[0].value
-                if hasattr(xml_stat, "ndbc_id"):
-                    station.ndbc_id = xml_stat.ndbc_id[0].value
-                    station.id      = xml_stat.ndbc_id[0].value
-                if hasattr(xml_stat, "id"):
-                    station.id = xml_stat.id[0].value
+                station.name      = toml_stat['name']
+                station.long_name = toml_stat['longname']
+                station.longitude = toml_stat['longitude']
+                station.latitude  = toml_stat['latitude']
+                station.type      = toml_stat['type']
+                if "water_level_correction" in toml_stat:
+                    station.water_level_correction = toml_stat['water_level_correction']
+                if "MLLW" in toml_stat:
+                    station.mllw = toml_stat['MLLW']
+                if "coops_id" in toml_stat:
+                    station.coops_id = toml_stat['coops_id']
+                    station.id       = toml_stat['coops_id']
+                if "ndbc_id" in toml_stat:
+                    station.ndbc_id = toml_stat['ndbc_id']
+                    station.id      = toml_stat['ndbc_id']
+                if "id" in toml_stat:
+                    station.id = toml_stat['id']
                     
                 station.file_name = os.path.basename(file_name)    
 
