@@ -407,7 +407,7 @@ class Model:
         wgs84 = CRS.from_epsg(4326)
         transformer = Transformer.from_crs(wgs84, self.crs, always_xy=True)
         
-        if name[-3:].lower() == "xml":
+        if name[-4:].lower() == "toml":
 
             # Get all stations in file
             stations = cosmos.config.stations.find_by_file(name)

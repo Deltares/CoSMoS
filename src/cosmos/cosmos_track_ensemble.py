@@ -21,7 +21,6 @@ import cht.misc.misc_tools
 def setup_track_ensemble():
 
     tc = None
-    ens_start = None
 
     # Check if scenario is forced with track files or gridded data
     if not cosmos.scenario.meteo_track:
@@ -32,27 +31,23 @@ def setup_track_ensemble():
             if meteo_subset.name == cosmos.scenario.meteo_dataset:
                 break
 
-        ens_start = meteo_subset.last_analysis_time
-
         cosmos.log("Finding storm tracks ...")
         tracks = meteo_subset.find_cyclone_tracks(method="vorticity",
-                                                  pcyc=102000.0,
+                                                  pcyc=100000.0,
                                                   vcyc=40.0,
-                                                  vmin=18.0)
+                                                  vmin=18.0,
+                                                  dt = 3)
         # Filter cyclone based on TCvitals
-        # TODO: do we need a proper fallback for when the fill is not present?
-        try:
-            tc = find_priorityTC(tracks, "priority_storm.txt")
-        except Exception as e:
-            print(str(e), "Priority storm could NOT be found - longest track was used")
-            imax = 0
-            for itrack, track in enumerate(tracks):
-                if len(track.track) > imax:
-                    itrmax  = itrack
-                    imax    = len(track.track)
+        # Use coordinates specified in meteo file to extract nearest track from gridded meteo data (if present)
+        if hasattr(cosmos.scenario, 'meteo_lon'): 
+            meteo_lon = cosmos.scenario.meteo_lon
+            meteo_lat = cosmos.scenario.meteo_lat
+        else:
+            meteo_lon = None
+            meteo_lat = None
 
-            # Use the first track to make ensembles
-            tc = tracks[itrmax]
+        tc = find_priorityTC(tracks, "priority_storm.txt", meteo_lon, meteo_lat)
+#        tc = tracks[0]
 
         # Use the first track to make ensembles
         tc.account_for_forward_speed()
@@ -89,11 +84,9 @@ def setup_track_ensemble():
         cosmos.scenario.track_ensemble.tend = cosmos.stop_time
     cosmos.scenario.track_ensemble.include_best_track = 1
 
-    if ens_start:
-        # Ensemble starts at the time of the last analysis
-        cosmos.scenario.track_ensemble.tstart_ensemble = ens_start
-    else:
-        cosmos.scenario.track_ensemble.tstart_ensemble  = cosmos.scenario.cycle
+    # Set the ensemble start time, always equal to the cycle time
+    # NOTE: when tc starts later than cycle, ensemble also starts to deviate later
+    cosmos.scenario.track_ensemble.tstart_ensemble  = cosmos.scenario.cycle
 
     cosmos.scenario.track_ensemble.dt = 3
     cosmos.scenario.track_ensemble.compute_ensemble(number_of_realizations=cosmos.scenario.track_ensemble_nr_realizations)    

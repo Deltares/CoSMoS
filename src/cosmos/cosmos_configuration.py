@@ -11,7 +11,6 @@ import toml
 from .cosmos_stations import Stations
 from .cosmos_meteo import read_meteo_sources
 from .cosmos_color_maps import read_color_maps
-#import cht.misc.xmlkit as xml
 from cht.misc.misc_tools import rgb2hex
 import cht.misc.fileops as fo
 
@@ -109,9 +108,12 @@ class Configuration:
 
     - Main CoSMoS path.
     - Model database path.
+    - Meteo database path.
+    - Conda path
     - Model executable paths.
     - Webserver and webviewer settings.
     - Cycle settings (can be overwritten by CoSMoS initialization settings).
+    - Cloud configuration
     """   
     def __init__(self):
         self.path           = Path()
@@ -135,6 +137,7 @@ class Configuration:
         - Read all available Stations.
         - Read all available meteo datasets.
         - Read all available super regions.
+        - Load color maps.
         """        
 
         from .cosmos_main import cosmos
@@ -161,7 +164,7 @@ class Configuration:
                 name_list = fo.list_folders(os.path.join(type_path,"*"))
                 for name_path in name_list:
                     name = os.path.basename(name_path).lower()
-                    # Check if xml file exists
+                    # Check if toml file exists
                     toml_file = os.path.join(name_path, "model.toml")
                     if os.path.exists(toml_file):
                         cosmos.all_models[name] = {"type": type_name,
@@ -171,7 +174,7 @@ class Configuration:
         # Color maps
         tml_file = os.path.join(self.path.config,
                                 "color_maps",
-                                "map_contours.yml")
+                                "map_contours.toml")
         self.map_contours = read_color_maps(tml_file)
         
         # Available stations
@@ -179,10 +182,13 @@ class Configuration:
         self.stations = Stations()
         self.stations.read()
 
+        # Add metget_api configuration path for coamps-tc data (save only path to be able to change priority storm while cosmos is running)
+        self.metget_config_path = os.path.join(self.path.main, "configuration", "metget_config.toml")
+
         # Available meteo sources
         cosmos.log("Reading meteo sources ...")    
         read_meteo_sources()
-
+   
         # Find all available super regions
         cosmos.log("Reading super regions ...")    
         self.super_region = {}

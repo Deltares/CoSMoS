@@ -15,8 +15,8 @@ def read_color_maps(file_name):
     map_contours = {}
 
     with open(file_name, 'r') as f:
-        clrs = yaml.safe_load(f)
-#    clrs = toml.load(file_name)
+        # clrs = yaml.safe_load(f)
+        clrs = toml.load(f)
 
     # Map contours
     maps = clrs["color_range"]

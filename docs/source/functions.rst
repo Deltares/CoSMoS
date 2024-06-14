@@ -8,7 +8,7 @@ Main classes
 .. autosummary:: 
    :toctree: _generated/  
    
-   cosmos.cosmos.CoSMoS
+   cosmos.cosmos_main.CoSMoS
    cosmos.cosmos_main_loop.MainLoop
    cosmos.cosmos_model_loop.ModelLoop
 
@@ -42,12 +42,12 @@ CoSMoS functions
 .. autosummary:: 
    :toctree: _generated/  
    
-   cosmos.cosmos.CoSMoS.initialize
-   cosmos.cosmos.CoSMoS.run
-   cosmos.cosmos.CoSMoS.stop
-   cosmos.cosmos.CoSMoS.log
-   cosmos.cosmos.CoSMoS.make_webviewer
-   cosmos.cosmos.CoSMoS.post_process
+   cosmos.cosmos_main.CoSMoS.initialize
+   cosmos.cosmos_main.CoSMoS.run
+   cosmos.cosmos_main.CoSMoS.stop
+   cosmos.cosmos_main.CoSMoS.log
+   cosmos.cosmos_main.CoSMoS.make_webviewer
+   cosmos.cosmos_main.CoSMoS.post_process
 
 MainLoop and ModelLoop functions
 ^^^^^^^^^^^^
@@ -68,7 +68,6 @@ Model functions
    cosmos.cosmos_model.Model.read_generic
    cosmos.cosmos_model.Model.set_paths
    cosmos.cosmos_model.Model.get_nested_models
-   cosmos.cosmos_model.Model.submit_job
    cosmos.cosmos_model.Model.get_all_nested_models
    cosmos.cosmos_model.Model.add_stations
    cosmos.cosmos_model.Model.get_peak_boundary_conditions
