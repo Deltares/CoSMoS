@@ -61,8 +61,22 @@ def setup_track_ensemble():
         # Read in storm track from *.cyc file
         from cht_cyclones.tropical_cyclone import TropicalCyclone
         tc= TropicalCyclone()
-        cyc_file = os.path.join(cosmos.config.meteo_database.path, "tracks", cosmos.scenario.meteo_track + ".cyc")
-        tc.from_ddb_cyc(cyc_file)
+
+        # check if absolute path is given
+        if not os.path.isabs(cosmos.scenario.meteo_track):
+            filename = os.path.join(cosmos.config.meteo_database.path, "tracks", cosmos.scenario.meteo_track + ".cyc")
+        else:
+            filename = cosmos.scenario.meteo_track
+        
+        # convert to tc based on file extension
+        if filename.endswith(".cyc"):
+            tc.from_ddb_cyc(filename)
+        elif filename.endswith(".trk"):
+            tc.from_trk(filename)
+        else:
+            cosmos.log("Unknown track file format: " + filename)
+            return
+
         tc.account_for_forward_speed()
         tc.estimate_missing_values()
         tc.include_rainfall = True  
