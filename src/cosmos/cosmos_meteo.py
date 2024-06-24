@@ -64,7 +64,6 @@ def read_meteo_sources():
                       "forecast",
                       crs=CRS.from_epsg(4326),
                       delay=6,
-                      time_interval=1,
                       config_path=cosmos.config.metget_config_path)
     cosmos.meteo_source.append(src)
 
