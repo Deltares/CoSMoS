@@ -166,7 +166,7 @@ def download_and_collect_meteo():
                 meteo_subset.meteo_source.to_csv(csv_path)
                 
                 # Change description in scenario object for the webviewer
-                des = "_".join(meteo_subset.meteo_source.values[-1][0].split("_")[:-1])
+                des = cosmos.cycle_string + " using " + "_".join(meteo_subset.meteo_source.values[-1][0].split("_")[:-1])
                 cosmos.scenario.description = des
                 
                 # Check if track was saved from coamps-tc 
