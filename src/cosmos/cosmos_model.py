@@ -243,9 +243,11 @@ class Model:
             if cosmos.config.run.run_mode == "cloud":
                 config["hm0_map"]["png_path"]   = "/output"
                 config["hm0_map"]["index_path"] = "/tiles/indices"
+                config["hm0_map"]["output_path"]  = "/input"
             else:
                 config["hm0_map"]["png_path"]   = os.path.join(cosmos.config.webviewer.data_path)
                 config["hm0_map"]["index_path"] = os.path.join(self.path, "tiling", "indices")
+                config["hm0_map"]["output_path"]  = "."
             config["hm0_map"]["start_time"] = cosmos.cycle
             config["hm0_map"]["stop_time"]  = cosmos.stop_time
             config["hm0_map"]["interval"] = cosmos.config.webviewer.tile_layer["hm0"]["interval"]

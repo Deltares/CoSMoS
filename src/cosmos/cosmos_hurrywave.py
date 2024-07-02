@@ -214,35 +214,21 @@ class CoSMoS_HurryWave(Model):
                 self.workflow_name = "hurrywave-deterministic-workflow"
 
 
-    def move(self):        
-        # Move files from job folder to archive folder        
-        # First clear archive folder              
+    def move(self):             
         job_path    = self.job_path
-        # Delete finished.txt file
-        # fo.delete_file(os.path.join(job_path, "finished.txt"))        
         output_path  = self.cycle_output_path
         input_path   = self.cycle_input_path  
         restart_path = self.restart_wave_path        
-        # Output        
-        if self.ensemble:
-            # Merging should happen in the job, so there should not be a difference between ensemble and deterministic
-            for member_name in cosmos.scenario.ensemble_names:                
-                pth0 = os.path.join(self.job_path, member_name)
-                pth1 = os.path.join(output_path, member_name)
-                fo.mkdir(pth1)
-                fo.move_file(os.path.join(pth0, "hurrywave_map.nc"), pth1)
-                fo.move_file(os.path.join(pth0, "hurrywave_his.nc"), pth1)
-                fo.move_file(os.path.join(pth0, "hurrywave_sp2.nc"), pth1)
-        else:
-            fo.move_file(os.path.join(job_path, "hurrywave_map.nc"), output_path)
-            fo.move_file(os.path.join(job_path, "hurrywave_his.nc"), output_path)
-            fo.move_file(os.path.join(job_path, "hurrywave_sp2.nc"), output_path)
-            fo.move_file(os.path.join(job_path, "*.txt"), output_path)
-
-        fo.move_file(os.path.join(job_path, "hurrywave.rst"), input_path)
-        # Input
-        fo.move_file(os.path.join(job_path, "*.*"), input_path)
-
+        # Output
+        fo.move_file(os.path.join(job_path, "hurrywave_map.nc"), output_path)
+        fo.move_file(os.path.join(job_path, "hurrywave_his.nc"), output_path)
+        fo.move_file(os.path.join(job_path, "hurrywave_sp2.nc"), output_path)
+        # Restart file used in simulation        
+        fo.move_file(os.path.join(self.job_path, "hurrywave.rst"), input_path)
+        # Restart files created during simulation
+        fo.move_file(os.path.join(self.job_path, "*.rst"), restart_path)
+        # Input (all the rest)
+        fo.move_file(os.path.join(self.job_path, "*.*"), input_path)
 
     def post_process(self):
         # Extract wave time series
