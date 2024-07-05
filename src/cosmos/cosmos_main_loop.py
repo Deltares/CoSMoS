@@ -278,7 +278,7 @@ class MainLoop:
         if cosmos.scenario.run_ensemble:
             # Make track ensemble (this also add 'new' ensemble models that fall within the cone)
             setup_track_ensemble()
-        elif cosmos.scenario.meteo_spiderweb or cosmos.scenario.meteo_track:
+        elif cosmos.scenario.meteo_spiderweb or not os.path.isabs(cosmos.scenario.meteo_track):
             # Make spiderweb if does not exist yet
             track_to_spw()
 

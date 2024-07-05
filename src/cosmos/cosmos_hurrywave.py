@@ -214,12 +214,8 @@ class CoSMoS_HurryWave(Model):
                 self.workflow_name = "hurrywave-deterministic-workflow"
 
 
-    def move(self):        
-        # Move files from job folder to archive folder        
-        # First clear archive folder              
+    def move(self):             
         job_path    = self.job_path
-        # Delete finished.txt file
-        # fo.delete_file(os.path.join(job_path, "finished.txt"))        
         output_path  = self.cycle_output_path
         input_path   = self.cycle_input_path  
         restart_path = self.restart_wave_path        

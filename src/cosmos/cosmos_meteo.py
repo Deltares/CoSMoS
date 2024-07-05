@@ -64,7 +64,6 @@ def read_meteo_sources():
                       "forecast",
                       crs=CRS.from_epsg(4326),
                       delay=6,
-                      time_interval=1,
                       config_path=cosmos.config.metget_config_path)
     cosmos.meteo_source.append(src)
 
@@ -151,6 +150,7 @@ def download_and_collect_meteo():
                                  tstride=meteo_subset.tstride)
             if meteo_subset.last_analysis_time:
                 cosmos.log("Last analysis time : " + meteo_subset.last_analysis_time.strftime("%Y%m%d_%H%M%S"))
+                # Check if Coamps-TC was used and save file for reference
                 file_name = os.path.join(meteo_subset.path, meteo_subset.last_analysis_time.strftime("%Y%m%d_%Hz"), "coamps_used.txt")
                 if os.path.exists(file_name):
                     cosmos.storm_flag = True
@@ -160,6 +160,14 @@ def download_and_collect_meteo():
                     fid.close()
                 else:
                     cosmos.storm_flag = False
+                
+                # Save csv with meteo sources for each time step
+                csv_path = os.path.join(cosmos.scenario.cycle_path, "meteo_sources.csv")
+                meteo_subset.meteo_source.to_csv(csv_path)
+                
+                # Change description in scenario object for the webviewer
+                des = "_".join(meteo_subset.meteo_source.values[-1][0].split("_")[:-1])
+                cosmos.scenario.description = des
                 
                 # Check if track was saved from coamps-tc 
                 track_files = glob.glob(os.path.join(meteo_subset.path, meteo_subset.last_analysis_time.strftime("%Y%m%d_%Hz"), "*.trk"))
