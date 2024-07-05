@@ -164,10 +164,7 @@ def download_and_collect_meteo():
                 # Save csv with meteo sources for each time step
                 csv_path = os.path.join(cosmos.scenario.cycle_path, "meteo_sources.csv")
                 meteo_subset.meteo_source.to_csv(csv_path)
-                
-                # Change description in scenario object for the webviewer
-                des = "_".join(meteo_subset.meteo_source.values[-1][0].split("_")[:-1])
-                cosmos.scenario.description = des
+                cosmos.scenario.meteo_string = "_".join(meteo_subset.meteo_source.values[-1][0].split("_")[:-1])
                 
                 # Check if track was saved from coamps-tc 
                 track_files = glob.glob(os.path.join(meteo_subset.path, meteo_subset.last_analysis_time.strftime("%Y%m%d_%Hz"), "*.trk"))

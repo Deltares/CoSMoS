@@ -123,7 +123,7 @@ class WebViewer:
                                         9)
             
             self.set_map_tile_variables("hm0_90",
-                                        "Wave height (90)",
+                                        "Wave height (worst case)",
                                         "These are worst case Hm0 wave heights.",
                                         cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["hm0"]["color_map"]],
                                         9)
@@ -149,7 +149,7 @@ class WebViewer:
                                         cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["precipitation"]["color_map"]],
                                         10)
             self.set_map_tile_variables("precipitation_90",
-                                        "Cumulative rainfall (90)",
+                                        "Cumulative rainfall (worst case)",
                                         "These are worst case cumulative precipitations.",
                                         cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["precipitation"]["color_map"]],
                                         10)            
@@ -831,6 +831,12 @@ class WebViewer:
                     isame = isc
         else:
             scs = []
+
+        # # Read meteo source from csv file
+        # csv_path = os.path.join(cosmos.scenario.cycle_path, "meteo_sources.csv")
+        # meteo_source = pd.read_csv(csv_path)
+        # meteo_string = "_".join(meteo_source.values[-1][0].split("_")[:-1])
+
         # Current scenario        
         newsc = {}
         newsc["name"]        = cosmos.scenario.name    
@@ -842,6 +848,7 @@ class WebViewer:
         newsc["cycle"]       = cosmos.cycle.strftime('%Y-%m-%dT%H:%M:%S')
         newsc["cycle_string"] = cosmos.cycle_string
         newsc["cycle_mode"]  = cosmos.config.run.mode
+        newsc["meteo_string"] = cosmos.scenario.meteo_string
         newsc["duration"]    = str(cosmos.scenario.runtime)
         now = datetime.datetime.utcnow()
         newsc["last_update"] = now.strftime("%Y/%m/%d %H:%M:%S" + " (UTC)")

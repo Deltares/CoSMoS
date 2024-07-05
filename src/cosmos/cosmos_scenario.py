@@ -58,6 +58,7 @@ class Scenario:
         self.meteo_track                = None
         self.observations_path = ""
         self.run_ensemble = False
+        self.meteo_string = ""
         
     def read(self):
         """Read scenario file, set model paths and settings, initialize models and read model generic and model specific data. 

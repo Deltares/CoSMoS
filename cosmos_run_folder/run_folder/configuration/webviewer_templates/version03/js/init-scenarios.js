@@ -116,7 +116,14 @@ function selectScenario() {
 
   // Set new zoom
   map.setView([currentScenario["lat"], currentScenario["lon"]], currentScenario["zoom"]);
-  document.getElementById("status_text").innerHTML = "Updated : " + currentScenario["last_update"];
+  var update_string = "Updated : " + currentScenario["last_update"]
+  if (currentScenario["cycle_string"]) {
+    update_string += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cosmos : " + currentScenario["cycle_string"]
+  }	
+  if (currentScenario["meteo_string"]) {
+    update_string += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;meteo : " + currentScenario["meteo_string"]
+  }
+  document.getElementById("status_text").innerHTML = update_string
   document.getElementById("description_text").innerHTML = currentScenario["description"]
 }
 
