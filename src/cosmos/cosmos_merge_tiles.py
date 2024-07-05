@@ -3,12 +3,14 @@
 
 import os
 import boto3
+#from bulkboto3 import BulkBoto3
 import tarfile
 import shutil
 from PIL import Image
 import numpy as np
 
 from cht.misc.misc_tools import yaml2dict
+
 
 # Helper class for cloud functions, note this is a copy of necessary functionalities of cosmos_cloud
 class Cloud:
@@ -21,6 +23,16 @@ class Cloud:
         )
         # Create an S3 client
         self.s3_client = session.client('s3')
+
+        # entrypoint_url = "https://eu-west-1.console.aws.amazon.com/s3/home?region=eu-west-1"
+        # self.bulkboto_agent = BulkBoto3(
+        #     resource_type="s3",
+        #     endpoint_url=entrypoint_url,
+        #     aws_access_key_id=config["cloud"]["access_key"],
+        #     aws_secret_access_key=config["cloud"]["secret_key"],
+        #     max_pool_connections=300,
+        #     verbose=True,
+        # )
 
     def list_folders(self, bucket_name, s3_folder):
         if s3_folder[-1] != "/":
@@ -49,6 +61,16 @@ class Cloud:
                 raise Exception("Failed to upload {}: {}".format(file, e))
             if not quiet:
                 print("Uploaded " + os.path.basename(file))
+
+    def bulk_upload_folder(self, bucket_name, local_folder, s3_folder, num_threads=8):
+        local_folder = local_folder.replace('\\\\','\\')
+        local_folder = local_folder.replace('\\','/')
+        self.bulkboto_agent.upload_dir_to_storage(
+            bucket_name=bucket_name,
+            local_dir=local_folder,
+            storage_dir=s3_folder,
+            n_threads=num_threads,
+        )        
 
     def download_and_extract_tgz(self, bucket_name, s3_folder, local_folder):
         """
@@ -192,6 +214,7 @@ def merge_tiles(config, quiet=True):
     # Upload the merged tiles back to S3
     # TODO parallelize this, e.g. using multithreading (maybe use bulkboto3?)
     cloud.upload_folder(output_s3_bucket, shared_directory, output_s3_prefix, quiet=quiet)
+    # cloud.bulk_upload_folder(output_s3_bucket, shared_directory, output_s3_prefix, num_threads=8)
 
 # Read config file (config.yml)
 config = yaml2dict("config.yml")

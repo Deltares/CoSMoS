@@ -52,6 +52,9 @@ class WebViewer:
         self.name    = None
         self.version = None
         self.path    = None
+        self.lon     = 0.0
+        self.lat     = 0.0
+        self.zoom    = 1
         self.tile_layer = {}
         self.tile_layer["flood_map"] = {}
         self.tile_layer["flood_map"]["interval"] = 24
@@ -100,6 +103,9 @@ class Run:
         self.just_initialize = False
         self.run_models      = True
         self.remove_old_cycles = 0
+        # Run all models in ensemble model by default
+        self.ensemble_models = ["sfincs", "hurrywave", "delft3d", "xbeach", "beware"]
+        self.track_ensemble_nr_realizations = 10
 
 class Configuration:
     """CoSMoS Configuration class.

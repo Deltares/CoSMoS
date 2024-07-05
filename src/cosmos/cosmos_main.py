@@ -194,26 +194,46 @@ class CoSMoS:
 
         """
         
-        if not cosmos.config.path.main:
-            cosmos.log("Error: CoSMoS main path not set! Do this by running cosmos.initialize(main_path) or passing main_path as input argument to cosmos.run().")
-            return
+        # if not cosmos.config.path.main:
+        #     cosmos.log("Error: CoSMoS main path not set! Do this by running cosmos.initialize(main_path) or passing main_path as input argument to cosmos.run().")
+        #     return
         
+        # self.config.run.just_initialize  = True
+        # self.config.run.run_models = False
+        # self.run(scenario_name, cycle = cycle)
+                
+        # from .cosmos_webviewer import WebViewer
+        
+        # wv = WebViewer(cosmos.config.webviewer.name)
+        # wv.make()
+
+        # # Delete job folder that was just created
+        # if cosmos.config.run.run_mode != "parallel":
+        #     fo.rmdir(os.path.join(cosmos.config.path.jobs,
+        #                           cosmos.scenario_name))
+        
+        # if cosmos.config.run.upload:
+        #     wv.upload()
+
         self.config.run.just_initialize  = True
         self.config.run.run_models = False
         self.run(scenario_name, cycle = cycle)
-                
-        from .cosmos_webviewer import WebViewer
-        
-        wv = WebViewer(cosmos.config.webviewer.name)
-        wv.make()
 
-        # Delete job folder that was just created
-        if cosmos.config.run.run_mode != "parallel":
-            fo.rmdir(os.path.join(cosmos.config.path.jobs,
-                                  cosmos.scenario_name))
-        
-        if cosmos.config.run.upload:
-            wv.upload()
+        try:
+            self.webviewer.make()        
+            if self.config.run.upload:
+                current_path = os.getcwd()
+                try:
+                    self.webviewer.upload()
+                except:
+                    print("An error occurred when uploading web viewer to server !!!")
+                os.chdir(current_path)
+        except Exception as e:
+            print("An error occured while making web viewer !")
+            print(f"Error: {e}")
+
+
+
 
     def post_process(self, scenario_name:str, model=None, cycle:str=None):   
         """Just post-process model results. 

@@ -199,6 +199,7 @@ class ModelLoop():
                 cosmos.log("Deleting model folder on S3 : " + model.name)
                 cosmos.cloud.delete_folder("cosmos-scenarios", s3key)
                 # Upload job folder to cloud storage
+                cosmos.log("Uploading to S3 : " + s3key)
                 cosmos.cloud.upload_folder("cosmos-scenarios",
                                            model.job_path,
                                            s3key)
@@ -207,7 +208,7 @@ class ModelLoop():
                     cosmos.cloud.upload_folder("cosmos-scenarios",
                                                os.path.join(model.job_path, "base_input"),
                                                s3key + "/base_input")
-                cosmos.log("Submitting to S3 : " + s3key)
+                cosmos.log("Submitting template job : " + model.workflow_name)
                 model.cloud_job = cosmos.argo.submit_template_job(
                     workflow_name=model.workflow_name, 
                     job_name=model.name, 

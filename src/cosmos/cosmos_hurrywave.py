@@ -103,7 +103,7 @@ class CoSMoS_HurryWave(Model):
         if self.meteo_spiderweb or self.meteo_track and not self.ensemble:   
             self.domain.input.variables.spwfile = "hurrywave.spw"
             # Spiderweb file given, copy to job folder
-            if cosmos.scenario.track_ensemble_nr_realizations>0:
+            if cosmos.scenario.run_ensemble:
                 spwfile = os.path.join(cosmos.scenario.cycle_track_ensemble_spw_path, "ensemble00000.spw")
             elif self.meteo_spiderweb:
                 spwfile = os.path.join(cosmos.scenario.cycle_track_spw_path, self.meteo_spiderweb)
@@ -223,36 +223,30 @@ class CoSMoS_HurryWave(Model):
         output_path  = self.cycle_output_path
         input_path   = self.cycle_input_path  
         restart_path = self.restart_wave_path        
-        # Output        
-        if self.ensemble:
-            # Merging should happen in the job, so there should not be a difference between ensemble and deterministic
-            for member_name in cosmos.scenario.ensemble_names:                
-                pth0 = os.path.join(self.job_path, member_name)
-                pth1 = os.path.join(output_path, member_name)
-                fo.mkdir(pth1)
-                fo.move_file(os.path.join(pth0, "hurrywave_map.nc"), pth1)
-                fo.move_file(os.path.join(pth0, "hurrywave_his.nc"), pth1)
-                fo.move_file(os.path.join(pth0, "hurrywave_sp2.nc"), pth1)
-        else:
-            fo.move_file(os.path.join(job_path, "hurrywave_map.nc"), output_path)
-            fo.move_file(os.path.join(job_path, "hurrywave_his.nc"), output_path)
-            fo.move_file(os.path.join(job_path, "hurrywave_sp2.nc"), output_path)
-            fo.move_file(os.path.join(job_path, "*.txt"), output_path)
 
+        # Output        
+        fo.move_file(os.path.join(job_path, "hurrywave_map.nc"), output_path)
+        fo.move_file(os.path.join(job_path, "hurrywave_his.nc"), output_path)
+        fo.move_file(os.path.join(job_path, "hurrywave_sp2.nc"), output_path)
+        fo.move_file(os.path.join(job_path, "*.txt"), output_path)
+
+        # Restart file used in simulation        
         fo.move_file(os.path.join(job_path, "hurrywave.rst"), input_path)
+        # Restart files created during simulation
+        fo.move_file(os.path.join(self.job_path, "hurrywave.*.rst"), restart_path)
         # Input
         fo.move_file(os.path.join(job_path, "*.*"), input_path)
 
 
     def post_process(self):
         # Extract wave time series
-        input_path  = self.cycle_input_path
+        # input_path  = self.cycle_input_path
         output_path = self.cycle_output_path
         post_path   = self.cycle_post_path            
-        if not self.domain.input.variables.tref:
-            # This model has been run before. The model instance has not data on tref, obs points etc.
-            self.domain.read_input_file(os.path.join(input_path, "hurrywave.inp"))
-            self.domain.read_observation_points()
+        # if not self.domain.input.variables.tref:
+        #     # This model has been run before. The model instance has not data on tref, obs points etc.
+        #     self.domain.read_input_file(os.path.join(input_path, "hurrywave.inp"))
+        #     self.domain.read_observation_points()
         if self.station:
             # Read in data for all stations
             data = {}

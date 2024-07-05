@@ -105,7 +105,7 @@ def prepare_single(config, member=None):
         # Get boundary conditions from overall model (Nesting 2)
         # If cloud mode, copy boundary files from S3
         if config["run_mode"] == "cloud":
-            file_name = config["flow_nested"]["overall_file"]    
+            file_name = config["wave_nested"]["overall_file"]    
             s3_key = config["scenario"] + "/" + "models" + "/" + config["wave_nested"]["overall_model"] + "/" + file_name
             local_file_path = f'/input/boundary'
             fo.mkdir(local_file_path)

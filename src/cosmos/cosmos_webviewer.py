@@ -71,9 +71,6 @@ class WebViewer:
     def make(self):
 
         cosmos.log("Updating scenario.js ...")
-
-        # Update scenario.js
-        self.update_scenarios_js()
         
         # Make scenario folder in web viewer
         self.cycle_path = os.path.join(self.path,
@@ -108,12 +105,12 @@ class WebViewer:
 
         if cosmos.config.run.make_flood_maps:
             self.set_map_tile_variables("flood_map",
-                                        "Flood map",
+                                        "Flooding",
                                         "This is a flood map. It can tell if you will drown.",
                                         cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["flood_map"]["color_map"]],
                                         13)
             self.set_map_tile_variables("flood_map_90",
-                                        "Flood map (90)",
+                                        "Flooding (worst case)",
                                         "This is a worst case flood map. It can tell if you will drown.",
                                         cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["flood_map"]["color_map"]],
                                         13)
@@ -138,11 +135,13 @@ class WebViewer:
                                         cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["water_level_map"]["color_map"]],
                                         13)
             self.set_map_tile_variables("water_level_90",
-                                        "Peak water level (90)",
+                                        "Peak water level (worst case)",
                                         "These were the worst-case peak water levels during the storm.",
                                         cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["water_level_map"]["color_map"]],
                                         13)
 
+        # Precipitation should come from meteo dataset, not from models
+        # But perhaps only shown where we have flood models
         if cosmos.config.run.make_meteo_maps:
             self.set_map_tile_variables("precipitation",
                                         "Cumulative rainfall",
@@ -186,6 +185,9 @@ class WebViewer:
         cosmos.log("Writing variables ...")                
         mv_file = os.path.join(self.cycle_path, "variables.js")        
         cht.misc.misc_tools.write_json_js(mv_file, self.map_variables, "var map_variables =")
+
+        # Update scenario.js
+        self.update_scenarios_js()
 
         cosmos.log("Web viewer done.")                
 
@@ -1037,7 +1039,7 @@ class WebViewer:
                 tgz_files = [f.replace('.tgz','') for f in tgz_files]
                 # keepp unique variables
                 variables.update(tgz_files)
-       
+
         # create a cloud configuration for the individual files
         config = {}
         config["cloud"] = {}
@@ -1093,13 +1095,17 @@ class WebViewer:
             jobs.append(cloud_job)
                        
         # Wait for all jobs to finish before finishing the webviewer
-        finished_list = []
-        while len(finished_list) < len(jobs):
+        okay = False
+        while not okay:
             # Check every minute
             time.sleep(60)
+            okay = True
             for job in jobs:
-                if Argo.get_task_status(job) != "Running":
-                    finished_list.append(job)
+                status = Argo.get_task_status(job)
+                if status == "Running":
+                    okay = False
+                    # Break out of for loop
+                    break
 
 def merge_timeseries(path, model_name, station, prefix,
                         t0=None,
