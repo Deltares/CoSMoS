@@ -38,9 +38,9 @@ class Scenario:
         self.long_name     = name
         self.description   = name
         self.cycle         = None
-        self.lon           = 0.0
-        self.lat           = 0.0
-        self.zoom          = 10
+        self.lon           = cosmos.config.webviewer.lon
+        self.lat           = cosmos.config.webviewer.lat
+        self.zoom          = cosmos.config.webviewer.zoom
         self.path          = None
         self.cycle_path    = None
         self.tile_path     = None
@@ -48,7 +48,8 @@ class Scenario:
         self.restart_path  = None
         self.last_cycle    = None 
         self.track_ensemble             = None 
-        self.track_ensemble_nr_realizations = 0 
+        self.track_ensemble_nr_realizations = cosmos.config.run.track_ensemble_nr_realizations
+        self.ensemble_models            = cosmos.config.run.ensemble_models
         self.meteo_dataset              = None
         self.meteo_spiderweb            = None
         self.meteo_wind                 = True
@@ -56,6 +57,8 @@ class Scenario:
         self.meteo_precipitation        = True
         self.meteo_track                = None
         self.observations_path = ""
+        self.run_ensemble = False
+        self.meteo_string = ""
         
     def read(self):
         """Read scenario file, set model paths and settings, initialize models and read model generic and model specific data. 

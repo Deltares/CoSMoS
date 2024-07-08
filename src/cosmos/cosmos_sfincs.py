@@ -181,7 +181,7 @@ class CoSMoS_SFINCS(Model):
         if self.meteo_spiderweb or self.meteo_track and not self.ensemble:   
             self.domain.input.spwfile = "sfincs.spw"         
             # Spiderweb file given, copy to job folder
-            if cosmos.scenario.track_ensemble_nr_realizations>0:
+            if cosmos.scenario.run_ensemble:
                 spwfile = os.path.join(cosmos.scenario.cycle_track_ensemble_spw_path, "ensemble00000.spw")
             elif self.meteo_spiderweb:
                 spwfile = os.path.join(cosmos.scenario.cycle_track_spw_path, self.meteo_spiderweb)

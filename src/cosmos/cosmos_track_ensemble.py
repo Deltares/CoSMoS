@@ -54,13 +54,11 @@ def setup_track_ensemble():
         tc.estimate_missing_values()
         tc.include_rainfall = True
 
-        tc.spiderweb_radius = 400.0
-        tc.nr_radial_bins   = 100
 
     else:
         # Read in storm track from *.cyc file
         from cht_cyclones.tropical_cyclone import TropicalCyclone
-        tc= TropicalCyclone()
+        tc = TropicalCyclone()
 
         # check if absolute path is given
         if not os.path.isabs(cosmos.scenario.meteo_track):
@@ -84,6 +82,10 @@ def setup_track_ensemble():
     if not tc:
         # No track found
         return
+
+    # Set radius and number of radial bins 
+    tc.spiderweb_radius = 400.0
+    tc.nr_radial_bins   = 100
 
     # Generate track ensemble
     cosmos.log("Generating track ensemble ...")
@@ -125,6 +127,10 @@ def setup_track_ensemble():
     # Loop through all models and check if they fall within cone
     models_to_add = []
     for model in cosmos.scenario.model:
+        # First check if this type of model should be run in ensemble mode
+        if model.type not in cosmos.scenario.ensemble_models:
+            # Not an ensemble model
+            continue
         if shapely.intersects(cone.loc[0]["geometry"], model.outline.loc[0]["geometry"]):
             # Add model
             # Make a shallow copy of the model

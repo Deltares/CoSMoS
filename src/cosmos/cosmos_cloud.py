@@ -88,7 +88,10 @@ class Cloud:
                     print("Downloaded " + os.path.basename(s3_key))
 
     def delete_folder(self, bucket_name, s3_folder):
-        objects = self.s3_client.list_objects(Bucket=bucket_name, Prefix=s3_folder, Delimiter="/")
+        if s3_folder[-1] != "/":
+             s3_folder = s3_folder + "/"
+#        objects = self.s3_client.list_objects(Bucket=bucket_name, Prefix=s3_folder, Delimiter="/")
+        objects = self.s3_client.list_objects(Bucket=bucket_name, Prefix=s3_folder)
         if "Contents" in objects:
             for object in objects['Contents']:
                 self.s3_client.delete_object(Bucket=bucket_name, Key=object['Key'])

@@ -105,7 +105,7 @@ def prepare_single(config, member=None):
         # Get boundary conditions from overall model (Nesting 2)
         # If cloud mode, copy boundary files from S3
         if config["run_mode"] == "cloud":
-            file_name = config["flow_nested"]["overall_file"]    
+            file_name = config["wave_nested"]["overall_file"]    
             s3_key = config["scenario"] + "/" + "models" + "/" + config["wave_nested"]["overall_model"] + "/" + file_name
             local_file_path = f'/input/boundary'
             fo.mkdir(local_file_path)
@@ -173,6 +173,7 @@ def map_tiles(config):
 
         hm0_path       = config["hm0_map"]["png_path"]
         index_path     = config["hm0_map"]["index_path"]
+        output_path    = config["hm0_map"]["output_path"]
                 
         if os.path.exists(index_path):
             
@@ -198,7 +199,8 @@ def map_tiles(config):
                 pathstr.append((t - dt).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
             pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))
 
-            hm0max_file = "./hurrywave_map.nc"
+            hm0max_file = os.path.join(output_path, "hurrywave_map.nc")
+            
             if config["ensemble"]:
                 varname = "hm0max_90"
             else:
@@ -226,7 +228,7 @@ def map_tiles(config):
                                    quiet=True)
 
                 # Full simulation        
-                hm0max = hw.read_hm0max(time_range=[t - dt + dt1, t + dt1],
+                hm0max = hw.read_hm0max(time_range=[t0 + dt1, t1 + dt1],
                                         hm0max_file=hm0max_file,
                                         parameter=varname)                    
                 hm0max = np.transpose(hm0max)

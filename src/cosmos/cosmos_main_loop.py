@@ -12,7 +12,7 @@ import os
 import numpy as np
 
 from .cosmos_main import cosmos
-from .cosmos_meteo import download_and_collect_meteo
+from .cosmos_meteo import download_and_collect_meteo, download_meteo, collect_meteo
 from .cosmos_track_ensemble import setup_track_ensemble
 from .cosmos_scenario import Scenario
 from .cosmos_cloud import Cloud
@@ -270,12 +270,15 @@ class MainLoop:
             return
             
         # Get meteo data (in case of forcing with track file, this is also where the spiderweb is generated)
-        download_and_collect_meteo()
+        # download_and_collect_meteo()
+        if cosmos.config.run.get_meteo:
+            download_meteo()
+        collect_meteo()
 
-        if cosmos.scenario.track_ensemble_nr_realizations > 0:
+        if cosmos.scenario.run_ensemble:
             # Make track ensemble (this also add 'new' ensemble models that fall within the cone)
             setup_track_ensemble()
-        elif cosmos.scenario.meteo_spiderweb or cosmos.scenario.meteo_track:
+        elif cosmos.scenario.meteo_spiderweb or not os.path.isabs(cosmos.scenario.meteo_track):
             # Make spiderweb if does not exist yet
             track_to_spw()
 
