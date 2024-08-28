@@ -484,13 +484,14 @@ class WebViewer:
                     transformer = Transformer.from_crs(model.crs,
                                                             'WGS 84',
                                                             always_xy=True)
-                    
+
+                    df["lon"], df["lat"] = transformer.transform(df.X, df.Y)
                     df_all = pd.concat([df_all, df], ignore_index= True)
 
            
         features = []    
         for ip in range(len(df_all)):
-            lon, lat = transformer.transform(df_all.X[ip],df_all.Y[ip])
+            lon, lat = df_all.lon[ip], df_all.lat[ip]
             point = Point((lon, lat))
                         
             features.append(Feature(geometry=point,

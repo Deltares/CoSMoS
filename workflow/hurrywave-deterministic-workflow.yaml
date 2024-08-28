@@ -1,0 +1,214 @@
+metadata:
+  name: hurrywave-deterministic-workflow
+  namespace: argo
+spec:
+  templates:
+    - name: run-hurrywave
+      inputs: {}
+      outputs: {}
+      metadata: {}
+      steps:
+        - - name: preparesimulation
+            template: prepare-simulation
+            arguments: {}
+        - - name: runsimulation
+            template: run-simulation
+            arguments: {}
+        - - name: tiles
+            template: map-tiles
+            arguments: {}
+    - name: prepare-simulation
+      inputs:
+        artifacts:
+          - name: my-art
+            path: /input
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.subfolder}}'
+            archive:
+              none: {}
+      outputs:
+        artifacts:
+          - name: my-art
+            path: /input
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.subfolder}}'
+            archive:
+              none: {}
+      nodeSelector:
+        alpha.eksctl.io/nodegroup-name: sfincs-2xlarge
+      metadata: {}
+      container:
+        name: ''
+        image: 012053003218.dkr.ecr.eu-west-1.amazonaws.com/run_job
+        command:
+          - python
+          - run_job_2.py
+          - prepare_single
+        resources:
+          limits:
+            cpu: '6'
+            memory: 14Gi
+          requests:
+            cpu: '6'
+            memory: 14Gi
+      retryStrategy:
+        limit: '10'
+        retryPolicy: Always
+    - name: run-simulation
+      inputs:
+        artifacts:
+          - name: my-art
+            path: /data
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.subfolder}}'
+            archive:
+              none: {}
+      outputs:
+        artifacts:
+          - name: my-art
+            path: /data
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.subfolder}}'
+            archive:
+              none: {}
+      nodeSelector:
+        alpha.eksctl.io/nodegroup-name: sfincs-2xlarge
+      metadata: {}
+      container:
+        name: hurrywave-cpu-argo
+        image: maartenvanormondt/hurrywave-cpu:latest
+        command:
+          - /bin/bash
+          - '-c'
+          - '--'
+        args:
+          - hurrywave
+        resources:
+          limits:
+            cpu: '6'
+            memory: 14Gi
+          requests:
+            cpu: '6'
+            memory: 14Gi
+      retryStrategy:
+        limit: '10'
+        retryPolicy: Always
+    - name: map-tiles
+      inputs:
+        artifacts:
+          - name: input-from-s3
+            path: /input
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.subfolder}}'
+            archive:
+              none: {}
+          - name: tiles
+            path: /tiles
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-models
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.tilingfolder}}/tiles.tgz'
+      outputs:
+        artifacts:
+          - name: upload-hm0_map-to-s3
+            path: >-
+              /output/{{workflow.parameters.scenario}}/{{workflow.parameters.cycle}}/hm0
+            s3:
+              endpoint: s3.amazonaws.com
+              bucket: cosmos-scenarios
+              region: eu-west-1
+              accessKeySecret:
+                name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
+              key: '{{workflow.parameters.subfolder}}/tiles/flood_map.tgz'
+            archive:
+              tar: {}
+            optional: true
+      nodeSelector:
+        alpha.eksctl.io/nodegroup-name: sfincs-2xlarge
+      metadata: {}
+      container:
+        name: ''
+        image: 012053003218.dkr.ecr.eu-west-1.amazonaws.com/run_job
+        command:
+          - python
+          - run_job_2.py
+          - map_tiles
+        resources:
+          limits:
+            cpu: '6'
+            memory: 14Gi
+          requests:
+            cpu: '6'
+            memory: 14Gi
+      retryStrategy:
+        limit: '10'
+        retryPolicy: Always
+  entrypoint: run-hurrywave
+  arguments:
+    parameters:
+      - name: subfolder
+        value: subfolder
+      - name: scenario
+        value: scenario
+      - name: cycle
+        value: cycle
+      - name: webviewerfolder
+        value: webviewerfolder
+      - name: tilingfolder
+        value: tilingfolder
