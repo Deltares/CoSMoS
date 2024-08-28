@@ -121,57 +121,6 @@ def read_meteo_sources():
     # for data_path in data_list:
     #     data_names.append(os.path.basename(data_path))
      
-def download_and_collect_meteo():
-    """Download meteo sources listed in meteo_subsets.toml using cht.meteo.
-    """    
-    # Loop through all available meteo subsets
-    # Determine if the need to be downloaded
-    # Get start and stop times for meteo data
-    for meteo_subset in cosmos.meteo_subset:
-        download = False
-        t0      = datetime.datetime(2100,1,1,0,0,0)
-        t1      = datetime.datetime(1970,1,1,0,0,0)
-        for model in cosmos.scenario.model:
-            if model.meteo_subset:
-                if model.meteo_subset.name == meteo_subset.name:
-                     download = True
-#                         if model.flow:
-                     t0 = min(t0, model.flow_start_time)
-                     t1 = max(t1, model.flow_stop_time)
-        if download:
-            # Download the data
-            if cosmos.config.run.get_meteo:
-                cosmos.log("Downloading meteo data : " + meteo_subset.name)
-                meteo_subset.download([t0, t1])
-            # Collect the data from netcdf files    
-            cosmos.log("Collecting meteo data : " + meteo_subset.name)
-            meteo_subset.collect([t0, t1],
-                                 xystride=meteo_subset.xystride,
-                                 tstride=meteo_subset.tstride)
-            if meteo_subset.last_analysis_time:
-                cosmos.log("Last analysis time : " + meteo_subset.last_analysis_time.strftime("%Y%m%d_%H%M%S"))
-                # Check if Coamps-TC was used and save file for reference
-                file_name = os.path.join(meteo_subset.path, meteo_subset.last_analysis_time.strftime("%Y%m%d_%Hz"), "coamps_used.txt")
-                if os.path.exists(file_name):
-                    cosmos.storm_flag = True
-                    keepfile_name = os.path.join(cosmos.scenario.cycle_path, "keep.txt")
-                    fid = open(keepfile_name, "w")  # Why is there no path here?
-                    fid.write("Coamps data was used in this cycle so we want to keep it \n")
-                    fid.close()
-                else:
-                    cosmos.storm_flag = False
-                
-                # Save csv with meteo sources for each time step
-                csv_path = os.path.join(cosmos.scenario.cycle_path, "meteo_sources.csv")
-                meteo_subset.meteo_source.to_csv(csv_path)
-                cosmos.scenario.meteo_string = "_".join(meteo_subset.meteo_source.values[-1][0].split("_")[:-1])
-                
-                # Check if track was saved from coamps-tc 
-                track_files = glob.glob(os.path.join(meteo_subset.path, meteo_subset.last_analysis_time.strftime("%Y%m%d_%Hz"), "*.trk"))
-                if len(track_files)>0:
-                    track_file_name = track_files[0]
-                    # Add the track to the scenario
-                    cosmos.scenario.meteo_track = track_file_name 
 
 def download_meteo():
     """Download meteo sources listed in meteo_subsets.toml using cht.meteo.
@@ -240,6 +189,10 @@ def collect_meteo():
                     # Add the track to the scenario
                     cosmos.scenario.meteo_track = track_file_name 
 
+                # Save csv with meteo sources for each time step
+                csv_path = os.path.join(cosmos.scenario.cycle_path, "meteo_sources.csv")
+                meteo_subset.meteo_source.to_csv(csv_path)
+                cosmos.scenario.meteo_string = "_".join(meteo_subset.meteo_source.values[-1][0].split("_")[:-1])
 
 
 def write_meteo_input_files(model, prefix, tref, path=None):

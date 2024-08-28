@@ -75,12 +75,20 @@ def setup_track_ensemble():
             cosmos.log("Unknown track file format: " + filename)
             return
 
+        if len(tc.track) < 2:
+            cosmos.log("Track too short: " + filename)
+            return
+
         tc.account_for_forward_speed()
         tc.estimate_missing_values()
         tc.include_rainfall = True  
 
     if not tc:
         # No track found
+        return
+    
+    if len(tc.track) < 3:
+        # Track too short
         return
 
     # Set radius and number of radial bins 

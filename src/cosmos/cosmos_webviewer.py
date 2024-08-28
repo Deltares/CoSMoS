@@ -69,8 +69,6 @@ class WebViewer:
     
 
     def make(self):
-
-        cosmos.log("Updating scenario.js ...")
         
         # Make scenario folder in web viewer
         self.cycle_path = os.path.join(self.path,
@@ -348,58 +346,103 @@ class WebViewer:
                     dct["legend"]   = lgn
 
                     self.map_variables.append(dct)
-                    
-                    # Cyclone track(s)
-                    # TODO: move a lot of this code to cht_cyclones
-                    tracks = meteo_subset.find_cyclone_tracks(xlim=[-110.0,-30.0],
-                                                              ylim=[5.0, 45.0],
-                                                              pcyc=99500.0,
-                                                              dt=6)
-                    
-                    if tracks:
-                        features = []
-                        for track in tracks:                            
-                            points=[]
-                            # Loop through items in geodataframe
-                            for index, row in track.track.iterrows():
-                                time = row['datetime']
-                                lon = row['geometry'].x
-                                lat = row['geometry'].y
-                                vmax = row['vmax']
-                                pc = row['pc']
-                                point = Point((lon, lat))               
-                                if vmax<64.0:
-                                    cat = "TS"
-                                elif vmax<83.0:
-                                    cat = "1"
-                                elif vmax<96.0:    
-                                    cat = "2"
-                                elif vmax<113.0:    
-                                    cat = "3"
-                                elif vmax<137.0:    
-                                    cat = "4"
-                                else:    
-                                    cat = "5"
-                                features.append(Feature(geometry=point,
-                                                        properties={"time":time + " UTC",
-                                                                    "lon":lon,
-                                                                    "lat":lat,
-                                                                    "vmax":vmax,
-                                                                    "pc":pc,
-                                                                    "category":cat}))
-                                
-                                points.append([lon, lat])
-                            
-                            trk = LineString(coordinates=points)
-                            features.append(Feature(geometry=trk,
-                                                    properties={"name":"No name"}))
-                        
-                        feature_collection = FeatureCollection(features)
 
+                    if cosmos.scenario.cyclone_track is not None:
+
+                        features = []
+                        points=[]
+                        # Loop through items in geodataframe
+                        for index, row in cosmos.scenario.cyclone_track.iterrows():
+                            time = row['datetime']
+                            lon = row['geometry'].x
+                            lat = row['geometry'].y
+                            vmax = row['vmax']
+                            pc = row['pc']
+                            point = Point((lon, lat))               
+                            if vmax<64.0:
+                                cat = "TS"
+                            elif vmax<83.0:
+                                cat = "1"
+                            elif vmax<96.0:    
+                                cat = "2"
+                            elif vmax<113.0:    
+                                cat = "3"
+                            elif vmax<137.0:    
+                                cat = "4"
+                            else:    
+                                cat = "5"
+                            features.append(Feature(geometry=point,
+                                                    properties={"time":time + " UTC",
+                                                                "lon":lon,
+                                                                "lat":lat,
+                                                                "vmax":vmax,
+                                                                "pc":pc,
+                                                                "category":cat}))
+                            
+                            points.append([lon, lat])
+                        
+                        trk = LineString(coordinates=points)
+                        features.append(Feature(geometry=trk,
+                                                properties={"name":"No name"}))                    
+                        feature_collection = FeatureCollection(features)
                         file_name = os.path.join(self.cycle_path, "track.geojson.js")
                         cht.misc.misc_tools.write_json_js(file_name,
-                                                          feature_collection,
-                                                          "var track_data =")
+                                                        feature_collection,
+                                                        "var track_data =")
+
+                    else:
+
+                        # Cyclone track(s)
+                        # TODO: move a lot of this code to cht_cyclones
+                        tracks = meteo_subset.find_cyclone_tracks(xlim=[-110.0,-30.0],
+                                                                ylim=[5.0, 45.0],
+                                                                pcyc=99500.0,
+                                                                dt=6)
+                        
+                        if tracks:
+                            features = []
+                            for track in tracks:                            
+                                points=[]
+                                # Loop through items in geodataframe
+                                for index, row in track.track.iterrows():
+                                    time = row['datetime']
+                                    lon = row['geometry'].x
+                                    lat = row['geometry'].y
+                                    vmax = row['vmax']
+                                    pc = row['pc']
+                                    point = Point((lon, lat))               
+                                    if vmax<64.0:
+                                        cat = "TS"
+                                    elif vmax<83.0:
+                                        cat = "1"
+                                    elif vmax<96.0:    
+                                        cat = "2"
+                                    elif vmax<113.0:    
+                                        cat = "3"
+                                    elif vmax<137.0:    
+                                        cat = "4"
+                                    else:    
+                                        cat = "5"
+                                    features.append(Feature(geometry=point,
+                                                            properties={"time":time + " UTC",
+                                                                        "lon":lon,
+                                                                        "lat":lat,
+                                                                        "vmax":vmax,
+                                                                        "pc":pc,
+                                                                        "category":cat}))
+                                    
+                                    points.append([lon, lat])
+                                
+                                trk = LineString(coordinates=points)
+                                features.append(Feature(geometry=trk,
+                                                        properties={"name":"No name"}))
+                            
+                                feature_collection = FeatureCollection(features)
+
+                            file_name = os.path.join(self.cycle_path, "track.geojson.js")
+                            cht.misc.misc_tools.write_json_js(file_name,
+                                                            feature_collection,
+                                                            "var track_data =")
         except Exception as e:
             print(str(e))
 
@@ -817,6 +860,8 @@ class WebViewer:
         # Check if there is a scenarios.js file
         # If so, append it with the current scenario
 
+        cosmos.log("Updating scenario.js ...")
+
         if other_js_source:
             sc_file = os.path.join(other_js_source)
         else:
@@ -837,6 +882,22 @@ class WebViewer:
         # meteo_source = pd.read_csv(csv_path)
         # meteo_string = "_".join(meteo_source.values[-1][0].split("_")[:-1])
 
+        # Find previous cycles 
+        if cosmos.config.run.run_mode == "cloud":
+            # Find previous cycles in cloud
+            bucket_name = 'cosmos.deltares.nl'
+            prefix = self.name + "/data/" + cosmos.scenario.name
+            previous_cycles = cosmos.cloud.list_folders(bucket_name, prefix)
+            # If the last cycle is not equal to the current cycle, add it to the list (this should not be necessary)
+            if previous_cycles[-1] != cosmos.cycle_string:
+                previous_cycles.append(cosmos.cycle_string)
+        else:
+            # Find previous cycles locally
+            prefix = os.path.join(self.cycle_path, "..")
+            previous_cycles = fo.list_folders(prefix)
+
+        previous_cycles = sorted(previous_cycles, reverse=True)
+
         # Current scenario        
         newsc = {}
         newsc["name"]        = cosmos.scenario.name    
@@ -852,6 +913,7 @@ class WebViewer:
         newsc["duration"]    = str(cosmos.scenario.runtime)
         now = datetime.datetime.utcnow()
         newsc["last_update"] = now.strftime("%Y/%m/%d %H:%M:%S" + " (UTC)")
+        newsc["previous_cycles"] = previous_cycles
         if isame>-1:
             # Scenario already existed in web viewer
             scs[isame] = newsc

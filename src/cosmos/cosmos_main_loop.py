@@ -12,7 +12,7 @@ import os
 import numpy as np
 
 from .cosmos_main import cosmos
-from .cosmos_meteo import download_and_collect_meteo, download_meteo, collect_meteo
+from .cosmos_meteo import download_meteo, collect_meteo
 from .cosmos_track_ensemble import setup_track_ensemble
 from .cosmos_scenario import Scenario
 from .cosmos_cloud import Cloud
@@ -128,7 +128,7 @@ class MainLoop:
             start_time = tnow + datetime.timedelta(seconds=1)
         else:
             # start after delay
-            start_time = cosmos.cycle + delay
+            start_time = cosmos.cycle + delay + datetime.timedelta(seconds=5)
         self.scheduler = sched.scheduler(time.time, time.sleep)
         dt = start_time - tnow
         
