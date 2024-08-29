@@ -14,7 +14,7 @@ try:
     from .cosmos_argo import Argo
 except:
     print("Argo not available")
-import cht.misc.fileops as fo
+import cht_utils.fileops as fo
 
 class ModelLoop():
     """Pre-process, submit, move, and post-process all models and initialize webviewer once all models are finished.

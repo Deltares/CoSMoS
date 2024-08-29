@@ -24,7 +24,7 @@ from .cosmos_meteo import track_to_spw
 from .cosmos_scenario import Scenario
 from .cosmos_webviewer import WebViewer
 
-import cht.misc.fileops as fo
+import cht_utils.fileops as fo
 
 class MainLoop:
     """Read the scenario.toml file, determine cycle times, and run cosmos model loop. 

@@ -8,7 +8,7 @@ Created on Mon May 10 12:18:09 2021
 import os
 import datetime
 
-import cht.misc.fileops as fo
+import cht_utils.fileops as fo
 
 
 class CoSMoS:

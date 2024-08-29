@@ -9,7 +9,7 @@ import shutil
 from PIL import Image
 import numpy as np
 
-from cht.misc.misc_tools import yaml2dict
+from cht_utils.misc_tools import yaml2dict
 
 
 # Helper class for cloud functions, note this is a copy of necessary functionalities of cosmos_cloud

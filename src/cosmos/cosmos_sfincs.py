@@ -9,10 +9,10 @@ import os
 import pandas as pd
 import numpy as np
 
-from cht.sfincs.sfincs import SFINCS
-import cht.misc.fileops as fo
-from cht.tide.tide_predict import predict
-from cht.nesting.nest1 import nest1
+from cht_sfincs.sfincs import SFINCS
+import cht_utils.fileops as fo
+from cht_tide.tide_predict import predict
+from cht_nesting.nest1 import nest1
 
 from .cosmos_main import cosmos
 from .cosmos_model import Model
@@ -42,7 +42,7 @@ class CoSMoS_SFINCS(Model):
 
         See Also
         ----------
-        cht.sfincs.sfincs
+        cht_sfincs.sfincs
         """         
         # Read in the SFINCS model                        
         input_file  = os.path.join(self.path, "input", "sfincs.inp")
@@ -64,7 +64,7 @@ class CoSMoS_SFINCS(Model):
 
         See Also
         ----------
-        cht.nesting.nest2
+        cht_nesting.nest2
         """
         # Set path temporarily to job path
         pth = self.domain.path

@@ -6,8 +6,8 @@ Created on Mon Feb 27 15:29:34 2023
 """
 import os
 import toml
-import cht.misc.xmlkit as xml
-import cht.misc.fileops as fo
+import cht_utils.xmlkit as xml
+import cht_utils.fileops as fo
 
 
 scenario_database_path = r"p:\11206085-onr-fhics\03_cosmos\scenarios"

@@ -14,11 +14,11 @@ from .cosmos_main import cosmos
 from .cosmos_model import Model
 #from .cosmos_tiling import make_wave_map_tiles
 import cosmos.cosmos_meteo as meteo
-from cht.misc.misc_tools import dict2yaml
+from cht_utils.misc_tools import dict2yaml
 
-from cht.hurrywave.hurrywave import HurryWave
-import cht.misc.fileops as fo
-from cht.nesting.nest1 import nest1
+from cht_hurrywave.hurrywave import HurryWave
+import cht_utils.fileops as fo
+from cht_nesting.nest1 import nest1
 
 class CoSMoS_HurryWave(Model):
     """Cosmos class for HurryWave model.
@@ -45,7 +45,7 @@ class CoSMoS_HurryWave(Model):
 
         See Also
         ----------
-        cht.hurrywave.hurrywave
+        cht_hurrywave.hurrywave
         """ 
         # Read in the HurryWave model
         
@@ -69,7 +69,7 @@ class CoSMoS_HurryWave(Model):
 
         See Also
         ----------
-        cht.nesting.nest2
+        cht_nesting.nest2
         """
         # Set path temporarily to job path
         pth = self.domain.path

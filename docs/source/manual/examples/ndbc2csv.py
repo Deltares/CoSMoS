@@ -1,7 +1,7 @@
 import glob
 import os
 import pandas as pd
-import cht.misc.misc_tools
+import cht_utils.misc_tools
 import numpy as np
 
 stations = ['41043', '41044', '41046', '41047', '41049', '41052', '42059', '42060', '42085']
@@ -35,5 +35,5 @@ for i,v in enumerate(stations):
 
 
         csv_file = os.path.join(path, "waves." + stations[i] + ".observed.csv.js")
-        cht.misc.misc_tools.write_csv_js(csv_file, s, "var csv = `date_time,hm0,tp")
+        cht_utils.misc_tools.write_csv_js(csv_file, s, "var csv = `date_time,hm0,tp")
     

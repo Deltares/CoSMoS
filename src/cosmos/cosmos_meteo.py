@@ -11,10 +11,10 @@ import numpy as np
 import datetime
 
 from .cosmos_main import cosmos
-from cht.meteo.meteo import MeteoSource
-from cht.meteo.meteo import MeteoGrid
+from cht_meteo.meteo import MeteoSource
+from cht_meteo.meteo import MeteoGrid
 import toml
-import cht.misc.fileops as fo
+import cht_utils.fileops as fo
 
 def read_meteo_sources():
     """Read meteo sources from ../meteo/meteo_subsets.toml.
@@ -123,7 +123,7 @@ def read_meteo_sources():
      
 
 def download_meteo():
-    """Download meteo sources listed in meteo_subsets.toml using cht.meteo.
+    """Download meteo sources listed in meteo_subsets.toml using cht_meteo.
     """    
     # Loop through all available meteo subsets
     # Determine if the need to be downloaded

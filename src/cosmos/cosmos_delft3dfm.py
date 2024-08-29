@@ -14,15 +14,15 @@ from pathlib import Path
 
 from .cosmos_main import cosmos
 from .cosmos_model import Model
-import cht.misc.xmlkit as xml
-from cht.delft3dfm.delft3dfm import Delft3DFM
-import cht.misc.fileops as fo
-from cht.nesting.nest1 import nest1
-from cht.nesting.nest2 import nest2
+import cht_utils.xmlkit as xml
+from cht_delft3dfm.delft3dfm import Delft3DFM
+import cht_utils.fileops as fo
+from cht_nesting.nest1 import nest1
+from cht_nesting.nest2 import nest2
 import cosmos.cosmos_meteo as meteo
 import hydrolib.core.dflowfm as hcdfm
 
-from cht.misc.misc_tools import findreplace
+from cht_utils.misc_tools import findreplace
 
 class CoSMoS_Delft3DFM(Model):
     """Cosmos class for Delft3d FM model.
@@ -49,7 +49,7 @@ class CoSMoS_Delft3DFM(Model):
 
         See Also
         ----------
-        cht.delft3dfm.delft3dfm
+        cht_delft3dfm.delft3dfm
         """   
         # First set some defaults
 #        self.flow_spinup_time = 0.0
@@ -85,7 +85,7 @@ class CoSMoS_Delft3DFM(Model):
 
         See Also
         ----------
-        cht.nesting.nest2
+        cht_nesting.nest2
         """   
         # Set path temporarily to job path
 #        pth = self.domain.path
@@ -338,7 +338,7 @@ class CoSMoS_Delft3DFM(Model):
     def post_process(self):
         """Post-process Delft3D FM output: generate wave and water level timeseries.        
         """         
-        import cht.misc.misc_tools
+        import cht_utils.misc_tools
 
         # Extract water levels
 
@@ -371,7 +371,7 @@ class CoSMoS_Delft3DFM(Model):
                     s = vv.to_csv(date_format='%Y-%m-%dT%H:%M:%S',
                                     float_format='%.3f',
                                     header=False) 
-                    cht.misc.misc_tools.write_csv_js(csv_file, s, "var csv = `date_time,wl")
+                    cht_utils.misc_tools.write_csv_js(csv_file, s, "var csv = `date_time,wl")
 
         # Extract waves
         if self.wave:
@@ -391,4 +391,4 @@ class CoSMoS_Delft3DFM(Model):
                         s = vv.to_csv(date_format='%Y-%m-%dT%H:%M:%S',
                                     float_format='%.3f',
                                     header=False)       
-                        cht.misc.misc_tools.write_csv_js(csv_file, s, "var csv = `date_time,hm0,tp") 
+                        cht_utils.misc_tools.write_csv_js(csv_file, s, "var csv = `date_time,hm0,tp") 

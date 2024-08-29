@@ -6,7 +6,7 @@ Created on Mon Feb 27 15:29:34 2023
 """
 import os
 import toml
-import cht.misc.xmlkit as xml
+import cht_utils.xmlkit as xml
 
 region = "puerto_rico"
 name = "sfincs_puerto_rico"

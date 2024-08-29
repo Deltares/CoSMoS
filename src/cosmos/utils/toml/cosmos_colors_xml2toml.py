@@ -7,7 +7,7 @@ Created on Mon Feb 27 15:29:34 2023
 import os
 import toml
 import yaml
-import cht.misc.xmlkit as xml
+import cht_utils.xmlkit as xml
 
 path = r"p:\11206085-onr-fhics\03_cosmos\configurations"
 name = "map_contours"

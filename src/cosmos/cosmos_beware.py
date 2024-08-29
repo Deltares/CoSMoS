@@ -12,11 +12,11 @@ import numpy as np
 #from pyproj import Transformer
 import shutil
 
-from cht.beware.beware import BEWARE
-import cht.misc.fileops as fo
-from cht.misc.deltares_ini import IniStruct
-from cht.tide.tide_predict import predict
-from cht.misc.misc_tools import findreplace
+from cht_beware.beware import BEWARE
+import cht_utils.fileops as fo
+from cht_utils.deltares_ini import IniStruct
+from cht_tide.tide_predict import predict
+from cht_utils.misc_tools import findreplace
 
 from .cosmos_main import cosmos
 from .cosmos_model import Model
@@ -45,7 +45,7 @@ class CoSMoS_BEWARE(Model):
 
         See Also
         ----------
-        cht.beware.beware
+        cht_beware.beware
         """        
         # Read in the BEWARE model
         input_file  = os.path.join(self.path, "input", "beware.inp")
@@ -64,7 +64,7 @@ class CoSMoS_BEWARE(Model):
 
         See Also
         ----------
-        cht.nesting.nest2 
+        cht_nesting.nest2 
         """   
         
         # Set path temporarily to job path
@@ -142,12 +142,12 @@ class CoSMoS_BEWARE(Model):
         
         See Also
         ----------
-        cht.misc.prob_maps
+        cht_utils.prob_maps
         """        
         # Post-processing occurs in cosmos_webviewer.py
         import numpy as np
-        import cht.misc.prob_maps as pm
-        import cht.misc.misc_tools
+        import cht_utils.prob_maps as pm
+        import cht_utils.misc_tools
         
         output_path = self.cycle_output_path
         post_path   = self.cycle_post_path
@@ -181,7 +181,7 @@ class CoSMoS_BEWARE(Model):
                                 header= False, index_label= 'datetime') 
                 file_name = os.path.join(web_path,  
                                                     "extreme_runup_height."  + self.name + "." + str(self.domain.filename[ip]) + ".csv.js")
-                cht.misc.misc_tools.write_csv_js(file_name, s, "var csv = `date_time,wl,setup,swash,runup, setup_5, setup_50, setup_95, runup_5, runup_50, runup_95")
+                cht_utils.misc_tools.write_csv_js(file_name, s, "var csv = `date_time,wl,setup,swash,runup, setup_5, setup_50, setup_95, runup_5, runup_50, runup_95")
  
         else:
             self.domain.read_data(os.path.join(output_path, "beware_his.nc"))       
@@ -203,7 +203,7 @@ class CoSMoS_BEWARE(Model):
                                 header= False, index_label= 'datetime') 
                 file_name = os.path.join(web_path,  
                                                     "extreme_runup_height."  + self.name + "." + str(self.domain.filename[ip]) + ".csv.js")
-                cht.misc.misc_tools.write_csv_js(file_name, s, "var csv = `date_time,wl,setup,swash,runup")
+                cht_utils.misc_tools.write_csv_js(file_name, s, "var csv = `date_time,wl,setup,swash,runup")
        
         # output_path = self.cycle_output_path
         # post_path   = self.cycle_post_path

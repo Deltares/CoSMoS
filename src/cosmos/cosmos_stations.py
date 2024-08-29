@@ -7,7 +7,7 @@ Created on Tue May 18 12:00:56 2021
 
 import os
 import toml
-from cht.misc import fileops as fo
+from cht_utils import fileops as fo
 
 class Station():
     """Initialize single observation station.

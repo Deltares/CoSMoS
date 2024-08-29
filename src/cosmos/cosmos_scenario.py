@@ -11,9 +11,6 @@ from .cosmos_main import cosmos
 from .cosmos_cluster import cluster_dict
 from .cosmos_cluster import Cluster
 
-# from cht.misc import fileops as fo
-# from cht.misc import xmlkit as xml
-
 class Scenario:
     """Scenario class to read scenario file and initialize models. 
 

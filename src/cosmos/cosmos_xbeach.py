@@ -14,9 +14,9 @@ import pandas as pd
 from cosmos.cosmos_main import cosmos
 from cosmos.cosmos_model import Model
 
-import cht.misc.fileops as fo
-from cht.xbeach.xbeach import XBeach
-from cht.xbeach.xbeach_output_morphology import Map 
+import cht_utils.fileops as fo
+from cht_xbeach.xbeach import XBeach
+from cht_xbeach.xbeach_output_morphology import Map 
 
 class CoSMoS_XBeach(Model):
     """Cosmos class for XBeach model.
@@ -42,7 +42,7 @@ class CoSMoS_XBeach(Model):
 
         See Also
         ----------
-        cht.xbeach.xbeach
+        cht_xbeach.xbeach
         """
       
         # Now read in the domain data
@@ -85,7 +85,7 @@ class CoSMoS_XBeach(Model):
 
         See Also
         ----------
-        cht.nesting.nest2
+        cht_nesting.nest2
         """
         
         # First generate input that is identical for all members

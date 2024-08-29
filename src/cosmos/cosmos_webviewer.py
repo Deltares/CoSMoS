@@ -19,9 +19,9 @@ from pyproj import Transformer
 from .cosmos_argo import Argo
 from .cosmos_main import cosmos
 
-import cht.misc.fileops as fo
-import cht.misc.misc_tools
-from cht.misc.misc_tools import dict2yaml
+import cht_utils.fileops as fo
+import cht_utils.misc_tools
+from cht_utils.misc_tools import dict2yaml
 
 class WebViewer:
     """Cosmos webviewer class
@@ -62,7 +62,7 @@ class WebViewer:
             fo.copy_file(template_path, self.path)
 
             # Change the title string in index.html to the scenario long name
-            cht.misc.misc_tools.findreplace(os.path.join(self.path, "index.html"),
+            cht_utils.misc_tools.findreplace(os.path.join(self.path, "index.html"),
                                             "COSMOS_VIEWER",
                                             cosmos.scenario.long_name)
 
@@ -182,7 +182,7 @@ class WebViewer:
         # Write map variables to file
         cosmos.log("Writing variables ...")                
         mv_file = os.path.join(self.cycle_path, "variables.js")        
-        cht.misc.misc_tools.write_json_js(mv_file, self.map_variables, "var map_variables =")
+        cht_utils.misc_tools.write_json_js(mv_file, self.map_variables, "var map_variables =")
 
         # Update scenario.js
         self.update_scenarios_js()
@@ -285,7 +285,7 @@ class WebViewer:
             feature_collection = FeatureCollection(features)
             stations_file = os.path.join(self.cycle_path,
                                     "xbeach.geojson.js")
-            cht.misc.misc_tools.write_json_js(stations_file, feature_collection, "var xb_markers =")
+            cht_utils.misc_tools.write_json_js(stations_file, feature_collection, "var xb_markers =")
             
     def make_meteo_maps(self):
         
@@ -386,7 +386,7 @@ class WebViewer:
                                                 properties={"name":"No name"}))                    
                         feature_collection = FeatureCollection(features)
                         file_name = os.path.join(self.cycle_path, "track.geojson.js")
-                        cht.misc.misc_tools.write_json_js(file_name,
+                        cht_utils.misc_tools.write_json_js(file_name,
                                                         feature_collection,
                                                         "var track_data =")
 
@@ -440,7 +440,7 @@ class WebViewer:
                                 feature_collection = FeatureCollection(features)
 
                             file_name = os.path.join(self.cycle_path, "track.geojson.js")
-                            cht.misc.misc_tools.write_json_js(file_name,
+                            cht_utils.misc_tools.write_json_js(file_name,
                                                             feature_collection,
                                                             "var track_data =")
         except Exception as e:
@@ -451,7 +451,7 @@ class WebViewer:
         #     try:
         #         feature_collection = cosmos.scenario.track_ensemble.get_feature_collection()
         #         file_name = os.path.join(self.cycle_path, "track_ensemble.geojson.js")
-        #         cht.misc.misc_tools.write_json_js(file_name,
+        #         cht_utils.misc_tools.write_json_js(file_name,
         #                                         feature_collection,
         #                                         "var track_ensemble_data =")
         #     except Exception as e:
@@ -510,7 +510,7 @@ class WebViewer:
             fo.mkdir(output_path_regime)
             file_name = os.path.join(output_path_regime,
                                 "sallenger.geojson.js")
-            cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var regimes =")
+            cht_utils.misc_tools.write_json_js(file_name, feature_collection, "var regimes =")
     
             dct={}
             dct["name"]        = "sallenger"
@@ -540,7 +540,7 @@ class WebViewer:
             fo.mkdir(output_path_regime)
             file_name = os.path.join(output_path_regime,
                                 "erosionregimes.geojson.js")
-            cht.misc.misc_tools.write_json_js(file_name, feature_collection_ero, "var regimes =")
+            cht_utils.misc_tools.write_json_js(file_name, feature_collection_ero, "var regimes =")
     
             dct={}
             dct["name"]        = "erosion_regimes"
@@ -597,7 +597,7 @@ class WebViewer:
                             fo.mkdir(output_path_runup)
                             file_name = os.path.join(output_path_runup,
                                                     "extreme_runup_height.geojson.js")
-                            cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var runup =")
+                            cht_utils.misc_tools.write_json_js(file_name, feature_collection, "var runup =")
         
                         dct={}
                         dct["name"]        = "extreme_runup_height"
@@ -645,7 +645,7 @@ class WebViewer:
                             fo.mkdir(output_path_runup)
                             file_name = os.path.join(output_path_runup,
                                                     "extreme_runup_height_prc95.geojson.js")
-                            cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var runup_prc95 =")
+                            cht_utils.misc_tools.write_json_js(file_name, feature_collection, "var runup_prc95 =")
         
                         dct={}
                         dct["name"]        = "extreme_runup_height_prc95"
@@ -684,7 +684,7 @@ class WebViewer:
                             fo.mkdir(output_path_waves)
                             file_name = os.path.join(output_path_waves,     
                                                     "extreme_sea_level_and_wave_height.geojson.js")
-                            cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var swl =")
+                            cht_utils.misc_tools.write_json_js(file_name, feature_collection, "var swl =")
 
 
                         dct={}
@@ -735,7 +735,7 @@ class WebViewer:
                             fo.mkdir(output_path_runup)
                             file_name = os.path.join(output_path_runup,     
                                                     "extreme_horizontal_runup_height.geojson.js")
-                            cht.misc.misc_tools.write_json_js(file_name, feature_collection, "var runup_vert =")
+                            cht_utils.misc_tools.write_json_js(file_name, feature_collection, "var runup_vert =")
 
 
                         dct={}
@@ -808,7 +808,7 @@ class WebViewer:
                                     var_string2 = "wl_5,wl_50,wl_95"
                             else:
                                 var_string2=var_string
-                            cht.misc.misc_tools.write_csv_js(csv_file, s, "var csv = `date_time," + var_string2)
+                            cht_utils.misc_tools.write_csv_js(csv_file, s, "var csv = `date_time," + var_string2)
 
                         # Check if there are observations
                         if cosmos.scenario.observations_path and station.id:
@@ -835,7 +835,7 @@ class WebViewer:
                                                 header=False) 
                                     # Write csv js file
                                     obs_file = csv_file
-                                    cht.misc.misc_tools.write_csv_js(os.path.join(self.cycle_path, "timeseries", obs_file),
+                                    cht_utils.misc_tools.write_csv_js(os.path.join(self.cycle_path, "timeseries", obs_file),
                                                                     s,
                                                                     "var csv = `date_time," + var_string)
                                 
@@ -855,7 +855,7 @@ class WebViewer:
         if features:
             feature_collection = FeatureCollection(features)
             buoys_file = os.path.join(self.cycle_path, station_file)
-            cht.misc.misc_tools.write_json_js(buoys_file, feature_collection, "var " + station_var + " =")
+            cht_utils.misc_tools.write_json_js(buoys_file, feature_collection, "var " + station_var + " =")
 
     def update_scenarios_js(self, other_js_source = None):
         # Check if there is a scenarios.js file
@@ -871,7 +871,7 @@ class WebViewer:
         isame = -1
         cosmos.log("Updating scenario file : " + sc_file)
         if fo.exists(sc_file):
-            scs = cht.misc.misc_tools.read_json_js(sc_file)
+            scs = cht_utils.misc_tools.read_json_js(sc_file)
             for isc, sc in enumerate(scs):
                 if sc["name"] == cosmos.scenario.name:
                     isame = isc
@@ -922,7 +922,7 @@ class WebViewer:
             # New scenario in web viewer    
             scs.append(newsc)        
 
-        cht.misc.misc_tools.write_json_js(sc_file, scs, "var scenario =")
+        cht_utils.misc_tools.write_json_js(sc_file, scs, "var scenario =")
 
     def upload(self):
         if cosmos.config.run.run_mode == "cloud":
@@ -940,7 +940,7 @@ class WebViewer:
             
     def upload_to_opendap(self):    
         """Upload web viewer to web server."""
-        from cht.misc.sftp import SSHSession        
+        from cht_utils.sftp import SSHSession        
         cosmos.log("Uploading web viewer to OpenDap ...")        
         # Upload entire copy of local web viewer to web server        
         try:

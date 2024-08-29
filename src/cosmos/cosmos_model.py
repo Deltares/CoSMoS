@@ -20,9 +20,9 @@ import shapely
 from .cosmos_main import cosmos
 from .cosmos_cluster import cluster_dict as cluster
 
-from cht.nesting.nest2 import nest2
-import cht.misc.fileops as fo
-from cht.misc.misc_tools import dict2yaml
+from cht_nesting.nest2 import nest2
+import cht_utils.fileops as fo
+from cht_utils.misc_tools import dict2yaml
 
 class Model:
     """Read generic model data from toml file, prepare model run paths, and submit jobs.

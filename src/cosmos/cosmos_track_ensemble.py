@@ -13,10 +13,10 @@ import copy
 
 from .cosmos_main import cosmos
 from cht_cyclones.tropical_cyclone import TropicalCycloneEnsemble
-from cht.meteo.meteo import filter_cyclones_TCvitals, find_priorityTC
-import cht.misc.fileops as fo
+from cht_meteo.meteo import filter_cyclones_TCvitals, find_priorityTC
+import cht_utils.fileops as fo
 from datetime import datetime
-import cht.misc.misc_tools
+import cht_utils.misc_tools
 
 def setup_track_ensemble():
 

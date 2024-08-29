@@ -11,8 +11,8 @@ import toml
 from .cosmos_stations import Stations
 from .cosmos_meteo import read_meteo_sources
 from .cosmos_color_maps import read_color_maps
-from cht.misc.misc_tools import rgb2hex
-import cht.misc.fileops as fo
+from cht_utils.misc_tools import rgb2hex
+import cht_utils.fileops as fo
 
 class Path:
     def __init__(self):

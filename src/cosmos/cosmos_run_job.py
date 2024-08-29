@@ -1,8 +1,8 @@
 # Run Ensemble model (including pre and post processing)
 
 import os
-from cht.misc.misc_tools import yaml2dict
-import cht.misc.fileops as fo
+from cht_utils.misc_tools import yaml2dict
+import cht_utils.fileops as fo
 
 # Read config file (config.yml)
 config = yaml2dict("config.yml")

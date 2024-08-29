@@ -4,7 +4,7 @@ import os
 import tarfile
 from botocore.exceptions import ClientError        
 
-import cht.misc.fileops as fo
+import cht_utils.fileops as fo
 
 class Cloud:
     # Helper class for cloud functions

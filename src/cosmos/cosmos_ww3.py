@@ -9,7 +9,7 @@ import os
 
 from .cosmos_main import cosmos
 from .cosmos_model import Model
-import cht.misc.xmlkit as xml
+import cht_utils.xmlkit as xml
 
 class CoSMoS_WW3(Model):
     

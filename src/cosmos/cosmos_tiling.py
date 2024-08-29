@@ -7,8 +7,8 @@ Created on Mon Sep 20 12:17:22 2021
 import numpy as np
 
 from .cosmos_main import cosmos
-from cht.tiling.tiling import make_png_tiles
-from cht.tiling.tiling import make_floodmap_tiles
+from cht_tiling.tiling import make_png_tiles
+from cht_tiling.tiling import make_floodmap_tiles
 
 # class CoSMoS_TileLayer:
 #     def __init__(self, name, long_name):
