@@ -20,7 +20,7 @@ try:
     from .cosmos_argo import Argo
 except:
     print("Argo not available")
-from .cosmos_meteo import track_to_spw
+# from .cosmos_meteo import track_to_spw
 from .cosmos_scenario import Scenario
 from .cosmos_webviewer import WebViewer
 
@@ -269,18 +269,19 @@ class MainLoop:
             # No need to do anything else here 
             return
             
-        # Get meteo data (in case of forcing with track file, this is also where the spiderweb is generated)
-        # download_and_collect_meteo()
-        if cosmos.config.run.get_meteo:
+        # Download meteo data
+        if cosmos.config.run.download_meteo:
             download_meteo()
+
+        # Merge meteo data (in case of forcing with track file, this is also where the spiderweb is generated)
         collect_meteo()
 
-        if cosmos.scenario.run_ensemble:
+        if cosmos.scenario.run_ensemble and cosmos.tropical_cyclone:    
             # Make track ensemble (this also add 'new' ensemble models that fall within the cone)
             setup_track_ensemble()
-        elif cosmos.scenario.meteo_spiderweb or not os.path.isabs(cosmos.scenario.meteo_track):
-            # Make spiderweb if does not exist yet
-            track_to_spw()
+        # elif cosmos.scenario.meteo_spiderweb or not os.path.isabs(cosmos.scenario.meteo_track):
+        #     # Make spiderweb if does not exist yet
+        #     track_to_spw()
 
         # Get list of models that have already finished and set their status to finished
         finished_list = os.listdir(cosmos.scenario.cycle_job_list_path)

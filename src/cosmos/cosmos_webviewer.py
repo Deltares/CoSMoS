@@ -347,102 +347,109 @@ class WebViewer:
 
                     self.map_variables.append(dct)
 
-                    if cosmos.scenario.cyclone_track is not None:
+            if cosmos.tropical_cyclone is not None:
+                # Copy track geojson to cycle folder
+                jsfile = os.path.join(cosmos.scenario.cycle_track_spw_path, "track.geojson.js")
+                fo.copy_file(jsfile, self.cycle_path)
 
-                        features = []
-                        points=[]
-                        # Loop through items in geodataframe
-                        for index, row in cosmos.scenario.cyclone_track.iterrows():
-                            time = row['datetime']
-                            lon = row['geometry'].x
-                            lat = row['geometry'].y
-                            vmax = row['vmax']
-                            pc = row['pc']
-                            point = Point((lon, lat))               
-                            if vmax<64.0:
-                                cat = "TS"
-                            elif vmax<83.0:
-                                cat = "1"
-                            elif vmax<96.0:    
-                                cat = "2"
-                            elif vmax<113.0:    
-                                cat = "3"
-                            elif vmax<137.0:    
-                                cat = "4"
-                            else:    
-                                cat = "5"
-                            features.append(Feature(geometry=point,
-                                                    properties={"time":time + " UTC",
-                                                                "lon":lon,
-                                                                "lat":lat,
-                                                                "vmax":vmax,
-                                                                "pc":pc,
-                                                                "category":cat}))
+                    # if cosmos.scenario.cyclone_track is not None:
+
+
+
+                    #     features = []
+                    #     points=[]
+                    #     # Loop through items in geodataframe
+                    #     for index, row in cosmos.scenario.cyclone_track.iterrows():
+                    #         time = row['datetime']
+                    #         lon = row['geometry'].x
+                    #         lat = row['geometry'].y
+                    #         vmax = row['vmax']
+                    #         pc = row['pc']
+                    #         point = Point((lon, lat))               
+                    #         if vmax<64.0:
+                    #             cat = "TS"
+                    #         elif vmax<83.0:
+                    #             cat = "1"
+                    #         elif vmax<96.0:    
+                    #             cat = "2"
+                    #         elif vmax<113.0:    
+                    #             cat = "3"
+                    #         elif vmax<137.0:    
+                    #             cat = "4"
+                    #         else:    
+                    #             cat = "5"
+                    #         features.append(Feature(geometry=point,
+                    #                                 properties={"time":time + " UTC",
+                    #                                             "lon":lon,
+                    #                                             "lat":lat,
+                    #                                             "vmax":vmax,
+                    #                                             "pc":pc,
+                    #                                             "category":cat}))
                             
-                            points.append([lon, lat])
+                    #         points.append([lon, lat])
                         
-                        trk = LineString(coordinates=points)
-                        features.append(Feature(geometry=trk,
-                                                properties={"name":"No name"}))                    
-                        feature_collection = FeatureCollection(features)
-                        file_name = os.path.join(self.cycle_path, "track.geojson.js")
-                        cht.misc.misc_tools.write_json_js(file_name,
-                                                        feature_collection,
-                                                        "var track_data =")
+                    #     trk = LineString(coordinates=points)
+                    #     features.append(Feature(geometry=trk,
+                    #                             properties={"name":"No name"}))                    
+                    #     feature_collection = FeatureCollection(features)
+                    #     file_name = os.path.join(self.cycle_path, "track.geojson.js")
+                    #     cht.misc.misc_tools.write_json_js(file_name,
+                    #                                     feature_collection,
+                    #                                     "var track_data =")
 
-                    else:
+                    # else:
 
-                        # Cyclone track(s)
-                        # TODO: move a lot of this code to cht_cyclones
-                        tracks = meteo_subset.find_cyclone_tracks(xlim=[-110.0,-30.0],
-                                                                ylim=[5.0, 45.0],
-                                                                pcyc=99500.0,
-                                                                dt=6)
+                    #     # Cyclone track(s)
+                    #     # TODO: move a lot of this code to cht_cyclones
+                    #     tracks = meteo_subset.find_cyclone_tracks(xlim=[-110.0,-30.0],
+                    #                                             ylim=[5.0, 45.0],
+                    #                                             pcyc=99500.0,
+                    #                                             dt=6)
                         
-                        if tracks:
-                            features = []
-                            for track in tracks:                            
-                                points=[]
-                                # Loop through items in geodataframe
-                                for index, row in track.track.iterrows():
-                                    time = row['datetime']
-                                    lon = row['geometry'].x
-                                    lat = row['geometry'].y
-                                    vmax = row['vmax']
-                                    pc = row['pc']
-                                    point = Point((lon, lat))               
-                                    if vmax<64.0:
-                                        cat = "TS"
-                                    elif vmax<83.0:
-                                        cat = "1"
-                                    elif vmax<96.0:    
-                                        cat = "2"
-                                    elif vmax<113.0:    
-                                        cat = "3"
-                                    elif vmax<137.0:    
-                                        cat = "4"
-                                    else:    
-                                        cat = "5"
-                                    features.append(Feature(geometry=point,
-                                                            properties={"time":time + " UTC",
-                                                                        "lon":lon,
-                                                                        "lat":lat,
-                                                                        "vmax":vmax,
-                                                                        "pc":pc,
-                                                                        "category":cat}))
+                    #     if tracks:
+                    #         features = []
+                    #         for track in tracks:                            
+                    #             points=[]
+                    #             # Loop through items in geodataframe
+                    #             for index, row in track.track.iterrows():
+                    #                 time = row['datetime']
+                    #                 lon = row['geometry'].x
+                    #                 lat = row['geometry'].y
+                    #                 vmax = row['vmax']
+                    #                 pc = row['pc']
+                    #                 point = Point((lon, lat))               
+                    #                 if vmax<64.0:
+                    #                     cat = "TS"
+                    #                 elif vmax<83.0:
+                    #                     cat = "1"
+                    #                 elif vmax<96.0:    
+                    #                     cat = "2"
+                    #                 elif vmax<113.0:    
+                    #                     cat = "3"
+                    #                 elif vmax<137.0:    
+                    #                     cat = "4"
+                    #                 else:    
+                    #                     cat = "5"
+                    #                 features.append(Feature(geometry=point,
+                    #                                         properties={"time":time + " UTC",
+                    #                                                     "lon":lon,
+                    #                                                     "lat":lat,
+                    #                                                     "vmax":vmax,
+                    #                                                     "pc":pc,
+                    #                                                     "category":cat}))
                                     
-                                    points.append([lon, lat])
+                    #                 points.append([lon, lat])
                                 
-                                trk = LineString(coordinates=points)
-                                features.append(Feature(geometry=trk,
-                                                        properties={"name":"No name"}))
+                    #             trk = LineString(coordinates=points)
+                    #             features.append(Feature(geometry=trk,
+                    #                                     properties={"name":"No name"}))
                             
-                                feature_collection = FeatureCollection(features)
+                    #             feature_collection = FeatureCollection(features)
 
-                            file_name = os.path.join(self.cycle_path, "track.geojson.js")
-                            cht.misc.misc_tools.write_json_js(file_name,
-                                                            feature_collection,
-                                                            "var track_data =")
+                    #         file_name = os.path.join(self.cycle_path, "track.geojson.js")
+                    #         cht.misc.misc_tools.write_json_js(file_name,
+                    #                                         feature_collection,
+                    #                                         "var track_data =")
         except Exception as e:
             print(str(e))
 
@@ -805,7 +812,7 @@ class WebViewer:
                                 if ts_type == "waves":
                                     var_string2 =  "hm0_5,tp_5,hm0_50,tp_50,hm0_95,tp_95"
                                 elif ts_type == "wl":
-                                    var_string2 = "wl_5,wl_50,wl_95"
+                                    var_string2 = "wl_5,wl_50,wl_95,wl_best_track"
                             else:
                                 var_string2=var_string
                             cht.misc.misc_tools.write_csv_js(csv_file, s, "var csv = `date_time," + var_string2)

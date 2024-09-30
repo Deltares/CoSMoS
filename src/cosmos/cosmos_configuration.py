@@ -64,7 +64,7 @@ class WebViewer:
         self.tile_layer["water_level_map"]["color_map"] = "water_level_map"
         self.tile_layer["hm0"] = {}
         self.tile_layer["hm0"]["interval"] = 24
-        self.tile_layer["hm0"]["color_map"] = "hm0"
+        self.tile_layer["hm0"]["color_map"] = "hm0_linear"
         self.tile_layer["sedero"] = {}
         self.tile_layer["sedero"]["color_map"] = "sedero"
         self.tile_layer["bed_levels"] = {}
@@ -97,7 +97,7 @@ class Run:
         self.make_meteo_maps = True
         self.make_sedero_maps = True
         self.upload          = True
-        self.get_meteo       = True
+        self.download_meteo  = True
         self.run_mode        = "serial"
         self.only_run_ensemble = False
         self.just_initialize = False
@@ -106,6 +106,7 @@ class Run:
         # Run all models in ensemble model by default
         self.ensemble_models = ["sfincs", "hurrywave", "delft3d", "xbeach", "beware"]
         self.track_ensemble_nr_realizations = 10
+        self.spw_wind_field   = "gridded_data"
 
 class Configuration:
     """CoSMoS Configuration class.
