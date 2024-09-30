@@ -154,11 +154,16 @@ class CoSMoS:
         self.main_loop.start(cycle=cycle)
 
 
-    def stop(self): 
+    def stop(self, message:str): 
         """Stop main loop and model loop.
-        """  
-        self.model_loop.scheduler.cancel()
-        self.main_loop.scheduler.cancel()
+        """ 
+        # Raise exception
+        self.log("Error: " + message) 
+        print("Error: " + message) 
+        raise Exception("CoSMoS was stopped, because of an error.")
+        # self.model_loop.scheduler.cancel()
+        # self.main_loop.scheduler.cancel()
+
 
     def log(self, message:str):  
         """Write log message to cosmos.log
@@ -272,7 +277,13 @@ class CoSMoS:
                 for mdl in cosmos.scenario.model:
                     if mdl.name == model2:
                         mdls.append(mdl)
-                
+
+        # mm=cosmos.scenario.model[10]
+        # mm.cycle_output_path = "d:\\cosmos\\run_folder\\scenarios\\nopp_forecast\\20240925_12z\\models\\sfincs_gom_0004_ensemble\\output"
+        # mm.cycle_post_path   = "d:\\cosmos\\run_folder\\scenarios\\nopp_forecast\\20240925_12z\\models\\sfincs_gom_0004_ensemble\\timeseries"
+        # mm.ensemble = True
+        # mm.post_process()
+
         for mdl in mdls:
             fo.mkdir(mdl.cycle_path)
             fo.mkdir(mdl.cycle_input_path)

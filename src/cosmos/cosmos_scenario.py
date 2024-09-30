@@ -44,7 +44,8 @@ class Scenario:
         self.job_list_path = None
         self.restart_path  = None
         self.last_cycle    = None 
-        self.cyclone_track             = None 
+        self.cyclone_track              = None 
+        self.tropical_cyclone           = None 
         self.track_ensemble             = None 
         self.track_ensemble_nr_realizations = cosmos.config.run.track_ensemble_nr_realizations
         self.ensemble_models            = cosmos.config.run.ensemble_models

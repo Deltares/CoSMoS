@@ -178,12 +178,15 @@ class CoSMoS_SFINCS(Model):
             else:
                 self.domain.input.scsfile = None
 
+        # Spiderweb file
+        self.meteo_spiderweb = cosmos.scenario.meteo_spiderweb
+        
         if self.meteo_spiderweb or self.meteo_track and not self.ensemble:   
             self.domain.input.spwfile = "sfincs.spw"         
             # Spiderweb file given, copy to job folder
-            if cosmos.scenario.run_ensemble:
-                spwfile = os.path.join(cosmos.scenario.cycle_track_ensemble_spw_path, "ensemble00000.spw")
-            elif self.meteo_spiderweb:
+            # if cosmos.scenario.run_ensemble:
+            #     spwfile = os.path.join(cosmos.scenario.cycle_track_ensemble_spw_path, "ensemble00000.spw")
+            if self.meteo_spiderweb:
                 spwfile = os.path.join(cosmos.scenario.cycle_track_spw_path, self.meteo_spiderweb)
             elif self.meteo_track:
                 spwfile = os.path.join(cosmos.scenario.cycle_track_spw_path, self.meteo_track.split('.')[0] + ".spw")
@@ -260,9 +263,14 @@ class CoSMoS_SFINCS(Model):
             if self.ensemble:
                 prcs= [0.05, 0.50, 0.95]
                 for i,v in enumerate(prcs):
+                    data["wl"]                      = self.domain.read_timeseries_output(path=output_path,
+                                                          ensemble_member=0,
+                                                          file_name= "sfincs_his.nc",
+                                                          parameter= "point_zs")                                      
                     data["wl_" + str(round(v*100))] = self.domain.read_timeseries_output(path=output_path,
                                                           file_name= "sfincs_his.nc",
                                                           parameter= "point_zs_" + str(round(v*100)))
+                                                          
             else:    
                 data["wl"] = self.domain.read_timeseries_output(path=output_path,  parameter="point_zs")
             # Loop through stations 
@@ -273,6 +281,8 @@ class CoSMoS_SFINCS(Model):
                     df.index.name='date_time'
                     for i,v in enumerate(prcs):
                         df["wl_" + str(round(v*100))] = data["wl_" + str(round(v*100))][station.name]
+                    # Best track    
+                    df["wl_best_track"] = data["wl"][station.name]
                 else:    
                     df = pd.DataFrame(index=data["wl"].index)
                     df.index.name='date_time'
