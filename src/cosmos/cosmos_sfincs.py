@@ -45,13 +45,13 @@ class CoSMoS_SFINCS(Model):
         cht_sfincs.sfincs
         """         
         # Read in the SFINCS model                        
-        input_file  = os.path.join(self.path, "input", "sfincs.inp")
-        self.domain = SFINCS(input_file)
+        #input_file  = os.path.join(self.path, "input", "sfincs.inp")
+        self.domain = SFINCS(root=os.path.join(self.path, "input"), crs=self.crs, mode="r")
         # Copy some attributes to the model domain (needed for nesting)
-        self.domain.crs   = self.crs
-        self.domain.type  = self.type
-        self.domain.name  = self.name
-        self.domain.runid = self.runid
+        # self.domain.crs   = self.crs
+        self.domain.type  = self.type # why?
+        self.domain.name  = self.name # why?
+        self.domain.runid = self.runid # why
                         
     def pre_process(self):
         """Preprocess SFINCS model.
@@ -71,53 +71,55 @@ class CoSMoS_SFINCS(Model):
         self.domain.path = self.job_path
         
         # Start and stop times
-        self.domain.input.tref     = cosmos.scenario.ref_date
-        self.domain.input.tstart   = self.flow_start_time
-        self.domain.input.tstop    = self.flow_stop_time
-        self.domain.input.tspinup  = self.flow_spinup_time*3600
-        self.domain.input.dtmapout = 21600.0 # should this not be configurable?
-        self.domain.input.dtmaxout = 21600.0 # should this not be configurable?
-        self.domain.input.dtout    = None
-        self.domain.input.outputformat = "net"
-        self.domain.input.bzsfile  = "sfincs.bzs"
-        self.domain.input.storecumprcp = 1
+        self.domain.input.variables.tref     = cosmos.scenario.ref_date
+        self.domain.input.variables.tstart   = self.flow_start_time
+        self.domain.input.variables.tstop    = self.flow_stop_time
+        self.domain.input.variables.tspinup  = self.flow_spinup_time*3600
+        self.domain.input.variables.dthisout = cosmos.config.run.dthis
+        self.domain.input.variables.dtmapout = cosmos.config.run.dtmap
+        self.domain.input.variables.dtmaxout = cosmos.config.run.dtmax
+        self.domain.input.variables.dtout    = None
+        self.domain.input.variables.outputformat = "net"
+        self.domain.input.variables.bzsfile  = "sfincs.bzs"
+        self.domain.input.variables.storecumprcp = 1
 
         # Temporary fix for SFINCS bug 
-        if hasattr(self.domain.input, "krfile"):
-            self.domain.input.ksfile = self.domain.input.krfile
+        if hasattr(self.domain.input.variables, "krfile"):
+            self.domain.input.variables.ksfile = self.domain.input.variables.krfile
         
         if self.flow_nested:
-            self.domain.input.pavbnd = -999.0
+            self.domain.input.variables.pavbnd = -999.0
 
         # Make observation points
         if self.station:
-            self.domain.input.obsfile  = "sfincs.obs"
+            self.domain.input.variables.obsfile  = "sfincs.obs"
             for station in self.station:
-                self.domain.add_observation_point(station.x,
-                                                  station.y,
-                                                  station.name)
+                self.domain.observation_points.add_point(station.x,
+                                                         station.y,
+                                                         station.name)
                 
         # Add observation points for nested models (Nesting 1)
         if self.nested_flow_models:
-            if not self.domain.input.obsfile:
-                self.domain.input.obsfile = "sfincs.obs"
+            if not self.domain.input.variables.obsfile:
+                self.domain.input.variables.obsfile = "sfincs.obs"
             
             for nested_model in self.nested_flow_models:
                 nest1(self.domain, nested_model.domain)
 
         # Add other observation stations 
         if self.nested_flow_models or len(self.station)>0:
-            if not self.domain.input.obsfile:
-                self.domain.input.obsfile = "sfincs.obs"
-            self.domain.write_observation_points()
+            if not self.domain.input.variables.obsfile:
+                self.domain.input.variables.obsfile = "sfincs.obs"
+            # self.domain.write_observation_points()
+            self.domain.observation_points.write()
 
         # Make restart file
-        trstsec = self.domain.input.tstop.replace(tzinfo=None) - self.domain.input.tref            
+        trstsec = self.domain.input.variables.tstop.replace(tzinfo=None) - self.domain.input.variables.tref            
         if self.meteo_subset:
             if self.meteo_subset.last_analysis_time:
-                trstsec = self.meteo_subset.last_analysis_time.replace(tzinfo=None) - self.domain.input.tref
-        self.domain.input.trstout = trstsec.total_seconds()
-        self.domain.input.dtrst   = 0.0
+                trstsec = self.meteo_subset.last_analysis_time.replace(tzinfo=None) - self.domain.input.variables.tref
+        self.domain.input.variables.trstout = trstsec.total_seconds()
+        self.domain.input.variables.dtrst   = 0.0
         
         # Get restart file from previous cycle
         if self.flow_restart_file:
@@ -126,63 +128,75 @@ class CoSMoS_SFINCS(Model):
             dst = os.path.join(self.job_path,
                                "sfincs.rst")
             fo.copy_file(src, dst)
-            self.domain.input.rstfile = "sfincs.rst"
-            self.domain.input.tspinup = 0.0
+            self.domain.input.variables.rstfile = "sfincs.rst"
+            self.domain.input.variables.tspinup = 0.0
+
+        if cosmos.config.run.event_mode == "tsunami":
+            # Onlymake tsunami for large model
+            if not self.flow_nested:
+                # Interpolate the data to the mesh                
+                self.domain.initial_conditions.interpolate(cosmos.tsunami.data, var_name="dZ")
+                # Write the initial conditions to the SFINCS input file
+                self.domain.input.variables.ncinifile = "sfincs_ini.nc"
+                self.domain.initial_conditions.write()
 
         # Boundary conditions        
         if self.flow_nested:
             # The actual nesting occurs in the run_job.py file 
-            self.domain.input.bzsfile = "sfincs.bzs"
+            self.domain.input.variables.bzsfile = "sfincs.bzs"
             
-        elif self.domain.input.bcafile:            
+        elif self.domain.input.variables.bcafile:            
             # Get boundary conditions from astronomic components (should really do this in sfincs.py) 
             times = pd.date_range(start=self.flow_start_time,
                                   end=self.flow_stop_time,
                                   freq='600s')            
             # Make boundary conditions based on bca file
-            for point in self.domain.flow_boundary_point:
+            # for point in self.domain.flow_boundary_point:
+            for ind, point in self.domain.boundary_conditions.gdf.iterrows():
                 if self.tide:
+                    # Read in astro!
                     v = predict(point.astro, times)
                 else:    
                     v = np.zeros(len(times))
                 point.data = pd.Series(v, index=times)                    
-            self.domain.write_flow_boundary_conditions()
+            # self.domain.write_flow_boundary_conditions()
+            self.domain.boundary_conditions.write()
 
         if self.wave_nested:
             # The actual nesting occurs in the run_job.py file
-            self.domain.input.snapwave_bhsfile = "snapwave.bhs"
-            self.domain.input.snapwave_btpfile = "snapwave.btp"
-            self.domain.input.snapwave_bwdfile = "snapwave.bwd"
-            self.domain.input.snapwave_bdsfile = "snapwave.bds"
+            self.domain.input.variables.snapwave_bhsfile = "snapwave.bhs"
+            self.domain.input.variables.snapwave_btpfile = "snapwave.btp"
+            self.domain.input.variables.snapwave_bwdfile = "snapwave.bwd"
+            self.domain.input.variables.snapwave_bdsfile = "snapwave.bds"
 
         # If SFINCS nested in Hurrywave for SNAPWAVE setup, separately run BEWARE nesting for LF waves
         if self.bw_nested:
             # The actual nesting occurs in the run_job.py file 
-            self.domain.input.wfpfile = "sfincs.wfp"
-            self.domain.input.whifile = "sfincs.whi"
-            self.domain.input.wtifile = "sfincs.wti"
+            self.domain.input.variables.wfpfile = "sfincs.wfp"
+            self.domain.input.variables.whifile = "sfincs.whi"
+            self.domain.input.variables.wtifile = "sfincs.wti"
 
         # Meteo forcing
         if self.meteo_wind or self.meteo_atmospheric_pressure or self.meteo_precipitation:
             meteo.write_meteo_input_files(self,
                                           "sfincs",
-                                          self.domain.input.tref)
+                                          self.domain.input.variables.tref)
             if self.meteo_wind:                
-                self.domain.input.amufile = "sfincs.amu"
-                self.domain.input.amvfile = "sfincs.amv"
+                self.domain.input.variables.amufile = "sfincs.amu"
+                self.domain.input.variables.amvfile = "sfincs.amv"
             if self.meteo_atmospheric_pressure:
-                self.domain.input.ampfile = "sfincs.amp"
-                self.domain.input.baro    = 1                            
+                self.domain.input.variables.ampfile = "sfincs.amp"
+                self.domain.input.variables.baro    = 1                            
             if self.meteo_precipitation:                
-                self.domain.input.amprfile = "sfincs.ampr"
+                self.domain.input.variables.amprfile = "sfincs.ampr"
             else:
-                self.domain.input.scsfile = None
+                self.domain.input.variables.scsfile = None
 
         # Spiderweb file
         self.meteo_spiderweb = cosmos.scenario.meteo_spiderweb
         
         if self.meteo_spiderweb or self.meteo_track and not self.ensemble:   
-            self.domain.input.spwfile = "sfincs.spw"         
+            self.domain.input.variables.spwfile = "sfincs.spw"         
             # Spiderweb file given, copy to job folder
             # if cosmos.scenario.run_ensemble:
             #     spwfile = os.path.join(cosmos.scenario.cycle_track_ensemble_spw_path, "ensemble00000.spw")
@@ -191,19 +205,20 @@ class CoSMoS_SFINCS(Model):
             elif self.meteo_track:
                 spwfile = os.path.join(cosmos.scenario.cycle_track_spw_path, self.meteo_track.split('.')[0] + ".spw")
             fo.copy_file(spwfile, os.path.join(self.job_path, "sfincs.spw"))            
-            self.domain.input.baro    = 1
+            self.domain.input.variables.baro    = 1
             if self.crs.is_projected:
-                self.domain.input.utmzone = self.crs.utm_zone
+                self.domain.input.variables.utmzone = self.crs.utm_zone
         
         if self.ensemble:
             # Use spiderweb from ensemble
-            self.domain.input.spwfile = "sfincs.spw"
+            self.domain.input.variables.spwfile = "sfincs.spw"
             if self.crs.is_projected:
-                self.domain.input.utmzone = self.crs.utm_zone
+                self.domain.input.variables.utmzone = self.crs.utm_zone
 
         # Now write input file (sfincs.inp)
-        self.domain.write_input_file()
-        # Finally set the path back to the one in cosmos\models\etc.
+        self.domain.input.write()
+
+        # Finally set the path back to the one in model_database
         self.domain.path = pth
 
         # And now prepare the job files
@@ -227,7 +242,7 @@ class CoSMoS_SFINCS(Model):
             fid = open(batch_file, "w")
             fid.write("@ echo off\n")
             exe_path = os.path.join(cosmos.config.executables.sfincs_path, "sfincs.exe")
-            fid.write(exe_path + ">sfincs.log\n")
+            fid.write(exe_path + "\n")
             fid.close()
  
         if cosmos.config.run.run_mode == "cloud":
@@ -255,24 +270,24 @@ class CoSMoS_SFINCS(Model):
         
     def post_process(self):
         # Extract water levels
-        output_path = self.cycle_output_path
-        post_path   = self.cycle_post_path
+        output_path   = self.cycle_output_path
+        post_path     = self.cycle_post_path
+        his_file_name = os.path.join(output_path, "sfincs_his.nc")
         if self.station:
             # Read in data for all stations
             data = {}
             if self.ensemble:
                 prcs= [0.05, 0.50, 0.95]
                 for i,v in enumerate(prcs):
-                    data["wl"]                      = self.domain.read_timeseries_output(path=output_path,
-                                                          ensemble_member=0,
-                                                          file_name= "sfincs_his.nc",
-                                                          parameter= "point_zs")                                      
-                    data["wl_" + str(round(v*100))] = self.domain.read_timeseries_output(path=output_path,
-                                                          file_name= "sfincs_his.nc",
-                                                          parameter= "point_zs_" + str(round(v*100)))
-                                                          
+                    data["wl"]                      = self.domain.read_timeseries_output(file_name=his_file_name,
+                                                                                         ensemble_member=0,
+                                                                                         parameter="point_zs")                                      
+                    data["wl_" + str(round(v*100))] = self.domain.read_timeseries_output(file_name=his_file_name,
+                                                                                         parameter="point_zs_" + str(round(v*100)))                         
             else:    
-                data["wl"] = self.domain.read_timeseries_output(path=output_path,  parameter="point_zs")
+                # data["wl"] = self.domain.read_timeseries_output(path=output_path,  parameter="point_zs")
+                data["wl"] = self.domain.read_timeseries_output(file_name=his_file_name,
+                                                                parameter="point_zs")
             # Loop through stations 
             for station in self.station:                
                 if self.ensemble:

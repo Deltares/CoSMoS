@@ -96,7 +96,7 @@ def prepare_single(config, member=None):
             fo.copy_file(fname0, "sfincs.spw")
 
     # Read SFINCS model (necessary for nesting)
-    sf = SFINCS("sfincs.inp")
+    sf = SFINCS(".", mode="r")
     sf.name = config["model"]
     sf.type = "sfincs"
     sf.path = "."

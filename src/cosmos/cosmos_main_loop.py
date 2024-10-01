@@ -16,12 +16,12 @@ from .cosmos_meteo import download_meteo, collect_meteo
 from .cosmos_track_ensemble import setup_track_ensemble
 from .cosmos_scenario import Scenario
 from .cosmos_cloud import Cloud
+from .cosmos_tsunami import CoSMoS_Tsunami
+
 try:
     from .cosmos_argo import Argo
 except:
     print("Argo not available")
-# from .cosmos_meteo import track_to_spw
-from .cosmos_scenario import Scenario
 from .cosmos_webviewer import WebViewer
 
 import cht_utils.fileops as fo
@@ -268,20 +268,28 @@ class MainLoop:
         if self.just_initialize:
             # No need to do anything else here 
             return
-            
-        # Download meteo data
-        if cosmos.config.run.download_meteo:
-            download_meteo()
 
-        # Merge meteo data (in case of forcing with track file, this is also where the spiderweb is generated)
-        collect_meteo()
+        if cosmos.config.run.event_mode == "meteo":
 
-        if cosmos.scenario.run_ensemble and cosmos.tropical_cyclone:    
-            # Make track ensemble (this also add 'new' ensemble models that fall within the cone)
-            setup_track_ensemble()
-        # elif cosmos.scenario.meteo_spiderweb or not os.path.isabs(cosmos.scenario.meteo_track):
-        #     # Make spiderweb if does not exist yet
-        #     track_to_spw()
+            # Download meteo data
+            if cosmos.config.run.download_meteo:
+                download_meteo()
+
+            # Merge meteo data (in case of forcing with track file, this is also where the spiderweb is generated)
+            collect_meteo()
+
+            if cosmos.scenario.run_ensemble and cosmos.tropical_cyclone:    
+                # Make track ensemble (this also add 'new' ensemble models that fall within the cone)
+                setup_track_ensemble()
+            # elif cosmos.scenario.meteo_spiderweb or not os.path.isabs(cosmos.scenario.meteo_track):
+            #     # Make spiderweb if does not exist yet
+            #     track_to_spw()
+
+        elif cosmos.config.run.event_mode == "tsunami":
+            # Generate tsunami NetCDF file. Initial conditions for model(s) are generated from this file.
+            cosmos.log("Generating tsunami NetCDF file ...")
+            cosmos.tsunami = CoSMoS_Tsunami()
+            cosmos.tsunami.generate_from_scenario(cosmos.scenario.finite_fault_file)
 
         # Get list of models that have already finished and set their status to finished
         finished_list = os.listdir(cosmos.scenario.cycle_job_list_path)

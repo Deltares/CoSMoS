@@ -23,8 +23,6 @@ dependencies:
   - xarray
   - pip
   - pip:
-    - deltares-coastalhazardstoolkit
-    - git+https://github.com/username/cht_cyclones.git@v1.0.1
     - noaa-coops
     - NDBC
     - paramiko

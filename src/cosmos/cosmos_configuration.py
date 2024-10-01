@@ -99,6 +99,7 @@ class Run:
         self.upload          = True
         self.download_meteo  = True
         self.run_mode        = "serial"
+        self.event_mode      = "meteo"
         self.only_run_ensemble = False
         self.just_initialize = False
         self.run_models      = True
@@ -107,6 +108,9 @@ class Run:
         self.ensemble_models = ["sfincs", "hurrywave", "delft3d", "xbeach", "beware"]
         self.track_ensemble_nr_realizations = 10
         self.spw_wind_field   = "gridded_data"
+        self.dthis            = 600.0
+        self.dtmap            = 21600.0
+        self.dtmax            = 21600.0
 
 class Configuration:
     """CoSMoS Configuration class.

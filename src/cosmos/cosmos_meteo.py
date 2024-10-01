@@ -80,6 +80,12 @@ def read_meteo_sources():
     meteo_path = cosmos.config.meteo_database.path
     file_name = os.path.join(meteo_path,
                             "meteo_subsets.toml")
+    
+    # Check if file exists. If not, give warning and continue
+    if not os.path.exists(file_name):
+        cosmos.log("Warning! Meteo subsets file not found : " + file_name)
+        return
+
     toml_dict = toml.load(file_name)
     
     parameters = ["wind","barometric_pressure","precipitation"]

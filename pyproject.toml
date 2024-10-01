@@ -1,3 +1,18 @@
 [build-system]
 requires = ["setuptools>=42"]
 build-backend = "setuptools.build_meta"
+
+dependencies = [
+    "geopandas",
+    "numpy",
+    "pandas",
+    "pyproj",
+    "shapely",
+    "scipy",
+    "xarray",
+    "matplotlib",
+    "pyyaml",
+	"xugrid",
+    "toml",
+	"boto3"
+]
