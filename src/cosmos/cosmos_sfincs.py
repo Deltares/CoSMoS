@@ -12,7 +12,7 @@ import numpy as np
 from cht_sfincs.sfincs import SFINCS
 import cht_utils.fileops as fo
 from cht_tide.tide_predict import predict
-from cht_nesting.nest1 import nest1
+from cht_nesting import nest1
 
 from .cosmos_main import cosmos
 from .cosmos_model import Model
@@ -82,6 +82,10 @@ class CoSMoS_SFINCS(Model):
         self.domain.input.variables.outputformat = "net"
         self.domain.input.variables.bzsfile  = "sfincs.bzs"
         self.domain.input.variables.storecumprcp = 1
+
+        if cosmos.config.run.event_mode == "tsunami":
+            # Store velocity in output file. Use for nesting, and later also damage assessment ?
+            self.domain.input.variables.storevel = 1
 
         # Temporary fix for SFINCS bug 
         if hasattr(self.domain.input.variables, "krfile"):

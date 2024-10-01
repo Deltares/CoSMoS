@@ -5,13 +5,12 @@ Created on Tue May 11 16:02:04 2021
 @author: ormondt
 """
 import os
-import xarray as xr
 
 from .cosmos_main import cosmos
 from cht_tsunami.tsunami import Tsunami
 
 # Don't really need a class here, but what the heck. It may come in handy later and makes the code more like the other modules.
-# Use super to inherit from the Tsunami class.
+# Use super to inherit from the CHT Tsunami class.
 
 class CoSMoS_Tsunami(Tsunami):
 

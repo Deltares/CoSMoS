@@ -99,8 +99,9 @@ class Model:
 
         self.crs = CRS(self.crs)
                 
-        # Read polygon around model (should really use geojson file for this)
-        polygon_file  = os.path.join(self.path, "misc", self.name + ".txt")
+        # Read polygon around model (should preferably use a geojson file for this)
+        polygon_file = os.path.join(self.path, "misc", self.name + ".txt")
+        geojson_file = os.path.join(self.path, "misc", "outline.geojson")
         if os.path.exists(polygon_file):
             df = pd.read_csv(polygon_file, index_col=False, header=None,
                  delim_whitespace=True, names=['x', 'y'])
@@ -113,7 +114,15 @@ class Model:
                              self.polygon.vertices.max(axis=0)[1]]
             # Make gdf with outline 
             geom = shapely.geometry.Polygon(np.squeeze(xy))
-            self.outline = gpd.GeoDataFrame({"geometry": [geom]}).set_crs(self.crs).to_crs(4326)   
+        elif os.path.exists(geojson_file):
+            outline = gpd.read_file(geojson_file).to_crs(self.crs)
+            geom    = outline.geometry[0]
+            if not self.xlim:
+                self.xlim = [geom.bounds[0], geom.bounds[2]]
+                self.ylim = [geom.bounds[1], geom.bounds[3]]                
+            self.polygon = path.Path(geom.exterior.coords)    
+            # GDF with outline of model    
+            self.outline = gpd.GeoDataFrame({"geometry": [geom]}).set_crs(self.crs).to_crs(4326)
            
         # Stations
         if self.station:
@@ -134,6 +143,7 @@ class Model:
         config["cycle"]    = cosmos.cycle_string
         config["ensemble"] = self.ensemble
         config["run_mode"] = cosmos.config.run.run_mode
+        config["event_mode"] = cosmos.config.run.event_mode
         config["vertical_reference_level_difference_with_msl"] = self.vertical_reference_level_difference_with_msl
 
         ## INPUT for nesting

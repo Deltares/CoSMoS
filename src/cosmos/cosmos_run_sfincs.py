@@ -15,7 +15,7 @@ from cht_utils.prob_maps import merge_nc_map
 from cht_tiling.tiling import make_floodmap_tiles
 from cht_tiling.tiling import make_png_tiles
 from cht_sfincs.sfincs import SFINCS
-from cht_nesting.nest2 import nest2
+from cht_nesting import nest2
 #from cht_utils.argo import Argo
 
 def read_ensemble_members():
@@ -126,6 +126,13 @@ def prepare_single(config, member=None):
             else:
                 output_path = config["flow_nested"]["overall_path"]
         
+        # if config["event_mode"] == "tsunami":
+        #     filter_incoming = True
+        # else:    
+        #     filter_incoming = False
+        # Do not filter yet, as the filter does not seem to work properly
+        filter_incoming = False                        
+
         # Get boundary conditions from overall model (Nesting 2)
         nest2(
             overall = config["flow_nested"]["overall_type"],
@@ -133,6 +140,7 @@ def prepare_single(config, member=None):
             output_path = output_path,                
             boundary_water_level_correction=zcor,
             option="flow",
+            filter_incoming=filter_incoming,
             bc_path="."
         )
         
