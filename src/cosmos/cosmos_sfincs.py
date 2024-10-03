@@ -283,15 +283,25 @@ class CoSMoS_SFINCS(Model):
             if self.ensemble:
                 prcs= [0.05, 0.50, 0.95]
                 for i,v in enumerate(prcs):
-                    data["wl"]                      = self.domain.read_timeseries_output(file_name=his_file_name,
-                                                                                         ensemble_member=0,
-                                                                                         parameter="point_zs")                                      
-                    data["wl_" + str(round(v*100))] = self.domain.read_timeseries_output(file_name=his_file_name,
-                                                                                         parameter="point_zs_" + str(round(v*100)))                         
+                    # data["wl"]                      = self.domain.read_timeseries_output(file_name=his_file_name,
+                    #                                                                      ensemble_member=0,
+                    #                                                                      parameter="point_zs")                                      
+                    # data["wl_" + str(round(v*100))] = self.domain.read_timeseries_output(file_name=his_file_name,
+                    #                                                                      parameter="point_zs_" + str(round(v*100)))                         
+
+                    data["wl"]                      = self.domain.output.read_his_file(file_name=his_file_name,
+                                                                                       ensemble_member=0,
+                                                                                       parameter="point_zs")                                      
+                    data["wl_" + str(round(v*100))] = self.domain.output.read_his_file(file_name=his_file_name,
+                                                                                       parameter="point_zs_" + str(round(v*100)))                         
+
+
             else:    
                 # data["wl"] = self.domain.read_timeseries_output(path=output_path,  parameter="point_zs")
-                data["wl"] = self.domain.read_timeseries_output(file_name=his_file_name,
-                                                                parameter="point_zs")
+                # data["wl"] = self.domain.read_timeseries_output(file_name=his_file_name,
+                #                                                 parameter="point_zs")
+                data["wl"] = self.domain.output.read_his_file(file_name=his_file_name,
+                                                              parameter="point_zs")
             # Loop through stations 
             for station in self.station:                
                 if self.ensemble:

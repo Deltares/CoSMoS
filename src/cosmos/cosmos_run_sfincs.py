@@ -286,7 +286,7 @@ def map_tiles(config):
                 # Inundation map over dt-hour increments                    
                 for it, t in enumerate(requested_times):
 
-                    zsmax = sf.read_zsmax(zsmax_file=zsmax_file,
+                    zsmax = sf.output.read_zsmax(zsmax_file=zsmax_file,
                                           time_range=[t - dt + dt1, t + dt1],
                                           varname=varname)
                     # Difference between MSL and NAVD88 (used in topo data)
@@ -306,7 +306,7 @@ def map_tiles(config):
                                         quiet=True)
 
                 # Full simulation        
-                zsmax = sf.read_zsmax(zsmax_file=zsmax_file,
+                zsmax = sf.output.read_zsmax(zsmax_file=zsmax_file,
                                     time_range=[t0 + dt1, t1 + dt1],
                                     varname=varname)
                 zsmax += config["vertical_reference_level_difference_with_msl"]
@@ -388,7 +388,7 @@ def map_tiles(config):
                 # Water level map over dt-hour increments                    
                 for it, t in enumerate(requested_times):
 
-                    zsmax = sf.read_zsmax(zsmax_file=zsmax_file,
+                    zsmax = sf.output.read_zsmax(zsmax_file=zsmax_file,
                                           time_range=[t - dt + dt1, t + dt1],
                                           varname=varname)
                     zsmax += water_level_correction
@@ -413,7 +413,7 @@ def map_tiles(config):
                     ) 
 
                 # Full simulation        
-                zsmax = sf.read_zsmax(zsmax_file=zsmax_file, varname=varname)
+                zsmax = sf.output.read_zsmax(zsmax_file=zsmax_file, varname=varname)
 
                 zsmax += water_level_correction
                 zsmax = np.transpose(zsmax)

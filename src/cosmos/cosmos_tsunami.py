@@ -26,7 +26,7 @@ class CoSMoS_Tsunami(Tsunami):
             source_file = os.path.join(cosmos.scenario.path, "tsunami", source_file)
 
         self.read_fault_file(source_file)
-        self.compute(smoothing=True, dx=1000.0, dy=1000.0)
+        self.compute(smoothing=True, dx=1.0/60.0)
 
         output_file = os.path.join(cosmos.scenario.path, "tsunami", "tsunami.nc")
         self.write(output_file)

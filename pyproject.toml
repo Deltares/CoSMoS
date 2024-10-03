@@ -12,7 +12,7 @@ dependencies = [
     "xarray",
     "matplotlib",
     "pyyaml",
-	"xugrid",
+    "xugrid",
     "toml",
-	"boto3"
+    "boto3"
 ]
