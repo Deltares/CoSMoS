@@ -77,6 +77,7 @@ class Model:
         self.peak_boundary_time    = None
         self.zb_deshoal         = None
         self.ensemble           = False
+        self.zs_ini_max         = -9999.9
 
     def read_generic(self):
         """Read model attributes from model.toml file.
@@ -417,6 +418,11 @@ class Model:
             for st in stations:
 
                 station = copy.copy(st)
+
+                # Check if this station is not already present
+                if station.name in [st.name for st in self.station]:
+                    continue
+
                 station.longitude_model = station.longitude
                 station.latitude_model  = station.latitude
                 

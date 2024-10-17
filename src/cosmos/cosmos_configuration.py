@@ -85,7 +85,19 @@ class CloudConfig:
         self.namespace  = "argo"
         # Token for accessing the argo installation
         self.token = None
-        
+
+class TrackEnsemble:
+    def __init__(self):
+        # Error statistics - defaults are based on NHC of 2018-20210
+        self.mean_abs_cte24 = 19.0397 # mean absolute error in cross-track error (CTE) in NM
+        self.sc_cte = 1.3253  # auto-regression CTE; typically >1
+        self.mean_abs_ate24 = 26.224 # mean absolute error in along-track error (ATE) in NM
+        self.sc_ate = 1.3432  # auto-regression ATE; typically >1
+        self.mean_abs_ve24 = 6.9858  # mean absolute error in wind error (VE) in knots
+        self.sc_ve = 1.0000  # auto-regression VE = 1 = no auto-regression
+        self.bias_ve = 0.0  # bias per hour
+        self.nr_realizations = 10
+
 class Run:
     def __init__(self):
         self.mode            = "single_shot"
@@ -102,11 +114,12 @@ class Run:
         self.only_run_ensemble = False
         self.just_initialize = False
         self.run_models      = True
+        self.collect_meteo_up_to_cycle = False
         self.remove_old_cycles = 0
         # Run all models in ensemble model by default
         self.ensemble_models = ["sfincs", "hurrywave", "delft3d", "xbeach", "beware"]
-        self.track_ensemble_nr_realizations = 10
         self.spw_wind_field   = "gridded_data"
+        self.clear_zs_ini     = False # used to limit initial water level in sfincs models
 
 class Configuration:
     """CoSMoS Configuration class.
@@ -132,6 +145,7 @@ class Configuration:
         self.webviewer      = WebViewer()
         self.run            = Run()
         self.cloud_config   = CloudConfig()
+        self.track_ensemble = TrackEnsemble()
         self.kwargs         = {}
     
     def set(self):

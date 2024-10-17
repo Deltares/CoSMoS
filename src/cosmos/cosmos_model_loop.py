@@ -312,7 +312,7 @@ class ModelLoop():
                 fo.rmdir(pth)
 
             # Check if we need to start a new cycle
-            if cosmos.config.run.mode == "continuous" and cosmos.next_cycle_time:
+            if cosmos.next_cycle_time:
                 # Start new main loop
                 cosmos.main_loop.start(cycle=cosmos.next_cycle_time)
             else:
@@ -323,7 +323,7 @@ class ModelLoop():
             pass
 
 def check_for_finished_simulations():
-    """Check if there finished simulations to be post-processed.
+    """Check if there are finished simulations to be post-processed.
     """    
     finished_list = []
     

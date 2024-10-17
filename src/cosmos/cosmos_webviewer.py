@@ -347,123 +347,19 @@ class WebViewer:
 
                     self.map_variables.append(dct)
 
+            # Would be neater to write folloing two files as geojson first and then write them as js here 
             if cosmos.tropical_cyclone is not None:
                 # Copy track geojson to cycle folder
                 jsfile = os.path.join(cosmos.scenario.cycle_track_spw_path, "track.geojson.js")
                 fo.copy_file(jsfile, self.cycle_path)
 
-                    # if cosmos.scenario.cyclone_track is not None:
+            if cosmos.scenario.track_ensemble:                
+                # Copy ensemble tracks
+                jsfile = os.path.join(cosmos.scenario.cycle_track_ensemble_path, "track_ensemble.geojson.js")
+                fo.copy_file(jsfile, self.cycle_path)
 
-
-
-                    #     features = []
-                    #     points=[]
-                    #     # Loop through items in geodataframe
-                    #     for index, row in cosmos.scenario.cyclone_track.iterrows():
-                    #         time = row['datetime']
-                    #         lon = row['geometry'].x
-                    #         lat = row['geometry'].y
-                    #         vmax = row['vmax']
-                    #         pc = row['pc']
-                    #         point = Point((lon, lat))               
-                    #         if vmax<64.0:
-                    #             cat = "TS"
-                    #         elif vmax<83.0:
-                    #             cat = "1"
-                    #         elif vmax<96.0:    
-                    #             cat = "2"
-                    #         elif vmax<113.0:    
-                    #             cat = "3"
-                    #         elif vmax<137.0:    
-                    #             cat = "4"
-                    #         else:    
-                    #             cat = "5"
-                    #         features.append(Feature(geometry=point,
-                    #                                 properties={"time":time + " UTC",
-                    #                                             "lon":lon,
-                    #                                             "lat":lat,
-                    #                                             "vmax":vmax,
-                    #                                             "pc":pc,
-                    #                                             "category":cat}))
-                            
-                    #         points.append([lon, lat])
-                        
-                    #     trk = LineString(coordinates=points)
-                    #     features.append(Feature(geometry=trk,
-                    #                             properties={"name":"No name"}))                    
-                    #     feature_collection = FeatureCollection(features)
-                    #     file_name = os.path.join(self.cycle_path, "track.geojson.js")
-                    #     cht.misc.misc_tools.write_json_js(file_name,
-                    #                                     feature_collection,
-                    #                                     "var track_data =")
-
-                    # else:
-
-                    #     # Cyclone track(s)
-                    #     # TODO: move a lot of this code to cht_cyclones
-                    #     tracks = meteo_subset.find_cyclone_tracks(xlim=[-110.0,-30.0],
-                    #                                             ylim=[5.0, 45.0],
-                    #                                             pcyc=99500.0,
-                    #                                             dt=6)
-                        
-                    #     if tracks:
-                    #         features = []
-                    #         for track in tracks:                            
-                    #             points=[]
-                    #             # Loop through items in geodataframe
-                    #             for index, row in track.track.iterrows():
-                    #                 time = row['datetime']
-                    #                 lon = row['geometry'].x
-                    #                 lat = row['geometry'].y
-                    #                 vmax = row['vmax']
-                    #                 pc = row['pc']
-                    #                 point = Point((lon, lat))               
-                    #                 if vmax<64.0:
-                    #                     cat = "TS"
-                    #                 elif vmax<83.0:
-                    #                     cat = "1"
-                    #                 elif vmax<96.0:    
-                    #                     cat = "2"
-                    #                 elif vmax<113.0:    
-                    #                     cat = "3"
-                    #                 elif vmax<137.0:    
-                    #                     cat = "4"
-                    #                 else:    
-                    #                     cat = "5"
-                    #                 features.append(Feature(geometry=point,
-                    #                                         properties={"time":time + " UTC",
-                    #                                                     "lon":lon,
-                    #                                                     "lat":lat,
-                    #                                                     "vmax":vmax,
-                    #                                                     "pc":pc,
-                    #                                                     "category":cat}))
-                                    
-                    #                 points.append([lon, lat])
-                                
-                    #             trk = LineString(coordinates=points)
-                    #             features.append(Feature(geometry=trk,
-                    #                                     properties={"name":"No name"}))
-                            
-                    #             feature_collection = FeatureCollection(features)
-
-                    #         file_name = os.path.join(self.cycle_path, "track.geojson.js")
-                    #         cht.misc.misc_tools.write_json_js(file_name,
-                    #                                         feature_collection,
-                    #                                         "var track_data =")
         except Exception as e:
             print(str(e))
-
-        # NOTE this can be removed right? This already happens in cosmos_track_ensemble.py
-        # if cosmos.scenario.track_ensemble:
-        #     try:
-        #         feature_collection = cosmos.scenario.track_ensemble.get_feature_collection()
-        #         file_name = os.path.join(self.cycle_path, "track_ensemble.geojson.js")
-        #         cht.misc.misc_tools.write_json_js(file_name,
-        #                                         feature_collection,
-        #                                         "var track_ensemble_data =")
-        #     except Exception as e:
-        #         print(str(e))
-
 
 
     def make_xb_regimes(self):        
@@ -810,9 +706,9 @@ class WebViewer:
                             
                             if model.ensemble:
                                 if ts_type == "waves":
-                                    var_string2 =  "hm0_5,tp_5,hm0_50,tp_50,hm0_95,tp_95"
+                                    var_string2 =  "hm0_0,tp_0,hm0_0,tp_0,hm0_100,tp_100"
                                 elif ts_type == "wl":
-                                    var_string2 = "wl_5,wl_50,wl_95,wl_best_track"
+                                    var_string2 = "wl_0,wl_50,wl_100,wl_best_track"
                             else:
                                 var_string2=var_string
                             cht.misc.misc_tools.write_csv_js(csv_file, s, "var csv = `date_time," + var_string2)
@@ -1083,7 +979,7 @@ class WebViewer:
 #            bucket_name = "cosmos.deltares.nl"
             local_folder = self.cycle_path
             s3_folder = self.name + "/" + "data" + "/" + cosmos.scenario.name + "/" + cosmos.cycle_string
-            cosmos.cloud.upload_folder(bucket_name, local_folder, s3_folder)
+            cosmos.cloud.upload_folder(bucket_name, local_folder, s3_folder, quiet=True)
             # Upload scenarios.js
             local_file = os.path.join(self.path, "data", "scenarios.js")
             s3_folder  = self.name + "/" + "data"
@@ -1215,6 +1111,20 @@ def merge_timeseries(path, model_name, station, prefix,
                 df = pd.read_csv(csv_file, header=0,
                                 index_col=0,
                                 parse_dates=True).squeeze()
+                # if column is named wl_5, rename it to wl_0
+                # check if model name ends with ensemble
+                if model_name.endswith("ensemble"):
+                    if "wl_5" in df:
+                        df.rename(columns={"wl_5":"wl_0"}, inplace=True)
+                    # if column is named wl_95, rename it to wl_100
+                    if "wl_95" in df:
+                        df.rename(columns={"wl_95":"wl_100"}, inplace=True)
+                # if "columns" in df:
+                #     if "wl_5" in df.columns:
+                #         df.rename(columns={"wl_5":"wl_0"}, inplace=True)
+                #     # if column is named wl_95, rename it to wl_100
+                #     if "wl_95" in df.columns:
+                #         df.rename(columns={"wl_95":"wl_100"}, inplace=True)                                 
                 df.index.name = "date_time"
                 df.name       = name_str                    
                 okay = True

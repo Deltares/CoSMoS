@@ -8,6 +8,7 @@ import tarfile
 import shutil
 from PIL import Image
 import numpy as np
+from multiprocessing.pool import ThreadPool
 
 from cht.misc.misc_tools import yaml2dict
 
@@ -46,21 +47,30 @@ class Cloud:
                 folders.append(subfolder_name)
         return folders 
 
-    def upload_folder(self, bucket_name, local_folder, s3_folder, quiet=True):
+    def upload_folder(self, bucket_name, local_folder, s3_folder, parallel=True, quiet=True):
         local_folder = local_folder.replace('\\\\','\\')
         local_folder = local_folder.replace('\\','/')
         # Recursively list all files
         flist = list_all_files(local_folder)
-        for file in flist:
-            file1 = file.replace('\\','/')
-            file1 = file1.replace(local_folder,'')
-            s3_key = s3_folder + file1
-            try:
-                self.s3_client.upload_file(file, bucket_name, s3_key)
-            except Exception as e:
-                raise Exception("Failed to upload {}: {}".format(file, e))
-            if not quiet:
-                print("Uploaded " + os.path.basename(file))
+
+#        for file in flist:
+#            file1 = file.replace('\\','/')
+#            file1 = file1.replace(local_folder,'')
+#            s3_key = s3_folder + file1
+#            try:
+#                self.s3_client.upload_file(file, bucket_name, s3_key)
+#            except Exception as e:
+#                raise Exception("Failed to upload {}: {}".format(file, e))
+#            if not quiet:
+#                print("Uploaded " + os.path.basename(file))
+
+        if parallel:
+            pool = ThreadPool()
+            pool.starmap(upf, [(file, local_folder, s3_folder, bucket_name, self.s3_client, quiet) for file in flist])
+        else:
+            for file in flist:
+                upf(file, local_folder, s3_folder, bucket_name, self.s3_client, quiet)
+
 
     def bulk_upload_folder(self, bucket_name, local_folder, s3_folder, num_threads=8):
         local_folder = local_folder.replace('\\\\','\\')
@@ -77,9 +87,11 @@ class Cloud:
         Download and extract a .tgz file from S3.
         """
         local_tgz_path = os.path.join('/tmp', os.path.basename(s3_folder))
+        print("local_tgz_path: ", local_tgz_path)
         
         # Download the .tgz file
         try:
+            print("Downloading {} to {}".format(s3_folder, local_tgz_path))
             self.s3_client.download_file(bucket_name, s3_folder, local_tgz_path)
         except Exception as e:
             raise Exception("Failed to download {}: {}".format(s3_folder, e))
@@ -87,11 +99,13 @@ class Cloud:
         # Extract the .tgz file
         try:
             with tarfile.open(local_tgz_path, "r:gz") as tar:
+                print("Extracting {} to {}".format(local_tgz_path, local_folder))
                 tar.extractall(path=local_folder)
         except Exception as e:
             raise Exception("Failed to extract {}: {}".format(local_tgz_path, e))
         
         # Clean up the downloaded .tgz file
+        print("Removing {}".format(local_tgz_path))
         os.remove(local_tgz_path)
 
     def check_file_exists(self, bucket_name, s3_key):
@@ -104,6 +118,15 @@ class Cloud:
                 return False
             else:
                 raise
+
+def upf(file, local_folder, s3_folder, bucket_name, s3_client, quiet):
+    file1 = file.replace('\\','/')
+    file1 = file1.replace(local_folder,'')
+    s3_key = s3_folder + file1
+    s3_client.upload_file(file, bucket_name, s3_key)
+    if not quiet:
+        print("Uploaded " + file + " to " + s3_key + " in bucket " + bucket_name)
+        # print("Uploaded " + file)
 
 def list_all_files(src):
     # Recursively list all files and folders in a folder
@@ -187,11 +210,13 @@ def merge_tiles(config, quiet=True):
     shutil.rmtree(shared_directory, ignore_errors=True)
     os.makedirs(local_extract_path, exist_ok=True)
     os.makedirs(shared_directory, exist_ok=True)
-
+    
     # Download and extract each .tgz file
     for s3_key in s3_keys:
+        print("s3key: ", s3_key)
         # create a tmp directory for each model and download
         tmp_dir = os.path.join(local_extract_path, os.path.splitext(os.path.basename(s3_key))[0])
+        print("tmp_dir: ", tmp_dir)
         try:
             cloud.download_and_extract_tgz(s3_bucket, s3_key, tmp_dir)
         except Exception as e:
@@ -201,6 +226,7 @@ def merge_tiles(config, quiet=True):
             print("Downloaded and extracted {}".format(s3_key))
 
         # Process the tiles (merge model tiles with existing tiles in shared directory)
+        print("merging model tiles from " + tmp_dir + " to " + shared_directory)
         merge_model_tiles(tmp_dir, shared_directory)
         if not quiet:
             print("Processed tiles from {}".format(s3_key))
@@ -221,4 +247,4 @@ config = yaml2dict("config.yml")
 
 print("Running merge_tiles.py")
 
-merge_tiles(config, quiet=False)
+merge_tiles(config, quiet=True)
