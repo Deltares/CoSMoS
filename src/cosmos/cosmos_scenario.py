@@ -47,7 +47,7 @@ class Scenario:
         self.cyclone_track              = None 
         self.tropical_cyclone           = None 
         self.track_ensemble             = None 
-        self.track_ensemble_nr_realizations = cosmos.config.run.track_ensemble_nr_realizations
+        self.track_ensemble_nr_realizations = cosmos.config.track_ensemble.nr_realizations
         self.ensemble_models            = cosmos.config.run.ensemble_models
         self.meteo_dataset              = None
         self.meteo_spiderweb            = None
@@ -74,9 +74,11 @@ class Scenario:
             if key == "model" or key == "cluster":
                 pass
             else:    
-#                for key, value in sc_dict[key].items():
                 setattr(self, key, value)        
+
+                
             
+
         # First find all the models and store in dict models_in_scenario
         models_in_scenario = {}
         for mdl in sc_dict["model"]:                        
@@ -224,7 +226,20 @@ class Scenario:
                    if subset.name == model.meteo_dataset:
                        model.meteo_subset = subset
                        break
-                        
+
+            # Get stations to add from scenario
+            if "station" in sc_dict:
+                for station in sc_dict["station"]:
+                    toml_file_name = station["name"] # toml file name
+                    if "model_type" in station:
+                        mdltype = station["model_type"]
+                        if tp.lower() in mdltype:
+                            model.add_stations(toml_file_name)
+                    if "model_name" in station:
+                        mdlname = station["model_name"]
+                        if name.lower() in mdlname:
+                            model.add_stations(toml_file_name)
+
             self.model.append(model)
 
         # Add models to clusters 

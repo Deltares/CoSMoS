@@ -10,6 +10,7 @@ import numpy as np
 import datetime
 import shapely
 import copy
+import geopandas as gpd
 
 from .cosmos_main import cosmos
 from cht_cyclones.tropical_cyclone import TropicalCycloneEnsemble
@@ -21,98 +22,17 @@ import cht_utils.misc_tools
 def setup_track_ensemble():
 
     tc = cosmos.tropical_cyclone
-
-#     # Check if scenario is forced with track files or gridded data
-#     if not cosmos.scenario.meteo_track:
-#         # If only gridded data, try to extract the storm track
-#         # Use only the first meteo_subset for now
-
-#         for meteo_subset in cosmos.meteo_subset:
-#             if meteo_subset.name == cosmos.scenario.meteo_dataset:
-#                 break
-
-#         cosmos.log("Finding storm tracks ...")
-#         tracks = meteo_subset.find_cyclone_tracks(method="vorticity",
-#                                                   pcyc=100000.0,
-#                                                   vcyc=40.0,
-#                                                   vmin=18.0,
-#                                                   dt = 3)
-#         # Filter cyclone based on TCvitals
-#         # Use coordinates specified in meteo file to extract nearest track from gridded meteo data (if present)
-#         if hasattr(cosmos.scenario, 'meteo_lon'): 
-#             meteo_lon = cosmos.scenario.meteo_lon
-#             meteo_lat = cosmos.scenario.meteo_lat
-#         else:
-#             meteo_lon = None
-#             meteo_lat = None
-
-#         tc = find_priorityTC(tracks, "priority_storm.txt", meteo_lon, meteo_lat)
-# #        tc = tracks[0]
-
-#         # Use the first track to make ensembles
-#         tc.account_for_forward_speed()
-#         tc.estimate_missing_values()
-#         tc.include_rainfall = True
-
-
-#     else:
-
-#         # Read in storm track from *.cyc file
-#         from cht_cyclones.tropical_cyclone import TropicalCyclone
-
-#         # check if absolute path is given
-#         if not os.path.isabs(cosmos.scenario.meteo_track):
-#             filename = os.path.join(cosmos.config.meteo_database.path, "tracks", cosmos.scenario.meteo_track + ".cyc")
-#         else:
-#             filename = cosmos.scenario.meteo_track
-
-#         tc = TropicalCyclone(track_file=filename)
-#         tc.config["include_rainfall"] = True
-
-#         # 
-#         tc.get_wind_field_from_meteo_dataset(cosmos.scenario.meteo_dataset, filename=None, format="ascii")
-
-
-
-        # # convert to tc based on file extension
-        # if filename.endswith(".cyc"):
-        #     tc.from_ddb_cyc(filename)
-        # elif filename.endswith(".trk"):
-        #     tc.from_trk(filename)
-        # else:
-        #     cosmos.log("Unknown track file format: " + filename)
-        #     return
-
-        # if len(tc.gdf.track) < 2:
-        #     cosmos.log("Track too short: " + filename)
-        #     return
-
-        # tc.account_for_forward_speed()
-        # tc.estimate_missing_values()
-        # tc.include_rainfall = True  
-
-    # Determine if we use Holland or interpolated wind field
-
-    # if not tc:
-    #     # No track found
-    #     return
     
     if len(tc.track.gdf) < 3:
         # Track too short
         return
 
-    # # Set radius and number of radial bins 
-    # tc.spiderweb_radius = 400.0
-    # tc.nr_radial_bins   = 100
-
-    # Generate track ensemble
-    cosmos.log("Generating track ensemble ...")
-#    cosmos.scenario.ensemble = True
-    # Now we change from file name tp track object ???
-#    cosmos.scenario.cyclone_track = tc.track
-
-    # cosmos.scenario.track_ensemble = TropicalCycloneEnsemble(TropicalCyclone=tc)
-
+    # Check if track ensemble is already generated in a previous attempt
+    if os.path.exists(cosmos.scenario.cycle_track_ensemble_path):
+        # Track ensemble already generated
+        ensemble_generated_before = True
+    else:
+        ensemble_generated_before = False
 
     tstart = cosmos.cycle.replace(tzinfo=None)
     tend   = cosmos.stop_time.replace(tzinfo=None)
@@ -121,49 +41,50 @@ def setup_track_ensemble():
     track_path = cosmos.scenario.cycle_track_ensemble_cyc_path
     spw_path   = cosmos.scenario.cycle_track_ensemble_spw_path    
 
-    cosmos.scenario.track_ensemble = tc.make_ensemble(name="ensemble",
-                                                      number_of_realizations=nens,
-                                                      dt=dt,
-                                                      tstart=tstart,
-                                                      tend=tend,
-                                                      track_path=track_path,
-                                                      spw_path=spw_path,
-                                                     )
+    if not ensemble_generated_before:
+
+        # Generate track ensemble
+        cosmos.log("Generating track ensemble ...")
+
+        cosmos.scenario.track_ensemble = tc.make_ensemble(name="ensemble",
+                                                          number_of_realizations=nens,
+                                                          dt=dt,
+                                                          tstart=tstart,
+                                                          tend=tend,
+                                                          track_path=track_path,
+                                                          spw_path=spw_path,
+                                                          mean_abs_cte24=cosmos.config.track_ensemble.mean_abs_cte24, # mean absolute error in cross-track error (CTE) in NM
+                                                          sc_cte=cosmos.config.track_ensemble.sc_cte,  # auto-regression CTE; typically >1
+                                                          mean_abs_ate24=cosmos.config.track_ensemble.mean_abs_ate24, # mean absolute error in along-track error (ATE) in NM
+                                                          sc_ate=cosmos.config.track_ensemble.sc_ate,  # auto-regression ATE; typically >1 
+                                                          mean_abs_ve24=cosmos.config.track_ensemble.mean_abs_ve24,  # mean absolute error in wind error (VE) in knots
+                                                          sc_ve=cosmos.config.track_ensemble.sc_ve,  # auto-regression VE = 1 = no auto-regression
+                                                          bias_ve=cosmos.config.track_ensemble.bias_ve  # bias per hour
+                                                         )
+
+
+        trks = cosmos.scenario.track_ensemble.to_gdf(option="tracks",
+                                                     varname="track_ensemble_data", 
+                                                    filename=os.path.join(cosmos.scenario.cycle_track_ensemble_path, "track_ensemble.geojson.js"))
+
+
+        # Get outline of ensemble
+        cone = cosmos.scenario.track_ensemble.to_gdf(option="outline",
+                                                    buffer=200000.0,
+                                                    filename=os.path.join(cosmos.scenario.cycle_track_ensemble_path, "ensemble_cone.geojson"))
  
-    # cosmos.scenario.track_ensemble.position_method = 1
-    # # NOTE this could be before, after best-track meteo data, so why would we do this?
-    # if cosmos.scenario.track_ensemble.tstart < cosmos.scenario.ref_date:
-    #     cosmos.scenario.track_ensemble.tstart = cosmos.scenario.ref_date
-    # if cosmos.scenario.track_ensemble.tend > cosmos.stop_time:
-    #     cosmos.scenario.track_ensemble.tend = cosmos.stop_time
-    # cosmos.scenario.track_ensemble.include_best_track = 1
+    else:
+        # Could also read in ensemble from file, but then we need to build that functionality in the TropicalCycloneEnsemble class
+        cosmos.scenario.track_ensemble = TropicalCycloneEnsemble(tc,
+                                                                 number_of_realizations=nens,
+                                                                 dt=dt,
+                                                                 tstart=tstart,
+                                                                 tend=tend,
+                                                                 track_path=track_path,
+                                                                 spw_path=spw_path)
 
-    # Set the ensemble start time, always equal to the cycle time
-    # NOTE: when tc starts later than cycle, ensemble also starts to deviate later
-    # cosmos.scenario.track_ensemble.tstart_ensemble  = cosmos.cycle.replace(tzinfo=None)
-
-    # cosmos.scenario.track_ensemble.dt = 3
-    # cosmos.scenario.track_ensemble.compute_ensemble(number_of_realizations=cosmos.scenario.track_ensemble_nr_realizations)    
-
-    # # Write to files
-    # cosmos.log("Saving track files ...")
-    # cosmos.scenario.track_ensemble.to_cyc(cosmos.scenario.cycle_track_ensemble_cyc_path)
-    # cosmos.log("Saving spiderweb files ...")
-    # cosmos.scenario.track_ensemble.to_spiderweb(cosmos.scenario.cycle_track_ensemble_spw_path)
-    # cosmos.scenario.track_ensemble.to_shapefile(cosmos.scenario.cycle_track_ensemble_path)
-    
-    # Get outline of ensemble
-    cone = cosmos.scenario.track_ensemble.to_gdf(option="outline", buffer=200000.0)
-
-    # Make geojson file (in webviewer folder)
-    file_name = os.path.join(cosmos.config.webviewer.data_path,
-                           cosmos.scenario.name,
-                           cosmos.cycle_string,
-                           "track_ensemble.geojson.js")
-#    cosmos.scenario.track_ensemble.to_geojson(file_name, text="var track_ensemble_data =")
-
-    # Why here? This is something for the webviewer, so should be in the webviewer part of the code
-    cosmos.scenario.track_ensemble.to_gdf(filename=file_name, varname="track_ensemble_data")
+        # Read the cone from geojson file and turn into gdf
+        cone = gpd.read_file(os.path.join(cosmos.scenario.cycle_track_ensemble_path, "ensemble_cone.geojson"))
 
     # Loop through all models and check if they fall within cone
     models_to_add = []
@@ -205,21 +126,14 @@ def setup_track_ensemble():
         # Set and make paths for ensemble models
         model.set_paths()
     
-    if cosmos.config.run.only_run_ensemble:
-        # Remove all models that are not ensembles       
-        cosmos.scenario.model = [model for model in cosmos.scenario.model if model.ensemble]
+    # if cosmos.config.run.only_run_ensemble:
+    #     # Remove all models that are not ensembles       
+    #     cosmos.scenario.model = [model for model in cosmos.scenario.model if model.ensemble]
 
     # Set ensemble names
     cosmos.scenario.ensemble_names = []
     for iens in range(cosmos.scenario.track_ensemble_nr_realizations):
         cosmos.scenario.ensemble_names.append(str(iens).zfill(5))
-
-    # Upload spw files to S3
-    if cosmos.config.run.run_mode == "cloud":
-        cosmos.log("Uploading spiderweb files to S3")
-        path = cosmos.scenario.cycle_track_ensemble_spw_path
-        subfolder = cosmos.scenario.name + "/track_ensemble/spw"
-        cosmos.cloud.upload_folder("cosmos-scenarios", path, subfolder)
 
     cosmos.log("Track ensemble done ...")
   

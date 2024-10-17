@@ -87,6 +87,17 @@ class CoSMoS_SFINCS(Model):
             # Store velocity in output file. Use for nesting, and later also damage assessment ?
             self.domain.input.variables.storevel = 1
 
+        # Turn on viscosity in all SFINCS models
+        self.domain.input.viscosity = 1
+        self.domain.input.nuvisc    = 0.01
+
+        # Limit maximum initial water level (to get rid of excess water from previous events)
+        if cosmos.config.run.clear_zs_ini:
+            self.domain.input.zsinimax = self.zs_ini_max
+
+        # Add some evaporation (same reason as above)
+        self.domain.input.qeva = 10.0 / 24  # 10 mm/day    
+
         # Temporary fix for SFINCS bug 
         if hasattr(self.domain.input.variables, "krfile"):
             self.domain.input.variables.ksfile = self.domain.input.variables.krfile
@@ -265,6 +276,7 @@ class CoSMoS_SFINCS(Model):
         # Output
         fo.move_file(os.path.join(job_path, "sfincs_map.nc"), output_path)
         fo.move_file(os.path.join(job_path, "sfincs_his.nc"), output_path)
+        fo.move_file(os.path.join(job_path, "sfincs.log"), output_path)
         # Restart file used in simulation        
         fo.move_file(os.path.join(self.job_path, "sfincs.rst"), input_path)
         # Restart files created during simulation
@@ -281,7 +293,7 @@ class CoSMoS_SFINCS(Model):
             # Read in data for all stations
             data = {}
             if self.ensemble:
-                prcs= [0.05, 0.50, 0.95]
+                prcs= [0.0, 0.50, 1.0]
                 for i,v in enumerate(prcs):
                     # data["wl"]                      = self.domain.read_timeseries_output(file_name=his_file_name,
                     #                                                                      ensemble_member=0,

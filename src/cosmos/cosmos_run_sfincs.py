@@ -227,10 +227,10 @@ def merge_ensemble(config):
             fo.copy_file(os.path.join(folder_path, member, "sfincs_his.nc"), os.path.join(output_path, member, "sfincs_his.nc"))
         map_files.append(os.path.join(folder_path, member, "sfincs_map.nc"))
 
-    merge_nc_his(his_files, ["point_zs"], output_file_name=his_output_file_name)
+    merge_nc_his(his_files, ["point_zs"], output_file_name=his_output_file_name, prcs=[0.0, 0.5, 1.0])
     if "flood_map" in config or "water_level_map" in config:
         try:
-            merge_nc_map(map_files, ["zsmax", "cumprcp"], output_file_name=map_output_file_name)
+            merge_nc_map(map_files, ["zsmax", "cumprcp"], output_file_name=map_output_file_name, prcs=[1.0])
         except Exception as e:
             print(str(e))
     # Copy restart files from the first ensemble member (restart files are the same for all members)
@@ -278,7 +278,7 @@ def map_tiles(config):
             zsmax_file = os.path.join(zsmax_path, "sfincs_map.nc")
             
             if config["ensemble"]:
-                varname = "zsmax_90"
+                varname = "zsmax_100"
             else:
                 varname = "zsmax"    
 
@@ -378,7 +378,7 @@ def map_tiles(config):
             zsmax_file = os.path.join(zsmax_path, "sfincs_map.nc")
             
             if config["ensemble"]:
-                varname = "zsmax_90"
+                varname = "zsmax_100"
             else:
                 varname = "zsmax"
 
@@ -413,7 +413,9 @@ def map_tiles(config):
                     ) 
 
                 # Full simulation        
-                zsmax = sf.output.read_zsmax(zsmax_file=zsmax_file, varname=varname)
+                zsmax = sf.output.read_zsmax(zsmax_file=zsmax_file,
+                                             time_range=[t0 + dt1, t1 + dt1],
+                                             varname=varname)
 
                 zsmax += water_level_correction
                 zsmax = np.transpose(zsmax)
@@ -464,7 +466,7 @@ def map_tiles(config):
             cumprcp_file = os.path.join(cumprcp_path, "sfincs_map.nc")
             
             if config["ensemble"]:
-                varname = "cumprcp_90"
+                varname = "cumprcp_100"
             else:
                 varname = "cumprcp"
             try:
@@ -474,6 +476,7 @@ def map_tiles(config):
                 ds = xr.open_dataset(cumprcp_file)
                 cumprcp = (ds[varname].isel(timemax=-1)-ds[varname].isel(timemax=0)).values
                 cumprcp = np.transpose(cumprcp)
+                cumprcp = cumprcp * 1000 # convert to mm (this was not need in cauberg?)
 
                 png_path = os.path.join(precipitation_map_path,
                                         config["scenario"],

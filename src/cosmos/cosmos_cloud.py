@@ -3,6 +3,7 @@ import boto3
 import os
 import tarfile
 from botocore.exceptions import ClientError        
+from multiprocessing.pool import ThreadPool
 
 import cht_utils.fileops as fo
 
@@ -63,18 +64,25 @@ class Cloud:
         if not quiet:
             print("Made folder: " + s3_folder)
 
-    def upload_folder(self, bucket_name, local_folder, s3_folder, quiet=True):
+    def upload_folder(self, bucket_name, local_folder, s3_folder, parallel=True, quiet=True):
         local_folder = local_folder.replace('\\\\','\\')
         local_folder = local_folder.replace('\\','/')
         # Recursively list all files
         flist = list_all_files(local_folder)
-        for file in flist:
-            file1 = file.replace('\\','/')
-            file1 = file1.replace(local_folder,'')
-            s3_key = s3_folder + file1
-            self.s3_client.upload_file(file, bucket_name, s3_key)
-            if not quiet:
-                print("Uploaded " + os.path.basename(file))
+        if parallel:
+            pool = ThreadPool()
+            pool.starmap(upf, [(file, local_folder, s3_folder, bucket_name, self.s3_client, quiet) for file in flist])
+        else:
+            for file in flist:
+                upf(file, local_folder, s3_folder, bucket_name, self.s3_client, quiet)
+        # flist = list_all_files(local_folder)
+        # for file in flist:
+        #     file1 = file.replace('\\','/')
+        #     file1 = file1.replace(local_folder,'')
+        #     s3_key = s3_folder + file1
+        #     self.s3_client.upload_file(file, bucket_name, s3_key)
+        #     if not quiet:
+        #         print("Uploaded " + os.path.basename(file))
 
     def download_folder(self, bucket_name, s3_folder, local_folder, quiet=True):
         fo.mkdir(local_folder)
@@ -164,3 +172,11 @@ def list_all_files(src):
         if f.is_file():
             lst.append(str(f))
     return lst        
+
+def upf(file, local_folder, s3_folder, bucket_name, s3_client, quiet):
+    file1 = file.replace('\\','/')
+    file1 = file1.replace(local_folder,'')
+    s3_key = s3_folder + file1
+    s3_client.upload_file(file, bucket_name, s3_key)
+    if not quiet:
+        print("Uploaded " + file)

@@ -52,40 +52,8 @@ class CoSMoS:
         ----------
         main_path : str
             Path of CoSMoS main folder.
-        scenario_name : str
-            Name of the scenario to be run.
-        config_file : str, optional
-            Configuration file in folder 'configurations', by default "config.toml"
-        mode: str, optional
-            Mode, by default "single_shot" (other "continuous")
-        run_mode : str, optional
-            Run mode, by default "serial" (other "parallel" or "cloud")
-        run_models : bool, optional
-            Option to run models, by default True
-        make_flood_maps : bool, optional
-            Option to make flood maps, by default True
-        make_wave_maps : bool, optional
-            Option to make wave maps, by default True
-        make_water_level_maps : bool, optional
-            Option to make water level maps, by default True
-        make_sedero_maps : bool, optional
-            Option to make sedero maps, by default False
-        make_meteo_maps : bool, optional
-            Option to make meteo maps, by default True
-        get_meteo : bool, optional
-            Option to upload results, by default True
-        make_figures : bool, optional
-            Option to make figures, by default True
-        upload : bool, optional
-            Option to upload results, by default False
-        ensemble : bool, optional
-            Option to run in ensemble mode, by default False
-        webviewer : str, optional
-            Webviewer version, by default None
-        just_initialize : bool, optional
-            Only initialize cosmos models, by default False
-        clean_up : bool, optional
-            Option to clean up job folder, by default False
+        config_file : str
+            Name of the configuration file.
 
         See Also
         -------
@@ -109,7 +77,7 @@ class CoSMoS:
         # Read in configuration
         self.config.set()
 
-    def run(self, scenario_name=None, cycle=None):
+    def run(self, scenario_name=None, cycle=None, last_cycle=None):
 
         """Run a CoSMoS scenario:
     
@@ -136,7 +104,11 @@ class CoSMoS:
         self.scenario_name = scenario_name
 
         if cycle:
-            cycle = datetime.datetime.strptime(cycle, "%Y%m%d_%HZ").replace(tzinfo=datetime.timezone.utc)        
+            cycle = datetime.datetime.strptime(cycle, "%Y%m%d_%HZ").replace(tzinfo=datetime.timezone.utc)
+        if last_cycle:
+            cosmos.last_cycle = datetime.datetime.strptime(last_cycle, "%Y%m%d_%HZ").replace(tzinfo=datetime.timezone.utc)
+        else:
+            cosmos.last_cycle = None
         
         if not self.config.path.main:
             cosmos.log("Error: CoSMoS main path not set! Do this by running cosmos.initialize(main_path) or passing main_path as input argument to cosmos.run().")
@@ -147,6 +119,7 @@ class CoSMoS:
         self.main_loop  = MainLoop()
         self.model_loop = ModelLoop()
 
+        # Why these things ?
         self.main_loop.just_initialize = self.config.run.just_initialize
         self.main_loop.run_models      = self.config.run.run_models
         self.main_loop.clean_up        = self.config.run.clean_up
@@ -237,6 +210,45 @@ class CoSMoS:
             print("An error occured while making web viewer !")
             print(f"Error: {e}")
 
+        if cosmos.config.run.upload:
+            self.webviewer.upload()
+    
+
+    def upload_webviewer(self, scenario_name:str, cycle = None):   
+        """Just upload webviewer
+
+        Parameters
+        ----------
+        scenario_name : str
+            Scenario name
+
+        cycle : str, optional
+            Cycle to start with (e.g. 20231213_00z), by default None
+        
+        See Also
+        -------
+        cosmos.cosmos_main_loop.MainLoop
+        cosmos.cosmos_model_loop.ModelLoop
+        cosmos.cosmos_webviewer.WebViewer
+
+        """
+        from .cosmos_webviewer import WebViewer
+        from .cosmos_scenario import Scenario
+        from .cosmos_cloud import Cloud
+
+        self.cloud = Cloud()
+
+        self.scenario = Scenario(scenario_name)
+        self.cycle_string = cycle
+
+        self.webviewer = WebViewer(self.config.webviewer.name)
+        self.webviewer.cycle_path = os.path.join(self.webviewer.path,
+                                       "data",
+                                       scenario_name,
+                                       cycle)
+
+        # self.webviewer.cycle_path = os.path.join(self.config.path.main, "scenarios", scenario_name, self.cycle_string)
+        self.webviewer.upload()
 
 
 

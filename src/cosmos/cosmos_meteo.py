@@ -180,9 +180,21 @@ def collect_meteo():
 
             # Collect the data from netcdf files    
             cosmos.log("Collecting meteo data : " + meteo_subset.name)
+            if cosmos.config.run.collect_meteo_up_to_cycle:
+                last_meteo_cycle = cosmos.cycle
+            else:
+                last_meteo_cycle = None
+
             meteo_subset.collect([t0, t1],
                                  xystride=meteo_subset.xystride,
-                                 tstride=meteo_subset.tstride)
+                                 tstride=meteo_subset.tstride,
+                                 last_cycle=last_meteo_cycle
+                                 )
+            # meteo_subset.collect([t0, t1],
+            #                      xystride=meteo_subset.xystride,
+            #                      tstride=meteo_subset.tstride
+            #                      )
+
 
             if meteo_subset.last_analysis_time:
 
@@ -212,8 +224,12 @@ def collect_meteo():
             for folder in cycle_folders:
                 try:
                     t = datetime.datetime.strptime(os.path.basename(folder), "%Y%m%d_%Hz")
-                    # Track start time needs to be after or at the start time of the scenario. Tracks starting after scenario cycle time should not be used.
-                    if t >= t0 and t <= cosmos.cycle.replace(tzinfo=None):
+                    # For hindcasts, only use data up to the last cycle
+                    if last_meteo_cycle:
+                        if t > last_meteo_cycle.replace(tzinfo=None):
+                            continue
+                    # Track start time needs to be after or at the start time of the scenario.
+                    if t >= t0:
                         # Check if track file is available
                         track_files = glob.glob(os.path.join(folder, "*.trk"))
                         if len(track_files)>0:
