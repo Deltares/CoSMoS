@@ -54,12 +54,12 @@ class Model:
         self.vertical_reference_level_difference_with_msl = 0.0
         self.boundary_water_level_correction = 0.0
         self.station            = []
-        self.meteo_subset       = None
+        self.meteo_dataset      = None
         self.meteo_spiderweb    = None
         self.meteo_dataset      = None
-        self.meteo_wind                 = True
+        self.meteo_wind         = True
         self.meteo_atmospheric_pressure = True
-        self.meteo_precipitation        = True
+        self.meteo_precipitation = True
         self.runid              = None
         self.polygon            = None
         self.make_flood_map     = False
@@ -78,6 +78,7 @@ class Model:
         self.zb_deshoal         = None
         self.ensemble           = False
         self.zs_ini_max         = -9999.9
+        self.outline            = None
 
     def read_generic(self):
         """Read model attributes from model.toml file.
@@ -103,9 +104,23 @@ class Model:
         # Read polygon around model (should preferably use a geojson file for this)
         polygon_file = os.path.join(self.path, "misc", self.name + ".txt")
         geojson_file = os.path.join(self.path, "misc", "outline.geojson")
-        if os.path.exists(polygon_file):
-            df = pd.read_csv(polygon_file, index_col=False, header=None,
-                 delim_whitespace=True, names=['x', 'y'])
+
+        if os.path.exists(geojson_file):
+            outline = gpd.read_file(geojson_file).to_crs(self.crs)
+            geom    = outline.geometry[0]
+            if not self.xlim:
+                self.xlim = [geom.bounds[0], geom.bounds[2]]
+                self.ylim = [geom.bounds[1], geom.bounds[3]]                
+            self.polygon = path.Path(geom.exterior.coords)    
+            # GDF with outline of model    
+            self.outline = gpd.GeoDataFrame({"geometry": [geom]}).set_crs(self.crs).to_crs(4326)
+        elif os.path.exists(polygon_file):
+            df = pd.read_csv(polygon_file,
+                             index_col=False,
+                             header=None,
+                             names=['x', 'y'],
+                             sep="\s+")
+                 
             xy = df.to_numpy()
             self.polygon = path.Path(xy)
             if not self.xlim:
@@ -115,13 +130,6 @@ class Model:
                              self.polygon.vertices.max(axis=0)[1]]
             # Make gdf with outline 
             geom = shapely.geometry.Polygon(np.squeeze(xy))
-        elif os.path.exists(geojson_file):
-            outline = gpd.read_file(geojson_file).to_crs(self.crs)
-            geom    = outline.geometry[0]
-            if not self.xlim:
-                self.xlim = [geom.bounds[0], geom.bounds[2]]
-                self.ylim = [geom.bounds[1], geom.bounds[3]]                
-            self.polygon = path.Path(geom.exterior.coords)    
             # GDF with outline of model    
             self.outline = gpd.GeoDataFrame({"geometry": [geom]}).set_crs(self.crs).to_crs(4326)
            
@@ -549,3 +557,65 @@ class Model:
                 if station.type == "wave_buoy":
                     if station.name in all_nested_stations and bw==0:
                         station.upload = False 
+
+    def write_meteo_input_files(self, prefix, tref, path=None):
+        
+        if not path:
+            path = self.job_path
+
+        time_range = [self.flow_start_time, self.flow_stop_time]
+        
+        header_comments = False
+        if self.type.lower() == "delft3dfm":
+            header_comments = True
+            
+        # Check if the model uses 2d meteo forcing from weather model
+        
+        if self.meteo_dataset:
+
+            if self.crs.is_geographic:
+            
+                # Make a new cut-out that covers the domain of the model
+                meteo_dataset = self.meteo_dataset.cut_out(lon_range=self.xlim,
+                                                            lat_range=self.ylim,
+                                                            time_range=time_range,
+                                                            crs=self.crs)
+            
+            else:
+
+                # Make new mesh in local CRS (should we make dxy configurable ?)
+                dxy      = 5000.0
+                x        = np.arange(self.xlim[0] - dxy, self.xlim[1] + dxy, dxy)
+                y        = np.arange(self.ylim[0] - dxy, self.ylim[1] + dxy, dxy)
+                meteo_dataset = self.meteo_dataset.cut_out(x=x,
+                                                            y=y,
+                                                            time_range=time_range,
+                                                            crs=self.crs)
+
+        if self.type == "delft3d" or self.type == "delft3dfm" or self.type == "xbeach" or self.type == "hurrywave" or self.type == "sfincs":
+
+            # Simple for now
+
+            if self.meteo_wind:                
+                meteo_dataset.to_delft3d(prefix,
+                                         parameters=["wind"],
+                                         path=path,
+                                         refdate=tref,
+                                         time_range=time_range,
+                                         header_comments=header_comments)            
+
+            if self.meteo_atmospheric_pressure:
+                meteo_dataset.to_delft3d(prefix,
+                                         parameters=["barometric_pressure"],
+                                         path=path,
+                                         refdate=tref,
+                                         time_range=time_range,
+                                         header_comments=header_comments)
+                            
+            if self.meteo_precipitation:                
+                meteo_dataset.to_delft3d(prefix,
+                                         parameters=["precipitation"],
+                                         path=path,
+                                         refdate=tref,
+                                         time_range=time_range,
+                                         header_comments=header_comments)

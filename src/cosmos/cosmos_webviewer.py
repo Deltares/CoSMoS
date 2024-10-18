@@ -292,28 +292,32 @@ class WebViewer:
         cosmos.log("Making meteo map tiles ...")
 
         try:
-            # Wind
-            meteo_dataset = cosmos.scenario.meteo_dataset
 
-            for meteo_subset in cosmos.meteo_subset:
-                if meteo_dataset == meteo_subset.name:
+            # Wind 
+            # Name of meteo dataset in scenario file (this one will be used for the wind map)            
+
+            for dataset_name, meteo_dataset in cosmos.meteo_database.dataset.items():
+
+                if meteo_dataset.name == cosmos.scenario.meteo_dataset:
                     
-                    # TODO these ranges should be in the config file
+                    # TODO these ranges should be in the config file !
                     xlim = [-99.0, -55.0]
                     ylim = [8.0, 45.0]
-                                                        
-                    subset = meteo_subset.subset(xlim=xlim,
-                                                 ylim=ylim,
-                                                 time_range=[],
-                                                 stride=2)
+
+                    # Either fix stride in cut-out or move to write_wind_to_json                                                        
+                    dset = meteo_dataset.cut_out(x_range=xlim,
+                                                   y_range=ylim,
+                                                   time_range=[],
+                                                   stride=2)
+
                     # Get maximum wind speed
-                    u = subset.quantity[0].u
-                    v = subset.quantity[0].v
+                    u = dset.ds["wind_u"].values[:]
+                    v = dset.ds["wind_v"].values[:]
                     vmag = np.sqrt(u*u + v*v)
                     wndmx = np.max(vmag)
                     
                     file_name = os.path.join(self.cycle_path, "wind.json.js")
-                    subset.write_wind_to_json(file_name, time_range=None, js=True)
+                    dset.wind_to_json(file_name, time_range=None, js=True)
                     
                     # Add wind to map variables
     

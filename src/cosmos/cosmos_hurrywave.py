@@ -13,7 +13,7 @@ import pandas as pd
 from .cosmos_main import cosmos
 from .cosmos_model import Model
 #from .cosmos_tiling import make_wave_map_tiles
-import cosmos.cosmos_meteo as meteo
+# import cosmos.cosmos_meteo as meteo
 from cht_utils.misc_tools import dict2yaml
 
 from cht_hurrywave.hurrywave import HurryWave
@@ -94,9 +94,7 @@ class CoSMoS_HurryWave(Model):
                     
         # Meteo forcing
         if self.meteo_wind:
-            meteo.write_meteo_input_files(self,
-                                          "hurrywave",
-                                          self.domain.input.variables.tref)
+            self.write_meteo_input_files("hurrywave", self.domain.input.variables.tref)
             self.domain.input.variables.amufile = "hurrywave.amu"
             self.domain.input.variables.amvfile = "hurrywave.amv"
                 
@@ -160,9 +158,9 @@ class CoSMoS_HurryWave(Model):
 
         # Make restart file
         trstsec = self.domain.input.variables.tstop.replace(tzinfo=None) - self.domain.input.variables.tref            
-        if self.meteo_subset:
-            if self.meteo_subset.last_analysis_time:
-                trstsec = self.meteo_subset.last_analysis_time.replace(tzinfo=None) - self.domain.input.variables.tref
+        if self.meteo_dataset:
+            if self.meteo_dataset.last_analysis_time:
+                trstsec = self.meteo_dataset.last_analysis_time.replace(tzinfo=None) - self.domain.input.variables.tref
         self.domain.input.variables.trstout  = trstsec.total_seconds()
         self.domain.input.variables.dtrstout = 0.0
         

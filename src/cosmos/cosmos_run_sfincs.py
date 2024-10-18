@@ -14,7 +14,7 @@ from cht_utils.prob_maps import merge_nc_his
 from cht_utils.prob_maps import merge_nc_map
 from cht_tiling.tiling import make_floodmap_tiles
 from cht_tiling.tiling import make_png_tiles
-from cht_sfincs.sfincs import SFINCS
+from cht_sfincs import SFINCS
 from cht_nesting import nest2
 #from cht_utils.argo import Argo
 
@@ -96,7 +96,7 @@ def prepare_single(config, member=None):
             fo.copy_file(fname0, "sfincs.spw")
 
     # Read SFINCS model (necessary for nesting)
-    sf = SFINCS(".", mode="r")
+    sf = SFINCS(".", mode="r", read_grid_data=False)
     sf.name = config["model"]
     sf.type = "sfincs"
     sf.path = "."
@@ -266,7 +266,7 @@ def map_tiles(config):
                 
             requested_times = pd.date_range(start=t0 + dt,
                                             end=t1,
-                                            freq=str(dtinc) + "H").to_pydatetime().tolist()
+                                            freq=str(dtinc) + "h").to_pydatetime().tolist()
 
             color_values = config["flood_map"]["color_map"]["contours"]
 
@@ -287,8 +287,8 @@ def map_tiles(config):
                 for it, t in enumerate(requested_times):
 
                     zsmax = sf.output.read_zsmax(zsmax_file=zsmax_file,
-                                          time_range=[t - dt + dt1, t + dt1],
-                                          varname=varname)
+                                                 time_range=[t - dt + dt1, t + dt1],
+                                                 varname=varname)
                     # Difference between MSL and NAVD88 (used in topo data)
                     zsmax += config["vertical_reference_level_difference_with_msl"]
                     zsmax = np.transpose(zsmax)
@@ -307,8 +307,8 @@ def map_tiles(config):
 
                 # Full simulation        
                 zsmax = sf.output.read_zsmax(zsmax_file=zsmax_file,
-                                    time_range=[t0 + dt1, t1 + dt1],
-                                    varname=varname)
+                                             time_range=[t0 + dt1, t1 + dt1],
+                                             varname=varname)
                 zsmax += config["vertical_reference_level_difference_with_msl"]
                 zsmax = np.transpose(zsmax)
 
@@ -368,7 +368,7 @@ def map_tiles(config):
             # Compute requested times
             requested_times = pd.date_range(start=t0 + dt,
                                             end=t1,
-                                            freq=str(dtinc) + "H").to_pydatetime().tolist()
+                                            freq=str(dtinc) + "h").to_pydatetime().tolist()
             
             pathstr = []
             for it, t in enumerate(requested_times):

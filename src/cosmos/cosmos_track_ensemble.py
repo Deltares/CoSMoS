@@ -65,8 +65,11 @@ def setup_track_ensemble():
 
         trks = cosmos.scenario.track_ensemble.to_gdf(option="tracks",
                                                      varname="track_ensemble_data", 
-                                                    filename=os.path.join(cosmos.scenario.cycle_track_ensemble_path, "track_ensemble.geojson.js"))
+                                                     filename=os.path.join(cosmos.scenario.cycle_track_ensemble_path, "track_ensemble.geojson.js"))
 
+
+        trks = cosmos.scenario.track_ensemble.to_gdf(option="tracks",
+                                                     filename=os.path.join(cosmos.scenario.cycle_track_ensemble_path, "track_ensemble.pli"))
 
         # Get outline of ensemble
         cone = cosmos.scenario.track_ensemble.to_gdf(option="outline",
@@ -92,6 +95,9 @@ def setup_track_ensemble():
         # First check if this type of model should be run in ensemble mode
         if model.type not in cosmos.scenario.ensemble_models:
             # Not an ensemble model
+            continue
+        if model.outline is None:
+            # No outline defined
             continue
         if shapely.intersects(cone.loc[0]["geometry"], model.outline.loc[0]["geometry"]):
             # Add model

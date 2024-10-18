@@ -58,6 +58,7 @@ class Scenario:
         self.observations_path = ""
         self.run_ensemble = False
         self.meteo_string = ""
+        self.storm_number = None
         
     def read(self):
         """Read scenario file, set model paths and settings, initialize models and read model generic and model specific data. 
@@ -220,11 +221,12 @@ class Scenario:
             # Should move this bit to pre-processing of model
             model.read_model_specific()
             
-            # Find matching meteo subset
+            # Find matching meteo dataset
             if model.meteo_dataset:
-               for subset in cosmos.meteo_subset:
-                   if subset.name == model.meteo_dataset:
-                       model.meteo_subset = subset
+               # Loop through all available meteo datasets
+               for dataset_name, meteo_dataset in cosmos.meteo_database.dataset.items():
+                   if dataset_name == model.meteo_dataset:
+                       model.meteo_dataset = meteo_dataset
                        break
 
             # Get stations to add from scenario

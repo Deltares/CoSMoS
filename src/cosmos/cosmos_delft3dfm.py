@@ -19,7 +19,7 @@ from cht_delft3dfm.delft3dfm import Delft3DFM
 import cht_utils.fileops as fo
 from cht_nesting.nest1 import nest1
 from cht_nesting.nest2 import nest2
-import cosmos.cosmos_meteo as meteo
+# import cosmos.cosmos_meteo as meteo
 import hydrolib.core.dflowfm as hcdfm
 
 from cht_utils.misc_tools import findreplace
@@ -136,10 +136,7 @@ class CoSMoS_Delft3DFM(Model):
         # Meteo forcing
         if self.meteo_wind or self.meteo_atmospheric_pressure or self.meteo_precipitation:
                     
-            meteo.write_meteo_input_files(self,
-                                          "delft3dfm",
-                                          refdate,
-                                          path=job_path_flow)
+            self.write_meteo_input_files("delft3dfm", refdate)
             
             if self.meteo_wind:                
                 self.domain.meteo.amu_file = "delft3dfm.amu"
@@ -209,9 +206,9 @@ class CoSMoS_Delft3DFM(Model):
 
         # Make restart file
         trstsec = tstop.replace(tzinfo=None) - refdate            
-        if self.meteo_subset:
-            if self.meteo_subset.last_analysis_time:
-                trstsec = self.meteo_subset.last_analysis_time.replace(tzinfo=None) - refdate
+        if self.meteo_dataset:
+            if self.meteo_dataset.last_analysis_time:
+                trstsec = self.meteo_dataset.last_analysis_time.replace(tzinfo=None) - refdate
         self.domain.input.output.rstinterval = [trstsec.total_seconds()]
         
         # # Get restart file from previous cycle

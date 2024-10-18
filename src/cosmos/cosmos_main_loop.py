@@ -69,8 +69,9 @@ class MainLoop:
 
         cosmos.log("Starting main loop ...")
 
-        # Update config (it's possible that this was changed while running a forecast scenario)
-        cosmos.config.set()
+        # DO NOT DO THIS ANYMORE (once config is set, it should not be read in anymore)
+        # # Update config (it's possible that this was changed while running a forecast scenario)
+        # cosmos.config.set()
 
         # Set cloud object
         if cosmos.config.run.run_mode == "cloud":
@@ -175,6 +176,7 @@ class MainLoop:
         # Start by reading all available models, stations, etc.
         cosmos.log("Starting cycle ...")
 
+        # Clean up should be moved to different function
         if self.clean_up:
             # Don't allow clean up when just initializing or continuous mode
             if not self.just_initialize and cosmos.config.run.mode == "single_shot":
@@ -246,12 +248,12 @@ class MainLoop:
                 model.run_simulation = False
 
         # Check if model data needs to be uploaded to webviewer (only upload for high-res nested models)
+        # Can this be moved to the model class?
         modelopt = ["flow", "wave"]
         modeloptnames = ["tide_gauge", "wave_buoy"]
         for model in cosmos.scenario.model:
             for iopt, opts in enumerate(modelopt):
                 all_nested_models = model.get_all_nested_models(opts)
-
                 if all_nested_models:
                     all_nested_stations = []
                     if all_nested_models[0].type == "beware":
@@ -328,6 +330,7 @@ class MainLoop:
             cosmos.tsunami = CoSMoS_Tsunami()
             cosmos.tsunami.generate_from_scenario(cosmos.scenario.finite_fault_file)
 
+        # Should remove this at some point?
         if self.just_initialize:
             # No need to do anything else here, except for setting the status of the models
             for model in cosmos.scenario.model:
@@ -344,6 +347,7 @@ class MainLoop:
                     model.run_simulation = False
                     break
 
+        # Can run_models be False?
         if self.run_models:
             # Upload spw files to S3
             if (

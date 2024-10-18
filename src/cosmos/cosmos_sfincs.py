@@ -16,7 +16,7 @@ from cht_nesting import nest1
 
 from .cosmos_main import cosmos
 from .cosmos_model import Model
-import cosmos.cosmos_meteo as meteo
+# import cosmos.cosmos_meteo as meteo
 
 class CoSMoS_SFINCS(Model):
     """Cosmos class for SFINCS model.
@@ -46,7 +46,7 @@ class CoSMoS_SFINCS(Model):
         """         
         # Read in the SFINCS model                        
         #input_file  = os.path.join(self.path, "input", "sfincs.inp")
-        self.domain = SFINCS(root=os.path.join(self.path, "input"), crs=self.crs, mode="r")
+        self.domain = SFINCS(root=os.path.join(self.path, "input"), crs=self.crs, mode="r", read_grid_data=False)
         # Copy some attributes to the model domain (needed for nesting)
         # self.domain.crs   = self.crs
         self.domain.type  = self.type # why?
@@ -130,9 +130,9 @@ class CoSMoS_SFINCS(Model):
 
         # Make restart file
         trstsec = self.domain.input.variables.tstop.replace(tzinfo=None) - self.domain.input.variables.tref            
-        if self.meteo_subset:
-            if self.meteo_subset.last_analysis_time:
-                trstsec = self.meteo_subset.last_analysis_time.replace(tzinfo=None) - self.domain.input.variables.tref
+        if self.meteo_dataset:
+            if self.meteo_dataset.last_analysis_time:
+                trstsec = self.meteo_dataset.last_analysis_time.replace(tzinfo=None) - self.domain.input.variables.tref
         self.domain.input.variables.trstout = trstsec.total_seconds()
         self.domain.input.variables.dtrst   = 0.0
         
@@ -161,21 +161,10 @@ class CoSMoS_SFINCS(Model):
             self.domain.input.variables.bzsfile = "sfincs.bzs"
             
         elif self.domain.input.variables.bcafile:            
-            # Get boundary conditions from astronomic components (should really do this in sfincs.py) 
-            times = pd.date_range(start=self.flow_start_time,
-                                  end=self.flow_stop_time,
-                                  freq='600s')            
-            # Make boundary conditions based on bca file
-            # for point in self.domain.flow_boundary_point:
-            for ind, point in self.domain.boundary_conditions.gdf.iterrows():
-                if self.tide:
-                    # Read in astro!
-                    v = predict(point.astro, times)
-                else:    
-                    v = np.zeros(len(times))
-                point.data = pd.Series(v, index=times)                    
-            # self.domain.write_flow_boundary_conditions()
-            self.domain.boundary_conditions.write()
+            # Get boundary conditions from astronomic components
+            self.domain.boundary_conditions.generate_bzs_from_bca(dt=600.0,
+                                                                  offset=0.0,
+                                                                  write_file=True)
 
         if self.wave_nested:
             # The actual nesting occurs in the run_job.py file
@@ -193,9 +182,7 @@ class CoSMoS_SFINCS(Model):
 
         # Meteo forcing
         if self.meteo_wind or self.meteo_atmospheric_pressure or self.meteo_precipitation:
-            meteo.write_meteo_input_files(self,
-                                          "sfincs",
-                                          self.domain.input.variables.tref)
+            self.write_meteo_input_files("sfincs", self.domain.input.variables.tref)
             if self.meteo_wind:                
                 self.domain.input.variables.amufile = "sfincs.amu"
                 self.domain.input.variables.amvfile = "sfincs.amv"

@@ -9,7 +9,7 @@ import os
 import toml
 
 from .cosmos_stations import Stations
-from .cosmos_meteo import read_meteo_sources
+from .cosmos_meteo import read_meteo_database
 from .cosmos_color_maps import read_color_maps
 from cht_utils.misc_tools import rgb2hex
 import cht_utils.fileops as fo
@@ -211,8 +211,8 @@ class Configuration:
         self.metget_config_path = os.path.join(self.path.main, "configuration", "metget_config.toml")
 
         # Available meteo sources
-        cosmos.log("Reading meteo sources ...")    
-        read_meteo_sources()
+        cosmos.log("Reading meteo database ...")
+        read_meteo_database()
    
         # Find all available super regions
         cosmos.log("Reading super regions ...")    
