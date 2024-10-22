@@ -291,7 +291,8 @@ def map_tiles(config):
                                                  varname=varname)
                     # Difference between MSL and NAVD88 (used in topo data)
                     zsmax += config["vertical_reference_level_difference_with_msl"]
-                    zsmax = np.transpose(zsmax)
+
+                    # zsmax = np.transpose(zsmax)
 
                     png_path = os.path.join(flood_map_path,
                                             config["scenario"],
@@ -310,7 +311,7 @@ def map_tiles(config):
                                              time_range=[t0 + dt1, t1 + dt1],
                                              varname=varname)
                 zsmax += config["vertical_reference_level_difference_with_msl"]
-                zsmax = np.transpose(zsmax)
+                # zsmax = np.transpose(zsmax)
 
                 png_path = os.path.join(flood_map_path,
                                         config["scenario"],
@@ -392,7 +393,7 @@ def map_tiles(config):
                                           time_range=[t - dt + dt1, t + dt1],
                                           varname=varname)
                     zsmax += water_level_correction
-                    zsmax = np.transpose(zsmax)
+                    # zsmax = np.transpose(zsmax)
 
                     png_path = os.path.join(water_level_map_path,
                                             config["scenario"],
@@ -418,7 +419,7 @@ def map_tiles(config):
                                              varname=varname)
 
                 zsmax += water_level_correction
-                zsmax = np.transpose(zsmax)
+                # zsmax = np.transpose(zsmax)
 
                 png_path = os.path.join(water_level_map_path,
                                         config["scenario"],
@@ -475,7 +476,7 @@ def map_tiles(config):
                 # cumprcp = sf.read_cumulative_precipitation(file_name=cumprcp_file)
                 ds = xr.open_dataset(cumprcp_file)
                 cumprcp = (ds[varname].isel(timemax=-1)-ds[varname].isel(timemax=0)).values
-                cumprcp = np.transpose(cumprcp)
+                # cumprcp = np.transpose(cumprcp)
                 cumprcp = cumprcp * 1000 # convert to mm (this was not need in cauberg?)
 
                 png_path = os.path.join(precipitation_map_path,
