@@ -15,13 +15,13 @@ beware_path    = "c:\\cosmos_run_folder\\exe\\beware"
 xbeach_path    = "yourxbeachpath"
 
 [webserver]
-hostname = "c-oet0074.directory.intra"
-path     = "../../opt/websites/static/deltares/cosmos"
-username = "ormondt"
-password = "HurryWave2021!"
+hostname = ""
+path     = ""
+username = ""
+password = ""
 
 [webviewer]
-name    = "2psips_event_viewer"
+name    = "event_viewer"
 version = "version03"
 
 [cycle]
