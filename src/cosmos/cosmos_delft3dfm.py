@@ -178,7 +178,7 @@ class CoSMoS_Delft3DFM(Model):
             
         # Make observation points
         if self.domain.input.output.obsfile:
-            self.domain.read_observation_points(file_name=os.path.join(job_path_flow, self.domain.input.output.obsfile[0].filepath))   
+            self.domain.read_observation_points(path= job_path_flow)
         for station in self.station:
             self.domain.add_observation_point(station.x,
                                               station.y,
