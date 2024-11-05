@@ -610,9 +610,9 @@ class WebViewer:
                         features = []
                         
                         dfx = pd.read_csv(os.path.join(model.path, 'input', 'runup.x'), index_col=0,
-                            delim_whitespace=True)
+                            sep='\s+')
                         dfy = pd.read_csv(os.path.join(model.path, 'input', 'runup.y'), index_col=0,
-                            delim_whitespace=True)                    
+                            sep='\s+')                    
                         r2max= dfx.columns.values
 
                         for ip in range(len(model.domain.filename)):
