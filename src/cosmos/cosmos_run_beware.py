@@ -14,7 +14,7 @@ from cht_utils.prob_maps import merge_nc_map
 from cht_tiling.tiling import make_floodmap_tiles
 from cht_tiling.tiling import make_png_tiles
 from cht_beware.beware import BEWARE
-from cht_nesting.nest2 import nest2
+from cht_nesting import nest2
 #from cht_utils.argo import Argo
 
 def read_ensemble_members():

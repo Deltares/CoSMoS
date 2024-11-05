@@ -14,7 +14,7 @@ from cht_utils.prob_maps import merge_nc_his
 from cht_utils.prob_maps import merge_nc_map
 from cht_tiling.tiling import make_png_tiles
 from cht_hurrywave.hurrywave import HurryWave
-from cht_nesting.nest2 import nest2
+from cht_nesting import nest2
 
 def read_ensemble_members():
     with open('ensemble_members.txt') as f:
