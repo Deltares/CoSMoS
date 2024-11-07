@@ -9,7 +9,7 @@ import toml
 import cht_utils.xmlkit as xml
 import cht_utils.fileops as fo
 
-model_database_path = r"p:\11206085-onr-fhics\03_cosmos\models"
+model_database_path = r"/home/apenko/psips/repos/model-database/GoM/sfincs_gom_500m/"
 region_list = fo.list_folders(os.path.join(model_database_path,
                                            "*"))
 for region_path in region_list:

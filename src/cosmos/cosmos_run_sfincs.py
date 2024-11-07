@@ -564,7 +564,7 @@ elif option == "simulate":
     if platform.system() == "Windows":
         run_string = "call run_simulation.bat"
     else:
-        run_string = "./run_simulation.sh"
+        run_string = "source ./run_simulation.sh"
     if config["ensemble"]:
         # Read in the list of ensemble members
         ensemble_members = read_ensemble_members()

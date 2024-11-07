@@ -253,6 +253,8 @@ class CoSMoS_SFINCS(Model):
                 fid = open(batch_file, "w")
                 fid.write("#!/bin/bash\n")
                 exe_path = os.path.join(cosmos.config.executables.sfincs_path, "sfincs")
+                fid.write("unset LD_LIBRARY_PATH\n")
+                fid.write("export PATH="+cosmos.config.executables.sfincs_path + ":$PATH\n")
                 fid.write(exe_path + "\n")
                 fid.close()
  

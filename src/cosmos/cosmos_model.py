@@ -379,8 +379,9 @@ class Model:
                 # Linux
                 fid = open(os.path.join(self.job_path, "run_job.sh"), "w")
                 fid.write("#!/bin/bash\n")
-#                fid.write("date > running.txt\n")
+                fid.write("`date` > running.txt\n")
 #                fid.write("source " + cosmos.config.conda.path + "/bin/activate cosmos\n")
+                fid.write(f"conda init \n")
                 fid.write(f"conda activate {cosmos.config.conda.env}\n")
                 if self.ensemble:
                     fid.write("python run_job_2.py prepare_ensemble\n")
@@ -415,10 +416,13 @@ class Model:
                 fid = open("tmp.sh", "w")
                 fid.write("#!/bin/bash\n")
                 fid.write("cd " + self.job_path + "\n")
-                fid.write("sh run_job.sh\n")
+                fid.write("source ./run_job.sh\n")
                 fid.write("exit\n")
                 fid.close()
-                os.system('sh tmp.sh')
+                print("before tmp")
+                #os.system("chmod u+x tmp.sh")
+                os.system("source ./tmp.sh")
+                print("tmp ran")
             
         elif cosmos.config.run.run_mode == "cloud":
             cosmos.log("Ready to submit to Argo - " + self.long_name + " ...")
