@@ -127,7 +127,7 @@ class CoSMoS_HurryWave(Model):
                 specout = False
                 if nested_model.type=="xbeach":
                     specout = True
-                    nest1(self.domain, nested_model.domain, option="sp2")
+                    nest1(self.domain, nested_model.domain, option="sp2", obs_point_prefix=nested_model.name)
                 elif nested_model.type=="sfincs":
                     # No sp2 output
                     # The next two lines are already done when reading in sfincs model, right?
@@ -140,7 +140,7 @@ class CoSMoS_HurryWave(Model):
                     nest1(self.domain, nested_model.domain, obs_point_prefix=nested_model.name)
                 else:
                     specout = True
-                    nest1(self.domain, nested_model.domain)
+                    nest1(self.domain, nested_model.domain, obs_point_prefix=nested_model.name)
                     
             if specout:        
                 if not self.domain.input.variables.ospfile:
