@@ -253,22 +253,20 @@ class CoSMoS_Delft3DFM(Model):
                 batch_file = os.path.join(self.job_path, "run_simulation.bat")
                 fid = open(batch_file, "w")            
                 fid.write("@ echo off\n")
-                fid.write("DATE /T > running.txt\n")
                 exe_path = os.path.join("call \"" + cosmos.config.executables.delft3dfm_path,
                                         "x64\\dimr\\scripts\\run_dimr.bat\" dimr_config.xml\n")
                 fid.write(exe_path)
-                fid.write("move running.txt finished.txt\n")
                 fid.write("exit\n")
                 fid.close()
             else:
                 batch_file = os.path.join(self.job_path, "run_simulation.sh")
                 fid = open(batch_file, "w")            
                 fid.write("#!/bin/bash\n")
-                fid.write("date > running.txt\n")
+                fid.write("unset LD_LIBRARY_PATH\n")
+                fid.write("export PATH=" + cosmos.config.executables.delft3dfm_path + ":$PATH\n")
                 exe_path = os.path.join(cosmos.config.executables.delft3dfm_path,
                                         "x64/dimr/scripts/run_dimr.sh dimr_config.xml\n")
                 fid.write(exe_path)
-                fid.write("mv running.txt finished.txt\n")
                 fid.write("exit\n")
                 fid.close()
              

@@ -380,7 +380,6 @@ class Model:
                 fid = open(os.path.join(self.job_path, "run_job.sh"), "w")
                 fid.write("#!/bin/bash\n")
                 fid.write("`date` > running.txt\n")
-#                fid.write("source " + cosmos.config.conda.path + "/bin/activate cosmos\n")
                 fid.write(f"conda init \n")
                 fid.write(f"conda activate {cosmos.config.conda.env}\n")
                 if self.ensemble:
@@ -395,7 +394,6 @@ class Model:
                     if not self.type == "beware":
                         fid.write("python run_job_2.py map_tiles\n")
                 fid.write("mv running.txt finished.txt\n")
-                #fid.write("exit\n")
                 fid.close()
 
         # Run batch file (bat or sh) and python run_job_2.py are ready. Now actually submit the job.  
@@ -419,16 +417,13 @@ class Model:
                 fid.write("source ./run_job.sh\n")
                 fid.write("exit\n")
                 fid.close()
-                print("before tmp")
-                #os.system("chmod u+x tmp.sh")
                 os.system("source ./tmp.sh")
-                print("tmp ran")
             
         elif cosmos.config.run.run_mode == "cloud":
             cosmos.log("Ready to submit to Argo - " + self.long_name + " ...")
             s3key = cosmos.scenario.name + "/" + "models" + "/" + self.name
             tilesfolder = self.region + "/" + self.type + "/" + self.deterministic_name
-#                webviewerfolder = cosmos.config.webviewer.name + "/data/" + cosmos.scenario.name + "/" + cosmos.cycle_string
+            # webviewerfolder = cosmos.config.webviewer.name + "/data/" + cosmos.scenario.name + "/" + cosmos.cycle_string
             webviewerfolder = cosmos.config.webviewer.name + "/data"
             # Delete existing folder in cloud storage
             cosmos.log("Deleting model folder on S3 : " + self.name)

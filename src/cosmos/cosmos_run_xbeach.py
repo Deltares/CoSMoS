@@ -216,7 +216,7 @@ if option == "simulate":
     if platform.system() == "Windows":
         run_string = "call run_simulation.bat"
     else:
-        run_string = "./run_simulation.sh"
+        run_string = "source ./run_simulation.sh"
 
     prepare_single(config)
     os.system(run_string)

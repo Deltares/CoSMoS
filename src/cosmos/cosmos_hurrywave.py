@@ -205,8 +205,9 @@ class CoSMoS_HurryWave(Model):
             elif platform.system() == "Linux":
                 batch_file = os.path.join(self.job_path, "run_simulation.sh")
                 fid = open(batch_file, "w")
-                exe_path = os.path.join(cosmos.config.executables.hurrywave_path, "hurrywave")
-                fid.write(exe_path + "\n")
+                fid.write("unset LD_LIBRARY_PATH\n")
+                fid.write("export PATH=" + cosmos.config.executables.hurrywave_path + ":$PATH\n")
+                fid.write(os.path.join(cosmos.config.executables.hurrywave_path, "hurrywave\n"))
                 fid.close()
  
         if cosmos.config.run.run_mode == "cloud":

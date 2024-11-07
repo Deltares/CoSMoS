@@ -227,8 +227,6 @@ class CoSMoS_SFINCS(Model):
         # Keep calling it run_job_2.py for now, otherwise the cloud workflow will not work
         fo.copy_file(os.path.join(pth, "cosmos_run_sfincs.py"), os.path.join(self.job_path, "run_job_2.py"))
 
-        print(os.name)
-
         # Write config.yml file to be used in job
         self.write_config_yml()
 
@@ -252,10 +250,9 @@ class CoSMoS_SFINCS(Model):
                 batch_file = os.path.join(self.job_path, "run_simulation.sh")
                 fid = open(batch_file, "w")
                 fid.write("#!/bin/bash\n")
-                exe_path = os.path.join(cosmos.config.executables.sfincs_path, "sfincs")
                 fid.write("unset LD_LIBRARY_PATH\n")
-                fid.write("export PATH="+cosmos.config.executables.sfincs_path + ":$PATH\n")
-                fid.write(exe_path + "\n")
+                fid.write("export PATH=" + cosmos.config.executables.sfincs_path + ":$PATH\n")
+                fid.write(os.path.join(cosmos.config.executables.sfincs_path, "sfincs\n"))
                 fid.close()
  
         if cosmos.config.run.run_mode == "cloud":
