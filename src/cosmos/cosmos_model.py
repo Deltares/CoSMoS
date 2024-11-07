@@ -349,7 +349,8 @@ class Model:
         if cosmos.config.run.run_mode == "cloud":
             # No need for a batch file. Workflow template will take care of different steps.
             pass
-        else:  
+        else:
+            # Now loop through models
             # Make windows batch file (run.bat) that activates the correct environment and runs run_job.py
             if platform_name == "windows":
                 fid = open(os.path.join(self.job_path, "run_job.bat"), "w")
@@ -378,8 +379,9 @@ class Model:
                 # Linux
                 fid = open(os.path.join(self.job_path, "run_job.sh"), "w")
                 fid.write("#!/bin/bash\n")
-                fid.write("date > running.txt\n")
-                fid.write("source " + cosmos.config.conda.path + "/bin/activate cosmos\n")
+#                fid.write("date > running.txt\n")
+#                fid.write("source " + cosmos.config.conda.path + "/bin/activate cosmos\n")
+                fid.write(f"conda activate {cosmos.config.conda.env}\n")
                 if self.ensemble:
                     fid.write("python run_job_2.py prepare_ensemble\n")
                     fid.write("python run_job_2.py simulate\n")
@@ -410,6 +412,13 @@ class Model:
             else:
                 # Run on HPC node
                 cosmos.log("Running on HPC node ...")
+                fid = open("tmp.sh", "w")
+                fid.write("#!/bin/bash\n")
+                fid.write("cd " + self.job_path + "\n")
+                fid.write("sh run_job.sh\n")
+                fid.write("exit\n")
+                fid.close()
+                os.system('sh tmp.sh')
             
         elif cosmos.config.run.run_mode == "cloud":
             cosmos.log("Ready to submit to Argo - " + self.long_name + " ...")
