@@ -250,7 +250,7 @@ class CoSMoS_Delft3DFM(Model):
         if cosmos.config.run.run_mode != "cloud":
             # Write batch file (Windows or Linux)
             if platform.system() == "Windows":
-                batch_file = os.path.join(self.job_path, "run_delft3dfm.bat")
+                batch_file = os.path.join(self.job_path, "run_simulation.bat")
                 fid = open(batch_file, "w")            
                 fid.write("@ echo off\n")
                 fid.write("DATE /T > running.txt\n")
@@ -261,7 +261,7 @@ class CoSMoS_Delft3DFM(Model):
                 fid.write("exit\n")
                 fid.close()
             else:
-                batch_file = os.path.join(self.job_path, "run_delft3dfm.sh")
+                batch_file = os.path.join(self.job_path, "run_simulation.sh")
                 fid = open(batch_file, "w")            
                 fid.write("#!/bin/bash\n")
                 fid.write("date > running.txt\n")

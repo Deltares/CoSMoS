@@ -195,14 +195,14 @@ class CoSMoS_HurryWave(Model):
         if cosmos.config.run.run_mode != "cloud":
             # Make run batch file (only for windows and linux).
             if platform.system() == "Windows":
-                batch_file = os.path.join(self.job_path, "run_hurrywave.bat")
+                batch_file = os.path.join(self.job_path, "run_simulation.bat")
                 fid = open(batch_file, "w")
                 fid.write("@ echo off\n")
                 exe_path = os.path.join(cosmos.config.executables.hurrywave_path, "hurrywave.exe")
                 fid.write(exe_path + "\n")
                 fid.close()
             elif platform.system() == "Linux":
-                batch_file = os.path.join(self.job_path, "run_hurrywave.sh")
+                batch_file = os.path.join(self.job_path, "run_simulation.sh")
                 fid = open(batch_file, "w")
                 exe_path = os.path.join(cosmos.config.executables.hurrywave_path, "hurrywave")
                 fid.write(exe_path + "\n")

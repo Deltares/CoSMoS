@@ -116,7 +116,7 @@ class CoSMoS_SFINCS(Model):
                 self.domain.input.variables.obsfile = "sfincs.obs"
             
             for nested_model in self.nested_flow_models:
-                nest1(self.domain, nested_model.domain)
+                nest1(self.domain, nested_model.domain, obs_point_prefix=nested_model.name)
 
         # Add other observation stations 
         if self.nested_flow_models or len(self.station)>0:

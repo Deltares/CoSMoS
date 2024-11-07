@@ -113,13 +113,13 @@ class CoSMoS_BEWARE(Model):
             # Make run batch file (windows or linux)
             if platform.system() == "Windows":
                 src = os.path.join(cosmos.config.executables.beware_path, "run_bw.bas")
-                batch_file = os.path.join(self.job_path, "run_beware.bat")
+                batch_file = os.path.join(self.job_path, "run_simulation.bat")
                 shutil.copyfile(src, batch_file)
                 findreplace(batch_file, "EXEPATHKEY", cosmos.config.executables.beware_path)
             else:
                 # Something like this
                 src = os.path.join(cosmos.config.executables.beware_path, "run_bw.sh")
-                batch_file = os.path.join(self.job_path, "run_beware.sh")
+                batch_file = os.path.join(self.job_path, "run_simulation.sh")
                 shutil.copyfile(src, batch_file)
                 findreplace(batch_file, "EXEPATHKEY", cosmos.config.executables.beware_path)
 

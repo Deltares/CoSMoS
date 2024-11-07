@@ -155,7 +155,7 @@ class CoSMoS_XBeach(Model):
         if cosmos.config.run.run_mode != "cloud":
             # Make run batch file (windows or linux)
             if platform.system() == "Windows":
-                batch_file = os.path.join(self.job_path, "run_xbeach.bat")
+                batch_file = os.path.join(self.job_path, "run_simulation.bat")
                 fid = open(batch_file, "w")
                 fid.write("@ echo off\n")
                 fid.write("DATE /T > running.txt\n")
@@ -169,7 +169,7 @@ class CoSMoS_XBeach(Model):
                 fid.write("move running.txt finished.txt\n")
                 fid.close()
             else:
-                batch_file = os.path.join(self.job_path, "run_xbeach.sh")
+                batch_file = os.path.join(self.job_path, "run_simulation.sh")
                 fid = open(batch_file, "w")
                 fid.write("#!/bin/bash\n")
                 fid.write("date > running.txt\n")
