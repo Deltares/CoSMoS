@@ -8,6 +8,7 @@ Created on Tue May 11 16:02:04 2021
 import os
 import pandas as pd
 import numpy as np
+import platform
 #from pyproj import CRS
 #from pyproj import Transformer
 import shutil
@@ -109,11 +110,18 @@ class CoSMoS_BEWARE(Model):
                     f.write(member + "\n")
 
         if cosmos.config.run.run_mode != "cloud":
-            # Make run batch file
-            src = os.path.join(cosmos.config.executables.beware_path, "run_bw.bas")
-            batch_file = os.path.join(self.job_path, "run_beware.bat")
-            shutil.copyfile(src, batch_file)
-            findreplace(batch_file, "EXEPATHKEY", cosmos.config.executables.beware_path)     
+            # Make run batch file (windows or linux)
+            if platform.system() == "Windows":
+                src = os.path.join(cosmos.config.executables.beware_path, "run_bw.bas")
+                batch_file = os.path.join(self.job_path, "run_beware.bat")
+                shutil.copyfile(src, batch_file)
+                findreplace(batch_file, "EXEPATHKEY", cosmos.config.executables.beware_path)
+            else:
+                # Something like this
+                src = os.path.join(cosmos.config.executables.beware_path, "run_bw.sh")
+                batch_file = os.path.join(self.job_path, "run_beware.sh")
+                shutil.copyfile(src, batch_file)
+                findreplace(batch_file, "EXEPATHKEY", cosmos.config.executables.beware_path)
 
         if cosmos.config.run.run_mode == "cloud":
             # Set workflow names

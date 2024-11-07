@@ -10,6 +10,7 @@ import datetime
 import toml
 import xarray as xr
 import pandas as pd
+import platform
 
 from cosmos.cosmos_main import cosmos
 from cosmos.cosmos_model import Model
@@ -152,20 +153,33 @@ class CoSMoS_XBeach(Model):
                     f.write(member + "\n")
 
         if cosmos.config.run.run_mode != "cloud":
-            # Make run batch file (only for windows)
-            batch_file = os.path.join(self.job_path, "run_xbeach.bat")
-            fid = open(batch_file, "w")
-            fid.write("@ echo off\n")
-            fid.write("DATE /T > running.txt\n")
-            fid.write("set xbeachdir=" + cosmos.config.executables.xbeach_path + "\n")
-            fid.write('set mpidir="c:\\Program Files\\MPICH2\\bin"\n')
-            fid.write("set PATH=%xbeachdir%;%PATH%\n")
-            fid.write("set PATH=%mpidir%;%PATH%\n")
-            fid.write("mpiexec.exe -n 5 -mapall %xbeachdir%\\xbeach.exe\n")
-            fid.write("del q_*\n")
-            fid.write("del E_*\n")
-            fid.write("move running.txt finished.txt\n")
-            fid.close()
+            # Make run batch file (windows or linux)
+            if platform.system() == "Windows":
+                batch_file = os.path.join(self.job_path, "run_xbeach.bat")
+                fid = open(batch_file, "w")
+                fid.write("@ echo off\n")
+                fid.write("DATE /T > running.txt\n")
+                fid.write("set xbeachdir=" + cosmos.config.executables.xbeach_path + "\n")
+                fid.write('set mpidir="c:\\Program Files\\MPICH2\\bin"\n')
+                fid.write("set PATH=%xbeachdir%;%PATH%\n")
+                fid.write("set PATH=%mpidir%;%PATH%\n")
+                fid.write("mpiexec.exe -n 5 -mapall %xbeachdir%\\xbeach.exe\n")
+                fid.write("del q_*\n")
+                fid.write("del E_*\n")
+                fid.write("move running.txt finished.txt\n")
+                fid.close()
+            else:
+                batch_file = os.path.join(self.job_path, "run_xbeach.sh")
+                fid = open(batch_file, "w")
+                fid.write("#!/bin/bash\n")
+                fid.write("date > running.txt\n")
+                fid.write("export PATH=$PATH:" + cosmos.config.executables.xbeach_path + "\n")
+                fid.write("export PATH=$PATH:/usr/lib/mpich/bin\n")
+                fid.write("mpirun -np 5 xbeach\n")
+                fid.write("rm q_*\n")
+                fid.write("rm E_*\n")
+                fid.write("mv running.txt finished.txt\n")
+                fid.close()
  
         if cosmos.config.run.run_mode == "cloud":
             # Set workflow names

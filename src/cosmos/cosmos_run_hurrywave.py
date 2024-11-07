@@ -6,6 +6,7 @@ import numpy as np
 import sys
 import boto3
 import datetime
+import platform
 
 #from cht_utils.argo import Argo
 import cht_utils.fileops as fo
@@ -297,6 +298,11 @@ if option == "prepare_ensemble":
 
 elif option == "simulate":
     # Never called in cloud mode
+    # Make run string (platform dependent)
+    if platform.system() == "Windows":
+        run_string = "call run_simulation.bat"
+    else:
+        run_string = "./run_simulation.sh"
     if config["ensemble"]:
         # Read in the list of ensemble members
         ensemble_members = read_ensemble_members()
@@ -307,11 +313,11 @@ elif option == "simulate":
             os.chdir(member)
             # Run the Hurrywave model
             prepare_single(config, member=member)
-            os.system("call run_hurrywave.bat\n")
+            os.system(run_string)
             os.chdir(curdir)
     else:
         prepare_single(config)
-        os.system("call run_hurrywave.bat\n")
+        os.system(run_string)
 
 elif option == "prepare_single":
     # Only occurs in cloud mode (running single is done in workflow)

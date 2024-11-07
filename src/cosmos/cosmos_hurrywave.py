@@ -7,16 +7,13 @@ Created on Tue May 11 16:02:04 2021
 
 import os
 import pandas as pd
-#import datetime
-#import shutil
+import platform
 
 from .cosmos_main import cosmos
 from .cosmos_model import Model
-#from .cosmos_tiling import make_wave_map_tiles
-# import cosmos.cosmos_meteo as meteo
-from cht_utils.misc_tools import dict2yaml
+# from cht_utils.misc_tools import dict2yaml
 
-from cht_hurrywave.hurrywave import HurryWave
+from cht_hurrywave import HurryWave
 import cht_utils.fileops as fo
 from cht_nesting import nest1
 
@@ -196,13 +193,20 @@ class CoSMoS_HurryWave(Model):
                     f.write(member + "\n")
 
         if cosmos.config.run.run_mode != "cloud":
-            # Make run batch file (only for windows)
-            batch_file = os.path.join(self.job_path, "run_hurrywave.bat")
-            fid = open(batch_file, "w")
-            fid.write("@ echo off\n")
-            exe_path = os.path.join(cosmos.config.executables.hurrywave_path, "hurrywave.exe")
-            fid.write(exe_path + "\n")
-            fid.close()
+            # Make run batch file (only for windows and linux).
+            if platform.system() == "Windows":
+                batch_file = os.path.join(self.job_path, "run_hurrywave.bat")
+                fid = open(batch_file, "w")
+                fid.write("@ echo off\n")
+                exe_path = os.path.join(cosmos.config.executables.hurrywave_path, "hurrywave.exe")
+                fid.write(exe_path + "\n")
+                fid.close()
+            elif platform.system() == "Linux":
+                batch_file = os.path.join(self.job_path, "run_hurrywave.sh")
+                fid = open(batch_file, "w")
+                exe_path = os.path.join(cosmos.config.executables.hurrywave_path, "hurrywave")
+                fid.write(exe_path + "\n")
+                fid.close()
  
         if cosmos.config.run.run_mode == "cloud":
             # Set workflow names

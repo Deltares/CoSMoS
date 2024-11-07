@@ -7,16 +7,15 @@ Created on Tue May 11 16:02:04 2021
 
 import os
 import pandas as pd
-import numpy as np
+# import numpy as np
+import platform
 
-from cht_sfincs.sfincs import SFINCS
+from cht_sfincs import SFINCS
 import cht_utils.fileops as fo
-from cht_tide.tide_predict import predict
 from cht_nesting import nest1
 
 from .cosmos_main import cosmos
 from .cosmos_model import Model
-# import cosmos.cosmos_meteo as meteo
 
 class CoSMoS_SFINCS(Model):
     """Cosmos class for SFINCS model.
@@ -45,13 +44,11 @@ class CoSMoS_SFINCS(Model):
         cht_sfincs.sfincs
         """         
         # Read in the SFINCS model                        
-        #input_file  = os.path.join(self.path, "input", "sfincs.inp")
         self.domain = SFINCS(root=os.path.join(self.path, "input"), crs=self.crs, mode="r", read_grid_data=False)
-        # Copy some attributes to the model domain (needed for nesting)
-        # self.domain.crs   = self.crs
-        self.domain.type  = self.type # why?
-        self.domain.name  = self.name # why?
-        self.domain.runid = self.runid # why
+        # # Copy some attributes to the model domain (needed for nesting)
+        # self.domain.type  = self.type # why?
+        # self.domain.name  = self.name # why?
+        # self.domain.runid = self.runid # why
                         
     def pre_process(self):
         """Preprocess SFINCS model.
@@ -227,7 +224,10 @@ class CoSMoS_SFINCS(Model):
 
         # Copy the correct run script to run_job.py
         pth = os.path.dirname(__file__)
+        # Keep calling it run_job_2.py for now, otherwise the cloud workflow will not work
         fo.copy_file(os.path.join(pth, "cosmos_run_sfincs.py"), os.path.join(self.job_path, "run_job_2.py"))
+
+        print(os.name)
 
         # Write config.yml file to be used in job
         self.write_config_yml()
@@ -238,14 +238,23 @@ class CoSMoS_SFINCS(Model):
                 for member in cosmos.scenario.ensemble_names:
                     f.write(member + "\n")
 
+        # self.write_run_simulation_batch_file()
         if cosmos.config.run.run_mode != "cloud":
-            # Make run batch file (only for windows)
-            batch_file = os.path.join(self.job_path, "run_sfincs.bat")
-            fid = open(batch_file, "w")
-            fid.write("@ echo off\n")
-            exe_path = os.path.join(cosmos.config.executables.sfincs_path, "sfincs.exe")
-            fid.write(exe_path + "\n")
-            fid.close()
+            # Make run batch file (only for windows and linux)
+            if platform.system() == "Windows":
+                batch_file = os.path.join(self.job_path, "run_simulation.bat")
+                fid = open(batch_file, "w")
+                fid.write("@ echo off\n")
+                exe_path = os.path.join(cosmos.config.executables.sfincs_path, "sfincs.exe")
+                fid.write(exe_path + "\n")
+                fid.close()
+            elif platform.system() == "Linux":
+                batch_file = os.path.join(self.job_path, "run_simulation.sh")
+                fid = open(batch_file, "w")
+                fid.write("#!/bin/bash\n")
+                exe_path = os.path.join(cosmos.config.executables.sfincs_path, "sfincs")
+                fid.write(exe_path + "\n")
+                fid.close()
  
         if cosmos.config.run.run_mode == "cloud":
             # Set workflow names

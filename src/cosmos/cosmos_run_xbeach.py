@@ -6,6 +6,7 @@ import sys
 import boto3
 import datetime
 import numpy as np
+import platform
 
 #from cht_utils.argo import Argo
 import cht_utils.fileops as fo
@@ -211,8 +212,14 @@ print("Option: " + option)
 config = yaml2dict("config.yml")
 
 if option == "simulate":
+    # Make run string (platform dependent)
+    if platform.system() == "Windows":
+        run_string = "call run_simulation.bat"
+    else:
+        run_string = "./run_simulation.sh"
+
     prepare_single(config)
-    os.system("call run_xbeach.bat\n")
+    os.system(run_string)
 
 elif option == "map_tiles":
     # Make flood map tiles

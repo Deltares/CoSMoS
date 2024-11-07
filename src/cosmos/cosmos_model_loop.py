@@ -7,6 +7,7 @@ Created on Mon May 10 14:29:24 2021
 import time
 import sched
 import os
+import platform
 
 from .cosmos_main import cosmos
 from .cosmos_cluster import cluster_dict as cluster
@@ -128,113 +129,11 @@ class ModelLoop():
             src = os.path.join(model.path, "input", "*")
             fo.copy_file(src, model.job_path)
 
+            # Do some pre-processing (meteo and nesting step 1)
             model.pre_process()  # Adjust model input (this happens in model.job_path)
 
-            cosmos.log("Submitting " + model.long_name + " ...")
-            model.status = "running"
-
-            if model.ensemble:
-                # In case of ensemble, we move all inputs to base_input subfolder
-                fo.mkdir(os.path.join(model.job_path, "base_input"))
-                fo.move_file(os.path.join(model.job_path, "*"), os.path.join(model.job_path, "base_input"))
-                # Copy ensemble members file to job folder
-                fo.copy_file(os.path.join(model.job_path, "base_input", "ensemble_members.txt"), model.job_path)
-                # Copy run_job_2.py to job folder
-                fo.copy_file(os.path.join(model.job_path, "base_input", "run_job_2.py"), model.job_path)
-                # Copy config.yml to job folder
-                fo.copy_file(os.path.join(model.job_path, "base_input", "config.yml"), model.job_path)
-            
-            # Time to submit the job
-            # First prepare batch file
-            if cosmos.config.run.run_mode == "cloud":
-                # No need for a bach file. Workflow template will take care of different steps.
-                pass
-            else:  
-                # Make windows batch file (run.bat) that activates the correct environment and runs run_job.py   
-                fid = open(os.path.join(model.job_path, "run.bat"), "w")
-                fid.write("@ echo off\n")
-                fid.write("DATE /T > running.txt\n")
-                fid.write('set CONDAPATH=' + cosmos.config.conda.path + '\n')
-                if hasattr(cosmos.config.conda, "env"):
-                    fid.write(r"call %CONDAPATH%\Scripts\activate.bat "+ cosmos.config.conda.env + "\n")
-                else:
-                    fid.write(r"call %CONDAPATH%\Scripts\activate.bat cosmos" + "\n")
-                if model.ensemble:
-                    fid.write("python run_job_2.py prepare_ensemble\n")
-                    fid.write("python run_job_2.py simulate\n")
-                    fid.write("python run_job_2.py merge_ensemble\n")
-                    if not model.type == "beware":
-                        fid.write("python run_job_2.py map_tiles\n")   
-                    fid.write("python run_job_2.py clean_up\n")   
-                else:
-                    fid.write("python run_job_2.py simulate\n")
-                    if not model.type == "beware":
-                        fid.write("python run_job_2.py map_tiles\n")   
-                fid.write("move running.txt finished.txt\n")
-
-                #fid.write("exit\n")
-                
-                fid.close()
-
-            # And now actually kick off this job
-            if cosmos.config.run.run_mode == "serial":
-                #or self.type=="beware":
-                # Model needs to be run in serial mode (local on the job path of a windows machine)        
-                cosmos.log("Writing tmp.bat in " + os.getcwd() + " ...")
-                fid = open("tmp.bat", "w")
-                fid.write(model.job_path[0:2] + "\n")
-                fid.write("cd " + model.job_path + "\n")
-                fid.write("call run.bat\n")
-                fid.write("exit\n")
-                fid.close()
-                os.system('start tmp.bat')
-                
-            elif cosmos.config.run.run_mode == "cloud":
-                cosmos.log("Ready to submit to Argo - " + model.long_name + " ...")
-                s3key = cosmos.scenario.name + "/" + "models" + "/" + model.name
-                tilesfolder = model.region + "/" + model.type + "/" + model.deterministic_name
-#                webviewerfolder = cosmos.config.webviewer.name + "/data/" + cosmos.scenario.name + "/" + cosmos.cycle_string
-                webviewerfolder = cosmos.config.webviewer.name + "/data"
-                # Delete existing folder in cloud storage
-                cosmos.log("Deleting model folder on S3 : " + model.name)
-                cosmos.cloud.delete_folder("cosmos-scenarios", s3key)
-                # Upload job folder to cloud storage
-                cosmos.log("Uploading to S3 : " + s3key)
-                cosmos.cloud.upload_folder("cosmos-scenarios",
-                                           model.job_path,
-                                           s3key)
-                if model.ensemble:
-                    # Should really make sure this all happens cosmos_cloud
-                    cosmos.cloud.upload_folder("cosmos-scenarios",
-                                               os.path.join(model.job_path, "base_input"),
-                                               s3key + "/base_input")
-                cosmos.log("Submitting template job : " + model.workflow_name)
-                model.cloud_job = cosmos.argo.submit_template_job(
-                    workflow_name=model.workflow_name, 
-                    job_name=model.name, 
-                    subfolder=s3key,
-                    scenario=cosmos.scenario.name,
-                    cycle=cosmos.cycle_string, 
-                    webviewerfolder=webviewerfolder,
-                    tilingfolder=tilesfolder
-                    )
-
-
-            elif cosmos.config.run.run_mode == "parallel":
-                # Model will be run on WCP node, write file to jobs folder (WCP nodes will pick up this job)
-                
-                # Make directory in jobs folder (if non-existent) 
-                os.makedirs(os.path.join(cosmos.config.path.jobs, cosmos.scenario.name), exist_ok=True)
-                            
-                # write file name containing job path to jobs folder
-                file_name = os.path.join(cosmos.config.path.jobs, cosmos.scenario.name, f"{model.name}_{cosmos.cycle_string}.txt")
-                fid = open(file_name, "w")
-                fid.write(model.job_path)
-                fid.close()
-
-            else:
-                print("No run mode defined, should be either serial, parallel or cloud")
-
+            # And submit the job
+            model.submit_job()
 
         # Now do post-processing on simulations that were finished
         for model in finished_list:

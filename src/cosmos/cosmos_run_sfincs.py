@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import xarray as xr
 import sys
+import platform
 
 import cht_utils.fileops as fo
 from cht_utils.misc_tools import yaml2dict
@@ -558,7 +559,12 @@ if option == "prepare_ensemble":
     prepare_ensemble(config)
 
 elif option == "simulate":
-    # Never called in cloud mode
+    # Never called in cloud mode where this is done in a workflow
+    # Make the run string (platform dependent)
+    if platform.system() == "Windows":
+        run_string = "call run_simulation.bat"
+    else:
+        run_string = "./run_simulation.sh"
     if config["ensemble"]:
         # Read in the list of ensemble members
         ensemble_members = read_ensemble_members()
@@ -569,11 +575,11 @@ elif option == "simulate":
             os.chdir(member)
             # Run the SFINCS model
             prepare_single(config, member=member)
-            os.system("call run_sfincs.bat\n")
+            os.system(run_string)
             os.chdir(curdir)
     else:
         prepare_single(config)
-        os.system("call run_sfincs.bat\n")
+        os.system(run_string)
 
 elif option == "prepare_single":
     # Only occurs in cloud mode (running single is done in workflow)

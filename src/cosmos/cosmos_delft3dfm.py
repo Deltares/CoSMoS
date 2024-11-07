@@ -11,6 +11,7 @@ import numpy as np
 from pyproj import CRS
 from pyproj import Transformer
 from pathlib import Path
+import platform
 
 from .cosmos_main import cosmos
 from .cosmos_model import Model
@@ -247,16 +248,29 @@ class CoSMoS_Delft3DFM(Model):
                     f.write(member + "\n")
 
         if cosmos.config.run.run_mode != "cloud":
-            batch_file = os.path.join(self.job_path, "run_delft3dfm.bat")
-            fid = open(batch_file, "w")            
-            fid.write("@ echo off\n")
-            fid.write("DATE /T > running.txt\n")
-            exe_path = os.path.join("call \"" + cosmos.config.executables.delft3dfm_path,
-                                    "x64\\dimr\\scripts\\run_dimr.bat\" dimr_config.xml\n")
-            fid.write(exe_path)
-            fid.write("move running.txt finished.txt\n")
-            fid.write("exit\n")
-            fid.close()
+            # Write batch file (Windows or Linux)
+            if platform.system() == "Windows":
+                batch_file = os.path.join(self.job_path, "run_delft3dfm.bat")
+                fid = open(batch_file, "w")            
+                fid.write("@ echo off\n")
+                fid.write("DATE /T > running.txt\n")
+                exe_path = os.path.join("call \"" + cosmos.config.executables.delft3dfm_path,
+                                        "x64\\dimr\\scripts\\run_dimr.bat\" dimr_config.xml\n")
+                fid.write(exe_path)
+                fid.write("move running.txt finished.txt\n")
+                fid.write("exit\n")
+                fid.close()
+            else:
+                batch_file = os.path.join(self.job_path, "run_delft3dfm.sh")
+                fid = open(batch_file, "w")            
+                fid.write("#!/bin/bash\n")
+                fid.write("date > running.txt\n")
+                exe_path = os.path.join(cosmos.config.executables.delft3dfm_path,
+                                        "x64/dimr/scripts/run_dimr.sh dimr_config.xml\n")
+                fid.write(exe_path)
+                fid.write("mv running.txt finished.txt\n")
+                fid.write("exit\n")
+                fid.close()
              
         if cosmos.config.run.run_mode == "cloud":
             # Set workflow names
@@ -299,9 +313,6 @@ class CoSMoS_Delft3DFM(Model):
         # Output & diag
         fo.move_file(os.path.join(joboutpath, "*.nc"), output_path)
         fo.move_file(os.path.join(joboutpath, "*.dia"), output_path)
-
-#        fo.move_file(os.path.join(job_path, "sfincs.rst"), input_path)
-
 
         # Input
         # Delete net file (this is typically quite big)
