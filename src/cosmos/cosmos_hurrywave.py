@@ -47,13 +47,13 @@ class CoSMoS_HurryWave(Model):
         # Read in the HurryWave model
         
         # Now read in the domain data
-        self.domain = HurryWave(path=os.path.join(self.path, "input"), load=True)
+        self.domain = HurryWave(path=os.path.join(self.path, "input"), load=True, read_grid_data=False)
 
         # Copy some attributes to the model domain (needed for nesting)
-        self.domain.crs   = self.crs
-        self.domain.type  = self.type
-        self.domain.name  = self.name
-        self.domain.runid = self.runid        
+        self.domain.crs = self.crs
+        # self.domain.type  = self.type
+        # self.domain.name  = self.name
+        # self.domain.runid = self.runid        
         
     def pre_process(self):
         """Preprocess HurryWave model.
@@ -130,13 +130,14 @@ class CoSMoS_HurryWave(Model):
                     nest1(self.domain, nested_model.domain, option="sp2")
                 elif nested_model.type=="sfincs":
                     # No sp2 output
+                    # The next two lines are already done when reading in sfincs model, right?
                     nested_model.domain.input.bwvfile = "snapwave.bnd"
                     nested_model.domain.read_wave_boundary_points()
-                    nest1(self.domain, nested_model.domain)
+                    nest1(self.domain, nested_model.domain, obs_point_prefix=nested_model.name)
                     nested_model.domain.input.bwvfile = None
                 elif nested_model.type=="beware":
                     specout = False
-                    nest1(self.domain, nested_model.domain)
+                    nest1(self.domain, nested_model.domain, obs_point_prefix=nested_model.name)
                 else:
                     specout = True
                     nest1(self.domain, nested_model.domain)
