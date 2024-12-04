@@ -144,6 +144,27 @@ def prepare_single(config, member=None):
             filter_incoming=filter_incoming,
             bc_path="."
         )
+
+        # If this is a tsunami model, we want to adjust the start time of the model
+        # Find first time in boundary conditions where wl exceeds 0.001 m
+        if config["event_mode"] == "tsunami":
+            # Read boundary conditions
+            # Loop through points in gdf and find first time where water level exceeds 0.001 m
+            t0 = datetime.datetime.max
+            for ind, row in sf.boundary_conditions.gdf.iterrows():
+                t = row["timeseries"].index
+                v = row["timeseries"]["wl"].values
+                # Find first time where water level exceeds 0.001 m
+                if np.any(v > 0.001):
+                    tf = t[np.argmax(v > 0.001)]
+                    t0 = min(t0, tf)
+            # Round down t0 to nearest hour
+            t0 = t0.replace(minute=0, second=0, microsecond=0)
+            print("Starting model at : ")
+            print(t0)
+            # Adjust start time of model
+            sf.input.variables.tstart = t0
+            sf.input.write()
         
     if "wave_nested" in config:
         print("Nesting wave ...")
