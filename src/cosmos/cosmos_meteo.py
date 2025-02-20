@@ -45,6 +45,8 @@ def collect_meteo():
     # Determine if the need to be downloaded
     # Get start and stop times for meteo data
 
+    tau = 0
+
     for dataset_name, meteo_dataset in cosmos.meteo_database.dataset.items():
 
         collect = False
@@ -178,9 +180,15 @@ def collect_meteo():
     tc = TropicalCyclone(track_file=filename, tau=tau)
     tc.config["include_rainfall"] = True
 
+    fo.mkdir(cosmos.scenario.cycle_track_spw_path)        
+
+
     if cosmos.config.run.spw_wind_field == "parametric":
         # Use Holland (2010)
-        tc.compute_wind_field()
+        cosmos.scenario.meteo_spiderweb = f"{cosmos.scenario.meteo_track}.spw"
+        if not os.path.exists(os.path.join(cosmos.scenario.cycle_track_spw_path,
+                            cosmos.scenario.meteo_spiderweb)):
+            tc.compute_wind_field()
 
     else:    
 
@@ -207,11 +215,11 @@ def collect_meteo():
                 tc.get_wind_field_from_meteo_dataset(meteo_dataset)
                 break
 
-    fo.mkdir(cosmos.scenario.cycle_track_spw_path)        
     spwfile = os.path.join(cosmos.scenario.cycle_track_spw_path,
-                           cosmos.scenario.meteo_spiderweb)
-    
-    tc.write_spiderweb(spwfile, format="ascii", include_rainfall=True)
+                        cosmos.scenario.meteo_spiderweb)
+    if not os.path.exists(spwfile):    
+        # Only write spw file is it does not already exist
+        tc.write_spiderweb(spwfile, format="ascii", include_rainfall=True)
 
     # Also save the track file
     cycfile = os.path.join(cosmos.scenario.cycle_track_spw_path, "track.cyc")

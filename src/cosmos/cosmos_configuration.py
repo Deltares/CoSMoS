@@ -124,6 +124,7 @@ class Run:
         self.dtmap            = 21600.0
         self.dtmax            = 21600.0
         self.clear_zs_ini     = False # used to limit initial water level in sfincs models
+        self.use_spw_precip   = False
 
 class Configuration:
     """CoSMoS Configuration class.

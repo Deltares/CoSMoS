@@ -207,6 +207,12 @@ class CoSMoS_SFINCS(Model):
             self.domain.input.variables.baro    = 1
             if self.crs.is_projected:
                 self.domain.input.variables.utmzone = self.crs.utm_zone
+            if cosmos.config.run.use_spw_precip and self.make_flood_map:
+                # This must me an overland flood model
+                self.domain.input.variables.usespwprecip = 1
+                self.make_precipitation_map = True
+            else:
+                self.domain.input.variables.usespwprecip = 0
         
         if self.ensemble:
             # Use spiderweb from ensemble
