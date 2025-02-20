@@ -8,3 +8,16 @@ netCDF4
 deltares-coastalhazardstoolkit
 sphinx
 sphinx_rtd_theme
+cht_bathymetry
+cht_cyclones
+cht_hurrywave
+cht_sfincs
+cht_xbeach
+cht_beware
+cht_delft3dfm
+cht_physics
+cht_tide
+cht_tiling
+cht_utils
+cht_nesting
+cht_meteo
