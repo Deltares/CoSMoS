@@ -4,7 +4,7 @@ Created on Mon May 10 14:36:35 2021
 
 @author: ormondt
 """
-from cosmos.cosmos import cosmos
+from cosmos.cosmos_main import cosmos
 
 main_path = r"c:\cosmos_run_folder\run_folder"
 

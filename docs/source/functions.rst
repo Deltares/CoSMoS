@@ -31,11 +31,11 @@ Model-specific classes
 .. autosummary:: 
    :toctree: _generated/  
 
-   cosmos.cosmos_beware.CoSMoS_BEWARE
    cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM
    cosmos.cosmos_hurrywave.CoSMoS_HurryWave
    cosmos.cosmos_sfincs.CoSMoS_SFINCS
    cosmos.cosmos_xbeach.CoSMoS_XBeach
+   cosmos.cosmos_beware.CoSMoS_BEWARE
 
 CoSMoS functions
 ^^^^^^^^^^^^

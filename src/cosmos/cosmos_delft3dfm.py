@@ -7,23 +7,19 @@ Created on Tue May 11 16:02:04 2021
 
 import os
 import pandas as pd
-import numpy as np
-from pyproj import CRS
-from pyproj import Transformer
-from pathlib import Path
+# import numpy as np
 import platform
+
+from cht_delft3dfm.cht_delft3dfm import Delft3DFM
+import cht_utils.fileops as fo
+from cht_nesting.cht_nesting import nest1
 
 from .cosmos_main import cosmos
 from .cosmos_model import Model
-import cht_utils.xmlkit as xml
-from cht_delft3dfm.delft3dfm import Delft3DFM
-import cht_utils.fileops as fo
-from cht_nesting.nest1 import nest1
-from cht_nesting.nest2 import nest2
-# import cosmos.cosmos_meteo as meteo
-import hydrolib.core.dflowfm as hcdfm
 
+import hydrolib.core.dflowfm as hcdfm
 from cht_utils.misc_tools import findreplace
+from pathlib import Path
 
 class CoSMoS_Delft3DFM(Model):
     """Cosmos class for Delft3d FM model.
@@ -137,7 +133,7 @@ class CoSMoS_Delft3DFM(Model):
         # Meteo forcing
         if self.meteo_wind or self.meteo_atmospheric_pressure or self.meteo_precipitation:
                     
-            self.write_meteo_input_files("delft3dfm", refdate)
+            self.write_meteo_input_files("delft3dfm", refdate, path=job_path_flow)
             
             if self.meteo_wind:                
                 self.domain.meteo.amu_file = "delft3dfm.amu"
@@ -178,7 +174,7 @@ class CoSMoS_Delft3DFM(Model):
         if self.domain.input.output.obsfile:
             self.domain.read_observation_points(path= job_path_flow)
         for station in self.station:
-            self.domain.add_observation_point(station.x,
+            self.domain.add_observation_point_gdf(station.x,
                                               station.y,
                                               station.name)
                 
