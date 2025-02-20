@@ -21,10 +21,10 @@ Classes for pre-processing, running, and post-processing.
 
    cosmos.cosmos_model.Model
    cosmos.cosmos_scenario.Scenario
-   cosmos.cosmos_configuration.Configuration
    cosmos.cosmos_stations.Stations
    cosmos.cosmos_webviewer.WebViewer
 ..   cosmos.cosmos_cluster.Cluster
+   cosmos.cosmos_configuration.Configuration
 
 Model-specific classes
 ^^^^^^^^^^^^
