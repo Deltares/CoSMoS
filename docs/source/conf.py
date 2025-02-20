@@ -1,4 +1,9 @@
 # Configuration file for the Sphinx documentation builder.
+import os
+import sys
+
+# Get the absolute path to the `src` directory
+sys.path.insert(0, os.path.abspath("../../src"))
 
 # -- Project information
 
