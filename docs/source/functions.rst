@@ -76,20 +76,19 @@ Model functions
    cosmos.cosmos_sfincs.CoSMoS_SFINCS.pre_process
    cosmos.cosmos_sfincs.CoSMoS_SFINCS.move
    cosmos.cosmos_sfincs.CoSMoS_SFINCS.post_process
-   cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.read_model_specific
-   cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.pre_process
-   cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.move
-   cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.post_process
    cosmos.cosmos_hurrywave.CoSMoS_HurryWave.read_model_specific
    cosmos.cosmos_hurrywave.CoSMoS_HurryWave.pre_process
    cosmos.cosmos_hurrywave.CoSMoS_HurryWave.move
    cosmos.cosmos_hurrywave.CoSMoS_HurryWave.post_process
-   cosmos.cosmos_xbeach.CoSMoS_XBeach.read_model_specific
-   cosmos.cosmos_xbeach.CoSMoS_XBeach.pre_process
-   cosmos.cosmos_xbeach.CoSMoS_XBeach.move
-   cosmos.cosmos_xbeach.CoSMoS_XBeach.post_process
 ..   cosmos.cosmos_beware.CoSMoS_BEWARE.read_model_specific
    cosmos.cosmos_beware.CoSMoS_BEWARE.pre_process
    cosmos.cosmos_beware.CoSMoS_BEWARE.move
    cosmos.cosmos_beware.CoSMoS_BEWARE.post_process
-
+   cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.read_model_specific
+   cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.pre_process
+   cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.move
+   cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM.post_process
+   cosmos.cosmos_xbeach.CoSMoS_XBeach.read_model_specific
+   cosmos.cosmos_xbeach.CoSMoS_XBeach.pre_process
+   cosmos.cosmos_xbeach.CoSMoS_XBeach.move
+   cosmos.cosmos_xbeach.CoSMoS_XBeach.post_process
