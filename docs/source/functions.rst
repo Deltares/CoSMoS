@@ -35,7 +35,7 @@ Model-specific classes
    cosmos.cosmos_hurrywave.CoSMoS_HurryWave
    cosmos.cosmos_sfincs.CoSMoS_SFINCS
    cosmos.cosmos_xbeach.CoSMoS_XBeach
-   cosmos.cosmos_beware.CoSMoS_BEWARE
+..   cosmos.cosmos_beware.CoSMoS_BEWARE
 
 CoSMoS functions
 ^^^^^^^^^^^^
@@ -71,10 +71,6 @@ Model functions
    cosmos.cosmos_model.Model.get_all_nested_models
    cosmos.cosmos_model.Model.add_stations
    cosmos.cosmos_model.Model.get_peak_boundary_conditions
-   cosmos.cosmos_beware.CoSMoS_BEWARE.read_model_specific
-   cosmos.cosmos_beware.CoSMoS_BEWARE.pre_process
-   cosmos.cosmos_beware.CoSMoS_BEWARE.move
-   cosmos.cosmos_beware.CoSMoS_BEWARE.post_process
    cosmos.cosmos_sfincs.CoSMoS_SFINCS.read_model_specific
    cosmos.cosmos_sfincs.CoSMoS_SFINCS.pre_process
    cosmos.cosmos_sfincs.CoSMoS_SFINCS.move
@@ -91,5 +87,8 @@ Model functions
    cosmos.cosmos_xbeach.CoSMoS_XBeach.pre_process
    cosmos.cosmos_xbeach.CoSMoS_XBeach.move
    cosmos.cosmos_xbeach.CoSMoS_XBeach.post_process
-
+..   cosmos.cosmos_beware.CoSMoS_BEWARE.read_model_specific
+   cosmos.cosmos_beware.CoSMoS_BEWARE.pre_process
+   cosmos.cosmos_beware.CoSMoS_BEWARE.move
+   cosmos.cosmos_beware.CoSMoS_BEWARE.post_process
 
