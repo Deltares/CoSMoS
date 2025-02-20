@@ -7,3 +7,4 @@ scipy
 netCDF4
 deltares-coastalhazardstoolkit
 sphinx
+sphinx_rtd_theme
