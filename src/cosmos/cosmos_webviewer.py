@@ -365,7 +365,6 @@ class WebViewer:
         except Exception as e:
             print(str(e))
 
-
     def make_xb_regimes(self):        
         """Make Sallenger regimes markers for webviewer.
         """   
@@ -457,7 +456,6 @@ class WebViewer:
             dct["legend"] = make_legend(type = 'erosion_regimes')
     
             self.map_variables.append(dct)
-
 
     def make_runup_map(self):        
         """Make runup markers and timeseries for webviewer.
@@ -801,8 +799,7 @@ class WebViewer:
                 previous_cycles.append(cosmos.cycle_string)
         else:
             # Find previous cycles locally
-            prefix = os.path.join(self.cycle_path, "..")
-            previous_cycles = fo.list_folders(prefix)
+            previous_cycles = fo.list_folders(self.cycle_path, basename=True)
 
         previous_cycles = sorted(previous_cycles, reverse=True)
 

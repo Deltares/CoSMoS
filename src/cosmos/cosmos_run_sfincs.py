@@ -13,7 +13,7 @@ import cht_utils.fileops as fo
 from cht_utils.misc_tools import yaml2dict
 from cht_utils.prob_maps import merge_nc_his
 from cht_utils.prob_maps import merge_nc_map
-from cht_tiling.tiling import make_floodmap_tiles
+from cht_tiling.flood_map import make_flood_map_tiles
 from cht_tiling.tiling import make_png_tiles
 from cht_sfincs import SFINCS
 from cht_nesting import nest2
@@ -322,10 +322,10 @@ def map_tiles(config):
                                             config["flood_map"]["name"],
                                             pathstr[it])                                            
 
-                    make_floodmap_tiles(zsmax, index_path, png_path, topo_path,
+                    make_flood_map_tiles(zsmax, index_path, png_path, topo_path,
                                         color_values=color_values,
                                         zoom_range=[0, 13],
-                                        zbmax=1.0,
+                                        zbmax=0.5,
                                         quiet=True)
 
                 # Full simulation        
@@ -341,13 +341,13 @@ def map_tiles(config):
                                         config["flood_map"]["name"],
                                         pathstr[-1]) 
 
-                make_floodmap_tiles(zsmax, index_path, png_path, topo_path,
+                make_flood_map_tiles(zsmax, index_path, png_path, topo_path,
                                     color_values=color_values,
-                                    zoom_range=[0, 13],
-                                    zbmax=1.0,
+                                    zoom_range=[0, 14],
+                                    zbmax=0.5,
                                     quiet=True)
             except Exception as e:
-                print("An error occured while making flood map tiles: ". str(e))
+                print("An error occured while making flood map tiles: " + str(e))
 
     if "water_level_map" in config:
 
