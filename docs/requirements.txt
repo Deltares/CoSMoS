@@ -12,7 +12,6 @@ cht_bathymetry
 cht_cyclones
 cht_hurrywave
 cht_sfincs
-cht_xbeach
 cht_beware
 cht_delft3dfm
 cht_physics
