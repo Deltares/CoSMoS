@@ -13,5 +13,4 @@ cht_cyclones
 cht_hurrywave
 cht_sfincs
 cht_utils
-cht_nesting
 cht_meteo
