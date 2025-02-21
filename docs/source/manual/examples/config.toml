@@ -1,29 +1,52 @@
+[conda]
+path = "c:\\Users\\xx\\miniforge3"
+env = "cosmos"
+
 [model_database]
-path = "c:\\cosmos_run_folder\\model_database"
+path = "c:\\work\\cosmos\\model_database"
 
 [meteo_database]
-path = "c:\\cosmos_run_folder\\meteo_database"
-
-[conda]
-path = "c:\\Users\\%username%\\Anaconda3"
+path = "c:\\work\\cosmos\\meteo_database"
 
 [executables]
-delft3dfm_path = "c:\\Program Files (x86)\\Deltares\\Delft3D Flexible Mesh Suite HMWQ (2021.03)\\plugins\\DeltaShell.Dimr\\kernels"
-sfincs_path    = "c:\\cosmos_run_folder\\exe\\sfincs"
-hurrywave_path = "c:\\cosmos_run_folder\\exe\\hurrywave"
-beware_path    = "c:\\cosmos_run_folder\\exe\\beware"
+delft3dfm_path = "p:\\d-hydro\\dimrset\\2023\\2023.02"
+sfincs_path    = "c:\\work\\cosmos\\exe\\sfincs"
+hurrywave_path = "c:\\work\\cosmos\\exe\\hurrywave"
+beware_path    = "c:\\work\\cosmos\\exe\\beware"
 xbeach_path    = "yourxbeachpath"
 
-[webviewer]
-name    = "2psips_event_viewer"
-version = "version03"
+[webserver]
+hostname = ""
+path     = ""
+username = ""
+password = ""
 
-[cycle]
-mode            = "single_shot"
-interval        = 6
-clean_up        = false
-make_flood_maps = true
-make_wave_maps  = true
-upload          = false
-get_meteo       = true
-run_mode        = "serial"
+[webviewer]
+name    = "event_viewer"
+version = "version04"
+
+[cloud_config]
+host            = ""
+access_key      = ""
+secret_key      = ""
+region          = ""
+token           = ""
+
+[run]
+mode                  = "single_shot"
+interval              = 6
+clean_up              = false
+make_flood_maps       = true
+make_wave_maps        = true
+make_sedero_maps      = true
+make_water_level_maps = true
+make_meteo_maps       = false
+upload                = false
+download_meteo        = true
+run_mode              = "serial"
+event_mode            = "meteo"
+only_run_ensemble     = false
+remove_old_cycles     = 24
+dthis                 = 600.0
+dtmap                 = 3600.0
+dtmax                 = 21600.0

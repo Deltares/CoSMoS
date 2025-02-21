@@ -23,7 +23,7 @@ The main model components displayed in Figure 1 and 2 are elaborated in the foll
   :width: 800
   :alt: Alternative text
 
-  Figure 2: CoSMoS workflow
+  Figure 2: CoSMoS workflow (figure under review after latest cosmos updates)
 
 
 Main CoSMoS components
@@ -95,10 +95,10 @@ The following additional classes are used during the CoSMoS cycle:
    :header-rows: 0
 
    * - :py:class:`cosmos.cosmos_scenario.Scenario`
-     - Reads the scenario xml file and initializes the models.
+     - Reads the scenario toml file and initializes the models.
 
-   * - :py:class:`cosmos.cosmos_webviewer.WebViewer`
-     - Generates the webviewer
+  ..  * - :py:class:`cosmos.cosmos_webviewer.WebViewer`
+  ..    - Generates the webviewer
 
    * - :py:class:`cosmos.cosmos_stations.Stations`
      - Reads the observation stations.
@@ -116,14 +116,14 @@ The CoSMoS run folder is organized as follows:
        :literal: 
 
 - *configuration/config.toml* contains the paths to, among other things, the model executables, model database and meteo folder (see :ref:`Configuration <configuration>`).
-- *configuration/stations* contains the station xml files with observation station locations (see :ref:`Observation stations <stations>`).
+- *configuration/stations* contains the station toml files with observation station locations (see :ref:`Observation stations <stations>`).
 - *configuration/super_regions* contains super region files in which models can be grouped (see :ref:`Super regions <super_regions>`).
 - *configuration/webviewer_templates* contains webviewer templates that can be used for viewing CoSMoS model outputs (see :ref:`Webviewer <webviewer>`).
 - *jobs* is the folder in which the models are running.
 - *scenarios* contains the model scenario folders with scenario input files and model results (see :ref:`Scenario <scenario>`).
 - *webviewers* contains the webviewer with post-processed model results (see :ref:`Webviewer <webviewer>`).
 - *model_database* contains the individual model input files and model description (see :ref:`Models <models>`).
-- *meteo_database/meteo_subsets.xml* contains the meteo sources (see :ref:`Meteo <meteo>`). 
+- *meteo_database/meteo_database.toml* contains the meteo sources (see :ref:`Meteo <meteo>`). 
 - *run_cosmos.py* contains an example of how to run CoSMoS (see :ref:`Running CoSMoS <running>`).
 
 .. .. The following table provides an overview of all cosmos system components:
@@ -138,4 +138,4 @@ The CoSMoS run folder is organized as follows:
 ..         The CoSMoS class then starts the :py:class:`cosmos.cosmos_main_loop.MainLoop`.
 
 ..    * - :py:attr:`cosmos.cosmos_mainloop.MainLoop`
-..      - In the main loop, the xml scenario is read, cycle times are determined and the cosmos model loop is initiated.
+..      - In the main loop, the toml scenario is read, cycle times are determined and the cosmos model loop is initiated.

@@ -14,12 +14,12 @@ This example meteo folders shows the three main types of meteo data:
 - **Spiderweb grid meteo data** (keyword: *meteo_spiderweb* in scenario file). The *irma.spw* file in the folder *spiderwebs* is an example of spiderweb forcing.
 - **Ensemble of tracks** (keyword: *meteo_track* in scenario file). The *irma.cyc* file in the folder *tracks* is an example of cyclone file. 
 
-Metadata for the *meteo_datasets*, *spiderweb*, and *track* files are contained in the *meteo_subsets.xml* file:
+Metadata for the *meteo_datasets*, *spiderweb*, and *track* files are contained in the *meteo_database.toml* file:
 
-.. include:: examples/meteo_subsets.xml
+.. include:: examples/meteo_database.toml
        :literal:
 
-The following attributes can be included in the meteo subsets:
+The following attributes can be included in the meteo datasets:
 
 .. list-table::
    :widths: 30 70 30 30
@@ -126,8 +126,8 @@ CoSMoS gets the meteo data in two steps:
         - Coupled Ocean/Atmosphere Mesoscale Prediction System (COAMPS) tropical cyclone hindcast
 
 - Collect
-    CoSMoS loops through the *meteo_subset.xml* data and finds subsets that match the *meteo_dataset* specified in the scenario file. 
-    For each *meteo_subset*, CoSMoS collects the data from the netcdf files that are located in the specific meteo folder. 
+    CoSMoS loops through the *meteo_database.toml* data and finds datasets that match the *meteo_dataset* specified in the scenario file. 
+    For each *meteo_dataset*, CoSMoS collects the data from the netcdf files that are located in the specific meteo folder. 
     The individual CoSMoS model classes (see :ref:`Model classes <modelclasses>`) then write the meteo input files.
 
 Spiderweb forcing

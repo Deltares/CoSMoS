@@ -18,7 +18,7 @@ There are two options to execute model runs using CoSMoS:
 
 1. Run all models locally on your PC (**run_mode = "serial"**).
 2. Run models on multiple local PCs (**run_mode = "parallel"**). 
-   On the main PC (where CoSMoS and the CoastalHazardsToolkit are installed) you need to run the script *run_cosmos.py*. 
+   On the main PC (where CoSMoS and the cht packages are installed) you need to run the script *run_cosmos.py*. 
    The following script must be executed on other PCs that have access to the same CoSMoS run folder:
 
    .. include:: examples/run_parallel.py

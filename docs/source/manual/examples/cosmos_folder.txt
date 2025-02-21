@@ -4,11 +4,10 @@ cosmos
 	├── configuration
 		└── config.toml
 		├── stations
-			└── [station_name.xml]
+			└── [station_name.toml]
 		├── super_regions
-			└── [superregion_name.xml]
+			└── [superregion_name.toml]
 		├── webviewer_templates
-	├── jobs
 	├── observations
 	├── scenarios
 		├── [scenario_name]
@@ -26,6 +25,6 @@ cosmos
 				└── model.toml
 
 	meteo_database
-	└── meteo_subsets.xml
+	└── meteo_database.toml
 					
 	└── run_cosmos.py

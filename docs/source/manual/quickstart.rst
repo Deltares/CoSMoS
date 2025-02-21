@@ -11,7 +11,7 @@ To setup CoSMoS for your area of interest, you:
 
 **Step 2: Make a local copy of the CoSMoS run folder.**
 
-Copy the default folders *cosmos_run_folder*, *model_database*, and *meteo_database* from your CoSMoS installation folder to the folder where you want to run CoSMoS.
+Copy the default folders *run_folder*, *model_database*, and *meteo_database* from your CoSMoS installation folder to the folder where you want to run CoSMoS.
 
 **Step 3: Add models to the model database.**
 

@@ -103,7 +103,7 @@ The following settings can be included in the model file:
      - m
 
    * - station
-     - List of station xml files (located in cosmos//stations) added as observation points in model.
+     - List of station toml files (located in cosmos//stations) added as observation points in model.
      -
      -
 

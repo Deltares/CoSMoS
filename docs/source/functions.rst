@@ -22,9 +22,9 @@ Classes for pre-processing, running, and post-processing.
    cosmos.cosmos_model.Model
    cosmos.cosmos_scenario.Scenario
    cosmos.cosmos_stations.Stations
-   cosmos.cosmos_webviewer.WebViewer
-..   cosmos.cosmos_cluster.Cluster
+   cosmos.cosmos_cluster.Cluster
    cosmos.cosmos_configuration.Configuration
+..   cosmos.cosmos_webviewer.WebViewer
 
 Model-specific classes
 ^^^^^^^^^^^^
@@ -47,8 +47,8 @@ CoSMoS functions
    cosmos.cosmos_main.CoSMoS.run
    cosmos.cosmos_main.CoSMoS.stop
    cosmos.cosmos_main.CoSMoS.log
-   cosmos.cosmos_main.CoSMoS.make_webviewer
    cosmos.cosmos_main.CoSMoS.post_process
+   .. cosmos.cosmos_main.CoSMoS.make_webviewer
 
 MainLoop and ModelLoop functions
 ^^^^^^^^^^^^

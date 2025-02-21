@@ -5,7 +5,6 @@ pyproj
 matplotlib
 scipy
 netCDF4
-deltares-coastalhazardstoolkit
 sphinx
 sphinx_rtd_theme
 cht_bathymetry
@@ -14,3 +13,4 @@ cht_hurrywave
 cht_sfincs
 cht_utils
 cht_meteo
+cht_nesting

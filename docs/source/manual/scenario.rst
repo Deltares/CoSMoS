@@ -83,7 +83,7 @@ The following settings can be included in the scenario file:
      - **unit**
 
    * - meteo_dataset
-     - Meteo dataset to use from meteo_database\\meteo_subsets.xml (see :ref:`Meteo <meteo>`).
+     - Meteo dataset to use from meteo_database\\meteo_database.toml (see :ref:`Meteo <meteo>`).
      - None
      -
 

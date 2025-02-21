@@ -3,5 +3,5 @@ type = "hurrywave"
 crs = "WGS 84"
 flow_spinup_time = 0.0
 wave_spinup_time = 24.0
-station = [ "ndbc_buoys_all.xml",]
+station = [ "ndbc_buoys_all.toml",]
 make_wave_map = true

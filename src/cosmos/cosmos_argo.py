@@ -5,14 +5,15 @@ import time
 
 from .cosmos_main import cosmos
 
-GlobalConfig.namespace = cosmos.config.cloud_config.namespace
-GlobalConfig.host = cosmos.config.cloud_config.host
-GlobalConfig.verify_ssl = False
-GlobalConfig.token = cosmos.config.cloud_config.token
-
 class Argo:
 
     def __init__(self):
+        
+        GlobalConfig.namespace = cosmos.config.cloud_config.namespace
+        GlobalConfig.host = cosmos.config.cloud_config.host
+        GlobalConfig.verify_ssl = False
+        GlobalConfig.token = cosmos.config.cloud_config.token
+
         pass
 
     def submit_template_job(self, workflow_name, job_name, subfolder, scenario, cycle, webviewerfolder=None, tilingfolder=None):

@@ -1,5 +1,5 @@
 meteo
-└── meteo_subsets.xml
+└── meteo_database.toml
 ├── gfs_forecast_0p25_north_atlantic
     ├── 20170704_00z
         └── gfs_forecast_0p25_north_atlantic.20170704_0000.nc

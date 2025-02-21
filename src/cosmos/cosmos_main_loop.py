@@ -22,7 +22,7 @@ try:
     from .cosmos_argo import Argo
 except:
     print("Argo not available")
-from .cosmos_webviewer import WebViewer
+# from .cosmos_webviewer import WebViewer
 
 import cht_utils.fileops as fo
 

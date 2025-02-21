@@ -15,4 +15,4 @@ Contents
 .. toctree::
 
    manual
-..   functions
+   functions
