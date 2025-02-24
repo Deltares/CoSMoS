@@ -11,7 +11,7 @@ Station locations
 To add observation points in models, stations must be referenced in a station file located in *configuration/stations*. 
 An example of a station file is given below:
 
- .. include:: examples/ndbc_buoy.xml
+ .. include:: examples/ndbc_buoy.toml
        :literal: 
 
 In the :ref:`*model.toml* <models>` file you can refer to one or more station files using the keyword *station*. 
@@ -45,7 +45,7 @@ The following attributes can be described in the station file:
    * - mllw
      - Mean lower low water level (m).
 
-The default *cosmos_run_folder* contains xml files with locations of the NDBC wave buoys and the NOAA CO-OPS water level stations. 
+The default *cosmos_run_folder* contains toml files with locations of the NDBC wave buoys and the NOAA CO-OPS water level stations. 
 Other observation locations can be added manually. 
 
 Observation data

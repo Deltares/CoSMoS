@@ -53,7 +53,7 @@ epub_show_urls = 'footnote'
 autoapi_type = "python"  # Set to Python
 autoapi_dirs = ["../../src"]  # Adjust this to your source directory
 autoapi_ignore = ["*utils*",]  # Optional: Ignore tests/setup files
-autoapi_add_toctree = False  # Automatically add API docs to the ToC
+autoapi_add_toctree = True  # Automatically add API docs to the ToC
 autoapi_options = [
     "members",
     "undoc-members",
