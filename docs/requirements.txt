@@ -14,3 +14,4 @@ cht_sfincs
 cht_utils
 cht_meteo
 sphinx_autoapi
+sphinx-autoapi

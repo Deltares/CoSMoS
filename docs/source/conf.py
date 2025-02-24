@@ -15,9 +15,9 @@ release = '0.1'
 version = '0.1.0'
 
 # -- General configuration
-
 extensions = [
-    "sphinx_autoapi",  # Enable AutoAPI
+    'autoapi.extension',
+    # "sphinx-autoapi",  # Enable AutoAPI
     "sphinx_rtd_theme",  # Optional, if using ReadTheDocs theme
     'sphinx.ext.duration',
     'sphinx.ext.doctest',
@@ -52,8 +52,8 @@ epub_show_urls = 'footnote'
 # -- AutoAPI Configuration ---------------------------------------------------
 autoapi_type = "python"  # Set to Python
 autoapi_dirs = ["../../src"]  # Adjust this to your source directory
-# autoapi_ignore = ["*tests*", "*setup.py"]  # Optional: Ignore tests/setup files
-autoapi_add_toctree = True  # Automatically add API docs to the ToC
+autoapi_ignore = ["*utils*",]  # Optional: Ignore tests/setup files
+autoapi_add_toctree = False  # Automatically add API docs to the ToC
 autoapi_options = [
     "members",
     "undoc-members",
