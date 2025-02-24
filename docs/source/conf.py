@@ -4,23 +4,24 @@ import sys
 
 # Get the absolute path to the `src` directory
 sys.path.insert(0, os.path.abspath("../../src"))
-autodoc_mock_imports = ["cosmos_hurrywave",]
+# autodoc_mock_imports = ["cosmos_hurrywave",]
 
 # -- Project information
 
 project = 'CoSMoS'
 copyright = 'Deltares'
 author = 'Maarten van Ormondt'
-
 release = '0.1'
 version = '0.1.0'
 
 # -- General configuration
 
 extensions = [
+    "sphinx_autoapi",  # Enable AutoAPI
+    "sphinx_rtd_theme",  # Optional, if using ReadTheDocs theme
     'sphinx.ext.duration',
     'sphinx.ext.doctest',
-    'sphinx.ext.autodoc',
+    # 'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
@@ -30,7 +31,6 @@ extensions = [
 
 autosummary_generate = True
 autosectionlabel_prefix_document = True
-
 remove_from_toctrees = ["_generated/*"]
 
 intersphinx_mapping = {
@@ -47,3 +47,17 @@ html_theme = 'sphinx_rtd_theme'
 
 # -- Options for EPUB output
 epub_show_urls = 'footnote'
+
+
+# -- AutoAPI Configuration ---------------------------------------------------
+autoapi_type = "python"  # Set to Python
+autoapi_dirs = ["../../src"]  # Adjust this to your source directory
+# autoapi_ignore = ["*tests*", "*setup.py"]  # Optional: Ignore tests/setup files
+autoapi_add_toctree = True  # Automatically add API docs to the ToC
+autoapi_options = [
+    "members",
+    "undoc-members",
+    "show-inheritance",
+    "special-members",
+    "private-members",
+]
