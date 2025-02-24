@@ -13,5 +13,7 @@ Contents
 --------
 
 .. toctree::
+   :maxdepth: 1
 
    manual
+   api_reference
