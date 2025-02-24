@@ -23,13 +23,13 @@ extensions = [
     'sphinx.ext.doctest',
     # 'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
-    'sphinx.ext.autosummary',
+    # 'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
     'sphinx.ext.autosectionlabel',
 ]
 
-autosummary_generate = True
+# autosummary_generate = True
 autosectionlabel_prefix_document = True
 remove_from_toctrees = ["_generated/*"]
 
