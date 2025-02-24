@@ -21,7 +21,7 @@ extensions = [
     "sphinx_rtd_theme",  # Optional, if using ReadTheDocs theme
     'sphinx.ext.duration',
     'sphinx.ext.doctest',
-    # 'sphinx.ext.autodoc',
+    # # 'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     # 'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
@@ -29,7 +29,7 @@ extensions = [
     'sphinx.ext.autosectionlabel',
 ]
 
-# autosummary_generate = True
+autosummary_generate = False
 autosectionlabel_prefix_document = True
 remove_from_toctrees = ["_generated/*"]
 
