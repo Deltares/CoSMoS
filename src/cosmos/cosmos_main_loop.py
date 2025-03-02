@@ -17,12 +17,12 @@ from .cosmos_track_ensemble import setup_track_ensemble
 from .cosmos_scenario import Scenario
 from .cosmos_cloud import Cloud
 from .cosmos_tsunami import CoSMoS_Tsunami
+from .cosmos_webviewer import WebViewer
 
 try:
     from .cosmos_argo import Argo
 except:
     print("Argo not available")
-# from .cosmos_webviewer import WebViewer
 
 import cht_utils.fileops as fo
 
