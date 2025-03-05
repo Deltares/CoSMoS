@@ -11,7 +11,7 @@ import datetime
 from .cosmos_main import cosmos
 import cht_utils.fileops as fo
 from cht_cyclones import TropicalCyclone
-from cht_meteo.cht.meteo import MeteoDatabase
+from cht_meteo import MeteoDatabase
 
 def read_meteo_database():
     """Read meteo database."""    
