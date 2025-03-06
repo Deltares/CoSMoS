@@ -17,7 +17,7 @@ from cht_cyclones.tropical_cyclone import TropicalCycloneEnsemble
 # from cht_meteo.cht.meteo.meteo import filter_cyclones_TCvitals, find_priorityTC
 import cht_utils.fileops as fo
 from datetime import datetime
-import cht_utils.misc_tools
+# import cht_utils.misc_tools
 
 def setup_track_ensemble():
 
@@ -96,10 +96,10 @@ def setup_track_ensemble():
         if model.type not in cosmos.scenario.ensemble_models:
             # Not an ensemble model
             continue
-        if model.outline is None:
+        if model.exterior is None:
             # No outline defined
             continue
-        if shapely.intersects(cone.loc[0]["geometry"], model.outline.loc[0]["geometry"]):
+        if shapely.intersects(cone.loc[0]["geometry"], model.exterior.loc[0]["geometry"]):
             # Add model
             # Make a shallow copy of the model
             ensemble_model = copy.copy(model)

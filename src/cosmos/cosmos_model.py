@@ -44,7 +44,7 @@ class Model:
         self.bw_nested_name     = None
         self.nested_flow_models = []
         self.nested_wave_models = []
-        self.nested_bw_models = []
+        self.nested_bw_models   = []
         self.flow_spinup_time   = 0.0
         self.wave_spinup_time   = 0.0
         self.xlim               = None
@@ -79,7 +79,7 @@ class Model:
         self.zb_deshoal         = None
         self.ensemble           = False
         self.zs_ini_max         = -9999.9
-        self.outline            = None
+        self.exterior             = None
 
     def read_generic(self):
         """Read model attributes from model.toml file.
@@ -101,47 +101,90 @@ class Model:
         self.bw_nested_name   = self.bw_nested    
 
         self.crs = CRS(self.crs)
-                
-        # Read polygon around model (should preferably use a geojson file for this)
-        polygon_file = os.path.join(self.path, "misc", self.name + ".txt")
 
-        # Check a few file names for the geojson file
-        if os.path.exists(os.path.join(self.path, "misc", "outline.geojson")):
-            geojson_file = os.path.join(self.path, "misc", "outline.geojson")
-        elif os.path.exists(os.path.join(self.path, "misc", self.name + ".geojson")):
-            geojson_file = os.path.join(self.path, "misc", self.name + ".geojson")
+        # Need to find the exterior (polygon) and extent (bbox) of the model
+        # This has always been a bit of a mess in CoSMoS ...
+        # Currently, the preferred way is to use a geojson file ("model.geojson"),
+        # that sits in the model database at the same level as "model.toml"
+        # This geojson must have a polygon geometry that outlines the model with the property "name" set to "exterior"
+        # Alternatively, a polygon text file f"{model.name}.txt" can be used,
+        # or geojson files "outline.geojson" or "exterior.geojson" in the "misc" folder
+
+        if os.path.exists(os.path.join(self.path, "model.geojson")):
+            gdf = gpd.read_file(os.path.join(self.path, "model.geojson")).to_crs(self.crs)
         elif os.path.exists(os.path.join(self.path, "misc", "exterior.geojson")):
-            geojson_file = os.path.join(self.path, "misc", "exterior.geojson")
-        else:
-            geojson_file = "none"
-
-        if os.path.exists(geojson_file):
-            outline = gpd.read_file(geojson_file).to_crs(self.crs)
-            geom    = outline.geometry[0]
-            if not self.xlim:
-                self.xlim = [geom.bounds[0], geom.bounds[2]]
-                self.ylim = [geom.bounds[1], geom.bounds[3]]                
-            self.polygon = path.Path(geom.exterior.coords)    
-            # GDF with outline of model    
-            self.outline = gpd.GeoDataFrame({"geometry": [geom]}).set_crs(self.crs).to_crs(4326)
-        elif os.path.exists(polygon_file):
-            df = pd.read_csv(polygon_file,
+            gdf = gpd.read_file(os.path.join(self.path, "misc", "exterior.geojson")).to_crs(self.crs)
+            gdf["name"] = "exterior"
+        elif os.path.exists(os.path.join(self.path, "misc", "outline.geojson")):
+            gdf = gpd.read_file(os.path.join(self.path, "misc", "outline.geojson")).to_crs(self.crs)
+            gdf["name"] = "exterior"
+        elif os.path.exists(os.path.join(self.path, "misc", self.name + ".geojson")):
+            gdf = gpd.read_file(os.path.join(self.path, "misc", self.name + ".geojson")).to_crs(self.crs)
+            gdf["name"] = "exterior"
+        elif os.path.exists(os.path.join(self.path, "misc", self.name + ".txt")):
+            df = pd.read_csv(os.path.join(self.path, "misc", self.name + ".txt"),
                              index_col=False,
                              header=None,
                              names=['x', 'y'],
                              sep="\s+")
-                 
-            xy = df.to_numpy()
-            self.polygon = path.Path(xy)
-            if not self.xlim:
-                self.xlim = [self.polygon.vertices.min(axis=0)[0],
-                             self.polygon.vertices.max(axis=0)[0]]
-                self.ylim = [self.polygon.vertices.min(axis=0)[1],
-                             self.polygon.vertices.max(axis=0)[1]]
             # Make gdf with outline 
-            geom = shapely.geometry.Polygon(np.squeeze(xy))
+            geom = shapely.geometry.Polygon(np.squeeze(df.to_numpy()))
             # GDF with outline of model    
-            self.outline = gpd.GeoDataFrame({"geometry": [geom]}).set_crs(self.crs).to_crs(4326)
+            gdf = gpd.GeoDataFrame({"geometry": [geom]}).set_crs(self.crs)
+            gdf["name"] = "exterior"
+
+        # We now have the exterior gdf in the model crs
+        geom = gdf[gdf["name"] == "exterior"].geometry[0]
+        if not self.xlim:
+            # xlim/ylim are in local coordinates and are used for meteo
+            self.xlim = [geom.bounds[0], geom.bounds[2]]
+            self.ylim = [geom.bounds[1], geom.bounds[3]]
+        # Set the polygon for checking that station fall within the model
+        self.polygon = path.Path(geom.exterior.coords)
+
+        # Now convert to WGS 84
+        self.exterior = gdf.to_crs(4326)
+
+        # # Read polygon around model (should preferably use a geojson file for this)
+        # polygon_file = os.path.join(self.path, "misc", self.name + ".txt")
+
+        # # Check a few file names for the geojson file
+        # if os.path.exists(os.path.join(self.path, "misc", "outline.geojson")):
+        #     geojson_file = os.path.join(self.path, "misc", "outline.geojson")
+        # elif os.path.exists(os.path.join(self.path, "misc", self.name + ".geojson")):
+        #     geojson_file = os.path.join(self.path, "misc", self.name + ".geojson")
+        # elif os.path.exists(os.path.join(self.path, "misc", "exterior.geojson")):
+        #     geojson_file = os.path.join(self.path, "misc", "exterior.geojson")
+        # else:
+        #     geojson_file = "none"
+
+        # if os.path.exists(geojson_file):
+        #     outline = gpd.read_file(geojson_file).to_crs(self.crs)
+        #     geom    = outline.geometry[0]
+        #     if not self.xlim:
+        #         self.xlim = [geom.bounds[0], geom.bounds[2]]
+        #         self.ylim = [geom.bounds[1], geom.bounds[3]]                
+        #     self.polygon = path.Path(geom.exterior.coords)    
+        #     # GDF with outline of model    
+        #     self.outline = gpd.GeoDataFrame({"geometry": [geom]}).set_crs(self.crs).to_crs(4326)
+        # elif os.path.exists(polygon_file):
+        #     df = pd.read_csv(polygon_file,
+        #                      index_col=False,
+        #                      header=None,
+        #                      names=['x', 'y'],
+        #                      sep="\s+")
+                 
+        #     xy = df.to_numpy()
+        #     self.polygon = path.Path(xy)
+        #     if not self.xlim:
+        #         self.xlim = [self.polygon.vertices.min(axis=0)[0],
+        #                      self.polygon.vertices.max(axis=0)[0]]
+        #         self.ylim = [self.polygon.vertices.min(axis=0)[1],
+        #                      self.polygon.vertices.max(axis=0)[1]]
+        #     # Make gdf with outline 
+        #     geom = shapely.geometry.Polygon(np.squeeze(xy))
+        #     # GDF with outline of model    
+        #     self.outline = gpd.GeoDataFrame({"geometry": [geom]}).set_crs(self.crs).to_crs(4326)
            
         # Stations
         if self.station:
@@ -736,9 +779,9 @@ class Model:
             
                 # Make a new cut-out that covers the domain of the model
                 meteo_dataset = self.meteo_dataset.cut_out(lon_range=self.xlim,
-                                                            lat_range=self.ylim,
-                                                            time_range=time_range,
-                                                            crs=self.crs)
+                                                           lat_range=self.ylim,
+                                                           time_range=time_range,
+                                                           crs=self.crs)
             
             else:
 
@@ -747,9 +790,9 @@ class Model:
                 x        = np.arange(self.xlim[0] - dxy, self.xlim[1] + dxy, dxy)
                 y        = np.arange(self.ylim[0] - dxy, self.ylim[1] + dxy, dxy)
                 meteo_dataset = self.meteo_dataset.cut_out(x=x,
-                                                            y=y,
-                                                            time_range=time_range,
-                                                            crs=self.crs)
+                                                           y=y,
+                                                           time_range=time_range,
+                                                           crs=self.crs)
 
         if self.type == "delft3d" or self.type == "delft3dfm" or self.type == "xbeach" or self.type == "hurrywave" or self.type == "sfincs":
 
