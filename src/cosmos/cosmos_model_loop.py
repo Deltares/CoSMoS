@@ -11,6 +11,8 @@ import platform
 
 from .cosmos_main import cosmos
 from .cosmos_cluster import cluster_dict as cluster
+from .cosmos_clean_up import clean_up
+
 try:
     from .cosmos_argo import Argo
 except:
@@ -185,18 +187,21 @@ class ModelLoop():
             # Post process data (making floodmaps, uploading to server etc.)
             # Try to run post-processing. If it fails, print error message and continue.
 
-            try:
-                cosmos.webviewer.make()        
-                if cosmos.config.run.upload:
-                    current_path = os.getcwd()
-                    try:
-                        cosmos.webviewer.upload()
-                    except:
-                        print("An error occurred when uploading web viewer to server !!!")
-                    os.chdir(current_path)
-            except Exception as e:
-                print("An error occured while making web viewer !")
-                print(f"Error: {e}")
+            if cosmos.config.run.make_webviewer:
+                try:
+                    cosmos.webviewer.make()        
+                    if cosmos.config.run.upload:
+                        current_path = os.getcwd()
+                        try:
+                            cosmos.webviewer.upload()
+                        except:
+                            print("An error occurred when uploading web viewer to server !!!")
+                        os.chdir(current_path)
+                except Exception as e:
+                    print("An error occured while making web viewer !")
+                    print(f"Error: {e}")
+            else:
+                cosmos.log("Not making webviewer. Set make_webviewer to True in config file to make webviewer.")        
 
             self.status = "done"
                                     
@@ -209,6 +214,9 @@ class ModelLoop():
                 pth = os.path.join(cosmos.config.path.jobs,
                                    cosmos.scenario.name)
                 fo.rmdir(pth)
+
+            if cosmos.config.run.clean_up:
+                clean_up()
 
             # Check if we need to start a new cycle
             if cosmos.next_cycle_time:

@@ -131,9 +131,11 @@ class MainLoop:
         cosmos.scenario.set_paths()
 
         # Determine time at which this cycle should start running
+        # When running in single_shot mode, the simulation should start immediately
         delay = datetime.timedelta(hours=0)  # Delay in hours
         tnow = datetime.datetime.now(datetime.timezone.utc)
-        if tnow > cosmos.cycle + delay:
+        print(cosmos.config.run.mode)
+        if tnow > cosmos.cycle + delay or cosmos.config.run.mode == "single_shot":
             # start now
             start_time = tnow + datetime.timedelta(seconds=1)
         else:
