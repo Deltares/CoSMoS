@@ -170,7 +170,22 @@ class Configuration:
 
         from .cosmos_main import cosmos
 
-        self.path.config    = os.path.join(self.path.main, "configuration")     
+        # Doing something new here. Configuration can sit in the run folder (as in the past) or one level up (as in the future).
+
+        # Check if "configuration" folder exists in the main path
+        # If not, check if it exists in the parent folder
+        # If not, raise error
+        main_path_parent = os.path.dirname(self.path.main)
+        if os.path.exists(os.path.join(self.path.main, "configuration")):
+            # Configuration folder exists in main path
+            self.path.config    = os.path.join(self.path.main, "configuration")
+        elif os.path.exists(os.path.join(main_path_parent, "configuration")):
+            # Configuration folder exists in parent path
+            self.path.config    = os.path.join(main_path_parent, "configuration")
+        else:
+            raise FileNotFoundError("Configuration folder does not exist in main path or parent folder.")
+
+        # self.path.config    = os.path.join(self.path.main, "configuration")     
         self.path.jobs      = os.path.join(self.path.main, "jobs")
         self.path.stations  = os.path.join(self.path.config, "stations")
         self.path.scenarios = os.path.join(self.path.main, "scenarios")

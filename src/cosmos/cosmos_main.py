@@ -64,7 +64,7 @@ class CoSMoS:
 
         self.config          = Configuration()
 
-        # Set main path        
+        # Set main path
         self.config.path.main = main_path
 
         # Set config path

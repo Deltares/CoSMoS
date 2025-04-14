@@ -54,8 +54,7 @@ class WebViewer:
 
             fo.mkdir(self.path)
 
-            template_path = os.path.join(cosmos.config.path.main,
-                                         "configuration",
+            template_path = os.path.join(cosmos.config.path.config,
                                          "webviewer_templates",
                                          self.version,
                                          "*")

@@ -122,7 +122,7 @@ class MainLoop:
         cosmos.cycle_string = cosmos.cycle.strftime("%Y%m%d_%Hz")
 
         # Web viewer
-        if cosmos.config.webviewer:
+        if cosmos.config.webviewer and cosmos.config.run.make_webviewer:
             # Prepare new web viewer, or copy scenario data to existing viewer
             # Add scenario folder, cycle folder to web viewer
             cosmos.webviewer = WebViewer(cosmos.config.webviewer.name)
