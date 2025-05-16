@@ -131,10 +131,10 @@ class CoSMoS_HurryWave(Model):
                 elif nested_model.type=="sfincs":
                     # No sp2 output
                     # The next two lines are already done when reading in sfincs model, right?
-                    nested_model.domain.input.bwvfile = "snapwave.bnd"
-                    nested_model.domain.read_wave_boundary_points()
+                    nested_model.domain.input.variables.snapwave_bnd = "snapwave.bnd"
+                    # nested_model.domain.read_wave_boundary_points()
                     nest1(self.domain, nested_model.domain, obs_point_prefix=nested_model.name)
-                    nested_model.domain.input.bwvfile = None
+                    # nested_model.domain.input.bwvfile = None
                 elif nested_model.type=="beware":
                     specout = False
                     nest1(self.domain, nested_model.domain, obs_point_prefix=nested_model.name)
