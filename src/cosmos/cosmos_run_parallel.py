@@ -132,7 +132,7 @@ class CosmosRunParallel:
                     fid = open("tmp.bat", "w")
                     fid.write(self.local_path[0:2] + "\n")
                     fid.write("cd " + os.path.join(self.local_path, model_name) + "\n")
-                    fid.write("call run.bat\n")
+                    fid.write("call run_job.bat\n")
                     fid.write("move finished.txt finished_local.txt" + " \n")
                     fid.write("echo " + socket.gethostname() + ">> finished_local.txt"  + " \n" )
                     fid.write("xcopy " + os.path.join(self.local_path, model_name) + " " + os.path.join(model_path) + " /E /Q /Y" + "\n")
