@@ -21,7 +21,7 @@ import platform
 from .cosmos_main import cosmos
 from .cosmos_cluster import cluster_dict as cluster
 
-from cht_nesting.nest2 import nest2
+from cht_nesting import nest2
 import cht_utils.fileops as fo
 from cht_utils.misc_tools import dict2yaml
 
@@ -777,8 +777,6 @@ class Model:
         
         if self.meteo_dataset:
             meteo_res = self.meteo_dataset.resolution
-            if self.meteo_dataset.crs.is_geographic:
-                meteo_res = self.meteo_dataset.resolution * 111111 # convert to meters
             if self.crs.is_geographic:
                 # Try to retrieve model resolution, if not set use 0
                 # When finer than meteo_res, we upscale the meteo data
@@ -804,6 +802,8 @@ class Model:
                         crs=self.crs,
                         )                
             else:
+                if self.meteo_dataset.crs.is_geographic:
+                    meteo_res = meteo_res * 111e3 # convert to meters
                 # first check if the model has a resolution defined and update xy
                 dxy = self.resolution if self.resolution > 0 else 5000
                 # If model resolution is larger than meteo resolution (very big default), use meteo resolution

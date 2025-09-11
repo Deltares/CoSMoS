@@ -13,7 +13,7 @@ import cht_utils.fileops as fo
 from cht_utils.misc_tools import yaml2dict
 from cht_utils.prob_maps import merge_nc_his
 from cht_utils.prob_maps import merge_nc_map
-from cht_tiling.flood_map import make_flood_map_tiles
+from cht_tiling.tiling import make_floodmap_tiles
 from cht_tiling.tiling import make_png_tiles
 from cht_sfincs import SFINCS
 from cht_nesting import nest2
@@ -322,7 +322,7 @@ def map_tiles(config):
                                             config["flood_map"]["name"],
                                             pathstr[it])                                            
 
-                    make_flood_map_tiles(zsmax, index_path, png_path, topo_path,
+                    make_floodmap_tiles(zsmax, index_path, png_path, topo_path,
                                         color_values=color_values,
                                         zoom_range=[0, 13],
                                         zbmax=0.5,
@@ -341,9 +341,9 @@ def map_tiles(config):
                                         config["flood_map"]["name"],
                                         pathstr[-1]) 
 
-                make_flood_map_tiles(zsmax, index_path, png_path, topo_path,
+                make_floodmap_tiles(zsmax, index_path, png_path, topo_path,
                                     color_values=color_values,
-                                    zoom_range=[0, 14],
+                                    zoom_range=[0, 13],
                                     zbmax=0.5,
                                     quiet=True)
             except Exception as e:
@@ -499,7 +499,7 @@ def map_tiles(config):
                 ds = xr.open_dataset(cumprcp_file)
                 cumprcp = (ds[varname].isel(timemax=-1)-ds[varname].isel(timemax=0)).values
                 # cumprcp = np.transpose(cumprcp)
-                cumprcp = cumprcp * 1000 # convert to mm (this was not need in cauberg?)
+                # cumprcp = cumprcp * 1000 # convert to mm (this was not need in cauberg?)
 
                 png_path = os.path.join(precipitation_map_path,
                                         config["scenario"],
