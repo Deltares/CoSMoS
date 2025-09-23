@@ -71,8 +71,8 @@ class CoSMoS:
         self.config.file_name = config_file
 
         # # Initalize a list of cycles that we want to keep
-        # self.storm_flag      = False
-        # self.storm_keeplist  = []
+        self.storm_flag      = False
+        self.storm_keeplist  = []
 
         # Read in configuration
         self.config.set()
