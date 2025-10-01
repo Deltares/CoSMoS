@@ -75,14 +75,16 @@ class CoSMoS_SFINCS(Model):
         self.domain.input.variables.dthisout = cosmos.config.run.dthis
         self.domain.input.variables.dtmapout = cosmos.config.run.dtmap
         self.domain.input.variables.dtmaxout = cosmos.config.run.dtmax
+        self.domain.input.variables.dtwnd = cosmos.config.run.dtwnd
         self.domain.input.variables.dtout    = None
         self.domain.input.variables.outputformat = "net"
         self.domain.input.variables.bzsfile  = "sfincs.bzs"
-        self.domain.input.variables.storecumprcp = 1
+        self.domain.input.variables.storecumprcp = 0
 
         if cosmos.config.run.event_mode == "tsunami":
             # Store velocity in output file. Use for nesting, and later also damage assessment ?
             self.domain.input.variables.storevel = 1
+            self.domain.input.variables.storevelmax = 1
 
         # Turn on viscosity in all SFINCS models
         self.domain.input.viscosity = 1
@@ -188,6 +190,7 @@ class CoSMoS_SFINCS(Model):
                 self.domain.input.variables.baro    = 1                            
             if self.meteo_precipitation:                
                 self.domain.input.variables.amprfile = "sfincs.ampr"
+                self.domain.input.variables.storecumprcp = 1
             else:
                 self.domain.input.variables.scsfile = None
 

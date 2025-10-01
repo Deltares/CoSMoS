@@ -37,7 +37,11 @@ def download_meteo():
         if download:
             # Download the data
             cosmos.log("Downloading meteo data : " + meteo_dataset.name)
-            meteo_dataset.download([t0, t1], storm_number=cosmos.scenario.storm_number)
+            if cosmos.config.run.collect_meteo_up_to_cycle:
+                last_meteo_cycle = cosmos.cycle
+            else:
+                last_meteo_cycle = None
+            meteo_dataset.download([t0, t1], storm_number=cosmos.scenario.storm_number, last_cycle=last_meteo_cycle)
 
 def collect_meteo():
     """Collect meteo from netcdf files."""    

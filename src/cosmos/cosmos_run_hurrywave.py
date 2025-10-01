@@ -191,7 +191,7 @@ def map_tiles(config):
                 
             requested_times = pd.date_range(start=t0 + dt,
                                             end=t1,
-                                            freq=str(dtinc) + "H").to_pydatetime().tolist()
+                                            freq=str(dtinc) + "h").to_pydatetime().tolist()
 
             color_values = config["hm0_map"]["color_map"]["contours"]
 
@@ -214,7 +214,7 @@ def map_tiles(config):
                     hm0max = hw.read_hm0max(time_range=[t - dt + dt1, t + dt1],
                                             hm0max_file=hm0max_file,
                                             parameter=varname)                    
-                    # hm0max = np.transpose(hm0max)
+                    hm0max = np.transpose(hm0max)
 
                     png_path = os.path.join(hm0_path,
                                             config["scenario"],
@@ -232,7 +232,7 @@ def map_tiles(config):
                 hm0max = hw.read_hm0max(time_range=[t0 + dt1, t1 + dt1],
                                         hm0max_file=hm0max_file,
                                         parameter=varname)                    
-                # hm0max = np.transpose(hm0max)
+                hm0max = np.transpose(hm0max)
 
                 png_path = os.path.join(hm0_path,
                                         config["scenario"],

@@ -79,10 +79,10 @@ class CoSMoS_HurryWave(Model):
         self.domain.input.variables.tspinup  = self.wave_spinup_time*3600
 #        nsecs = (self.wave_stop_time - self.wave_start_time).total_seconds()
 #        self.domain.input.dtmaxout = nsecs
-        self.domain.input.variables.dtmaxout = 21600.0
-        self.domain.input.variables.dtmapout = 21600.0
+        self.domain.input.variables.dtmaxout = cosmos.config.run.dtmax
+        self.domain.input.variables.dtmapout = cosmos.config.run.dtmap
+        self.domain.input.variables.dtwnd = cosmos.config.run.dtwnd
         self.domain.input.variables.outputformat = "net"
-
 
         # Boundary conditions        
         if self.wave_nested:

@@ -104,38 +104,32 @@ class WebViewer:
             self.set_map_tile_variables("flood_map",
                                         "Flooding",
                                         "This is a flood map. It can tell if you will drown.",
-                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["flood_map"]["color_map"]],
-                                        13)
+                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["flood_map"]["color_map"]])
             self.set_map_tile_variables("flood_map_90",
                                         "Flooding (worst case)",
                                         "This is a worst case flood map. It can tell if you will drown.",
-                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["flood_map"]["color_map"]],
-                                        13)
+                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["flood_map"]["color_map"]])
             
         if cosmos.config.run.make_wave_maps:
             self.set_map_tile_variables("hm0",
                                         "Wave height",
                                         "These are Hm0 wave heights.",
-                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["hm0"]["color_map"]],
-                                        9)
+                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["hm0"]["color_map"]])
             
             self.set_map_tile_variables("hm0_90",
                                         "Wave height (worst case)",
                                         "These are worst case Hm0 wave heights.",
-                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["hm0"]["color_map"]],
-                                        9)
+                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["hm0"]["color_map"]])
         
         if cosmos.config.run.make_water_level_maps:
             self.set_map_tile_variables("water_level",
                                         "Peak water level",
                                         "These were the peak water levels during the storm.",
-                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["water_level_map"]["color_map"]],
-                                        13)
+                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["water_level_map"]["color_map"]])
             self.set_map_tile_variables("water_level_90",
                                         "Peak water level (worst case)",
                                         "These were the worst-case peak water levels during the storm.",
-                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["water_level_map"]["color_map"]],
-                                        13)
+                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["water_level_map"]["color_map"]])
 
         # Precipitation should come from meteo dataset, not from models
         # But perhaps only shown where we have flood models
@@ -143,13 +137,11 @@ class WebViewer:
             self.set_map_tile_variables("precipitation",
                                         "Cumulative rainfall",
                                         "These are cumulative precipitations.",
-                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["precipitation"]["color_map"]],
-                                        10)
+                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["precipitation"]["color_map"]])
             self.set_map_tile_variables("precipitation_90",
                                         "Cumulative rainfall (worst case)",
                                         "These are worst case cumulative precipitations.",
-                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["precipitation"]["color_map"]],
-                                        10)            
+                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["precipitation"]["color_map"]])            
             cosmos.log("Adding meteo layers ...")                
             self.make_meteo_maps()
 
@@ -157,18 +149,15 @@ class WebViewer:
             self.set_map_tile_variables("sedero",
                             "Sedimentation/erosion",
                             "This is a sedimentation/erosion map. It can tell if your house will wash away.",
-                            cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["sedero"]["color_map"]],
-                            16)
+                            cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["sedero"]["color_map"]])
             self.set_map_tile_variables("zb0",
                                         "Pre-storm bed level",
                                         "These were the bed levels prior to the storm.",
-                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["bed_levels"]["color_map"]],
-                                        16)
+                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["bed_levels"]["color_map"]])
             self.set_map_tile_variables("zbend",
                                         "Post-storm bed level",
                                         "These were the bed levels after the storm.",
-                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["bed_levels"]["color_map"]],
-                                        16)
+                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["bed_levels"]["color_map"]])
             cosmos.log("Adding XBeach markers ...")                
             self.make_xb_markers()
             cosmos.log("Adding XBeach regimes ...")                
@@ -188,7 +177,7 @@ class WebViewer:
 
         cosmos.log("Web viewer done.")                
 
-    def set_map_tile_variables(self, name, long_name, description, color_map, max_native_zoom):
+    def set_map_tile_variables(self, name, long_name, description, color_map, max_native_zoom=None):
 
         folders = [] 
         # Check if tiles are available
@@ -209,6 +198,7 @@ class WebViewer:
         pathstr = []
         namestr = []
 
+        max_zoom = 0
         for folder in folders:
             # Define the format of the original string
             format_str = "%Y%m%d_%HZ"
@@ -240,6 +230,13 @@ class WebViewer:
                 # Append the new strings to the lists
                 pathstr.append(folder)
                 namestr.append(start_nice + " - " + end_nice + " UTC")
+            
+            # check subfolder zoom levels
+            zooms = fo.list_folders(os.path.join(self.cycle_path, name, folder, "*"), basename=True)
+            max_zoom = max([int(z) for z in zooms])
+
+        if max_native_zoom is None:
+            max_native_zoom = max_zoom
 
         # Add to map variables
         dct={}
@@ -298,16 +295,17 @@ class WebViewer:
             for dataset_name, meteo_dataset in cosmos.meteo_database.dataset.items():
 
                 if meteo_dataset.name == cosmos.scenario.meteo_dataset:
-                    
-                    # TODO these ranges should be in the config file !
-                    xlim = [-99.0, -55.0]
-                    ylim = [8.0, 45.0]
+                    # Cut out meteo dataset for the area of interest
+                    xlim = meteo_dataset.lon_range
+                    ylim = meteo_dataset.lat_range
 
-                    # Either fix stride in cut-out or move to write_wind_to_json                                                        
+                    # Either fix stride in cut-out or move to write_wind_to_json
+                    # FIXME wind_to_json becomes too large for high-res data ... always resample since only for visualization?                                                        
                     dset = meteo_dataset.cut_out(x_range=xlim,
                                                    y_range=ylim,
-                                                   time_range=[],
-                                                   stride=2)
+                                                   dx=.1,
+                                                   dy=.1
+                                                   )
 
                     # Get maximum wind speed
                     u = dset.ds["wind_u"].values[:]
@@ -674,7 +672,7 @@ class WebViewer:
                     if station.type == station_type and station.upload:                
                         point = Point((station.longitude, station.latitude))
                         if station.id:
-                            name = station.long_name + " (" + station.id + ")"
+                            name = station.long_name + " (" + str(station.id) + ")"
                         else:
                             name = station.long_name
     
@@ -798,7 +796,8 @@ class WebViewer:
                 previous_cycles.append(cosmos.cycle_string)
         else:
             # Find previous cycles locally
-            previous_cycles = fo.list_folders(self.cycle_path, basename=True)
+            prefix = self.path + "/data/" + cosmos.scenario.name + "/*"
+            previous_cycles = fo.list_folders(prefix, basename=True)
 
         previous_cycles = sorted(previous_cycles, reverse=True)
 

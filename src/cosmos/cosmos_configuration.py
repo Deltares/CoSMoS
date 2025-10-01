@@ -102,6 +102,7 @@ class Run:
     def __init__(self):
         self.mode            = "single_shot"
         self.interval        = 6
+        self.delay           = 0
         self.clean_up        = False
         self.make_flood_maps = True
         self.make_wave_maps  = True
@@ -124,6 +125,7 @@ class Run:
         self.dthis            = 600.0
         self.dtmap            = 21600.0
         self.dtmax            = 21600.0
+        self.dtwnd            = 1800
         self.clear_zs_ini     = False # used to limit initial water level in sfincs models
         self.use_spw_precip   = False
         self.clean_up_mode    = "forecast"
