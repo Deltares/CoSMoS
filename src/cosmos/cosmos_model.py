@@ -21,7 +21,7 @@ import platform
 from .cosmos_main import cosmos
 from .cosmos_cluster import cluster_dict as cluster
 
-from cht_nesting.nest2 import nest2
+from cht_nesting import nest2
 import cht_utils.fileops as fo
 from cht_utils.misc_tools import dict2yaml
 
@@ -81,6 +81,7 @@ class Model:
         self.zs_ini_max         = -9999.9
         self.exterior             = None
         self.role               = "generic"  # can be "generic", "floodmap", "large_scale". Based on the role, we can set some predefined actions. This happens e.g. in cosmos_sfincs.py
+        self.resolution         = -999
 
     def read_generic(self):
         """Read model attributes from model.toml file.
@@ -151,6 +152,7 @@ class Model:
             self.xlim = [geom.bounds[0], geom.bounds[2]]
             self.ylim = [geom.bounds[1], geom.bounds[3]]
         # Set the polygon for checking that station fall within the model
+        # NOTE why is this a path???
         self.polygon = path.Path(geom.exterior.coords)
 
         # Now convert to WGS 84
@@ -785,28 +787,50 @@ class Model:
         # Check if the model uses 2d meteo forcing from weather model
         
         if self.meteo_dataset:
-
+            meteo_res = self.meteo_dataset.resolution
             if self.crs.is_geographic:
-            
-                # Make a new cut-out that covers the domain of the model
-                meteo_dataset = self.meteo_dataset.cut_out(lon_range=self.xlim,
-                                                           lat_range=self.ylim,
-                                                           time_range=time_range,
-                                                           crs=self.crs)
-            
-            else:
+                # Try to retrieve model resolution, if not set use 0
+                # When finer than meteo_res, we upscale the meteo data
+                dxy = self.resolution if self.resolution > 0 else 0
 
-                # Make new mesh in local CRS (should we make dxy configurable ?)
-                dxy      = 20000.0
+                # Default meteo resolution is very big, so when not defined in meteo_database, we don't upscale
+                if meteo_res < dxy:
+                    # Make a new cut-out that covers the domain of the model
+                    meteo_dataset = self.meteo_dataset.cut_out(
+                        lon_range=self.xlim,
+                        lat_range=self.ylim,
+                        time_range=time_range,
+                        dx = dxy, # new resolution of meteo dataset
+                        dy = dxy, # new resolution of meteo dataset
+                        crs=self.crs,
+                        )
+                else:
+                    # Make a new cut-out that covers the domain of the model
+                    meteo_dataset = self.meteo_dataset.cut_out(
+                        lon_range=self.xlim,
+                        lat_range=self.ylim,
+                        time_range=time_range,
+                        crs=self.crs,
+                        )                
+            else:
+                if self.meteo_dataset.crs.is_geographic:
+                    meteo_res = meteo_res * 111e3 # convert to meters
+                # first check if the model has a resolution defined and update xy
+                dxy = self.resolution if self.resolution > 0 else 5000
+                # If model resolution is larger than meteo resolution (very big default), use meteo resolution
+                if dxy > meteo_res:
+                    dxy = meteo_res
                 x        = np.arange(self.xlim[0] - dxy, self.xlim[1] + dxy, dxy)
                 y        = np.arange(self.ylim[0] - dxy, self.ylim[1] + dxy, dxy)
-                meteo_dataset = self.meteo_dataset.cut_out(x=x,
-                                                           y=y,
-                                                           time_range=time_range,
-                                                           crs=self.crs)
+                # non-geographical coordinates always need to be reprojected to model CRS
+                meteo_dataset = self.meteo_dataset.cut_out(
+                    x=x,
+                    y=y,
+                    time_range=time_range,
+                    crs=self.crs,
+                    )
 
         if self.type == "delft3d" or self.type == "delft3dfm" or self.type == "xbeach" or self.type == "hurrywave" or self.type == "sfincs":
-
             # Simple for now
 
             if format == "netcdf":

@@ -70,14 +70,10 @@ class CoSMoS:
         # Set config path
         self.config.file_name = config_file
 
-        # # Initalize a list of cycles that we want to keep
-        self.storm_flag      = False
-        self.storm_keeplist  = []
-
         # Read in configuration
         self.config.set()
 
-    def run(self, scenario_name=None, cycle=None, last_cycle=None):
+    def run(self, scenario_name=None, cycle=None, last_cycle=None, delay:int=0):
 
         """Run a CoSMoS scenario:
     
@@ -109,6 +105,9 @@ class CoSMoS:
             cosmos.last_cycle = datetime.datetime.strptime(last_cycle, "%Y%m%d_%HZ").replace(tzinfo=datetime.timezone.utc)
         else:
             cosmos.last_cycle = None
+        
+        # set delay
+        cosmos.config.run.delay = delay
         
         if not self.config.path.main:
             cosmos.log("Error: CoSMoS main path not set! Do this by running cosmos.initialize(main_path) or passing main_path as input argument to cosmos.run().")

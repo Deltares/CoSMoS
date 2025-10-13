@@ -11,7 +11,7 @@ import platform
 #from cht_utils.argo import Argo
 import cht_utils.fileops as fo
 from cht_utils.misc_tools import yaml2dict
-from cht_nesting.nest2 import nest2
+from cht_nestingp import nest2
 from cht_tiling import TiledWebMap
 from cht_xbeach.xbeach import XBeach
 
@@ -171,15 +171,15 @@ def map_tiles(config):
             
             # make pngs for sedimentoation/erosion
             print("Making sedimenation/erosion tiles for model " + name)
-            make_sedero_tiles(config, np.transpose(val_masked), index_path, os.path.join(sedero_map_path, pathstr[0]))
+            make_sedero_tiles(config, val_masked, index_path, os.path.join(sedero_map_path, pathstr[0]))
             print("Sedimentation/erosion tiles done.")
             
             # make pngs for bedlevels (pre- and post-storm)
             zb0 = dt['zb'][0, :, :].values
             zbend = dt['zb'][-1, :, :].values
             print("Making bedlevel tiles for model " + name)
-            make_bedlevel_tiles(config, np.transpose(zb0), index_path, os.path.join(zb0_map_path, pathstr[0]))
-            make_bedlevel_tiles(config, np.transpose(zbend), index_path, os.path.join(zbend_map_path, pathstr[0]))
+            make_bedlevel_tiles(config, zb0, index_path, os.path.join(zb0_map_path, pathstr[0]))
+            make_bedlevel_tiles(config, zbend, index_path, os.path.join(zbend_map_path, pathstr[0]))
             print("Bed level tiles done.")
 
 def make_sedero_tiles(config, sedero, index_path, sedero_map_path):

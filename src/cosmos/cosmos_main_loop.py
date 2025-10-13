@@ -69,6 +69,11 @@ class MainLoop:
 
         cosmos.log("Starting main loop ...")
 
+        # get delay time
+        delay_hours = cosmos.config.run.delay
+        # When you need a timedelta, make a new variable
+        delay_td = datetime.timedelta(hours=delay_hours)
+
         # DO NOT DO THIS ANYMORE (once config is set, it should not be read in anymore)
         # # Update config (it's possible that this was changed while running a forecast scenario)
         # cosmos.config.set()
@@ -129,7 +134,7 @@ class MainLoop:
             start_time = tnow + datetime.timedelta(seconds=1)
         else:
             # start after delay
-            start_time = cosmos.cycle + delay + datetime.timedelta(seconds=5)
+            start_time = cosmos.cycle + delay_td + datetime.timedelta(seconds=5)
         self.scheduler = sched.scheduler(time.time, time.sleep)
         dt = start_time - tnow
 
@@ -188,19 +193,13 @@ class MainLoop:
 
         # Remove older cycles
         if not self.just_initialize and cosmos.config.run.mode == "continuous":
-            if cosmos.config.run.remove_old_cycles > 0 and not cosmos.storm_flag:
+            if cosmos.config.run.remove_old_cycles > 0:
                 # Get list of all cycles in scneario folder
                 cycle_list = fo.list_folders(os.path.join(cosmos.scenario.path, "*z"))
                 tkeep = cosmos.cycle.replace(tzinfo=None) - datetime.timedelta(
                     hours=cosmos.config.run.remove_old_cycles
                 )
                 for cycle in cycle_list:
-                    if cycle in cosmos.storm_keeplist:
-                        continue
-                    keepfile_name = os.path.join(cycle, "keep.txt")
-                    if os.path.exists(keepfile_name):
-                        cosmos.storm_keeplist.append(cycle)
-                        continue
                     t = datetime.datetime.strptime(cycle[-12:], "%Y%m%d_%Hz")
                     if t < tkeep:
                         cosmos.log("Removing older cycle : " + cycle[-12:])
@@ -219,10 +218,6 @@ class MainLoop:
                             )
                         except:
                             pass
-
-            elif cosmos.storm_flag:
-                cycle_list = fo.list_folders(os.path.join(cosmos.scenario.path, "*z"))
-                cosmos.storm_keeplist.append(cycle_list[-1])
 
         # Create scenario cycle paths
         fo.mkdir(cosmos.scenario.cycle_path)

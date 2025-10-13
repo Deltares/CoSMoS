@@ -503,7 +503,7 @@ def map_tiles(config):
                 ds = xr.open_dataset(cumprcp_file)
                 cumprcp = (ds[varname].isel(timemax=-1)-ds[varname].isel(timemax=0)).values
                 # cumprcp = np.transpose(cumprcp)
-                cumprcp = cumprcp * 1000 # convert to mm (this was not need in cauberg?)
+                # cumprcp = cumprcp * 1000 # convert to mm (this was not need in cauberg?)
 
                 png_path = os.path.join(precipitation_map_path,
                                         config["scenario"],
