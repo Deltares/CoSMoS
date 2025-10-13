@@ -124,8 +124,11 @@ class MainLoop:
             # Sigle shot, so we can start now
             start_time = tnow + datetime.timedelta(seconds=1)
         else:
-            # Continuous, so we start at the cycle time (plus delay if this is set)
+            # Continuous, so we start at the cycle time (plus delay if this is set)            
             start_time = cosmos.cycle + delay + datetime.timedelta(seconds=5)
+            # However, if start time has already passed, start immediately
+            if start_time < tnow:
+                start_time = tnow + datetime.timedelta(seconds=1)
 
         self.scheduler = sched.scheduler(time.time, time.sleep)
         dt = start_time - tnow

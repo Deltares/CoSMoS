@@ -83,95 +83,20 @@ def collect_meteo():
                 last_meteo_cycle = None
             meteo_dataset.collect([t0, t1], last_cycle=last_meteo_cycle)
 
+            # Get the approximate resolution of the meteo_dataset in degrees.
+            # This is used to determine in order to adjust the resolution of the meteo forcing grid.
+            meteo_dataset.resolution = float(meteo_dataset.ds["lon"].values[1] - meteo_dataset.ds["lon"].values[0])
+
             if meteo_dataset.last_analysis_time:
-
                 cosmos.log("Last analysis time : " + meteo_dataset.last_analysis_time.strftime("%Y%m%d_%H%M%S"))
-
-                # file_name = os.path.join(meteo_dataset.path, meteo_dataset.last_analysis_time.strftime("%Y%m%d_%Hz"), "coamps_used.txt")
-                # if os.path.exists(file_name):
-                #     cosmos.storm_flag = True
-                #     keepfile_name = os.path.join(cosmos.scenario.cycle_path, "keep.txt")
-                #     fid = open(keepfile_name, "w")  # Why is there no path here?
-                #     fid.write("Coamps data was used in this cycle so we want to keep it \n")
-                #     fid.close()
-                # else:
-                #     cosmos.storm_flag = False                
-
-                # # Save csv with meteo sources for each time step
-                # csv_path = os.path.join(cosmos.scenario.cycle_path, "meteo_sources.csv")
 
             if meteo_dataset.last_forecast_cycle_time:
                 cosmos.log("Last forecast cycle time : " + meteo_dataset.last_forecast_cycle_time.strftime("%Y%m%d_%H%M%S"))
-                # meteo_dataset.meteo_source.to_csv(csv_path)
                 cstr = meteo_dataset.last_forecast_cycle_time.strftime("%Y%m%d_%Hz")
                 cosmos.scenario.meteo_string = f"{ cstr } ({ meteo_dataset.name })"
 
             else:    
                 cosmos.scenario.meteo_string = meteo_dataset.name + " (no cycle information available)"
-
-            # # The next bit should be moved out of this loop 
-
-            # # Check if track files are available in any of the cycle folders
-            # cycle_folders = fo.list_folders(os.path.join(meteo_dataset.path, "*"))
-            # track_file_list = []
-            # tau = meteo_dataset.tau
-            # # Loop through folders and determine time of cycle
-            # for folder in cycle_folders:
-            #     try:
-            #         t = datetime.datetime.strptime(os.path.basename(folder), "%Y%m%d_%Hz")
-            #         # For hindcasts, only use data up to the last cycle
-            #         if last_meteo_cycle:
-            #             if t > last_meteo_cycle.replace(tzinfo=None):
-            #                 continue
-            #         # Track start time needs to be after or at the start time of the scenario.
-            #         if t >= t0:
-            #             # Check if track file is available
-            #             track_files = glob.glob(os.path.join(folder, "*.trk"))
-            #             if len(track_files) > 0:
-            #                 track_file_list.append(track_files[0])
-            #                 storm_name = meteo_dataset.name
-            #     except:
-            #         print("Error in reading folder name")
-            #         pass
-
-    # Cyclone track
-    # Don't try to find it anymore!
-
-#     if not cosmos.scenario.meteo_track and not cosmos.scenario.meteo_spiderweb:
-
-#         # Track file not provided, so try to find it in the meteo data
-
-#         # If only gridded data, try to extract the storm track
-#         # Use only the first meteo_dataset for now
-
-#         for meteo_dataset in cosmos.meteo_dataset:
-#             if meteo_dataset.name == cosmos.scenario.meteo_dataset:
-#                 break
-
-#         cosmos.log("Finding storm tracks ...")
-#         tracks = meteo_dataset.find_cyclone_tracks(method="vorticity",
-#                                                 pcyc=100000.0,
-#                                                 vcyc=40.0,
-#                                                 vmin=18.0,
-#                                                 dt = 3)
-#         # Filter cyclone based on TCvitals
-#         # Use coordinates specified in meteo file to extract nearest track from gridded meteo data (if present)
-#         if hasattr(cosmos.scenario, 'meteo_lon'): 
-#             meteo_lon = cosmos.scenario.meteo_lon
-#             meteo_lat = cosmos.scenario.meteo_lat
-#         else:
-#             meteo_lon = None
-#             meteo_lat = None
-
-#         tc = find_priorityTC(tracks, "priority_storm.txt", meteo_lon, meteo_lat)
-# #        tc = tracks[0]
-
-#         # Use the first track to make ensembles
-#         tc.account_for_forward_speed()
-#         tc.estimate_missing_values()
-#         tc.include_rainfall = True
-
-#     else:
 
     # Cyclone track
 

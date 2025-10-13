@@ -206,16 +206,20 @@ class CoSMoS_SFINCS(Model):
 
         # Meteo forcing
         if self.meteo_wind or self.meteo_atmospheric_pressure or self.meteo_precipitation:
-            self.write_meteo_input_files("sfincs", self.domain.input.variables.tref)
-            if self.meteo_wind:                
-                self.domain.input.variables.amufile = "sfincs.amu"
-                self.domain.input.variables.amvfile = "sfincs.amv"
+            # Write netcdf meteo forcing files
+            self.write_meteo_input_files("sfincs", self.domain.input.variables.tref, format="netcdf")
+            if self.meteo_wind:
+                self.domain.input.variables.netamuamvfile = "sfincs_wind.nc"
+                # self.domain.input.variables.amufile = "sfincs.amu"
+                # self.domain.input.variables.amvfile = "sfincs.amv"
             if self.meteo_atmospheric_pressure:
-                self.domain.input.variables.ampfile = "sfincs.amp"
+                self.domain.input.variables.netampfile = "sfincs_barometric_pressure.nc"
+                # self.domain.input.variables.ampfile = "sfincs.amp"
                 self.domain.input.variables.baro    = 1                            
-            if self.meteo_precipitation:                
-                self.domain.input.variables.amprfile = "sfincs.ampr"
-                self.domain.input.variables.storecumprcp = 1
+            if self.meteo_precipitation:
+                self.domain.input.variables.netamprfile = "sfincs_precipitation.nc"
+                # self.domain.input.variables.amprfile = "sfincs.ampr"
+                # self.domain.input.variables.storecumprcp = 1
             else:
                 self.domain.input.variables.scsfile = None
 

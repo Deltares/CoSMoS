@@ -81,7 +81,7 @@ class Model:
         self.zs_ini_max         = -9999.9
         self.exterior             = None
         self.role               = "generic"  # can be "generic", "floodmap", "large_scale". Based on the role, we can set some predefined actions. This happens e.g. in cosmos_sfincs.py
-        self.resolution         = -999
+        self.resolution         = -999.0
 
     def read_generic(self):
         """Read model attributes from model.toml file.
@@ -789,23 +789,20 @@ class Model:
         if self.meteo_dataset:
             meteo_res = self.meteo_dataset.resolution
             if self.crs.is_geographic:
-                # Try to retrieve model resolution, if not set use 0
-                # When finer than meteo_res, we upscale the meteo data
-                dxy = self.resolution if self.resolution > 0 else 0
-
-                # Default meteo resolution is very big, so when not defined in meteo_database, we don't upscale
-                if meteo_res < dxy:
-                    # Make a new cut-out that covers the domain of the model
+                # Model is in geographical coordinates
+                dxy = self.resolution # if not provided, dxy is -999.0
+                if meteo_res < dxy * 0.5:
+                    # Meteo data is much finer than model resolution
                     meteo_dataset = self.meteo_dataset.cut_out(
                         lon_range=self.xlim,
                         lat_range=self.ylim,
                         time_range=time_range,
-                        dx = dxy, # new resolution of meteo dataset
-                        dy = dxy, # new resolution of meteo dataset
+                        dx=0.5*dxy, # new resolution of meteo dataset
+                        dy=0.5*dxy, # new resolution of meteo dataset
                         crs=self.crs,
                         )
                 else:
-                    # Make a new cut-out that covers the domain of the model
+                    # Make a new cut-out that covers the domain of the model while using meteo resolution
                     meteo_dataset = self.meteo_dataset.cut_out(
                         lon_range=self.xlim,
                         lat_range=self.ylim,
@@ -815,8 +812,8 @@ class Model:
             else:
                 if self.meteo_dataset.crs.is_geographic:
                     meteo_res = meteo_res * 111e3 # convert to meters
-                # first check if the model has a resolution defined and update xy
-                dxy = self.resolution if self.resolution > 0 else 5000
+                # First check if the model has a resolution defined. If not, use meteo resolution or 20km
+                dxy = self.resolution if self.resolution > 0.0 else 20000.0
                 # If model resolution is larger than meteo resolution (very big default), use meteo resolution
                 if dxy > meteo_res:
                     dxy = meteo_res
@@ -856,7 +853,7 @@ class Model:
 
                 # ASCII format
 
-                if self.meteo_wind:                
+                if self.meteo_wind:
                     meteo_dataset.to_delft3d(prefix,
                                             parameters=["wind"],
                                             path=path,
