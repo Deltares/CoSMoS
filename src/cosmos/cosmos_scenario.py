@@ -55,6 +55,7 @@ class Scenario:
         self.meteo_atmospheric_pressure = True
         self.meteo_precipitation        = True
         self.meteo_track                = None
+        self.cyclone_track_forecast_source = None
         self.observations_path = ""
         self.run_ensemble = False
         self.meteo_string = ""

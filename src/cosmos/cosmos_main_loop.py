@@ -85,18 +85,7 @@ class MainLoop:
 
         if not cycle:
             # Determine cycle time
-            # if cosmos.scenario.cycle:
-            #     # Cycle provided in scenario file
-            #     cosmos.cycle = cosmos.scenario.cycle.replace(
-            #         tzinfo=datetime.timezone.utc
-            #     )
-            # else:
-            # First main loop in forecast scenario
-            # Determine which cycle to run
-            delay = 0
-            t = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(
-                hours=delay
-            )
+            t = datetime.datetime.now(datetime.timezone.utc)
             h0 = t.hour
             h0 = h0 - np.mod(h0, cosmos.config.run.interval)
             cosmos.cycle = t.replace(microsecond=0, second=0, minute=0, hour=h0)
@@ -127,14 +116,14 @@ class MainLoop:
             # Add scenario folder, cycle folder to web viewer
             cosmos.webviewer = WebViewer(cosmos.config.webviewer.name)
 
-        # Set scenario paths
+        # Set scenario paths (with updated cycle time)
         cosmos.scenario.set_paths()
 
         # Determine time at which this cycle should start running
         # When running in single_shot mode, the simulation should start immediately
-        delay = datetime.timedelta(hours=0)  # Delay in hours
+        delay = datetime.timedelta(hours=cosmos.config.run.delay)  # Delay in hours
         tnow = datetime.datetime.now(datetime.timezone.utc)
-        print(cosmos.config.run.mode)
+
         if tnow > cosmos.cycle + delay or cosmos.config.run.mode == "single_shot":
             # start now
             start_time = tnow + datetime.timedelta(seconds=1)
@@ -289,20 +278,32 @@ class MainLoop:
         # Write start and stop times to log file
         for model in cosmos.scenario.model:
             if model.flow:
+                if model.flow_restart_file:
+                    # not the entire path
+                    rststr = f" (restart file : {model.flow_restart_file.split('/')[-1]})"
+                else:
+                    rststr = " (no restart file)"
                 cosmos.log(
                     model.long_name
                     + " : "
                     + model.flow_start_time.strftime("%Y%m%d %H%M%S")
                     + " - "
                     + model.flow_stop_time.strftime("%Y%m%d %H%M%S")
+                    + rststr
                 )
             else:
+                if model.wave_restart_file:
+                    # not the entire path
+                    rststr = f" (restart file : {model.wave_restart_file.split('/')[-1]})"
+                else:
+                    rststr = " (no restart file)"
                 cosmos.log(
                     model.long_name
                     + " : "
                     + model.wave_start_time.strftime("%Y%m%d %H%M%S")
                     + " - "
                     + model.wave_stop_time.strftime("%Y%m%d %H%M%S")
+                    + rststr
                 )
 
         # if self.just_initialize:
@@ -392,6 +393,7 @@ def get_start_and_stop_times():
             model.wave_start_time = start_time
             model.wave_stop_time = stop_time
 
+    # Make list of all wave models that do not have any models nested in them
     not_nested_models = []
     for model in cosmos.scenario.model:
         if model.wave:
@@ -403,15 +405,20 @@ def get_start_and_stop_times():
     # Now for each of these models, loop up in the model tree until
     # not nested in any other model
     for not_nested_model in not_nested_models:
+
         nested = True
         model = not_nested_model
         nested_wave_start_time = start_time
 
         while nested:
+
+            # nested_wave_start_time is the start time of the model that is nested in this model
+            # this model should start at the same time or earlier
             model.wave_start_time = min(model.wave_start_time, nested_wave_start_time)
 
             # Check for restart files
             restart_time, restart_file = check_for_wave_restart_files(model)
+
             if not restart_time:
                 # No restart file available, so subtract spin-up time
                 tok = start_time - datetime.timedelta(hours=model.wave_spinup_time)
@@ -424,6 +431,7 @@ def get_start_and_stop_times():
             if model.wave_nested:
                 # This model gets it's wave boundary conditions from another model
                 nested_wave_start_time = model.wave_start_time
+                # Set the new model to be 
                 model = model.wave_nested
 
             else:
@@ -457,6 +465,9 @@ def get_start_and_stop_times():
         nested_flow_start_time = start_time
 
         while nested:
+
+            # flow_start_time is minimum this model's flow_start_time and the flow_start_time of the model that is nested in it.
+
             model.flow_start_time = min(model.flow_start_time, nested_flow_start_time)
 
             # Check for restart files

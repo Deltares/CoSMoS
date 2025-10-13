@@ -33,7 +33,9 @@ class Conda:
 class Executables:
     def __init__(self):
         self.sfincs_path    = None
+        self.sfincs_docker_image = None
         self.hurrywave_path = None
+        self.hurrywave_docker_image = None
         self.delft3d_path   = None
         self.xbeach_path    = None
         self.beware_path    = None
@@ -64,7 +66,7 @@ class WebViewer:
         self.tile_layer["water_level_map"]["color_map"] = "water_level_map"
         self.tile_layer["hm0"] = {}
         self.tile_layer["hm0"]["interval"] = 24
-        self.tile_layer["hm0"]["color_map"] = "hm0_linear"
+        self.tile_layer["hm0"]["color_map"] = "hm0"
         self.tile_layer["sedero"] = {}
         self.tile_layer["sedero"]["color_map"] = "sedero"
         self.tile_layer["bed_levels"] = {}
@@ -118,6 +120,7 @@ class Run:
         self.run_models      = True
         self.collect_meteo_up_to_cycle = False
         self.remove_old_cycles = 0
+        self.delay           = 0  # hours to wait after cycle time before starting the run
         # Run all models in ensemble model by default
         self.ensemble_models = ["sfincs", "hurrywave", "delft3d", "xbeach", "beware"]
         self.spw_wind_field   = "gridded_data"
@@ -127,6 +130,9 @@ class Run:
         self.clear_zs_ini     = False # used to limit initial water level in sfincs models
         self.use_spw_precip   = False
         self.clean_up_mode    = "forecast"
+        self.bathtub          = False
+        self.sfincs_docker    = False
+        self.hurrywave_docker = False
 
 class Configuration:
     """CoSMoS Configuration class.

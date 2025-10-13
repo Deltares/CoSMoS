@@ -7,10 +7,11 @@ Created on Tue May 25 14:28:58 2021
 import os
 import glob
 import datetime
+import geopandas as gpd
 
 from .cosmos_main import cosmos
 import cht_utils.fileops as fo
-from cht_cyclones import TropicalCyclone
+from cht_cyclones import TropicalCyclone, jtwc
 from cht_meteo import MeteoDatabase
 
 def read_meteo_database():
@@ -39,7 +40,15 @@ def download_meteo():
             cosmos.log("Downloading meteo data : " + meteo_dataset.name)
             meteo_dataset.download([t0, t1], storm_number=cosmos.scenario.storm_number)
 
+    # Download cyclone tracks if needed
+    if cosmos.scenario.cyclone_track_forecast_source is not None:
+        if cosmos.scenario.cyclone_track_forecast_source.lower() == "jtwc":
+            # Download JTWC tracks
+            jtwc_path = os.path.join(cosmos.meteo_database.path, "tracks", "jtwc")
+            jtwc.download(jtwc_path)
+
 def collect_meteo():
+
     """Collect meteo from netcdf files."""    
     # Loop through all available meteo datasets
     # Determine if the need to be downloaded
@@ -84,35 +93,42 @@ def collect_meteo():
                 # else:
                 #     cosmos.storm_flag = False                
 
-                # Save csv with meteo sources for each time step
-                csv_path = os.path.join(cosmos.scenario.cycle_path, "meteo_sources.csv")
+                # # Save csv with meteo sources for each time step
+                # csv_path = os.path.join(cosmos.scenario.cycle_path, "meteo_sources.csv")
+
+            if meteo_dataset.last_forecast_cycle_time:
+                cosmos.log("Last forecast cycle time : " + meteo_dataset.last_forecast_cycle_time.strftime("%Y%m%d_%H%M%S"))
                 # meteo_dataset.meteo_source.to_csv(csv_path)
-                cosmos.scenario.meteo_string = "dunno"
+                cstr = meteo_dataset.last_forecast_cycle_time.strftime("%Y%m%d_%Hz")
+                cosmos.scenario.meteo_string = f"{ cstr } ({ meteo_dataset.name })"
 
+            else:    
+                cosmos.scenario.meteo_string = meteo_dataset.name + " (no cycle information available)"
 
-            # The next bit should be moved out of this loop 
+            # # The next bit should be moved out of this loop 
 
-            # Check if track files are available in any of the cycle folders
-            cycle_folders = fo.list_folders(os.path.join(meteo_dataset.path, "*"))
-            track_file_list = []
-            tau = meteo_dataset.tau
-            # Loop through folders and determine time of cycle
-            for folder in cycle_folders:
-                try:
-                    t = datetime.datetime.strptime(os.path.basename(folder), "%Y%m%d_%Hz")
-                    # For hindcasts, only use data up to the last cycle
-                    if last_meteo_cycle:
-                        if t > last_meteo_cycle.replace(tzinfo=None):
-                            continue
-                    # Track start time needs to be after or at the start time of the scenario.
-                    if t >= t0:
-                        # Check if track file is available
-                        track_files = glob.glob(os.path.join(folder, "*.trk"))
-                        if len(track_files)>0:
-                            track_file_list.append(track_files[0])
-                except:
-                    print("Error in reading folder name")
-                    pass
+            # # Check if track files are available in any of the cycle folders
+            # cycle_folders = fo.list_folders(os.path.join(meteo_dataset.path, "*"))
+            # track_file_list = []
+            # tau = meteo_dataset.tau
+            # # Loop through folders and determine time of cycle
+            # for folder in cycle_folders:
+            #     try:
+            #         t = datetime.datetime.strptime(os.path.basename(folder), "%Y%m%d_%Hz")
+            #         # For hindcasts, only use data up to the last cycle
+            #         if last_meteo_cycle:
+            #             if t > last_meteo_cycle.replace(tzinfo=None):
+            #                 continue
+            #         # Track start time needs to be after or at the start time of the scenario.
+            #         if t >= t0:
+            #             # Check if track file is available
+            #             track_files = glob.glob(os.path.join(folder, "*.trk"))
+            #             if len(track_files) > 0:
+            #                 track_file_list.append(track_files[0])
+            #                 storm_name = meteo_dataset.name
+            #     except:
+            #         print("Error in reading folder name")
+            #         pass
 
     # Cyclone track
     # Don't try to find it anymore!
@@ -155,74 +171,156 @@ def collect_meteo():
 
     # Cyclone track
 
-    filename = None
+    # Now we collect the cyclone track file. There are three options:
+    # 1. Track file provided in scenario file
+    # 2. Track file provided by cyclone_track_forecast_source (e.g. JTWC)
+    # 3. Track file found in meteo data folders
+
+    # The track file will be copied to the cycle folder\\track folder and will be named storm.cyc.
+    # The matching spiderweb file will be stored in the same folder and will be named storm.spw.
+
     cosmos.tropical_cyclone = None
+    tc = None
+    # track_file_name = None
+    # storm_name = None
 
-    # Check if track was provided in the scenario file
     if cosmos.scenario.meteo_track is not None:
+    
+        # 1. Track name provided in scenario file (cosmos.scenario.meteo_track is the name without path or extension!)
+    
         cosmos.log("Using track file provided in scenario file")
-        filename = os.path.join(cosmos.config.meteo_database.path, "tracks", cosmos.scenario.meteo_track + ".cyc")
-        # Check here whether the file exists
-        if not os.path.exists(filename):
-            # Stop the run
-            cosmos.stop("Track file not found: " + filename)
+        track_file_name = os.path.join(cosmos.config.meteo_database.path, "tracks", cosmos.scenario.meteo_track + ".cyc")
+        storm_name = cosmos.scenario.meteo_track
+        # Create a TropicalCyclone object
+        tc = TropicalCyclone(track_file=track_file_name, name=storm_name)
 
-    if filename is None:
-        # Track file not provided, so see if track_file_list is empty
-        if len(track_file_list) > 0:
-            filename = track_file_list
-        else:   
-            cosmos.log("No cyclone track found")
-            return
+    elif cosmos.scenario.cyclone_track_forecast_source is not None:
 
-    # filename can now be a list of track files, or the name of a single track file
-    # Apply the same tau that is used for the meteo data
-    tc = TropicalCyclone(track_file=filename, tau=tau)
-    tc.config["include_rainfall"] = True
+        # 2) Track provided by cyclone_track_forecast_source (e.g. JTWC)
 
-    fo.mkdir(cosmos.scenario.cycle_track_spw_path)        
+        # Make sure that the area file is available and exists
+        if cosmos.scenario.cyclone_track_forecast_area_file is not None:
+            # Read the file (geojson) and get the Polygon geometry
+            forecast_area = gpd.read_file(os.path.join(cosmos.config.path.main,
+                                                       "configuration",
+                                                       "areas",
+                                                        cosmos.scenario.cyclone_track_forecast_area_file)).geometry.iloc[0]
+        else:
+            cosmos.stop("Track forecast area file (cyclone_track_forecast_area_file) not provided in scenario.toml !")
 
+        if cosmos.scenario.cyclone_track_forecast_source.lower() == "jtwc":
+
+            jtwc_path = os.path.join(cosmos.meteo_database.path, "tracks", "jtwc")
+            t0 = cosmos.cycle.replace(tzinfo=None)
+            t1 = cosmos.stop_time.replace(tzinfo=None)
+
+            # Find the track
+            track_file_name, storm_name = jtwc.find_jtwc_track_file(jtwc_path, t0, t1, forecast_area)
+
+            if track_file_name is None:
+                cosmos.log("No JTWC track found for this cycle")
+                return
+
+            # Make a TropicalCyclone object
+            tc = TropicalCyclone(track_file=track_file_name, name=storm_name)
+
+    else:
+
+        # 3) Track may be found in meteo data folders. This is now the case for COAMPS-TC.
+
+        for dataset_name, meteo_dataset in cosmos.meteo_database.dataset.items():
+
+            collect = False
+
+            for model in cosmos.scenario.model:
+                if model.meteo_dataset:
+                    if model.meteo_dataset.name == meteo_dataset.name:
+                        collect = True
+
+            if collect:
+
+                # Check if track files are available in any of the cycle folders
+                cycle_folders = fo.list_folders(os.path.join(meteo_dataset.path, "*"))
+                track_file_list = []
+                tau = meteo_dataset.tau
+                # Loop through folders and determine time of cycle
+                for folder in cycle_folders:
+                    try:
+                        t = datetime.datetime.strptime(os.path.basename(folder), "%Y%m%d_%Hz")
+                        # For hindcasts, only use data up to the last cycle
+                        if last_meteo_cycle:
+                            if t > last_meteo_cycle.replace(tzinfo=None):
+                                continue
+                        # Track start time needs to be after or at the start time of the scenario.
+                        if t >= t0:
+                            # Check if track file is available
+                            track_files = glob.glob(os.path.join(folder, "*.trk"))
+                            if len(track_files) > 0:
+                                track_file_list.append(track_files[0])
+                                storm_name = meteo_dataset.name
+                    except:
+                        print("Error in reading folder name")
+                        pass
+
+                if len(track_file_list) == 0:
+                    cosmos.log("No track files found for dataset: " + dataset_name)
+                    return
+
+                # Make a TC with list of track files
+                tc = TropicalCyclone(track_file=track_file_list, name=storm_name)
+
+    if tc is None:
+        cosmos.log("No cyclone track found")
+        return
+
+    # There is a tropical cyclone track. Now determine how to get the wind field.
+    # Two options:
+    # 1. Parametric wind field (Holland 2010)
+    # 2. Wind field from meteo data
+
+    cosmos.scenario.meteo_spiderweb = "storm.spw"
 
     if cosmos.config.run.spw_wind_field == "parametric":
-        # Use Holland (2010)
-        cosmos.scenario.meteo_spiderweb = f"{cosmos.scenario.meteo_track}.spw"
+        # 1) Use Holland (2010)
         if not os.path.exists(os.path.join(cosmos.scenario.cycle_track_spw_path,
                             cosmos.scenario.meteo_spiderweb)):
             tc.compute_wind_field()
 
-    else:    
+    else:
 
         # Use the meteo data
         for dataset_name, meteo_dataset in cosmos.meteo_database.dataset.items():
             if meteo_dataset.name == cosmos.scenario.meteo_dataset:
+
                 if len(meteo_dataset.subset) > 0:
                     times = meteo_dataset.subset[0].ds.time.values
                 else:
-                    times = meteo_dataset.subset[0].ds.time.values  
-                # # Resample the track to the meteo time step
-                # dt = times[1] - times[0]
-                # # Convert np.timedelta64 dt to integer hours
-                # dthours = int(dt.item()/1000000000/3600)
-                # Resample the track to 3-hourly
+                    times = meteo_dataset.subset[0].ds.time.values
+
                 dthours = 1
                 tc.track.resample(dthours, method="spline")
                 # Limit length of track to the meteo data (convert last time from np.datetime64 to datetime)
                 tend = datetime.datetime.utcfromtimestamp(times[-1].astype(datetime.datetime) / 1e9)
                 tc.track.shorten(tend=tend)
-                # Set spiderweb file name
-                cosmos.scenario.meteo_spiderweb = f"{meteo_dataset.name}.spw"
                 # Get wind field from meteo data                
                 tc.get_wind_field_from_meteo_dataset(meteo_dataset)
                 break
 
+    # We now have the wind field, so write the spiderweb file and cyc file in the cycle folder
+
+    # Check if track path exists. If not, create it.
+    if not os.path.exists(cosmos.scenario.cycle_track_spw_path):
+        os.makedirs(cosmos.scenario.cycle_track_spw_path)
+
     spwfile = os.path.join(cosmos.scenario.cycle_track_spw_path,
                         cosmos.scenario.meteo_spiderweb)
+
     if not os.path.exists(spwfile):    
         # Only write spw file is it does not already exist
         tc.write_spiderweb(spwfile, format="ascii", include_rainfall=True)
 
     # Also save the track file
-    cycfile = os.path.join(cosmos.scenario.cycle_track_spw_path, "track.cyc")
+    cycfile = os.path.join(cosmos.scenario.cycle_track_spw_path, "storm.cyc")
     tc.track.write(cycfile)
     # And the js file (to be uploaded to the webviewer)
     jsfile = os.path.join(cosmos.scenario.cycle_track_spw_path, "track.geojson.js")

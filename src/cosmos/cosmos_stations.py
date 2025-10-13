@@ -17,6 +17,7 @@ class Station():
         self.name      = None
         self.coops_id  = None 
         self.ndbc_id   = None 
+        self.iho_id    = None
         self.id        = None 
         self.long_name = None
         self.longitude = None
@@ -61,6 +62,9 @@ class Stations():
                 if "coops_id" in toml_stat:
                     station.coops_id = toml_stat['coops_id']
                     station.id       = toml_stat['coops_id']
+                if "iho_id" in toml_stat:
+                    station.iho_id = toml_stat['iho_id']
+                    station.id     = toml_stat['iho_id']
                 if "ndbc_id" in toml_stat:
                     station.ndbc_id = toml_stat['ndbc_id']
                     station.id      = toml_stat['ndbc_id']

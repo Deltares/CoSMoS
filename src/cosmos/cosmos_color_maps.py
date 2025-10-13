@@ -219,12 +219,12 @@ def read_color_maps(file_name):
                 nsteps = i1 - i0 + 1
                 
                 k = -1
-                for i in range(i0, i1 + 1):
+                for i in range(i0, i1 + 2):
 
                     k = k + 1
                     
                     # Interpolate
-                    z  = k/((nsteps - 1)*1.0)
+                    z  = k / (nsteps * 1.0)
                     rr = round(np.interp(z, v, r))
                     gg = round(np.interp(z, v, g))
                     bb = round(np.interp(z, v, b))                
@@ -248,9 +248,10 @@ def read_color_maps(file_name):
                         cnt["string"] = "< " + f"{zmin:.1f}"
                         cnt["lower_value"] = -1.0e6
                         cnt["upper_value"] = float(zz[i])
-                    elif k==nsteps - 1:
+                    #elif k==nsteps - 1:
+                    elif k==nsteps:
                         cnt["string"] = "> " +  f"{zmax:.1f}"
-                        cnt["lower_value"] = float(zz[i])
+                        cnt["lower_value"] = float(zz[i - 1])
                         cnt["upper_value"] = 1.0e6
                     else: 
                         cnt["string"] = f"{zz[i - 1]:.1f}" + " - " + f"{zz[i]:.1f}"                   

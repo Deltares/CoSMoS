@@ -216,6 +216,7 @@ class ModelLoop():
                 fo.rmdir(pth)
 
             if cosmos.config.run.clean_up:
+                # Run cleaning cycle (could move this to main_loop) 
                 clean_up()
 
             # Check if we need to start a new cycle

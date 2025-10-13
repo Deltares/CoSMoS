@@ -13,8 +13,7 @@ import cht_utils.fileops as fo
 from cht_utils.misc_tools import yaml2dict
 from cht_utils.prob_maps import merge_nc_his
 from cht_utils.prob_maps import merge_nc_map
-from cht_tiling.flood_map import make_flood_map_tiles
-from cht_tiling.tiling import make_png_tiles
+from cht_tiling import TiledWebMap
 from cht_sfincs import SFINCS
 from cht_nesting import nest2
 #from cht_utils.argo import Argo
@@ -322,11 +321,15 @@ def map_tiles(config):
                                             config["flood_map"]["name"],
                                             pathstr[it])                                            
 
-                    make_flood_map_tiles(zsmax, index_path, png_path, topo_path,
-                                        color_values=color_values,
-                                        zoom_range=[0, 13],
-                                        zbmax=0.5,
-                                        quiet=True)
+                    twm = TiledWebMap(png_path,
+                                      data=zsmax,
+                                      type="rgba",
+                                      parameter="flood_map",
+                                      zbmax=0.5,
+                                      color_values=color_values,
+                                      index_path=index_path,
+                                      topo_path=topo_path)
+                    twm.make()
 
                 # Full simulation        
                 zsmax = sf.output.read_zsmax(zsmax_file=zsmax_file,
@@ -341,11 +344,16 @@ def map_tiles(config):
                                         config["flood_map"]["name"],
                                         pathstr[-1]) 
 
-                make_flood_map_tiles(zsmax, index_path, png_path, topo_path,
-                                    color_values=color_values,
-                                    zoom_range=[0, 14],
+                twm = TiledWebMap(png_path,
+                                    data=zsmax,
+                                    type="rgba",
+                                    parameter="flood_map",
                                     zbmax=0.5,
-                                    quiet=True)
+                                    color_values=color_values,
+                                    index_path=index_path,
+                                    topo_path=topo_path)
+                twm.make()
+
             except Exception as e:
                 print("An error occured while making flood map tiles: " + str(e))
 
@@ -423,17 +431,15 @@ def map_tiles(config):
                                             config["water_level_map"]["name"],
                                             pathstr[it]) 
                     
-                    make_png_tiles(
-                        valg=zsmax,
-                        index_path=index_path,
-                        png_path=png_path,
-                        option="water_level",
-                        zoom_range=[0,11],
-                        topo_path=topo_path,
-                        color_values=color_values,
-                        zbmax=zbmax,
-                        quiet=True,
-                    ) 
+                    twm = TiledWebMap(png_path,
+                                      data=zsmax,
+                                      type="rgba",
+                                      parameter="water_level",
+                                      zbmax=zbmax,
+                                      color_values=color_values,
+                                      index_path=index_path,
+                                      topo_path=topo_path)
+                    twm.make()
 
                 # Full simulation        
                 zsmax = sf.output.read_zsmax(zsmax_file=zsmax_file,
@@ -449,17 +455,15 @@ def map_tiles(config):
                                         config["water_level_map"]["name"],
                                         pathstr[-1]) 
 
-                make_png_tiles(
-                    valg=zsmax,
-                    index_path=index_path,
-                    png_path=png_path,
-                    option="water_level",
-                    zoom_range=[0,11],
-                    topo_path=topo_path,
-                    color_values=color_values,
-                    zbmax=zbmax,
-                    quiet=True,
-                )
+                twm = TiledWebMap(png_path,
+                                    data=zsmax,
+                                    type="rgba",
+                                    parameter="water_level",
+                                    zbmax=zbmax,
+                                    color_values=color_values,
+                                    index_path=index_path,
+                                    topo_path=topo_path)
+                twm.make()
                             
             except Exception as e:
                 print("An error occured while making flood map tiles: {}".format(str(e)))
@@ -512,14 +516,13 @@ def map_tiles(config):
                 # only show values above 1.0 mm
                 cumprcp[np.where(cumprcp<1.0)] = np.nan
 
-                make_png_tiles(
-                    valg=cumprcp,
-                    index_path=index_path,
-                    png_path=png_path,
-                    zoom_range=[0,10],
-                    color_values=color_values,
-                    quiet=True,
-                )
+                twm = TiledWebMap(png_path,
+                                    data=cumprcp,
+                                    type="rgba",
+                                    parameter="precipitation",
+                                    color_values=color_values,
+                                    index_path=index_path)
+                twm.make()
                             
             except Exception as e:
                 print("An error occured while making precipitation map tiles: {}".format(str(e)))

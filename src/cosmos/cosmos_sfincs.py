@@ -78,11 +78,31 @@ class CoSMoS_SFINCS(Model):
         self.domain.input.variables.dtout    = None
         self.domain.input.variables.outputformat = "net"
         self.domain.input.variables.bzsfile  = "sfincs.bzs"
-        self.domain.input.variables.storecumprcp = 1
+
+        if self.role == "floodmap":
+            # We need to make a flood map, but not max water levels
+            self.make_flood_map = True
+            self.make_water_level_map = False
+            self.meteo_precipitation = True  # Always use meteo precipitation in flood map mode
+        elif self.role == "large_scale":
+            # We need to make max water levels, but not a flood map
+            self.make_flood_map = False
+            self.make_water_level_map = True
+            self.meteo_precipitation = False  # Never use meteo precipitation in large scale mode
+        else:
+            # Generic model, use settings from config file
+            pass   
 
         if cosmos.config.run.event_mode == "tsunami":
             # Store velocity in output file. Use for nesting, and later also damage assessment ?
             self.domain.input.variables.storevel = 1
+
+        # Turn on bathtub mode when this is a flood map simulation
+        bathtub = False
+        if cosmos.config.run.bathtub and self.make_flood_map:
+            bathtub = True
+            self.domain.input.variables.bathtub = 1
+            self.domain.input.variables.bathtub_dt = 3600.0
 
         # Turn on viscosity in all SFINCS models
         self.domain.input.viscosity = 1
@@ -126,15 +146,19 @@ class CoSMoS_SFINCS(Model):
             self.domain.observation_points.write()
 
         # Make restart file
-        trstsec = self.domain.input.variables.tstop.replace(tzinfo=None) - self.domain.input.variables.tref            
-        if self.meteo_dataset:
-            if self.meteo_dataset.last_analysis_time:
-                trstsec = self.meteo_dataset.last_analysis_time.replace(tzinfo=None) - self.domain.input.variables.tref
-        self.domain.input.variables.trstout = trstsec.total_seconds()
-        self.domain.input.variables.dtrst   = 0.0
+        if not bathtub:
+            trstsec = self.domain.input.variables.tstop.replace(tzinfo=None) - self.domain.input.variables.tref            
+            if self.meteo_dataset:
+                if self.meteo_dataset.last_analysis_time:
+                    trstsec = self.meteo_dataset.last_analysis_time.replace(tzinfo=None) - self.domain.input.variables.tref
+            self.domain.input.variables.trstout = trstsec.total_seconds()
+            self.domain.input.variables.dtrst   = 0.0
+        else:
+            self.domain.input.variables.trstout = 0.0
+            self.domain.input.variables.dtrst   = 0.0    
         
         # Get restart file from previous cycle
-        if self.flow_restart_file:
+        if self.flow_restart_file and not bathtub:
             src = os.path.join(self.restart_flow_path,
                                self.flow_restart_file)
             dst = os.path.join(self.job_path,
@@ -159,9 +183,10 @@ class CoSMoS_SFINCS(Model):
             
         elif self.domain.input.variables.bcafile:            
             # Get boundary conditions from astronomic components
-            self.domain.boundary_conditions.generate_bzs_from_bca(dt=600.0,
-                                                                  offset=0.0,
-                                                                  write_file=True)
+            pass
+            # self.domain.boundary_conditions.generate_bzs_from_bca(dt=600.0,
+            #                                                       offset=0.0,
+            #                                                       write_file=True)
 
         if self.wave_nested:
             # The actual nesting occurs in the run_job.py file
@@ -242,16 +267,24 @@ class CoSMoS_SFINCS(Model):
                 for member in cosmos.scenario.ensemble_names:
                     f.write(member + "\n")
 
-        # self.write_run_simulation_batch_file()
+        # Write run_simulation.bat or .sh file
         if cosmos.config.run.run_mode != "cloud":
             # Make run batch file (only for windows and linux)
             if platform.system() == "Windows":
                 batch_file = os.path.join(self.job_path, "run_simulation.bat")
-                fid = open(batch_file, "w")
-                fid.write("@ echo off\n")
-                exe_path = os.path.join(cosmos.config.executables.sfincs_path, "sfincs.exe")
-                fid.write(exe_path + "\n")
-                fid.close()
+                # Docker or exe? We do not run docker in bathtub mode, as it is slower.
+                if cosmos.config.run.sfincs_docker and not bathtub:
+                    fid = open(batch_file, "w")
+                    fid.write("@ echo off\n")
+                    fid.write(f"rem docker pull {cosmos.config.executables.sfincs_docker_image}\n")
+                    fid.write(f"docker run --rm -it --gpus all -v %cd%:/data {cosmos.config.executables.sfincs_docker_image}\n")
+                    fid.close()
+                else:
+                    fid = open(batch_file, "w")
+                    fid.write("@ echo off\n")
+                    exe_path = os.path.join(cosmos.config.executables.sfincs_path, "sfincs.exe")
+                    fid.write(exe_path + "\n")
+                    fid.close()
             elif platform.system() == "Linux":
                 batch_file = os.path.join(self.job_path, "run_simulation.sh")
                 fid = open(batch_file, "w")

@@ -12,7 +12,7 @@ import platform
 import cht_utils.fileops as fo
 from cht_utils.misc_tools import yaml2dict
 from cht_nesting.nest2 import nest2
-from cht_tiling.tiling import make_png_tiles
+from cht_tiling import TiledWebMap
 from cht_xbeach.xbeach import XBeach
 
 def get_s3_client(config):
@@ -185,21 +185,28 @@ def map_tiles(config):
 def make_sedero_tiles(config, sedero, index_path, sedero_map_path):
 
     color_values = config["sedero_map"]["color_map"]["contours"]
-    
-    make_png_tiles(sedero, index_path, sedero_map_path,
-                    color_values=color_values,
-                    zoom_range=[0, 16],
-                    quiet=True)
+
+    twm = TiledWebMap(sedero_map_path,
+                      data=sedero,
+                      type="rgba",
+                      parameter="sedero",
+                      color_values=color_values,
+                      index_path=index_path,
+                      quiet=True)
+    twm.make()
         
 def make_bedlevel_tiles(config, bedlevel, index_path, bedlevel_map_path):
 
     color_values = config["sedero_map"]["color_map_zb"]["contours"]
     
-    make_png_tiles(bedlevel, index_path, bedlevel_map_path,
-                    color_values=color_values,
-                    zoom_range=[0, 16],
-                    quiet=True)
-
+    twm = TiledWebMap(bedlevel_map_path,
+                      data=bedlevel,
+                      type="rgba",
+                      parameter="bed_level",
+                      color_values=color_values,
+                      index_path=index_path,
+                      quiet=True)
+    twm.make()
 
 # XBEACH job script
 

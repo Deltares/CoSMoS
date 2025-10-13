@@ -83,6 +83,8 @@ class CoSMoS_HurryWave(Model):
         self.domain.input.variables.dtmapout = 21600.0
         self.domain.input.variables.outputformat = "net"
 
+        self.meteo_atmospheric_pressure = False
+        self.meteo_precipitation = False
 
         # Boundary conditions        
         if self.wave_nested:
@@ -91,10 +93,14 @@ class CoSMoS_HurryWave(Model):
                     
         # Meteo forcing
         if self.meteo_wind:
-            self.write_meteo_input_files("hurrywave", self.domain.input.variables.tref)
-            self.domain.input.variables.amufile = "hurrywave.amu"
-            self.domain.input.variables.amvfile = "hurrywave.amv"
-                
+            self.write_meteo_input_files("hurrywave", self.domain.input.variables.tref, format="netcdf")
+            # self.domain.input.variables.amufile = "hurrywave.amu"
+            # self.domain.input.variables.amvfile = "hurrywave.amv"
+            self.domain.input.variables.netamuamvfile = "hurrywave_wind.nc"
+
+        # Spiderweb file
+        self.meteo_spiderweb = cosmos.scenario.meteo_spiderweb
+
         if self.meteo_spiderweb or self.meteo_track and not self.ensemble:   
             self.domain.input.variables.spwfile = "hurrywave.spw"
             # Spiderweb file given, copy to job folder
@@ -194,14 +200,23 @@ class CoSMoS_HurryWave(Model):
                     f.write(member + "\n")
 
         if cosmos.config.run.run_mode != "cloud":
+
             # Make run batch file (only for windows and linux).
             if platform.system() == "Windows":
                 batch_file = os.path.join(self.job_path, "run_simulation.bat")
-                fid = open(batch_file, "w")
-                fid.write("@ echo off\n")
-                exe_path = os.path.join(cosmos.config.executables.hurrywave_path, "hurrywave.exe")
-                fid.write(exe_path + "\n")
-                fid.close()
+                # Docker or exe? 
+                if cosmos.config.run.hurrywave_docker:
+                    fid = open(batch_file, "w")
+                    fid.write("@ echo off\n")
+                    fid.write(f"docker pull {cosmos.config.executables.hurrywave_docker_image}\n")
+                    fid.write(f"docker run --rm -it --gpus all -v %cd%:/data {cosmos.config.executables.hurrywave_docker_image}\n")
+                    fid.close()
+                else:
+                    fid = open(batch_file, "w")
+                    fid.write("@ echo off\n")
+                    exe_path = os.path.join(cosmos.config.executables.hurrywave_path, "hurrywave.exe")
+                    fid.write(exe_path + "\n")
+                    fid.close()
             elif platform.system() == "Linux":
                 batch_file = os.path.join(self.job_path, "run_simulation.sh")
                 fid = open(batch_file, "w")

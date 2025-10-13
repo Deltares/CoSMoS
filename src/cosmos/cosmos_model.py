@@ -80,6 +80,7 @@ class Model:
         self.ensemble           = False
         self.zs_ini_max         = -9999.9
         self.exterior             = None
+        self.role               = "generic"  # can be "generic", "floodmap", "large_scale". Based on the role, we can set some predefined actions. This happens e.g. in cosmos_sfincs.py
 
     def read_generic(self):
         """Read model attributes from model.toml file.
@@ -98,7 +99,17 @@ class Model:
 
         self.flow_nested_name = self.flow_nested    
         self.wave_nested_name = self.wave_nested    
-        self.bw_nested_name   = self.bw_nested    
+        self.bw_nested_name   = self.bw_nested
+
+        # If running in bathtub mode and make_flood_map, set spin-up time to zero
+        if cosmos.config.run.bathtub and self.role == "floodmap":
+            self.flow_spinup_time = 0.0
+            self.wave_spinup_time = 0.0
+
+        # If this is a SFINCS model and self.wave_nested is not None, then this is a SFINCS/SnapWave model
+        # In that case, we set self.wave = True    
+        if self.wave_nested is not None:
+            self.wave = True
 
         self.crs = CRS(self.crs)
 
@@ -126,7 +137,7 @@ class Model:
                              index_col=False,
                              header=None,
                              names=['x', 'y'],
-                             sep="\s+")
+                             sep=r"\s+")
             # Make gdf with outline 
             geom = shapely.geometry.Polygon(np.squeeze(df.to_numpy()))
             # GDF with outline of model    
@@ -760,7 +771,7 @@ class Model:
                     if station.name in all_nested_stations and bw==0:
                         station.upload = False 
 
-    def write_meteo_input_files(self, prefix, tref, path=None):
+    def write_meteo_input_files(self, prefix, tref, path=None, format="ascii"):
         
         if not path:
             path = self.job_path
@@ -786,7 +797,7 @@ class Model:
             else:
 
                 # Make new mesh in local CRS (should we make dxy configurable ?)
-                dxy      = 5000.0
+                dxy      = 20000.0
                 x        = np.arange(self.xlim[0] - dxy, self.xlim[1] + dxy, dxy)
                 y        = np.arange(self.ylim[0] - dxy, self.ylim[1] + dxy, dxy)
                 meteo_dataset = self.meteo_dataset.cut_out(x=x,
@@ -798,26 +809,49 @@ class Model:
 
             # Simple for now
 
-            if self.meteo_wind:                
+            if format == "netcdf":
+                    
+                params = []
+
+                if self.meteo_wind:
+                    params.append("wind")
+                if self.meteo_atmospheric_pressure:
+                    params.append("barometric_pressure")
+                if self.meteo_precipitation:
+                    params.append("precipitation")
+
                 meteo_dataset.to_delft3d(prefix,
-                                         parameters=["wind"],
+                                         format="netcdf",
+                                         parameters=params,
                                          path=path,
                                          refdate=tref,
                                          time_range=time_range,
                                          header_comments=header_comments)            
 
-            if self.meteo_atmospheric_pressure:
-                meteo_dataset.to_delft3d(prefix,
-                                         parameters=["barometric_pressure"],
-                                         path=path,
-                                         refdate=tref,
-                                         time_range=time_range,
-                                         header_comments=header_comments)
-                            
-            if self.meteo_precipitation:                
-                meteo_dataset.to_delft3d(prefix,
-                                         parameters=["precipitation"],
-                                         path=path,
-                                         refdate=tref,
-                                         time_range=time_range,
-                                         header_comments=header_comments)
+            else:
+
+                # ASCII format
+
+                if self.meteo_wind:                
+                    meteo_dataset.to_delft3d(prefix,
+                                            parameters=["wind"],
+                                            path=path,
+                                            refdate=tref,
+                                            time_range=time_range,
+                                            header_comments=header_comments)            
+
+                if self.meteo_atmospheric_pressure:
+                    meteo_dataset.to_delft3d(prefix,
+                                            parameters=["barometric_pressure"],
+                                            path=path,
+                                            refdate=tref,
+                                            time_range=time_range,
+                                            header_comments=header_comments)
+                                
+                if self.meteo_precipitation:                
+                    meteo_dataset.to_delft3d(prefix,
+                                            parameters=["precipitation"],
+                                            path=path,
+                                            refdate=tref,
+                                            time_range=time_range,
+                                            header_comments=header_comments)

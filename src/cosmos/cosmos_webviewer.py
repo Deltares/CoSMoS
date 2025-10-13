@@ -15,13 +15,16 @@ from scipy import interpolate
 from geojson import Point, LineString, Feature, FeatureCollection
 from pyproj import CRS
 from pyproj import Transformer
+import copy
 
 from .cosmos_argo import Argo
 from .cosmos_main import cosmos
 
+from cht_meteo import MeteoDataset
 import cht_utils.fileops as fo
 import cht_utils.misc_tools
 from cht_utils.misc_tools import dict2yaml
+from cht_tide.tide_stations import TideStationsDataset
 
 class WebViewer:
     """Cosmos webviewer class
@@ -293,62 +296,95 @@ class WebViewer:
         try:
 
             # Wind 
-            # Name of meteo dataset in scenario file (this one will be used for the wind map)            
+            # Name of meteo dataset in scenario file (this one will be used for the wind map)
 
+            # First find our meteo dataset
+            dset = None
             for dataset_name, meteo_dataset in cosmos.meteo_database.dataset.items():
-
                 if meteo_dataset.name == cosmos.scenario.meteo_dataset:
-                    
-                    # TODO these ranges should be in the config file !
-                    xlim = [-99.0, -55.0]
-                    ylim = [8.0, 45.0]
+                    # Make a copy of the meteo dataset
+                    dset = copy.deepcopy(meteo_dataset)
 
-                    # Either fix stride in cut-out or move to write_wind_to_json                                                        
-                    dset = meteo_dataset.cut_out(x_range=xlim,
-                                                   y_range=ylim,
-                                                   time_range=[],
-                                                   stride=2)
+            # Check if there is a tropical cyclone
+            if cosmos.tropical_cyclone is not None:
+                # Create a meteo dataset from the tropical cyclone
+                if dset is None:
+                    # There is not meteo dataset so we need to create one
+                    # This still needs to be developed !!!
+                    # First initialize an empty meteo dataset (with all zeros)
+                    lon_list = np.arange(110.0, 140.0, 0.25).tolist()
+                    lat_list = np.arange(0.0, 30.0, 0.25).tolist()
+                    # Time zone is UTC
+                    tstart = cosmos.cycle
+                    tstop = cosmos.stop_time.replace(tzinfo=datetime.timezone.utc)
+                    # Make a list of datetime.datetime objects from the start to cycle to the end with 3-hour intervals
+                    time_list = pd.date_range(start=tstart,
+                                              end=tstop,
+                                              freq='1h').to_pydatetime().tolist()
+                    mds = MeteoDataset(lon=lon_list, lat=lat_list, time=time_list)
+                    mds.fill()
+                    dset = cosmos.tropical_cyclone.to_meteo_dataset(mds)
+                    # cosmos.log("No meteo dataset found for wind maps")
+                    # return    
 
-                    # Get maximum wind speed
-                    u = dset.ds["wind_u"].values[:]
-                    v = dset.ds["wind_v"].values[:]
-                    vmag = np.sqrt(u*u + v*v)
-                    wndmx = np.max(vmag)
-                    
-                    file_name = os.path.join(self.cycle_path, "wind.json.js")
-                    dset.wind_to_json(file_name, time_range=None, js=True)
-                    
-                    # Add wind to map variables
-    
-                    if wndmx<=20.0:
-                        contour_set = "wnd20"
-                        wndmx=20.0                
-                    elif wndmx<=40.0:   
-                        contour_set = "wnd40"
-                        wndmx=40.0                
-                    else:   
-                        contour_set = "wnd60"
-                        wndmx=60.0                
-                    dct={}
-                    dct["name"]        = "wind"
-                    dct["long_name"]   = "Wind"
-                    dct["description"] = "This is a wind map. It can tell if your house will blow away."
-                    dct["format"]      = "vector_field"
-                    dct["max"]         = wndmx
-                    mp = cosmos.config.map_contours[contour_set]                    
-                    lgn = {}
-                    lgn["text"] = mp["string"]                        
-                    cntrs = mp["contours"]        
-                    contours = []                    
-                    for cntr in cntrs:    
-                        contour = {}
-                        contour["text"]  = cntr["string"]
-                        contour["color"] = "#" + cntr["hex"]
-                        contours.append(contour)
-                    lgn["contours"] = contours
-                    dct["legend"]   = lgn
+                else:
+                    # There is a meteo dataset so we can add the tropical cyclone to it
+                    dset = cosmos.tropical_cyclone.to_meteo_dataset(dset)
+                    # cosmos.log("No meteo dataset found for wind maps")
+                    # return    
 
-                    self.map_variables.append(dct)
+            if dset is None:
+                cosmos.log("No meteo dataset found for wind maps")
+                return
+
+            # # TODO these ranges should be in the config file ! Probably part of the scenario ?
+            # xlim = [-99.0, -55.0]
+            # ylim = [8.0, 45.0]
+            # Either fix stride in cut-out or move to write_wind_to_json                                                        
+            # dset = dset.cut_out(x_range=xlim,
+            #                              y_range=ylim,
+            #                              time_range=[])
+
+            # Get maximum wind speed
+            u = dset.ds["wind_u"].values[:]
+            v = dset.ds["wind_v"].values[:]
+            vmag = np.sqrt(u*u + v*v)
+            wndmx = np.max(vmag)
+            
+            file_name = os.path.join(self.cycle_path, "wind.json.js")
+            dset.wind_to_json(file_name, time_range=None, js=True)
+            
+            # Add wind to map variables
+
+            if wndmx<=20.0:
+                contour_set = "wnd20"
+                wndmx=20.0                
+            elif wndmx<=40.0:   
+                contour_set = "wnd40"
+                wndmx=40.0                
+            else:   
+                contour_set = "wnd60"
+                wndmx=60.0                
+            dct={}
+            dct["name"]        = "wind"
+            dct["long_name"]   = "Wind"
+            dct["description"] = "This is a wind map. It can tell if your house will blow away."
+            dct["format"]      = "vector_field"
+            dct["max"]         = wndmx
+            mp = cosmos.config.map_contours[contour_set]                    
+            lgn = {}
+            lgn["text"] = mp["string"]                        
+            cntrs = mp["contours"]        
+            contours = []                    
+            for cntr in cntrs:    
+                contour = {}
+                contour["text"]  = cntr["string"]
+                contour["color"] = "#" + cntr["hex"]
+                contours.append(contour)
+            lgn["contours"] = contours
+            dct["legend"]   = lgn
+
+            self.map_variables.append(dct)
 
             # Would be neater to write folloing two files as geojson first and then write them as js here 
             if cosmos.tropical_cyclone is not None:
@@ -607,9 +643,9 @@ class WebViewer:
                         features = []
                         
                         dfx = pd.read_csv(os.path.join(model.path, 'input', 'runup.x'), index_col=0,
-                            sep='\s+')
+                            sep=r"\s+")
                         dfy = pd.read_csv(os.path.join(model.path, 'input', 'runup.y'), index_col=0,
-                            sep='\s+')                    
+                            sep=r"\s+")
                         r2max= dfx.columns.values
 
                         for ip in range(len(model.domain.filename)):
@@ -668,6 +704,9 @@ class WebViewer:
             station_file = "stations.geojson.js"
             station_var = "stations"
         features = []    
+
+        tide_dataset_loaded = False
+
         for model in cosmos.scenario.model:
             if model.station:
                 for station in model.station:
@@ -685,6 +724,7 @@ class WebViewer:
                         t1_obs = cosmos.stop_time
                         cmp_file = None
                         obs_file = None
+                        prd_file = None
                         
                         # Merge time series from previous cycles
                         v  = merge_timeseries(path, model.name, station.name, ts_type,
@@ -743,7 +783,35 @@ class WebViewer:
                                                                     s,
                                                                     "var csv = `date_time," + var_string)
                                 
-                                
+
+                        # Check if we need to make tidal predictions (right now, this only works for IHO stations!)
+                        if ts_type == "wl" and station.iho_id is not None:
+                            # Make tidal predictions
+                            prd_file = "wl." + station.name + ".predicted.csv.js"
+                            t0 = cosmos.cycle - datetime.timedelta(days=3)
+                            t1 = cosmos.stop_time + datetime.timedelta(days=1)
+                            # Remove time zone from t0
+                            t0 = t0.replace(tzinfo=None)
+                            if not tide_dataset_loaded:
+                                # Load the tide dataset only once
+                                tide_stations_path = os.path.join(cosmos.config.path.main,
+                                                                 "configuration", 
+                                                                 "data",
+                                                                 "tide_stations",
+                                                                 "iho")
+                                tide_dataset = TideStationsDataset("iho", tide_stations_path)
+                                tide_dataset_loaded = True
+                            prd = tide_dataset.predict(name=station.iho_id,
+                                                        start=t0,
+                                                        end=t1)
+                            if prd is not None:
+                                s = prd.to_csv(date_format='%Y-%m-%dT%H:%M:%S',
+                                              float_format='%.3f',
+                                              header=False) 
+                                cht_utils.misc_tools.write_csv_js(os.path.join(self.cycle_path, "timeseries", prd_file),
+                                                                s,
+                                                                "var csvprd = `date_time,wl")
+
                         if cmp_file or obs_file:
                             features.append(Feature(geometry=point,
                                                     properties={"name":station.name,
@@ -755,7 +823,8 @@ class WebViewer:
                                                                 "mllw":station.mllw,
                                                                 "cycle": cosmos.cycle_string,
                                                                 "cmp_file":cmp_file,
-                                                                "obs_file":obs_file}))
+                                                                "obs_file":obs_file,
+                                                                "prd_file":prd_file}))
         if features:
             feature_collection = FeatureCollection(features)
             buoys_file = os.path.join(self.cycle_path, station_file)
@@ -798,7 +867,11 @@ class WebViewer:
                 previous_cycles.append(cosmos.cycle_string)
         else:
             # Find previous cycles locally
-            previous_cycles = fo.list_folders(self.cycle_path, basename=True)
+            scenario_path = os.path.join(self.path,
+                                            "data",
+                                            cosmos.scenario.name)
+            previous_cycles = fo.list_folders(os.path.join(scenario_path, "*"),
+                                              basename=True)
 
         previous_cycles = sorted(previous_cycles, reverse=True)
 
