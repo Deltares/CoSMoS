@@ -21,7 +21,7 @@ from .cosmos_webviewer import WebViewer
 
 try:
     from .cosmos_argo import Argo
-except:
+except Exception:
     print("Argo not available")
 
 import cht_utils.fileops as fo
@@ -69,15 +69,6 @@ class MainLoop:
 
         cosmos.log("Starting main loop ...")
 
-        # get delay time
-        delay_hours = cosmos.config.run.delay
-        # When you need a timedelta, make a new variable
-        delay_td = datetime.timedelta(hours=delay_hours)
-
-        # DO NOT DO THIS ANYMORE (once config is set, it should not be read in anymore)
-        # # Update config (it's possible that this was changed while running a forecast scenario)
-        # cosmos.config.set()
-
         # Set cloud object
         if cosmos.config.run.run_mode == "cloud":
             cosmos.cloud = Cloud()
@@ -108,7 +99,7 @@ class MainLoop:
             if cosmos.last_cycle:
                 if cosmos.cycle >= cosmos.last_cycle:
                     cosmos.next_cycle_time = None
-        else:            
+        else:
             # Single shot mode, so no next cycle
             cosmos.next_cycle_time = None
 
@@ -129,12 +120,13 @@ class MainLoop:
         delay = datetime.timedelta(hours=cosmos.config.run.delay)  # Delay in hours
         tnow = datetime.datetime.now(datetime.timezone.utc)
 
-        if tnow > cosmos.cycle + delay or cosmos.config.run.mode == "single_shot":
-            # start now
+        if cosmos.config.run.mode == "single_shot":
+            # Sigle shot, so we can start now
             start_time = tnow + datetime.timedelta(seconds=1)
         else:
-            # start after delay
-            start_time = cosmos.cycle + delay_td + datetime.timedelta(seconds=5)
+            # Continuous, so we start at the cycle time (plus delay if this is set)
+            start_time = cosmos.cycle + delay + datetime.timedelta(seconds=5)
+
         self.scheduler = sched.scheduler(time.time, time.sleep)
         dt = start_time - tnow
 
