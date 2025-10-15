@@ -11,11 +11,10 @@ import platform
 
 from .cosmos_main import cosmos
 from .cosmos_cluster import cluster_dict as cluster
-from .cosmos_clean_up import clean_up
 
 try:
     from .cosmos_argo import Argo
-except:
+except Exception:
     print("Argo not available")
 import cht_utils.fileops as fo
 
@@ -214,10 +213,6 @@ class ModelLoop():
                 pth = os.path.join(cosmos.config.path.jobs,
                                    cosmos.scenario.name)
                 fo.rmdir(pth)
-
-            if cosmos.config.run.clean_up:
-                # Run cleaning cycle (could move this to main_loop) 
-                clean_up()
 
             # Check if we need to start a new cycle
             if cosmos.next_cycle_time:

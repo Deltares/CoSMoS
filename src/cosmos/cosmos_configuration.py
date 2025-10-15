@@ -122,7 +122,7 @@ class Run:
         self.just_initialize = False
         self.run_models      = True
         self.collect_meteo_up_to_cycle = False
-        self.remove_old_cycles = 0
+        self.prune_after_hours = 72
         self.delay           = 0  # hours to wait after cycle time before starting the run
         # Run all models in ensemble model by default
         self.ensemble_models = ["sfincs", "hurrywave", "delft3d", "xbeach", "beware"]

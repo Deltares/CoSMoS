@@ -18,6 +18,7 @@ from .cosmos_scenario import Scenario
 from .cosmos_cloud import Cloud
 from .cosmos_tsunami import CoSMoS_Tsunami
 from .cosmos_webviewer import WebViewer
+from .cosmos_clean_up import clean_up
 
 try:
     from .cosmos_argo import Argo
@@ -167,52 +168,9 @@ class MainLoop:
         # Start by reading all available models, stations, etc.
         cosmos.log("Starting cycle ...")
 
-        # Clean up should be moved to different function
-        if self.clean_up:
-            # Don't allow clean up when just initializing or continuous mode
-            if not self.just_initialize and cosmos.config.run.mode == "single_shot":
-                # Remove all old modelruns in scenario folder
-                pths = fo.list_folders(os.path.join(cosmos.scenario.path, "*"))
-                for pth in pths:
-                    fo.rmdir(pth)
-                # Remove all the webviewer tiles from the local webviewer folder
-                pths = fo.list_folders(
-                    os.path.join(
-                        cosmos.config.webviewer.data_path, cosmos.scenario.name, "*"
-                    )
-                )
-                for pth in pths:
-                    fo.rmdir(pth)
-                # Clear the job list
-                fo.rmdir(os.path.join(cosmos.config.path.jobs, cosmos.scenario.name))
-
-        # Remove older cycles
-        if not self.just_initialize and cosmos.config.run.mode == "continuous":
-            if cosmos.config.run.remove_old_cycles > 0:
-                # Get list of all cycles in scneario folder
-                cycle_list = fo.list_folders(os.path.join(cosmos.scenario.path, "*z"))
-                tkeep = cosmos.cycle.replace(tzinfo=None) - datetime.timedelta(
-                    hours=cosmos.config.run.remove_old_cycles
-                )
-                for cycle in cycle_list:
-                    t = datetime.datetime.strptime(cycle[-12:], "%Y%m%d_%Hz")
-                    if t < tkeep:
-                        cosmos.log("Removing older cycle : " + cycle[-12:])
-                        fo.rmdir(cycle)
-                        cosmos.log(
-                            "Also removing webviewer tiles of older cycle : "
-                            + cycle[-12:]
-                        )
-                        try:
-                            fo.rmdir(
-                                os.path.join(
-                                    cosmos.config.webviewer.data_path,
-                                    cosmos.scenario.name,
-                                    cycle[-12:],
-                                )
-                            )
-                        except:
-                            pass
+        if cosmos.config.run.clean_up:
+            # Run cleaning cycle
+            clean_up()
 
         # Create scenario cycle paths
         fo.mkdir(cosmos.scenario.cycle_path)

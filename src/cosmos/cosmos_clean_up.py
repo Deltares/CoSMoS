@@ -57,7 +57,7 @@ def remove_older_cycles():
         if cycle.endswith('z'):
             tstr = cycle.replace('z', '')
             t = datetime.datetime.strptime(tstr, "%Y%m%d_%H").replace(tzinfo=cosmos.cycle.tzinfo)
-            if t < cosmos.cycle - datetime.timedelta(days=2):
+            if t < cosmos.cycle - datetime.timedelta(hours=cosmos.config.run.prune_after_hours):
                 pth = os.path.join(cosmos.scenario.path, cycle)
                 fo.rmdir(pth)
  
@@ -75,7 +75,7 @@ def remove_older_restart_files():
                 if file.endswith('.rst'):
                     tstr = file.replace('.rst', '')[-15:]  # Get the YYYYMMDDHHMMSS part
                     t = datetime.datetime.strptime(tstr, "%Y%m%d.%H%M%S").replace(tzinfo=cosmos.cycle.tzinfo)
-                    if t < cosmos.cycle - datetime.timedelta(days=3):
+                    if t < cosmos.cycle - datetime.timedelta(hours=cosmos.config.run.prune_after_hours):
                         pth = os.path.join(restart_path_flow, file)
                         cosmos.log(f"Removing old restart file : {pth}")
                         os.remove(pth)
@@ -87,7 +87,7 @@ def remove_older_restart_files():
                 if file.endswith('.rst'):
                     tstr = file.replace('.rst', '')[-15:]  # Get the YYYYMMDDHHMMSS part
                     t = datetime.datetime.strptime(tstr, "%Y%m%d.%H%M%S").replace(tzinfo=cosmos.cycle.tzinfo)
-                    if t < cosmos.cycle - datetime.timedelta(days=3):
+                    if t < cosmos.cycle - datetime.timedelta(hours=cosmos.config.run.prune_after_hours):
                         pth = os.path.join(restart_path_wave, file)
                         cosmos.log(f"Removing old restart file : {pth}")
                         os.remove(pth)            
@@ -106,6 +106,6 @@ def remove_older_webviewer_cycles():
         if cycle.endswith('z'):
             tstr = cycle.replace('z', '')
             t = datetime.datetime.strptime(tstr, "%Y%m%d_%H").replace(tzinfo=cosmos.cycle.tzinfo)
-            if t < cosmos.cycle - datetime.timedelta(days=1):
+            if t < cosmos.cycle - datetime.timedelta(hours=24):
                 pth = os.path.join(wvpath, cycle)
                 fo.rmdir(pth)

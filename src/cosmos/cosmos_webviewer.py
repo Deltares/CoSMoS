@@ -1026,7 +1026,7 @@ class WebViewer:
 
             # Get list of all cycles in scneario folder
             cycle_list = fo.list_folders(os.path.join(remote_path, cosmos.scenario.name, "*z"))
-            tkeep = cosmos.cycle.replace(tzinfo=None) - datetime.timedelta(hours=cosmos.config.run.remove_old_cycles)
+            tkeep = cosmos.cycle.replace(tzinfo=None) - datetime.timedelta(hours=cosmos.config.run.prune_after_hours)
             for cycle in cycle_list:
                 cycle_time = datetime.datetime.strptime(cycle[-12:], "%Y%m%d_%Hz")
                 if cycle_time < tkeep:

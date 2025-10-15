@@ -215,7 +215,7 @@ def collect_meteo():
                             cosmos.scenario.meteo_spiderweb)):
             tc.compute_wind_field()
 
-    else:
+    elif cosmos.config.run.spw_wind_field == "meteo_data":
 
         # Use the meteo data
         for dataset_name, meteo_dataset in cosmos.meteo_database.dataset.items():
@@ -234,6 +234,10 @@ def collect_meteo():
                 # Get wind field from meteo data                
                 tc.get_wind_field_from_meteo_dataset(meteo_dataset)
                 break
+
+    else:
+        cosmos.log(f"cosmos.config.run.spw_wind_field option {cosmos.config.run.spw_wind_field} not recognized!")
+        return
 
     # We now have the wind field, so write the spiderweb file and cyc file in the cycle folder
 
