@@ -334,13 +334,10 @@ class WebViewer:
                 cosmos.log("No meteo dataset found for wind maps")
                 return
 
-            # # TODO these ranges should be in the config file ! Probably part of the scenario ?
-            # xlim = [-99.0, -55.0]
-            # ylim = [8.0, 45.0]
-            # Either fix stride in cut-out or move to write_wind_to_json                                                        
-            # dset = dset.cut_out(x_range=xlim,
-            #                              y_range=ylim,
-            #                              time_range=[])
+            # Cut out to lon/lat limits if specified in config
+            if cosmos.config.webviewer.lon_lim is not None and cosmos.config.webviewer.lat_lim is not None:
+                dset = dset.cut_out(x_range=cosmos.config.webviewer.lon_lim,
+                                    y_range=cosmos.config.webviewer.lat_lim)
 
             # Get maximum wind speed
             u = dset.ds["wind_u"].values[:]
@@ -1159,7 +1156,7 @@ def merge_timeseries(path, model_name, station, prefix,
     cycle_list = fo.list_folders(os.path.join(path,'*z'))
     for it, cycle_string in enumerate(cycle_list):
         available_times.append(datetime.datetime.strptime(cycle_list[it][-12:],"%Y%m%d_%Hz"))
-    if t0==None or t1==None:
+    if t0 is None or t1 is None:
         t0 = available_times[0]
         t1 = available_times[-1]
             

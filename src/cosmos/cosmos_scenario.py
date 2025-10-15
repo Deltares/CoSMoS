@@ -35,6 +35,7 @@ class Scenario:
         self.long_name     = name
         self.description   = name
         self.cycle         = None
+        # Why do we need these from the web viewer again in the scenario object?
         self.lon           = cosmos.config.webviewer.lon
         self.lat           = cosmos.config.webviewer.lat
         self.zoom          = cosmos.config.webviewer.zoom
@@ -78,9 +79,6 @@ class Scenario:
             else:    
                 setattr(self, key, value)        
 
-                
-            
-
         # First find all the models and store in dict models_in_scenario
         models_in_scenario = {}
         for mdl in sc_dict["model"]:                        
@@ -115,7 +113,8 @@ class Scenario:
                 if "super_region" in mdl:
                     super_region_name = mdl["super_region"].lower()
                     for region in cosmos.config.super_region[super_region_name]["region"]:
-                        if not region in region_list:
+                        # Avoid duplicates
+                        if region not in region_list:
                             region_list.append(region)
 
                 # Loop through all available models

@@ -71,7 +71,6 @@ class CoSMoS_SFINCS(Model):
         self.domain.input.variables.tref     = cosmos.scenario.ref_date
         self.domain.input.variables.tstart   = self.flow_start_time
         self.domain.input.variables.tstop    = self.flow_stop_time
-        self.domain.input.variables.tspinup  = self.flow_spinup_time*3600
         self.domain.input.variables.dthisout = cosmos.config.run.dthis
         self.domain.input.variables.dtmapout = cosmos.config.run.dtmap
         self.domain.input.variables.dtmaxout = cosmos.config.run.dtmax

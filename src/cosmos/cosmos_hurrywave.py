@@ -76,7 +76,6 @@ class CoSMoS_HurryWave(Model):
         self.domain.input.variables.tref     = cosmos.scenario.ref_date
         self.domain.input.variables.tstart   = self.wave_start_time
         self.domain.input.variables.tstop    = self.wave_stop_time
-        self.domain.input.variables.tspinup  = self.wave_spinup_time*3600
 #        nsecs = (self.wave_stop_time - self.wave_start_time).total_seconds()
 #        self.domain.input.dtmaxout = nsecs
         self.domain.input.variables.dtmaxout = cosmos.config.run.dtmax

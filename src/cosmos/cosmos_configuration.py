@@ -11,7 +11,7 @@ import toml
 from .cosmos_stations import Stations
 from .cosmos_meteo import read_meteo_database
 from .cosmos_color_maps import read_color_maps
-from cht_utils.misc_tools import rgb2hex
+# from cht_utils.misc_tools import rgb2hex
 import cht_utils.fileops as fo
 
 class Path:
@@ -54,9 +54,11 @@ class WebViewer:
         self.name    = None
         self.version = None
         self.path    = None
-        self.lon     = 0.0
-        self.lat     = 0.0
-        self.zoom    = 1
+        self.lon     = 0.0   # Used for initial view
+        self.lat     = 0.0   # Used for initial view
+        self.zoom    = 1     # Used for initial view
+        self.lon_lim = None  # Used for wind and meteo maps
+        self.lat_lim = None  # Used for wind and meteo maps
         self.tile_layer = {}
         self.tile_layer["flood_map"] = {}
         self.tile_layer["flood_map"]["interval"] = 24
