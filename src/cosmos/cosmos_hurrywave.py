@@ -161,11 +161,15 @@ class CoSMoS_HurryWave(Model):
             self.domain.observation_points_regular.write()
 
         # Make restart file
-        trstsec = self.domain.input.variables.tstop.replace(tzinfo=None) - self.domain.input.variables.tref            
-        if self.meteo_dataset:
-            if self.meteo_dataset.last_analysis_time:
-                trstsec = self.meteo_dataset.last_analysis_time.replace(tzinfo=None) - self.domain.input.variables.tref
-        self.domain.input.variables.trstout  = trstsec.total_seconds()
+        # self.get_restart_time() sits in cosmos_model.py
+        trst = self.get_restart_time()
+        trstsec = trst - self.domain.input.variables.tref  
+        trstsec = trstsec.total_seconds()
+        # trstsec = self.domain.input.variables.tstop.replace(tzinfo=None) - self.domain.input.variables.tref            
+        # if self.meteo_dataset:
+        #     if self.meteo_dataset.last_analysis_time:
+        #         trstsec = self.meteo_dataset.last_analysis_time.replace(tzinfo=None) - self.domain.input.variables.tref
+        self.domain.input.variables.trstout  = trstsec
         self.domain.input.variables.dtrstout = 0.0
         
         # Get restart file from previous cycle

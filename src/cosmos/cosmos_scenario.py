@@ -58,7 +58,7 @@ class Scenario:
         self.meteo_track                = None
         self.cyclone_track_forecast_source = None
         self.observations_path = ""
-        self.run_ensemble = False
+        self.run_ensemble = False # Move this to config.run?
         self.meteo_string = ""
         self.storm_number = None
         

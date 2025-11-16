@@ -89,6 +89,11 @@ class CoSMoS_SFINCS(Model):
             self.make_flood_map = False
             self.make_water_level_map = True
             self.meteo_precipitation = False  # Never use meteo precipitation in large scale mode
+        elif self.role == "tide_only":
+            # We need to make max water levels, but not a flood map
+            self.make_flood_map = False
+            self.make_water_level_map = False
+            self.meteo_precipitation = False  # Never use meteo precipitation in large scale mode
         else:
             # Generic model, use settings from config file
             pass   
@@ -148,12 +153,40 @@ class CoSMoS_SFINCS(Model):
 
         # Make restart file
         if not bathtub:
-            trstsec = self.domain.input.variables.tstop.replace(tzinfo=None) - self.domain.input.variables.tref            
-            if self.meteo_dataset:
-                if self.meteo_dataset.last_analysis_time:
-                    trstsec = self.meteo_dataset.last_analysis_time.replace(tzinfo=None) - self.domain.input.variables.tref
-            self.domain.input.variables.trstout = trstsec.total_seconds()
+
+            # self.get_restart_time() sits in cosmos_model.py
+            trst = self.get_restart_time()
+            # # If we play catch up (i.e. we may have missed one or more cycles),
+            # # then we write output at the last meteo analysis time.
+            # # However, if we want the next cycle to be the current cycle + interval, trstsec must be the
+            # # minimum of these to times.
+            # # There are three options:
+            # # 1) Forecast mode (i.e. the meteo dataset has a last_analysis_time)
+            # #   a) With catch up    -> trst = last analysis time
+            # #   b) Without catch up -> trst = min(next cycle time + interval, last analysis time)
+            # # 2) Hindcast mode      -> trst = stop time of simulation
+
+
+
+            # if self.meteo_dataset.last_analysis_time:
+            #     # 1) Forecast mode
+            #     if cosmos.config.run.catch_up:
+            #         # a) With catch up
+            #         trst = self.meteo_dataset.last_analysis_time.replace(tzinfo=None)
+            #     else:
+            #         # b) Without catch up
+            #         trst = cosmos.next_cycle_time.replace(tzinfo=None)
+            #         trst = min(trst, self.meteo_dataset.last_analysis_time.replace(tzinfo=None))
+            # else:
+            #     # 2) Hindcast mode
+            #     trst = cosmos.next_cycle_time.replace(tzinfo=None)
+
+            trstsec = (trst - self.domain.input.variables.tref).total_seconds()
+            # trstsec = trstsec.total_seconds()
+
+            self.domain.input.variables.trstout = trstsec
             self.domain.input.variables.dtrst   = 0.0
+
         else:
             self.domain.input.variables.trstout = 0.0
             self.domain.input.variables.dtrst   = 0.0    
@@ -222,8 +255,9 @@ class CoSMoS_SFINCS(Model):
             else:
                 self.domain.input.variables.scsfile = None
 
-        # Spiderweb file
-        self.meteo_spiderweb = cosmos.scenario.meteo_spiderweb
+        # Spiderweb file (only when not tide only model!)
+        if self.role != "tide_only":
+            self.meteo_spiderweb = cosmos.scenario.meteo_spiderweb
         
         if self.meteo_spiderweb or self.meteo_track and not self.ensemble:   
             self.domain.input.variables.spwfile = "sfincs.spw"         
@@ -264,6 +298,13 @@ class CoSMoS_SFINCS(Model):
         # Keep calling it run_job_2.py for now, otherwise the cloud workflow will not work
         fo.copy_file(os.path.join(pth, "cosmos_run_sfincs.py"), os.path.join(self.job_path, "run_job_2.py"))
 
+        # If there is an associated tide_only model, copy its map file to the job folder. It is used
+        # to make storm surge maps.
+        if self.tide_only_model:
+            src = os.path.join(self.tide_only_model.cycle_output_path, "sfincs_map.nc")
+            dst = os.path.join(self.job_path, "sfincs_map_tide_only.nc")
+            fo.copy_file(src, dst)
+
         # Write config.yml file to be used in job
         self.write_config_yml()
 
@@ -282,7 +323,7 @@ class CoSMoS_SFINCS(Model):
                 if cosmos.config.run.sfincs_docker and not bathtub:
                     fid = open(batch_file, "w")
                     fid.write("@ echo off\n")
-                    fid.write(f"rem docker pull {cosmos.config.executables.sfincs_docker_image}\n")
+                    fid.write(f"docker pull {cosmos.config.executables.sfincs_docker_image}\n")
                     fid.write(f"docker run --rm -it --gpus all -v %cd%:/data {cosmos.config.executables.sfincs_docker_image}\n")
                     fid.close()
                 else:
@@ -326,6 +367,9 @@ class CoSMoS_SFINCS(Model):
         
     def post_process(self):
         # Extract water levels
+        # if self.role == "tide_only":
+        #     # No post processing for tide only model
+        #     return
         output_path   = self.cycle_output_path
         post_path     = self.cycle_post_path
         his_file_name = os.path.join(output_path, "sfincs_his.nc")

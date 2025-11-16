@@ -5,18 +5,18 @@ Created on Tue May 25 14:28:58 2021
 @author: ormondt
 """
 import os
-from pyproj import CRS
-import numpy as np
-import datetime
+# from pyproj import CRS
+# import numpy as np
+# import datetime
 import shapely
 import copy
 import geopandas as gpd
 
 from .cosmos_main import cosmos
-from cht_cyclones.tropical_cyclone import TropicalCycloneEnsemble
+from cht_cyclones.ensemble import TropicalCycloneEnsemble
 # from cht_meteo.cht.meteo.meteo import filter_cyclones_TCvitals, find_priorityTC
-import cht_utils.fileops as fo
-from datetime import datetime
+# import cht_utils.fileops as fo
+# from datetime import datetime
 # import cht_utils.misc_tools
 
 def setup_track_ensemble():
@@ -98,6 +98,9 @@ def setup_track_ensemble():
             continue
         if model.exterior is None:
             # No outline defined
+            continue
+        if model.role == "tide_only":
+            # Tide only model
             continue
         if shapely.intersects(cone.loc[0]["geometry"], model.exterior.loc[0]["geometry"]):
             # Add model

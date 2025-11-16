@@ -59,6 +59,7 @@ class WebViewer:
         self.zoom    = 1     # Used for initial view
         self.lon_lim = None  # Used for wind and meteo maps
         self.lat_lim = None  # Used for wind and meteo maps
+        self.storm_classification = "saffirsimpson"  # Used for classifying track points (options: saffirsimpson, pagasa)
         self.tile_layer = {}
         self.tile_layer["flood_map"] = {}
         self.tile_layer["flood_map"]["interval"] = 24
@@ -66,6 +67,9 @@ class WebViewer:
         self.tile_layer["water_level_map"] = {}
         self.tile_layer["water_level_map"]["interval"] = 24
         self.tile_layer["water_level_map"]["color_map"] = "water_level_map"
+        self.tile_layer["storm_surge_map"] = {}
+        self.tile_layer["storm_surge_map"]["interval"] = 24
+        self.tile_layer["storm_surge_map"]["color_map"] = "storm_surge_map"
         self.tile_layer["hm0"] = {}
         self.tile_layer["hm0"]["interval"] = 24
         self.tile_layer["hm0"]["color_map"] = "hm0"
@@ -108,9 +112,11 @@ class Run:
         self.interval        = 6
         self.delay           = 0
         self.clean_up        = False
+        self.catch_up        = False
         self.make_flood_maps = True
         self.make_wave_maps  = True
         self.make_water_level_maps = True
+        self.make_storm_surge_maps = True
         self.make_meteo_maps = True
         self.make_sedero_maps = True
         self.make_webviewer  = True
@@ -126,7 +132,7 @@ class Run:
         self.delay           = 0  # hours to wait after cycle time before starting the run
         # Run all models in ensemble model by default
         self.ensemble_models = ["sfincs", "hurrywave", "delft3d", "xbeach", "beware"]
-        self.spw_wind_field   = "gridded_data"
+        self.spw_wind_field   = "parametric"
         self.dthis            = 600.0
         self.dtmap            = 21600.0
         self.dtmax            = 21600.0

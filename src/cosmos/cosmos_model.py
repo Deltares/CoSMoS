@@ -68,6 +68,7 @@ class Model:
         self.make_water_level_map = False
         self.make_precipitation_map = False
         self.make_sedero_map    = False
+        self.make_storm_surge_map = False
         self.sa_correction      = None
         self.ssa_correction     = None
         self.wave               = False
@@ -78,6 +79,8 @@ class Model:
         self.peak_boundary_time    = None
         self.zb_deshoal         = None
         self.ensemble           = False
+        self.include_tide_only  = False
+        self.tide_only_model    = None
         self.zs_ini_max         = -9999.9
         self.exterior             = None
         self.role               = "generic"  # can be "generic", "floodmap", "large_scale". Based on the role, we can set some predefined actions. This happens e.g. in cosmos_sfincs.py
@@ -276,6 +279,9 @@ class Model:
             config["xbeach"]["zb_deshoal"] = self.domain.zb_deshoal
 
         # OUTPUT for webviewer
+
+        # Flood map
+
         if cosmos.config.run.make_flood_maps and self.make_flood_map:
             config["flood_map"] = {}
             if self.ensemble:
@@ -297,6 +303,9 @@ class Model:
             config["flood_map"]["stop_time"]  = cosmos.stop_time
             config["flood_map"]["interval"] = cosmos.config.webviewer.tile_layer["flood_map"]["interval"]
             config["flood_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["flood_map"]["color_map"]]
+
+        # Water level map
+
         if cosmos.config.run.make_water_level_maps and self.make_water_level_map:
             config["water_level_map"] = {}
             if self.ensemble:
@@ -318,6 +327,33 @@ class Model:
             config["water_level_map"]["stop_time"]  = cosmos.stop_time
             config["water_level_map"]["interval"] = cosmos.config.webviewer.tile_layer["water_level_map"]["interval"]
             config["water_level_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["water_level_map"]["color_map"]]
+
+        # Storm surge map    
+
+        if cosmos.config.run.make_storm_surge_maps and self.make_storm_surge_map:
+            config["storm_surge_map"] = {}
+            if self.ensemble:
+                name = "storm_surge_90"
+            else:
+                name = "storm_surge"    
+            config["storm_surge_map"]["name"] = name
+            if cosmos.config.run.run_mode == "cloud":
+                config["storm_surge_map"]["png_path"]   = "/output"
+                config["storm_surge_map"]["index_path"] = "/tiles/indices"
+                config["storm_surge_map"]["topo_path"]  = "/tiles/topobathy"
+                config["storm_surge_map"]["zsmax_path"]  = "/input"
+            else:
+                config["storm_surge_map"]["png_path"]   = os.path.join(cosmos.config.webviewer.data_path)
+                config["storm_surge_map"]["index_path"] = os.path.join(self.path, "tiling", "indices")
+                config["storm_surge_map"]["topo_path"]  = os.path.join(self.path, "tiling", "topobathy")
+                config["storm_surge_map"]["zsmax_path"]  = "."
+            config["storm_surge_map"]["start_time"] = cosmos.cycle
+            config["storm_surge_map"]["stop_time"]  = cosmos.stop_time
+            config["storm_surge_map"]["interval"] = cosmos.config.webviewer.tile_layer["storm_surge_map"]["interval"]
+            config["storm_surge_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["storm_surge_map"]["color_map"]]
+
+        # Hm0 map
+
         if cosmos.config.run.make_wave_maps and self.make_wave_map:
             config["hm0_map"] = {}
             if self.ensemble:
@@ -520,8 +556,6 @@ class Model:
 
         else:
             print("No run mode defined, should be either serial, parallel or cloud")
-
-
 
     def set_paths(self):
         """Set model paths (input, output, figures, restart, job).
@@ -737,6 +771,7 @@ class Model:
             self.peak_boundary_time = t[imax].to_pydatetime()
 
     def set_stations_to_upload(self):
+
         all_nested_models = self.get_all_nested_models("flow")
         if self.type=='beware':
             for station in self.station:
@@ -876,3 +911,36 @@ class Model:
                                             refdate=tref,
                                             time_range=time_range,
                                             header_comments=header_comments)
+
+    def get_restart_time(self):
+        # If we play catch up (i.e. we may have missed one or more cycles),
+        # then we write output at the last meteo analysis time.
+        # However, if we want the next cycle to be the current cycle + interval, trstsec must be the
+        # minimum of these to times.
+        # There are three options:
+        # 1) Forecast mode (i.e. the meteo dataset has a last_analysis_time)
+        #   a) With catch up    -> trst = last analysis time
+        #   b) Without catch up -> trst = min(next cycle time + interval, last analysis time)
+        # 2) Hindcast mode      -> trst = stop time of simulation
+        if self.meteo_dataset.last_analysis_time:
+            # 1) Forecast mode
+            if cosmos.config.run.catch_up:
+                # a) With catch up
+                trst = self.meteo_dataset.last_analysis_time.replace(tzinfo=None)
+            else:
+                # b) Without catch up
+                if cosmos.next_cycle_time is None:
+                    # There is no next cycle (probably running in single_shot mode), so set to last analysis time
+                    trst = self.meteo_dataset.last_analysis_time.replace(tzinfo=None)
+                else:
+                    trst = cosmos.next_cycle_time.replace(tzinfo=None)
+                    trst = min(trst, self.meteo_dataset.last_analysis_time.replace(tzinfo=None))
+        else:
+            # 2) Hindcast mode meteo
+            if cosmos.next_cycle_time is None:
+                # We do not actually need a restart file, but hey, what the heck.
+                trst = cosmos.stop_time(tzinfo=None)
+            else:
+                trst = cosmos.next_cycle_time.replace(tzinfo=None)
+
+        return trst    

@@ -9,6 +9,7 @@ import time
 import datetime
 import sched
 import os
+import copy
 import numpy as np
 
 from .cosmos_main import cosmos
@@ -18,7 +19,7 @@ from .cosmos_scenario import Scenario
 from .cosmos_cloud import Cloud
 from .cosmos_tsunami import CoSMoS_Tsunami
 from .cosmos_webviewer import WebViewer
-from .cosmos_clean_up import clean_up
+# from .cosmos_clean_up import clean_up
 
 try:
     from .cosmos_argo import Argo
@@ -96,7 +97,17 @@ class MainLoop:
 
         # Determine next cycle time
         if cosmos.config.run.mode == "continuous":
+            # In continuous mode, but not catch up, the next cycle is based on current time + interval
             cosmos.next_cycle_time = cosmos.cycle + datetime.timedelta(hours=cosmos.config.run.interval)
+            if cosmos.config.run.catch_up:
+                # Get max of next cycle time (current cycle plus interval) and current time round down to nearest interval
+                t = datetime.datetime.now(datetime.timezone.utc)
+                h0 = t.hour
+                h0 = h0 - np.mod(h0, cosmos.config.run.interval)
+                now_cycle = t.replace(microsecond=0, second=0, minute=0, hour=h0)
+                if now_cycle > cosmos.next_cycle_time:
+                    cosmos.next_cycle_time = now_cycle
+
             if cosmos.last_cycle:
                 if cosmos.cycle >= cosmos.last_cycle:
                     cosmos.next_cycle_time = None
@@ -168,14 +179,49 @@ class MainLoop:
         # Start by reading all available models, stations, etc.
         cosmos.log("Starting cycle ...")
 
-        if cosmos.config.run.clean_up:
-            # Run cleaning cycle
-            clean_up()
+        # if cosmos.config.run.clean_up:
+        #     # Run cleaning cycle
+        #     clean_up()
 
         # Create scenario cycle paths
         fo.mkdir(cosmos.scenario.cycle_path)
         fo.mkdir(cosmos.scenario.cycle_models_path)
         fo.mkdir(cosmos.scenario.cycle_job_list_path)
+
+        # Check if there are any tide_only models that need to be added
+        tide_only_models = []
+        for model in cosmos.scenario.model:
+            if model.flow and not model.wave:
+                # This is a flow only model
+                if model.include_tide_only:
+                    # This model should include tide only forcing
+                    cosmos.log(
+                        f"Adding tide only forcing to model {model.name}"
+                    )
+                    # Create new model that is a copy of this one, but only for tide
+                    tide_only_model = copy.deepcopy(model)
+                    tide_only_model.name = model.name + "_tide_only"
+                    tide_only_model.deterministic_name = tide_only_model.name
+                    tide_only_model.long_name = model.long_name + " (tide only)"
+                    tide_only_model.role = "tide_only"
+                    # Turn off meteo forcing for this model
+                    # We do not set the meteo dataset to None, because we need this for the restart file
+                    # However, due to the deepcopy, we do need to set meteo_dataset again here to that of the original model
+                    tide_only_model.meteo_dataset      = model.meteo_dataset
+                    tide_only_model.meteo_spiderweb    = None
+                    tide_only_model.meteo_wind         = False
+                    tide_only_model.meteo_atmospheric_pressure = False
+                    tide_only_model.meteo_precipitation = False
+                    # Turn off water_level_map for this model (this is not necessary, as )
+                    tide_only_model.make_water_level_map = False
+                    tide_only_model.make_precipitation_map = False
+                    # Add to scenario models
+                    tide_only_models.append(tide_only_model)
+                    # Link to original model
+                    model.tide_only_model = tide_only_model
+                    model.make_storm_surge_map = True
+
+        cosmos.scenario.model.extend(tide_only_models)
 
         # Prepare some stuff for each model
         for model in cosmos.scenario.model:
@@ -274,6 +320,7 @@ class MainLoop:
             # elif cosmos.scenario.meteo_spiderweb or not os.path.isabs(cosmos.scenario.meteo_track):
             #     # Make spiderweb if does not exist yet
             #     track_to_spw()
+
 
         elif cosmos.config.run.event_mode == "tsunami":
             # Generate tsunami NetCDF file. Initial conditions for model(s) are generated from this file.

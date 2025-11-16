@@ -244,17 +244,45 @@ def read_color_maps(file_name):
                     #     cnt["lower_value"] = zz[i]
                     #     cnt["upper_value"] = zz[i + 1]
                     cnt={}
+                    # The number of decimals should depend on zmin, zmax and zz
+                    # If they are greater than 1, use one decimal. If they are lower than 1, use 2 decimals. If they are lower than 0.1, use 3 decimals, etc.
+
+
                     if k==0:
-                        cnt["string"] = "< " + f"{zmin:.1f}"
+                        if zmin >= 1.0:
+                            fmt = ".1f"
+                        elif zmin >= 0.1:
+                            fmt = ".2f"
+                        else:
+                            fmt = ".3f"
+                        cnt["string"] = "< " + f"{zmin:{fmt}}"
                         cnt["lower_value"] = -1.0e6
                         cnt["upper_value"] = float(zz[i])
                     #elif k==nsteps - 1:
                     elif k==nsteps:
-                        cnt["string"] = "> " +  f"{zmax:.1f}"
+                        if zmax >= 1.0:
+                            fmt = ".1f"
+                        elif zmax >= 0.1:
+                            fmt = ".2f"
+                        else:
+                            fmt = ".3f"
+                        cnt["string"] = "> " +  f"{zmax:{fmt}}"
                         cnt["lower_value"] = float(zz[i - 1])
                         cnt["upper_value"] = 1.0e6
-                    else: 
-                        cnt["string"] = f"{zz[i - 1]:.1f}" + " - " + f"{zz[i]:.1f}"                   
+                    else:
+                        if zz[i - 1] >= 1.0:
+                            fmt1 = ".1f"
+                        elif zz[i - 1] >= 0.1:
+                            fmt1 = ".2f"
+                        else:
+                            fmt = ".3f"
+                        if zz[i] >= 1.0:
+                            fmt2 = ".1f"
+                        elif zz[i] >= 0.1:
+                            fmt2 = ".2f"
+                        else:
+                            fmt2 = ".3f"    
+                        cnt["string"] = f"{zz[i - 1]:{fmt1}}" + " - " + f"{zz[i]:{fmt2}}"                   
                         cnt["lower_value"] = float(zz[i - 1])
                         cnt["upper_value"] = float(zz[i])
                     cnt["rgb"]   = rgb

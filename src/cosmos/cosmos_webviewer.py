@@ -134,6 +134,18 @@ class WebViewer:
                                         "These were the worst-case peak water levels during the storm.",
                                         cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["water_level_map"]["color_map"]])
 
+        if cosmos.config.run.make_storm_surge_maps:
+            # These tiles have not yet been made, when the model was finished. So we need to make them here.
+            # self.make_storm_surge_map() 
+            self.set_map_tile_variables("storm_surge",
+                                        "Peak storm surge (no waves)",
+                                        "These were the peak storm surges during the storm.",
+                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["storm_surge_map"]["color_map"]])
+            self.set_map_tile_variables("storm_surge_90",
+                                        "Peak storm surge (worst case, no waves)",
+                                        "These are the worst case peak storm surges during the storm.",
+                                        cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["storm_surge_map"]["color_map"]])
+
         # Precipitation should come from meteo dataset, not from models
         # But perhaps only shown where we have flood models
         if cosmos.config.run.make_meteo_maps:
@@ -702,6 +714,12 @@ class WebViewer:
         tide_dataset_loaded = False
 
         for model in cosmos.scenario.model:
+
+            # For tide only, we do not put any time series in the web viewer
+            if model.role == "tide_only":
+                # On to the next model
+                continue
+
             if model.station:
                 for station in model.station:
                     if station.type == station_type and station.upload:                

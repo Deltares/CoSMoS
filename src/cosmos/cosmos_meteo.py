@@ -210,10 +210,10 @@ def collect_meteo():
     cosmos.scenario.meteo_spiderweb = "storm.spw"
 
     if cosmos.config.run.spw_wind_field == "parametric":
-        # 1) Use Holland (2010)
-        if not os.path.exists(os.path.join(cosmos.scenario.cycle_track_spw_path,
-                            cosmos.scenario.meteo_spiderweb)):
-            tc.compute_wind_field()
+        # 1) Use Holland (2010)        
+        # if not os.path.exists(os.path.join(cosmos.scenario.cycle_track_spw_path,
+        #                     cosmos.scenario.meteo_spiderweb)):
+        tc.compute_wind_field()
 
     elif cosmos.config.run.spw_wind_field == "meteo_data":
 
@@ -224,7 +224,7 @@ def collect_meteo():
                 if len(meteo_dataset.subset) > 0:
                     times = meteo_dataset.subset[0].ds.time.values
                 else:
-                    times = meteo_dataset.subset[0].ds.time.values
+                    times = meteo_dataset.ds.time.values
 
                 dthours = 1
                 tc.track.resample(dthours, method="spline")
@@ -257,6 +257,6 @@ def collect_meteo():
     tc.track.write(cycfile)
     # And the js file (to be uploaded to the webviewer)
     jsfile = os.path.join(cosmos.scenario.cycle_track_spw_path, "track.geojson.js")
-    tc.track.to_gdf(filename=jsfile)
+    tc.track.to_gdf(filename=jsfile, classification=cosmos.config.webviewer.storm_classification)
 
     cosmos.tropical_cyclone = tc

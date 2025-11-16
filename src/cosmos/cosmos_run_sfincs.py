@@ -249,9 +249,10 @@ def merge_ensemble(config):
         map_files.append(os.path.join(folder_path, member, "sfincs_map.nc"))
 
     merge_nc_his(his_files, ["point_zs"], output_file_name=his_output_file_name, prcs=[0.0, 0.5, 1.0])
-    if "flood_map" in config or "water_level_map" in config:
+
+    if "flood_map" in config or "water_level_map" in config or "storm_surge_map" in config:
         try:
-            merge_nc_map(map_files, ["zsmax", "cumprcp"], output_file_name=map_output_file_name, prcs=[1.0])
+            merge_nc_map(map_files, ["zs", "zsmax"], output_file_name=map_output_file_name, prcs=[1.0])
         except Exception as e:
             print(str(e))
     # Copy restart files from the first ensemble member (restart files are the same for all members)
@@ -468,6 +469,142 @@ def map_tiles(config):
             except Exception as e:
                 print("An error occured while making flood map tiles: {}".format(str(e)))
 
+    if "storm_surge_map" in config:
+
+        # Make SFINCS object
+        sf = SFINCS()
+        # sf_only_tide = SFINCS()
+        
+        # Make water level map tiles
+        print("Making storm surge map tiles ...")
+
+        storm_surge_map_path = config["storm_surge_map"]["png_path"]
+        index_path           = config["storm_surge_map"]["index_path"]
+        topo_path            = config["storm_surge_map"]["topo_path"]
+        zsmax_path           = config["storm_surge_map"]["zsmax_path"]
+        
+        # Get the difference between MSL and local vertical reference level to correct the water level
+        water_level_correction = 0.0
+        zbmax = 0.0
+
+        # # NOTE all overland models get a boundary_water_level_correction
+        # # this causes an offset wrt the surge models
+        # # correct surge models as well to align plots:
+        # if water_level_correction == 0.0: # default value
+        #     # water_level_correction += 0.15
+        #     zbmax = -1.0
+
+        if os.path.exists(index_path) and os.path.exists(topo_path):
+
+            print("Making storm surge map tiles for model " + config["model"] + " ...")
+
+            # start and stop time
+            t0  = config["storm_surge_map"]["start_time"].replace(tzinfo=None)
+            t1  = config["storm_surge_map"]["stop_time"].replace(tzinfo=None)
+            # ... hour increments  
+            dtinc = config["storm_surge_map"]["interval"]
+
+            # Compute interval in datetime format
+            dt1 = datetime.timedelta(hours=1)
+            dt  = datetime.timedelta(hours=dtinc)
+
+            # Compute requested times
+            requested_times = pd.date_range(start=t0 + dt,
+                                            end=t1,
+                                            freq=str(dtinc) + "h").to_pydatetime().tolist()
+            
+            pathstr = []
+            for it, t in enumerate(requested_times):
+                pathstr.append((t - dt).strftime("%Y%m%d_%HZ") + "_" + (t).strftime("%Y%m%d_%HZ"))
+            pathstr.append("combined_" + (t0).strftime("%Y%m%d_%HZ") + "_" + (t1).strftime("%Y%m%d_%HZ"))            
+
+            zsmax_file = os.path.join(zsmax_path, "sfincs_map.nc")
+            
+            if config["ensemble"]:
+                varname = "zs_100"
+                # tide only file sits in base input
+                zsmax_file_tide_only = os.path.join(zsmax_path, "base_input", "sfincs_map_tide_only.nc")
+            else:
+                varname = "zs"
+                zsmax_file_tide_only = os.path.join(zsmax_path, "sfincs_map_tide_only.nc")
+
+            try:
+
+                color_values = config["storm_surge_map"]["color_map"]["contours"]
+
+                # Water level map over dt-hour increments                    
+                for it, t in enumerate(requested_times):
+
+                    # Rather than using sf.output.read_zsmax, we read the file here with xarray
+                    ds = xr.open_dataset(zsmax_file)
+                    ds_tide_only = xr.open_dataset(zsmax_file_tide_only)
+                    # Now from read the data array "zs" within the time range
+                    zsmax = ds[varname].sel(time=slice(t - dt, t))
+                    # Same for tide only
+                    zsmax_tide_only = ds_tide_only["zs"].sel(time=slice(t - dt, t))                    
+                    ds.close()
+                    ds_tide_only.close()
+
+                    storm_surge = zsmax - zsmax_tide_only
+                    # And now take max over time
+                    storm_surge = storm_surge.max(dim="time").values
+
+                    png_path = os.path.join(storm_surge_map_path,
+                                            config["scenario"],
+                                            config["cycle"],
+                                            config["storm_surge_map"]["name"],
+                                            pathstr[it]) 
+                    
+                    twm = TiledWebMap(png_path,
+                                      data=storm_surge,
+                                      type="rgba",
+                                      parameter="storm_surge",
+                                      zbmax=zbmax,
+                                      color_values=color_values,
+                                      index_path=index_path,
+                                      topo_path=topo_path)
+                    twm.make()
+
+                # Full simulation        
+
+                # Rather than using sf.output.read_zsmax, we read the file here with xarray
+                ds = xr.open_dataset(zsmax_file)
+                ds_tide_only = xr.open_dataset(zsmax_file_tide_only)
+                # Now from read the data array "zs" within the time range
+                zsmax = ds[varname].sel(time=slice(t0, t1))
+                # Same for tide only
+                zsmax_tide_only = ds_tide_only["zs"].sel(time=slice(t0, t1))                    
+                ds.close()
+                ds_tide_only.close()
+
+                storm_surge = zsmax - zsmax_tide_only
+                # And now take max over time
+                storm_surge = storm_surge.max(dim="time").values
+
+                png_path = os.path.join(storm_surge_map_path,
+                                        config["scenario"],
+                                        config["cycle"],
+                                        config["storm_surge_map"]["name"],
+                                        pathstr[-1]) 
+
+                twm = TiledWebMap(png_path,
+                                    data=storm_surge,
+                                    type="rgba",
+                                    parameter="storm_surge",
+                                    zbmax=zbmax,
+                                    color_values=color_values,
+                                    index_path=index_path,
+                                    topo_path=topo_path)
+                twm.make()
+                            
+            except Exception as e:
+                print("An error occured while making flood map tiles: {}".format(str(e)))
+
+            # We can now delete the zsmax_file_tide_only file to save space
+            if os.path.exists(zsmax_file_tide_only):
+                os.remove(zsmax_file_tide_only)    
+
+
     if "precipitation_map" in config:
             
         # Make SFINCS object
@@ -565,6 +702,8 @@ def clean_up(config):
 
 member_name = None
 option = sys.argv[1]
+#option = "merge_ensemble"
+#option = "map_tiles"
 
 print("Running run_job.py")
 print("Option: " + option)

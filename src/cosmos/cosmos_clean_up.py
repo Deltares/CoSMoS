@@ -27,6 +27,12 @@ def clean_up():
         remove_older_restart_files()
         remove_older_webviewer_cycles()
 
+    if cosmos.config.run.clean_up_mode == "continuous_hindcast":
+        remove_input_folders()
+        remove_job_list_folder()
+        remove_older_restart_files()
+
+
 def remove_input_folders():
     for model in cosmos.scenario.model:
         input_path = model.cycle_input_path  

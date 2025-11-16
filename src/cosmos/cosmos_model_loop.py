@@ -11,6 +11,7 @@ import platform
 
 from .cosmos_main import cosmos
 from .cosmos_cluster import cluster_dict as cluster
+from .cosmos_clean_up import clean_up
 
 try:
     from .cosmos_argo import Argo
@@ -183,6 +184,10 @@ class ModelLoop():
 
             cosmos.log("All models finished!")
 
+            # Run clean up first (this has to be done before making the webviewer, as it removes some cycle folders)
+            if cosmos.config.run.clean_up:
+                clean_up()
+
             # Post process data (making floodmaps, uploading to server etc.)
             # Try to run post-processing. If it fails, print error message and continue.
 
@@ -213,6 +218,7 @@ class ModelLoop():
                 pth = os.path.join(cosmos.config.path.jobs,
                                    cosmos.scenario.name)
                 fo.rmdir(pth)
+
 
             # Check if we need to start a new cycle
             if cosmos.next_cycle_time:
@@ -282,6 +288,12 @@ def update_waiting_list():
                 if model.bw_nested.status != "finished":
                     okay = False
                 if model.bw_nested.status == "failed":
+                    model.status = "failed"
+            if model.tide_only_model:
+                # We always first want to run the tide only model first!
+                if model.tide_only_model.status != "finished":
+                    okay = False
+                if model.tide_only_model.status == "failed":
                     model.status = "failed"
                     
             if okay and model.cluster:
