@@ -10,6 +10,7 @@ import datetime
 import sched
 import os
 import copy
+import importlib
 import numpy as np
 
 from .cosmos_main import cosmos
@@ -19,7 +20,8 @@ from .cosmos_scenario import Scenario
 from .cosmos_cloud import Cloud
 from .cosmos_tsunami import CoSMoS_Tsunami
 from .cosmos_webviewer import WebViewer
-# from .cosmos_clean_up import clean_up
+from .cosmos_clean_up import clean_up
+from cht_utils.misc_tools import dict2yaml
 
 try:
     from .cosmos_argo import Argo
@@ -300,10 +302,6 @@ class MainLoop:
                     + rststr
                 )
 
-        # if self.just_initialize:
-        #     # No need to do anything else here 
-        #     return
-
         if cosmos.config.run.event_mode == "meteo":
             # Running storm or other weather event
 
@@ -362,6 +360,95 @@ class MainLoop:
             # And now start the model loop
             cosmos.log("Starting model loop ...")
             cosmos.model_loop.start()
+
+    def finish(self):
+        """Finish the main loop by performing clean up and making web viewer."""
+
+        # Run clean up first (this has to be done before making the webviewer, as it removes some cycle folders)
+        if cosmos.config.run.clean_up:
+            clean_up()
+
+        # Check if there is a custom post processing script 
+        if cosmos.config.run.post_processing_script is not None:            
+            # Run post processing script
+            cosmos.log("Running post processing script ...")
+            try:
+                # Check if file exists
+                if os.path.isfile(cosmos.config.run.post_processing_script):
+                    # Write config file with all info about this cycle
+                    cycle_info_file = os.path.join(cosmos.scenario.cycle_path, "cycle_info.yml")
+
+                    config = {}
+
+                    # Scenario info
+                    config["scenario_name"] = cosmos.scenario.name
+                    config["cycle"] = cosmos.cycle_string
+                    config["duration_hours"] = cosmos.scenario.runtime
+                    config["meteo_dataset"] = cosmos.scenario.meteo_dataset
+                    config["cyclone_track_forecast_source"] = cosmos.scenario.cyclone_track_forecast_source
+
+                    # Now paths of run folder, meteo database and model database
+                    config["run_folder_path"] = cosmos.config.path.main
+                    config["meteo_database_path"] = cosmos.config.meteo_database.path
+                    config["model_database_path"] = cosmos.config.model_database.path
+
+                    # Now loop through all models and add their info
+                    config["model"] = []
+                    for model in cosmos.scenario.model:
+                        model_info = {}
+                        model_info["name"] = model.name
+                        model_info["long_name"] = model.long_name
+                        model_info["region"] = model.region
+                        model_info["type"] = model.type
+                        model_info["role"] = model.role
+                        config["model"].append(model_info)
+    
+                    dict2yaml(cycle_info_file, config)
+
+                    # Import and run script
+                    spec = importlib.util.spec_from_file_location("custom_module", cosmos.config.run.post_processing_script)
+                    custom_module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(custom_module)
+                    custom_module.main(cycle_info_file)
+
+            except Exception as e:
+                print("An error occurred while running the post processing script !")
+                print(f"Error: {e}")    
+
+        # Post process data (making floodmaps, uploading to server etc.)
+        # Try to run post-processing. If it fails, print error message and continue.
+        if cosmos.config.run.make_webviewer:
+            try:
+                cosmos.webviewer.make()        
+                if cosmos.config.run.upload:
+                    current_path = os.getcwd()
+                    try:
+                        cosmos.webviewer.upload()
+                    except:
+                        print("An error occurred when uploading web viewer to server !!!")
+                    os.chdir(current_path)
+            except Exception as e:
+                print("An error occured while making web viewer !")
+                print(f"Error: {e}")
+        else:
+            cosmos.log("Not making webviewer. Set make_webviewer to True in config file to make webviewer.")        
+                                
+        # Move log file to scenario cycle path               
+        log_file = os.path.join(cosmos.config.path.main, "cosmos.log")
+        fo.move_file(log_file, cosmos.scenario.cycle_path)
+        
+        # Delete jobs folder
+        if cosmos.config.run.run_mode == "serial":
+            pth = os.path.join(cosmos.config.path.jobs,
+                                cosmos.scenario.name)
+            fo.rmdir(pth)
+
+        # Check if we need to start a new cycle
+        if cosmos.next_cycle_time:
+            # Start new main loop
+            cosmos.main_loop.start(cycle=cosmos.next_cycle_time)
+        else:
+            cosmos.log("All done.")
 
 
 def get_start_and_stop_times():

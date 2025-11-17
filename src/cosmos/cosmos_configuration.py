@@ -143,7 +143,8 @@ class Run:
         self.bathtub          = False
         self.sfincs_docker    = False
         self.hurrywave_docker = False
-
+        self.post_processing_script = None  # Custom post processing script to be run after each model loop
+        
 class Configuration:
     """CoSMoS Configuration class.
 
