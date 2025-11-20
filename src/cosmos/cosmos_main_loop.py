@@ -211,6 +211,7 @@ class MainLoop:
                     # However, due to the deepcopy, we do need to set meteo_dataset again here to that of the original model
                     tide_only_model.meteo_dataset      = model.meteo_dataset
                     tide_only_model.meteo_spiderweb    = None
+                    tide_only_model.meteo_track        = None
                     tide_only_model.meteo_wind         = False
                     tide_only_model.meteo_atmospheric_pressure = False
                     tide_only_model.meteo_precipitation = False

@@ -210,9 +210,15 @@ def collect_meteo():
     cosmos.scenario.meteo_spiderweb = "storm.spw"
 
     if cosmos.config.run.spw_wind_field == "parametric":
-        # 1) Use Holland (2010)        
-        # if not os.path.exists(os.path.join(cosmos.scenario.cycle_track_spw_path,
-        #                     cosmos.scenario.meteo_spiderweb)):
+        # 1) Use Holland (2010)
+        # If there is no background wind, we want a large radius
+        # If there is background wind, we want a small radius
+        if cosmos.scenario.meteo_dataset is None:
+            tc.config["spiderweb_radius"] = 800.0  # km
+            tc.config["nr_radial_bins"] = 100
+        else:
+            tc.config["spiderweb_radius"] = 400.0  # km
+            tc.config["nr_radial_bins"] = 100
         tc.compute_wind_field()
 
     elif cosmos.config.run.spw_wind_field == "meteo_data":

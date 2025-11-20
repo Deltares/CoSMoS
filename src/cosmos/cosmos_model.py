@@ -149,14 +149,18 @@ class Model:
             gdf["name"] = "exterior"
 
         # We now have the exterior gdf in the model crs
-        geom = gdf[gdf["name"] == "exterior"].geometry[0]
+        # Get the extent of all geometries in the gdf
+        bounds = gdf.total_bounds
+        # geom = gdf[gdf["name"] == "exterior"].geometry[0]
         if not self.xlim:
             # xlim/ylim are in local coordinates and are used for meteo
-            self.xlim = [geom.bounds[0], geom.bounds[2]]
-            self.ylim = [geom.bounds[1], geom.bounds[3]]
+            # self.xlim = [geom.bounds[0], geom.bounds[2]]
+            # self.ylim = [geom.bounds[1], geom.bounds[3]]
+            self.xlim = [bounds[0], bounds[2]]
+            self.ylim = [bounds[1], bounds[3]]
         # Set the polygon for checking that station fall within the model
         # NOTE why is this a path???
-        self.polygon = path.Path(geom.exterior.coords)
+        # self.polygon = path.Path(geom.exterior.coords)
 
         # Now convert to WGS 84
         self.exterior = gdf.to_crs(4326)
@@ -625,6 +629,11 @@ class Model:
                     self.flow_nested = model2
                     model2.nested_flow_models.append(self)
                     break
+            # It is possible that flow_nested is defined in model database,
+            # but that model is not included in the scenario. In that case, flow_nested is still a string.
+            if isinstance(self.flow_nested, str):
+                self.flow_nested = None
+                cosmos.log_warning(f"Flow nested model {self.flow_nested_name} for model {self.name} not found in scenario models.")   
         if self.wave_nested_name:
             # Look up model from which it gets it boundary conditions
             for model2 in cosmos.scenario.model:
@@ -632,6 +641,11 @@ class Model:
                     self.wave_nested = model2
                     model2.nested_wave_models.append(self)
                     break
+            # It is possible that wave_nested is defined in model database,
+            # but that model is not included in the scenario. In that case, wave_nested is still a string.
+            if isinstance(self.wave_nested, str):
+                self.wave_nested = None
+                cosmos.log(f"Wave nested model {self.wave_nested_name} for model {self.name} not found in scenario models.")   
         if self.bw_nested_name:
             # Look up model from which it gets it boundary conditions
             for model2 in cosmos.scenario.model:
@@ -676,6 +690,8 @@ class Model:
         """        
         wgs84 = CRS.from_epsg(4326)
         transformer = Transformer.from_crs(wgs84, self.crs, always_xy=True)
+
+        exterior = self.exterior.to_crs(self.crs)
         
         if name[-4:].lower() == "toml":
 
@@ -699,13 +715,18 @@ class Model:
                 station.y = y
                 
                 # Check whether this station lies with model domain
-                
-                if self.polygon:                            
-                    if not self.polygon.contains_points([(x, y)])[0]:
-                        # On to the next station
-                        continue
 
-                self.station.append(station)
+                for ip, polygon in exterior.iterrows():
+                    inpol = inpolygon(x, y, polygon["geometry"])
+                    if inpol[0]:
+                        self.station.append(station)
+                        break
+                    
+                # if self.polygon:                            
+                #     if not self.polygon.contains_points([(x, y)])[0]:
+                #         # On to the next station
+                #         continue
+                # self.station.append(station)
                                         
         else:
 
@@ -862,55 +883,55 @@ class Model:
                     crs=self.crs,
                     )
 
-        if self.type == "delft3d" or self.type == "delft3dfm" or self.type == "xbeach" or self.type == "hurrywave" or self.type == "sfincs":
-            # Simple for now
+            if self.type == "delft3d" or self.type == "delft3dfm" or self.type == "xbeach" or self.type == "hurrywave" or self.type == "sfincs":
+                # Simple for now
 
-            if format == "netcdf":
-                    
-                params = []
+                if format == "netcdf":
+                        
+                    params = []
 
-                if self.meteo_wind:
-                    params.append("wind")
-                if self.meteo_atmospheric_pressure:
-                    params.append("barometric_pressure")
-                if self.meteo_precipitation:
-                    params.append("precipitation")
+                    if self.meteo_wind:
+                        params.append("wind")
+                    if self.meteo_atmospheric_pressure:
+                        params.append("barometric_pressure")
+                    if self.meteo_precipitation:
+                        params.append("precipitation")
 
-                meteo_dataset.to_delft3d(prefix,
-                                         format="netcdf",
-                                         parameters=params,
-                                         path=path,
-                                         refdate=tref,
-                                         time_range=time_range,
-                                         header_comments=header_comments)            
-
-            else:
-
-                # ASCII format
-
-                if self.meteo_wind:
                     meteo_dataset.to_delft3d(prefix,
-                                            parameters=["wind"],
+                                            format="netcdf",
+                                            parameters=params,
                                             path=path,
                                             refdate=tref,
                                             time_range=time_range,
                                             header_comments=header_comments)            
 
-                if self.meteo_atmospheric_pressure:
-                    meteo_dataset.to_delft3d(prefix,
-                                            parameters=["barometric_pressure"],
-                                            path=path,
-                                            refdate=tref,
-                                            time_range=time_range,
-                                            header_comments=header_comments)
-                                
-                if self.meteo_precipitation:                
-                    meteo_dataset.to_delft3d(prefix,
-                                            parameters=["precipitation"],
-                                            path=path,
-                                            refdate=tref,
-                                            time_range=time_range,
-                                            header_comments=header_comments)
+                else:
+
+                    # ASCII format
+
+                    if self.meteo_wind:
+                        meteo_dataset.to_delft3d(prefix,
+                                                parameters=["wind"],
+                                                path=path,
+                                                refdate=tref,
+                                                time_range=time_range,
+                                                header_comments=header_comments)            
+
+                    if self.meteo_atmospheric_pressure:
+                        meteo_dataset.to_delft3d(prefix,
+                                                parameters=["barometric_pressure"],
+                                                path=path,
+                                                refdate=tref,
+                                                time_range=time_range,
+                                                header_comments=header_comments)
+                                    
+                    if self.meteo_precipitation:                
+                        meteo_dataset.to_delft3d(prefix,
+                                                parameters=["precipitation"],
+                                                path=path,
+                                                refdate=tref,
+                                                time_range=time_range,
+                                                header_comments=header_comments)
 
     def get_restart_time(self):
         # If we play catch up (i.e. we may have missed one or more cycles),
@@ -922,6 +943,10 @@ class Model:
         #   a) With catch up    -> trst = last analysis time
         #   b) Without catch up -> trst = min(next cycle time + interval, last analysis time)
         # 2) Hindcast mode      -> trst = stop time of simulation
+        if self.meteo_dataset is None:
+            # No meteo dataset, so just return stop time
+            trst = cosmos.stop_time.replace(tzinfo=None)
+            return trst
         if self.meteo_dataset.last_analysis_time:
             # 1) Forecast mode
             if cosmos.config.run.catch_up:
@@ -939,8 +964,19 @@ class Model:
             # 2) Hindcast mode meteo
             if cosmos.next_cycle_time is None:
                 # We do not actually need a restart file, but hey, what the heck.
-                trst = cosmos.stop_time(tzinfo=None)
+                trst = cosmos.stop_time.replace(tzinfo=None)
             else:
                 trst = cosmos.next_cycle_time.replace(tzinfo=None)
 
         return trst    
+
+def inpolygon(xq, yq, poly):
+    # if xq and yq are floats, turn into 1D arrays
+    if isinstance(xq, float):
+        xq = np.array([xq])
+    if isinstance(yq, float):
+        yq = np.array([yq])
+    coords = np.column_stack((xq.ravel(), yq.ravel()))
+    pts = shapely.points(coords)
+    inside = shapely.contains(poly, pts)   # vectorized
+    return inside.reshape(xq.shape)

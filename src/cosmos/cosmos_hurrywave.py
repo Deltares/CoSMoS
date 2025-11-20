@@ -90,6 +90,8 @@ class CoSMoS_HurryWave(Model):
         if self.wave_nested:
             self.domain.input.variables.bspfile = "hurrywave.bsp"
             self.domain.boundary_conditions.forcing = "spectra"
+        else:
+            self.domain.input.variables.bndfile = None
 
         # Meteo forcing
         if self.meteo_wind:
