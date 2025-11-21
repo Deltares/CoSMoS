@@ -108,7 +108,8 @@ class CoSMoS_SFINCS(Model):
         if cosmos.config.run.bathtub and self.make_flood_map:
             bathtub = True
             self.domain.input.variables.bathtub = 1
-            self.domain.input.variables.bathtub_dt = 3600.0
+            self.domain.input.variables.bathtub_dt = 600.0
+            self.domain.input.variables.bathtub_fachs = cosmos.config.run.bathtub_fachs
 
         # Turn on viscosity in all SFINCS models
         self.domain.input.viscosity = 1
@@ -412,9 +413,45 @@ class CoSMoS_SFINCS(Model):
                     df = pd.DataFrame(index=data["wl"].index)
                     df.index.name='date_time'
                     df["wl"]=data["wl"][station.name]
+                
                 # Write csv file for station
                 file_name = os.path.join(post_path,
                                             "wl." + station.name + ".csv")
                 df.to_csv(file_name,
                             date_format='%Y-%m-%dT%H:%M:%S',
                             float_format='%.3f')        
+
+            # Now we go through the stations and check if they are twl_gauge stations
+            # Make an  empty Dataframe with columns for: model, station, lon, lat, twl and hat
+            rows = []
+            for station in self.station:
+                if station.type == "twl_gauge":
+                    # Read in the water level time series
+                    file_name = os.path.join(post_path,
+                                            "wl." + station.name + ".csv")
+                    df = pd.read_csv(file_name, parse_dates=['date_time'], index_col='date_time')
+                    # Get maximum TWL
+                    twl = df["wl"].max()
+                    hat = station.hat
+                    if twl > hat: # High water!
+                        # Add a row to the dataframe
+                        row = {'model': self.name,
+                            'station': station.name,
+                            'longitude': station.longitude,
+                            'latitude': station.latitude,
+                            'twl': twl,
+                            'hat': hat}
+                        rows.append(row)
+                    else:
+                        # We delete the wl file as TWL did not exceed HAT
+                        os.remove(file_name)
+
+            df = pd.DataFrame(rows)
+
+            if not df.empty:
+                # Write TWL to csv including headers
+                twl_file_name = os.path.join(post_path,"twl.csv")
+
+                df.to_csv(twl_file_name,
+                        date_format='%Y-%m-%dT%H:%M:%S',
+                        float_format='%.3f')

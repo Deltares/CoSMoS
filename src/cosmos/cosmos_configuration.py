@@ -141,6 +141,7 @@ class Run:
         self.use_spw_precip   = False
         self.clean_up_mode    = "forecast"
         self.bathtub          = False
+        self.bathtub_fachs    = 0.4
         self.sfincs_docker    = False
         self.hurrywave_docker = False
         self.post_processing_script = None  # Custom post processing script to be run after each model loop
@@ -237,10 +238,10 @@ class Configuration:
                                 "map_contours.toml")
         self.map_contours = read_color_maps(tml_file)
         
-        # Available stations
+        # Available stations (the ones that are available for all models)
         cosmos.log("Reading stations ...")    
         self.stations = Stations()
-        self.stations.read()
+        self.stations.read_all()
 
         # Add metget_api configuration path for coamps-tc data (save only path to be able to change priority storm while cosmos is running)
         self.metget_config_path = os.path.join(self.path.main, "configuration", "metget_config.toml")

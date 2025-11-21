@@ -20,6 +20,7 @@ import platform
 
 from .cosmos_main import cosmos
 from .cosmos_cluster import cluster_dict as cluster
+from .cosmos_stations import read_station_set
 
 from cht_nesting import nest2
 import cht_utils.fileops as fo
@@ -115,7 +116,13 @@ class Model:
         if self.wave_nested is not None:
             self.wave = True
 
-        self.crs = CRS(self.crs)
+        self.crs = CRS(self.crs) # Convert CRS name to pyproj CRS object
+
+        self.get_exterior()
+
+        self.add_stations()
+
+    def get_exterior(self):    
 
         # Need to find the exterior (polygon) and extent (bbox) of the model
         # This has always been a bit of a mess in CoSMoS ...
@@ -205,15 +212,49 @@ class Model:
         #     geom = shapely.geometry.Polygon(np.squeeze(xy))
         #     # GDF with outline of model    
         #     self.outline = gpd.GeoDataFrame({"geometry": [geom]}).set_crs(self.crs).to_crs(4326)
+
+    def add_stations(self):    
            
         # Stations
         if self.station:
+
+            # At this point, self.station is a list of filenames of station toml files. The files may be in cosmos\run_folder\configuration\stations.
+            # Alternatively, they may also be in the model database in the model/stations folder.
+
             station_list = self.station
             self.station = []
-            for istat in range(len(station_list)):                
-                # Find matching stations from complete stations list
-                name = station_list[istat]
-                self.add_stations(name)
+
+            for station_file_name in station_list:
+
+                station_set_name = station_file_name.replace(".toml", "")
+
+                if station_set_name in cosmos.config.stations.station_set:
+                    # The station set is in the commonly available stations
+                    station_set = cosmos.config.stations.station_set[station_set_name]
+                elif os.path.exists(os.path.join(self.path, "stations", station_file_name)):
+                    # The station file is in the model database stations folder 
+                    station_set = read_station_set(os.path.join(self.path, "stations", station_file_name))
+                else:
+                    # Station set not found
+                    cosmos.log(f"Station set {station_set_name} not found for model {self.name}. Skipping these stations.")
+                    continue
+
+                # Check that station is within model polygon
+                wgs84 = CRS.from_epsg(4326)
+                transformer = Transformer.from_crs(wgs84, self.crs, always_xy=True)
+                exterior = self.exterior.geometry.iloc[0]
+                for station in station_set:
+                    # Use shapely inpolygon function instead of matplotlib path
+                    point = shapely.geometry.Point(station.longitude, station.latitude)
+                    if exterior.contains(point):
+                        # Make a copy of the station object to avoid issues when the same station is used in multiple models
+                        st = copy.deepcopy(station)
+                        x, y = transformer.transform(station.longitude,
+                                                     station.latitude)
+                        st.x = x
+                        st.y = y
+                        self.station.append(st)
+
 
     def write_config_yml(self):            
         # Write config file to be used in run_job.py
@@ -680,67 +721,67 @@ class Model:
         
         return all_nested_models
         
-    def add_stations(self, name):
-        """Add stations that are located within this model.
+    # def add_stations(self, name):
+    #     """Add stations that are located within this model.
 
-        Parameters
-        ----------
-        name : str
-            station file name or station name
-        """        
-        wgs84 = CRS.from_epsg(4326)
-        transformer = Transformer.from_crs(wgs84, self.crs, always_xy=True)
+    #     Parameters
+    #     ----------
+    #     name : str
+    #         station file name or station name
+    #     """        
+    #     wgs84 = CRS.from_epsg(4326)
+    #     transformer = Transformer.from_crs(wgs84, self.crs, always_xy=True)
 
-        exterior = self.exterior.to_crs(self.crs)
+    #     exterior = self.exterior.to_crs(self.crs)
         
-        if name[-4:].lower() == "toml":
+    #     if name[-4:].lower() == "toml":
 
-            # Get all stations in file
-            stations = cosmos.config.stations.find_by_file(name)
+    #         # Get all stations in file
+    #         stations = cosmos.config.stations.find_by_file(name)
 
-            for st in stations:
+    #         for st in stations:
 
-                station = copy.copy(st)
+    #             station = copy.copy(st)
 
-                # Check if this station is not already present
-                if station.name in [st.name for st in self.station]:
-                    continue
+    #             # Check if this station is not already present
+    #             if station.name in [st.name for st in self.station]:
+    #                 continue
 
-                station.longitude_model = station.longitude
-                station.latitude_model  = station.latitude
+    #             station.longitude_model = station.longitude
+    #             station.latitude_model  = station.latitude
                 
-                x, y = transformer.transform(station.longitude_model,
-                                             station.latitude_model)
-                station.x = x
-                station.y = y
+    #             x, y = transformer.transform(station.longitude_model,
+    #                                          station.latitude_model)
+    #             station.x = x
+    #             station.y = y
                 
-                # Check whether this station lies with model domain
+    #             # Check whether this station lies with model domain
 
-                for ip, polygon in exterior.iterrows():
-                    inpol = inpolygon(x, y, polygon["geometry"])
-                    if inpol[0]:
-                        self.station.append(station)
-                        break
+    #             for ip, polygon in exterior.iterrows():
+    #                 inpol = inpolygon(x, y, polygon["geometry"])
+    #                 if inpol[0]:
+    #                     self.station.append(station)
+    #                     break
                     
-                # if self.polygon:                            
-                #     if not self.polygon.contains_points([(x, y)])[0]:
-                #         # On to the next station
-                #         continue
-                # self.station.append(station)
+    #             # if self.polygon:                            
+    #             #     if not self.polygon.contains_points([(x, y)])[0]:
+    #             #         # On to the next station
+    #             #         continue
+    #             # self.station.append(station)
                                         
-        else:
+    #     else:
 
-            station = copy.copy(cosmos.config.stations.find_by_name(name))
+    #         station = copy.copy(cosmos.config.stations.find_by_name(name))
 
-            station.longitude_model = station.longitude
-            station.latitude_model  = station.latitude
+    #         station.longitude_model = station.longitude
+    #         station.latitude_model  = station.latitude
             
-            x, y = transformer.transform(station.longitude_model,
-                                         station.latitude_model)
-            station.x = x
-            station.y = y
+    #         x, y = transformer.transform(station.longitude_model,
+    #                                      station.latitude_model)
+    #         station.x = x
+    #         station.y = y
 
-            self.station.append(station)
+    #         self.station.append(station)
             
     def get_peak_boundary_conditions(self):
             """Get boundary conditions from overall model and define peak.

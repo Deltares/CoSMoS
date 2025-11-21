@@ -93,6 +93,7 @@ class WebViewer:
         for model in cosmos.scenario.model:
             model.set_stations_to_upload()
         self.make_timeseries("wl")
+        self.make_timeseries("twl")
         self.make_timeseries("waves")
 
         if cosmos.config.run.run_mode == "cloud":
@@ -181,6 +182,9 @@ class WebViewer:
         # TODO add if-statement for run-up layers
         cosmos.log("Adding run-up layers ...")                
         self.make_runup_map()
+
+        cosmos.log("Adding TWL layers ...")
+        self.make_twl_map()
 
         # Write map variables to file
         cosmos.log("Writing variables ...")                
@@ -697,19 +701,98 @@ class WebViewer:
                 except:
                     cosmos.log("An error occurred when making BEWARE webviewer !")
 
+    def make_twl_map(self):        
+        """Make SFINCS bathtub total water levels and timeseries for webviewer.
+        """   
+
+        # Total water levels estimates (tide+surge+0.2*Hs)
+
+        try:
+
+            if not cosmos.config.run.bathtub:
+                return
+
+            output_path = self.cycle_path
+
+            df_twl = None
+
+            for model in cosmos.scenario.model:
+                if model.type == 'sfincs':
+
+                    # Here we collect all the TWL points from all SFINCS models where they exceeded the threshold (HAT)
+                    # Each SFINCS bathtub model make a csv file with all points that exceeded the threshold
+                    # This happens in cosmos_sfincs.py -> post_process -> make_bathtub_csv
+                    # The file sits in model.cycle_post_path/twl_points.csv
+
+                    twl_file = os.path.join(model.cycle_post_path, "twl.csv")
+
+                    if os.path.exists(twl_file):
+                        df_twl0 = pd.read_csv(twl_file)
+                        if df_twl is None:
+                            df_twl = df_twl0
+                        else:
+                            df_twl = pd.concat([df_twl, df_twl0], ignore_index=True)
+
+            # We now hopefully (depending on whether you enjoy coastal flooding or not) have a dataframe with all TWL points from all SFINCS bathtub models
+            if df_twl is not None:
+                features = []
+                # Loop through rows in df_twl
+                for ip in range(len(df_twl)):
+                    lon = df_twl.longitude[ip]
+                    lat = df_twl.latitude[ip]
+                    point = Point((lon, lat))
+                    features.append(Feature(geometry=point,
+                                            properties={
+                                                        "model_name": df_twl.model[ip],
+                                                        "station_name": df_twl.station[ip],
+                                                        "lon": round(lon, 3),
+                                                        "lat": round(lat, 3),
+                                                        "TWL": round(df_twl.twl[ip], 2),
+                                                        "HAT": round(df_twl.hat[ip], 2),
+                                                        "TWLminusHAT": round(df_twl.twl[ip] - df_twl.hat[ip], 2),}))
+                                                
+                feature_collection = FeatureCollection(features)
+                file_name = os.path.join(output_path,
+                                        "estimated_total_water_level.geojson.js")
+                cht_utils.misc_tools.write_json_js(file_name, feature_collection, "var etwl =")
+            
+                dct={}
+                dct["name"]        = "estimated_total_water_level"
+                dct["long_name"]   = "Estimated Total Water Level"
+                dct["description"] = "These are the estimated maximum total water levels."
+                dct["format"]      = "geojson"
+                dct["infographic"] = "twl_bathtub"
+
+                dct["legend"] = make_legend(type="height_above_hat")
+
+                self.map_variables.append(dct)
+
+        except Exception as e:
+            cosmos.log("An error occurred when making BEWARE webviewer !")
+
     def make_timeseries(self, ts_type):
+
         """Generic function to make time series for the webviewer."""        
         if ts_type == "waves":
+            prefix = "waves"
             station_type = "wave_buoy"
             var_string = "hm0,tp"
             station_file = "wavebuoys.geojson.js"
             station_var = "buoys"
-        elif ts_type == "wl":    
+        elif ts_type == "wl":
+            prefix = "wl"
             station_type = "tide_gauge"
             var_string = "wl"
             station_file = "stations.geojson.js"
             station_var = "stations"
-        features = []    
+        elif ts_type == "twl":
+            prefix = "wl"
+            station_type = "twl_gauge"
+            var_string = "wl"
+            station_file = None
+            station_var = None
+
+        features = []
 
         tide_dataset_loaded = False
 
@@ -722,7 +805,23 @@ class WebViewer:
 
             if model.station:
                 for station in model.station:
-                    if station.type == station_type and station.upload:                
+
+                    cmp_file = None
+                    obs_file = None
+                    prd_file = None
+
+                    if station.type == station_type:
+                        pass
+
+                    if station.type == station_type and station.upload:
+
+                        if station_type == "twl_gauge":
+                            # We only upload TWL stations when TWL exceeds threshold
+                            # Therefore check if the file even exists
+                            fname = os.path.join(model.cycle_post_path, f"wl.{station.name}.csv")
+                            if not os.path.exists(fname):
+                                continue
+ 
                         point = Point((station.longitude, station.latitude))
                         if station.id:
                             name = station.long_name + " (" + str(station.id) + ")"
@@ -734,12 +833,9 @@ class WebViewer:
                         t1 = cosmos.cycle
                         t0_obs = t0
                         t1_obs = cosmos.stop_time
-                        cmp_file = None
-                        obs_file = None
-                        prd_file = None
                         
                         # Merge time series from previous cycles
-                        v  = merge_timeseries(path, model.name, station.name, ts_type,
+                        v  = merge_timeseries(path, model.name, station.name, prefix,
                                                    t0=t0.replace(tzinfo=None),
                                                    t1=t1.replace(tzinfo=None))
                         
@@ -749,7 +845,7 @@ class WebViewer:
                             if ts_type == "wl":
                                 v += model.vertical_reference_level_difference_with_msl
                             # Write csv js file
-                            cmp_file = ts_type + "." + station.name + "." + model.name + ".csv.js"
+                            cmp_file = prefix + "." + station.name + "." + model.name + ".csv.js"
                             csv_file = os.path.join(self.cycle_path,
                                                     "timeseries",
                                                     cmp_file)
@@ -837,7 +933,7 @@ class WebViewer:
                                                                 "cmp_file":cmp_file,
                                                                 "obs_file":obs_file,
                                                                 "prd_file":prd_file}))
-        if features:
+        if features and station_file is not None:
             feature_collection = FeatureCollection(features)
             buoys_file = os.path.join(self.cycle_path, station_file)
             cht_utils.misc_tools.write_json_js(buoys_file, feature_collection, "var " + station_var + " =")
