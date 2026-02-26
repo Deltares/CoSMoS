@@ -77,7 +77,7 @@ class CoSMoS_SFINCS(Model):
         self.domain.input.variables.dtwnd = cosmos.config.run.dtwnd
         self.domain.input.variables.dtout    = None
         self.domain.input.variables.outputformat = "net"
-        self.domain.input.variables.bzsfile  = "sfincs.bzs"
+        # self.domain.input.variables.bzsfile  = "sfincs.bzs"
 
         if self.role == "floodmap":
             # We need to make a flood map, but not max water levels
