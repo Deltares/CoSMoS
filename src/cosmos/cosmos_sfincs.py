@@ -77,7 +77,6 @@ class CoSMoS_SFINCS(Model):
         self.domain.input.variables.dtwnd = cosmos.config.run.dtwnd
         self.domain.input.variables.dtout    = None
         self.domain.input.variables.outputformat = "net"
-        # self.domain.input.variables.bzsfile  = "sfincs.bzs"
 
         if self.role == "floodmap":
             # We need to make a flood map, but not max water levels
@@ -216,15 +215,12 @@ class CoSMoS_SFINCS(Model):
 
         # Boundary conditions        
         if self.flow_nested:
-            # The actual nesting occurs in the run_job.py file 
+            # The actual nesting occurs in the run_job.py file
             self.domain.input.variables.bzsfile = "sfincs.bzs"
             
-        elif self.domain.input.variables.bcafile:            
-            # Get boundary conditions from astronomic components
+        elif self.domain.input.variables.bcafile:
+            # Get boundary conditions from astronomic components!
             pass
-            # self.domain.boundary_conditions.generate_bzs_from_bca(dt=600.0,
-            #                                                       offset=0.0,
-            #                                                       write_file=True)
 
         if self.wave_nested:
             # The actual nesting occurs in the run_job.py file

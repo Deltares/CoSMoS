@@ -200,7 +200,7 @@ class Model:
         #                      index_col=False,
         #                      header=None,
         #                      names=['x', 'y'],
-        #                      sep="\s+")
+        #                      sep=r"\s+")
                  
         #     xy = df.to_numpy()
         #     self.polygon = path.Path(xy)
