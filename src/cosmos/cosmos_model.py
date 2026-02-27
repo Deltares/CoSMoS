@@ -86,7 +86,7 @@ class Model:
         self.exterior             = None
         self.role               = "generic"  # can be "generic", "floodmap", "large_scale". Based on the role, we can set some predefined actions. This happens e.g. in cosmos_sfincs.py
         self.resolution         = -999.0
-        self.omp_num_threads    = cosmos.configuration.run.omp_num_threads
+        self.omp_num_threads    = -1 # Use -1 to use max number available
 
     def read_generic(self):
         """Read model attributes from model.toml file.
