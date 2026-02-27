@@ -132,10 +132,13 @@ class CoSMoS_SFINCS(Model):
         # Make observation points
         if self.station:
             self.domain.input.variables.obsfile  = "sfincs.obs"
+            # Only add stations that do not already exist
+            existing_stations = self.domain.observation_points.list_names()
             for station in self.station:
-                self.domain.observation_points.add_point(station.x,
-                                                         station.y,
-                                                         station.name)
+                if station.name not in existing_stations:
+                    self.domain.observation_points.add_point(station.x,
+                                                             station.y,
+                                                             station.name)
                 
         # Add observation points for nested models (Nesting 1)
         if self.nested_flow_models:
