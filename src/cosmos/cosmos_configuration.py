@@ -145,6 +145,7 @@ class Run:
         self.sfincs_docker    = False
         self.hurrywave_docker = False
         self.post_processing_script = None  # Custom post processing script to be run after each model loop
+        self.omp_num_threads  = 256
         
 class Configuration:
     """CoSMoS Configuration class.

@@ -86,6 +86,7 @@ class Model:
         self.exterior             = None
         self.role               = "generic"  # can be "generic", "floodmap", "large_scale". Based on the role, we can set some predefined actions. This happens e.g. in cosmos_sfincs.py
         self.resolution         = -999.0
+        self.omp_num_threads    = cosmos.configuration.run.omp_num_threads
 
     def read_generic(self):
         """Read model attributes from model.toml file.
@@ -516,8 +517,8 @@ class Model:
                 # Linux
                 fid = open(os.path.join(self.job_path, "run_job.sh"), "w")
                 fid.write("#!/bin/bash\n")
-                fid.write("`date` > running.txt\n")
-                fid.write(f"conda init \n")
+                fid.write("date > running.txt\n")
+                fid.write("conda init\n")
                 fid.write(f"conda activate {cosmos.config.conda.env}\n")
                 if self.ensemble:
                     fid.write("python run_job_2.py prepare_ensemble\n")

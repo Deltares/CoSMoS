@@ -340,6 +340,7 @@ class CoSMoS_SFINCS(Model):
                 batch_file = os.path.join(self.job_path, "run_simulation.sh")
                 fid = open(batch_file, "w")
                 fid.write("#!/bin/bash\n")
+                fid.write(f"export OMP_NUM_THREADS={self.omp_num_threads}\n")
                 fid.write("unset LD_LIBRARY_PATH\n")
                 fid.write("export PATH=" + cosmos.config.executables.sfincs_path + ":$PATH\n")
                 fid.write(os.path.join(cosmos.config.executables.sfincs_path, "sfincs\n"))
