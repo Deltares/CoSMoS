@@ -5,17 +5,43 @@ spectral wave models within the CoSMoS forecast framework.
 """
 
 import os
-import pandas as pd
 import platform
 
-from .cosmos_main import cosmos
-from .cosmos_model import Model
+import cht_utils.fileops as fo
+import pandas as pd
+import xarray as xr
+from cht_nesting import nest1
 
 # from cht_utils.misc_tools import dict2yaml
+from hydromt_hurrywave import HurrywaveModel
 
-from cht_hurrywave import HurryWave
-import cht_utils.fileops as fo
-from cht_nesting import nest1
+from .cosmos import cosmos
+from .cosmos_model import Model
+
+
+def _read_hurrywave_his(file_name: str, parameter: str = "point_hm0") -> "pd.DataFrame":
+    """Read HurryWave history output as DataFrame with station name columns."""
+    ds = xr.open_dataset(file_name)
+    var = ds[parameter]
+    if "station_name" in ds:
+        import numpy as np
+
+        names = ds["station_name"].values
+        names = [
+            (
+                s.decode("utf-8").strip()
+                if isinstance(s, (bytes, np.bytes_))
+                else str(s).strip()
+            )
+            for s in names
+        ]
+    else:
+        names = [f"station_{i}" for i in range(var.shape[1])]
+    df = pd.DataFrame(
+        var.values, index=pd.DatetimeIndex(var.time.values), columns=names
+    )
+    ds.close()
+    return df
 
 
 class CoSMoS_HurryWave(Model):
@@ -38,27 +64,19 @@ class CoSMoS_HurryWave(Model):
     cosmos.cosmos_model.Model
     """
 
-    def read_model_specific(self):
+    def read_model_specific(self) -> None:
         """Read HurryWave specific model attributes.
 
         See Also
         ----------
-        cht_hurrywave.hurrywave
+        hydromt_hurrywave
         """
         # Read in the HurryWave model
-
-        # Now read in the domain data
-        self.domain = HurryWave(
-            path=os.path.join(self.path, "input"), load=True, read_grid_data=False
+        self.domain = HurrywaveModel(
+            root=os.path.join(self.path, "input"), mode="r+", write_gis=False
         )
 
-        # Copy some attributes to the model domain (needed for nesting)
-        self.domain.crs = self.crs
-        # self.domain.type  = self.type
-        # self.domain.name  = self.name
-        # self.domain.runid = self.runid
-
-    def pre_process(self):
+    def pre_process(self) -> None:
         """Preprocess HurryWave model.
 
         - Extract and write wave conditions.
@@ -72,44 +90,40 @@ class CoSMoS_HurryWave(Model):
         cht_nesting.nest2
         """
         # Set path temporarily to job path
-        pth = self.domain.path
-        self.domain.path = self.job_path
+        pth = self.domain.root.path
+        self.domain.root.set(self.job_path)
 
         # Start and stop times
-        self.domain.input.variables.tref = cosmos.scenario.ref_date
-        self.domain.input.variables.tstart = self.wave_start_time
-        self.domain.input.variables.tstop = self.wave_stop_time
-        #        nsecs = (self.wave_stop_time - self.wave_start_time).total_seconds()
-        #        self.domain.input.dtmaxout = nsecs
-        self.domain.input.variables.dtmaxout = cosmos.config.run.dtmax
-        self.domain.input.variables.dtmapout = cosmos.config.run.dtmap
-        self.domain.input.variables.dtwnd = cosmos.config.run.dtwnd
-        self.domain.input.variables.outputformat = "net"
+        self.domain.config.set("tref", cosmos.scenario.ref_date)
+        self.domain.config.set("tstart", self.wave_start_time)
+        self.domain.config.set("tstop", self.wave_stop_time)
+        self.domain.config.set("dtmaxout", cosmos.config.run.dtmax)
+        self.domain.config.set("dtmapout", cosmos.config.run.dtmap)
+        self.domain.config.set("dtwnd", cosmos.config.run.dtwnd)
+        self.domain.config.set("outputformat", "net")
 
         self.meteo_atmospheric_pressure = False
         self.meteo_precipitation = False
 
         # Boundary conditions
         if self.wave_nested:
-            self.domain.input.variables.bspfile = "hurrywave.bsp"
+            self.domain.config.set("bspfile", "hurrywave.bsp")
             self.domain.boundary_conditions.forcing = "spectra"
         else:
-            self.domain.input.variables.bndfile = None
+            self.domain.config.set("bndfile", None)
 
         # Meteo forcing
         if self.meteo_wind:
             self.write_meteo_input_files(
-                "hurrywave", self.domain.input.variables.tref, format="netcdf"
+                "hurrywave", self.domain.config.get("tref"), format="netcdf"
             )
-            # self.domain.input.variables.amufile = "hurrywave.amu"
-            # self.domain.input.variables.amvfile = "hurrywave.amv"
-            self.domain.input.variables.netamuamvfile = "hurrywave_wind.nc"
+            self.domain.config.set("netamuamvfile", "hurrywave_wind.nc")
 
         # Spiderweb file
         self.meteo_spiderweb = cosmos.scenario.meteo_spiderweb
 
         if self.meteo_spiderweb or self.meteo_track and not self.ensemble:
-            self.domain.input.variables.spwfile = "hurrywave.spw"
+            self.domain.config.set("spwfile", "hurrywave.spw")
             # Spiderweb file given, copy to job folder
             if cosmos.scenario.run_ensemble:
                 spwfile = os.path.join(
@@ -128,22 +142,20 @@ class CoSMoS_HurryWave(Model):
 
         if self.ensemble:
             # Copy all spiderwebs to jobs folder
-            self.domain.input.variables.spwfile = "hurrywave.spw"
+            self.domain.config.set("spwfile", "hurrywave.spw")
 
         # Make observation points
         if self.station:
             for station in self.station:
-                if not self.domain.input.variables.obsfile:
-                    self.domain.input.variables.obsfile = "hurrywave.obs"
-                self.domain.observation_points_regular.add_point(
+                if not self.domain.config.get("obsfile"):
+                    self.domain.config.set("obsfile", "hurrywave.obs")
+                self.domain.observation_points.add_point(
                     station.x, station.y, station.name
                 )
 
         # Add observation points for nested models (Nesting 1)
         if self.nested_wave_models:
-
             for nested_model in self.nested_wave_models:
-
                 specout = False
                 if nested_model.type == "xbeach":
                     specout = True
@@ -156,7 +168,7 @@ class CoSMoS_HurryWave(Model):
                 elif nested_model.type == "sfincs":
                     # No sp2 output
                     # The next two lines are already done when reading in sfincs model, right?
-                    nested_model.domain.input.variables.snapwave_bnd = "snapwave.bnd"
+                    # nested_model.domain.input.variables.snapwave_bnd = "snapwave.bnd"
                     # nested_model.domain.read_wave_boundary_points()
                     nest1(
                         self.domain,
@@ -180,42 +192,37 @@ class CoSMoS_HurryWave(Model):
                     )
 
             if specout:
-                if not self.domain.input.variables.ospfile:
-                    self.domain.input.variables.ospfile = "hurrywave.osp"
-                self.domain.observation_points_sp2.write()
-                if self.domain.input.variables.dtsp2out == 0.0:
-                    self.domain.input.variables.dtsp2out = 3600.0
+                if not self.domain.config.get("ospfile"):
+                    self.domain.config.set("ospfile", "hurrywave.osp")
+                self.domain.observation_points_spectra.write()
+                if self.domain.config.get("dtsp2out") == 0.0:
+                    self.domain.config.set("dtsp2out", 3600.0)
 
-        if len(self.domain.observation_points_regular.gdf) > 0:
-            if not self.domain.input.variables.obsfile:
-                self.domain.input.variables.obsfile = "hurrywave.obs"
-            self.domain.observation_points_regular.write()
+        if len(self.domain.observation_points.gdf) > 0:
+            if not self.domain.config.get("obsfile"):
+                self.domain.config.set("obsfile", "hurrywave.obs")
+            self.domain.observation_points.write()
 
         # Make restart file
         # self.get_restart_time() sits in cosmos_model.py
         trst = self.get_restart_time()
-        trstsec = trst - self.domain.input.variables.tref
-        trstsec = trstsec.total_seconds()
-        # trstsec = self.domain.input.variables.tstop.replace(tzinfo=None) - self.domain.input.variables.tref
-        # if self.meteo_dataset:
-        #     if self.meteo_dataset.last_analysis_time:
-        #         trstsec = self.meteo_dataset.last_analysis_time.replace(tzinfo=None) - self.domain.input.variables.tref
-        self.domain.input.variables.trstout = trstsec
-        self.domain.input.variables.dtrstout = 0.0
+        trstsec = (trst - self.domain.config.get("tref")).total_seconds()
+        self.domain.config.set("trstout", trstsec)
+        self.domain.config.set("dtrstout", 0.0)
 
         # Get restart file from previous cycle
         if self.wave_restart_file:
             src = os.path.join(self.restart_wave_path, self.wave_restart_file)
             dst = os.path.join(self.job_path, "hurrywave.rst")
             fo.copy_file(src, dst)
-            self.domain.input.variables.rstfile = "hurrywave.rst"
-            self.domain.input.variables.tspinup = 0.0
+            self.domain.config.set("rstfile", "hurrywave.rst")
+            self.domain.config.set("tspinup", 0.0)
 
-        # Now write input file (sfincs.inp)
-        self.domain.input.write()
+        # Now write input file (hurrywave.inp)
+        self.domain.config.write()
 
         # Set the path back to the one in cosmos\models\etc.
-        self.domain.path = pth
+        self.domain.root.set(pth)
 
         ### And now prepare the job files ###
 
@@ -236,7 +243,6 @@ class CoSMoS_HurryWave(Model):
                     f.write(member + "\n")
 
         if cosmos.config.run.run_mode != "cloud":
-
             # Make run batch file (only for windows and linux).
             if platform.system() == "Windows":
                 batch_file = os.path.join(self.job_path, "run_simulation.bat")
@@ -282,7 +288,7 @@ class CoSMoS_HurryWave(Model):
             else:
                 self.workflow_name = "hurrywave-deterministic-workflow"
 
-    def move(self):
+    def move(self) -> None:
         job_path = self.job_path
         output_path = self.cycle_output_path
         input_path = self.cycle_input_path
@@ -301,7 +307,7 @@ class CoSMoS_HurryWave(Model):
         # Input
         fo.move_file(os.path.join(job_path, "*.*"), input_path)
 
-    def post_process(self):
+    def post_process(self) -> None:
         # Extract wave time series
         # input_path  = self.cycle_input_path
         output_path = self.cycle_output_path
@@ -312,35 +318,25 @@ class CoSMoS_HurryWave(Model):
         #     self.domain.read_observation_points()
         if self.station:
             # Read in data for all stations
+            his_file = os.path.join(output_path, "hurrywave_his.nc")
             data = {}
             if self.ensemble:
                 prcs = [0.05, 0.5, 0.95]
                 for i, v in enumerate(prcs):
-                    data["hm0_" + str(round(v * 100))] = (
-                        self.domain.read_timeseries_output(
-                            path=output_path,
-                            file_name="hurrywave_his.nc",
-                            parameter="hm0_" + str(round(v * 100)),
-                        )
+                    data["hm0_" + str(round(v * 100))] = _read_hurrywave_his(
+                        his_file,
+                        parameter="point_hm0_" + str(round(v * 100)),
                     )
-                    data["tp_" + str(round(v * 100))] = (
-                        self.domain.read_timeseries_output(
-                            path=output_path,
-                            file_name="hurrywave_his.nc",
-                            parameter="tp_" + str(round(v * 100)),
-                        )
+                    data["tp_" + str(round(v * 100))] = _read_hurrywave_his(
+                        his_file,
+                        parameter="point_tp_" + str(round(v * 100)),
                     )
             else:
-                data["hm0"] = self.domain.read_timeseries_output(
-                    path=output_path, parameter="hm0"
-                )
-                data["tp"] = self.domain.read_timeseries_output(
-                    path=output_path, parameter="tp"
-                )
+                data["hm0"] = _read_hurrywave_his(his_file, parameter="point_hm0")
+                data["tp"] = _read_hurrywave_his(his_file, parameter="point_tp")
 
             # Loop through stations
             for station in self.station:
-
                 if self.ensemble:
                     indx = data["hm0_" + str(round(prcs[0] * 100))].index
                     df = pd.DataFrame(index=indx)

@@ -5,16 +5,16 @@ on S3 by compositing PNG images with alpha blending.
 """
 
 import os
-import boto3
+import shutil
 
 # from bulkboto3 import BulkBoto3
 import tarfile
-import shutil
-from PIL import Image
-import numpy as np
 from multiprocessing.pool import ThreadPool
 
+import boto3
+import numpy as np
 from cht_utils.misc_tools import yaml2dict
+from PIL import Image
 
 
 # Helper class for cloud functions, note this is a copy of necessary functionalities of cosmos_cloud

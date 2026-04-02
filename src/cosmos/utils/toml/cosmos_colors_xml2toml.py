@@ -1,9 +1,9 @@
 """Utility to convert CoSMoS color map XML definitions to TOML format."""
 
 import os
-import toml
-import yaml
+
 import cht_utils.xmlkit as xml
+import yaml
 
 path = r"p:\11206085-onr-fhics\03_cosmos\configurations"
 name = "map_contours"

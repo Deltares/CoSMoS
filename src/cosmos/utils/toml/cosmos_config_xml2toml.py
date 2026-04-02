@@ -1,8 +1,9 @@
 """Utility to convert CoSMoS XML configuration files to TOML format."""
 
 import os
-import toml
+
 import cht_utils.xmlkit as xml
+import toml
 
 path = "c:\\work\\cosmos\\run_folder\\configuration"
 name = "config_mvo"

@@ -1,12 +1,12 @@
 """Utility to convert various XML and YAML configuration files to TOML format."""
 
 # Convert files to toml format
-import cht.misc.xmlkit as xml
-import cht.misc.fileops as fo
-from cht.misc.misc_tools import yaml2dict
-import xml.etree.ElementTree as ET
-import toml
 import os
+
+import cht.misc.fileops as fo
+import cht.misc.xmlkit as xml
+import toml
+from cht.misc.misc_tools import yaml2dict
 
 
 def xml2dict(element):
@@ -23,7 +23,6 @@ def xml2toml(foldername=None, file_list=None, format="xml", items=None):
 
     for file in file_list:
         if file.endswith(".xml"):
-
             xml_obj = xml.xml2obj(file)
             dct = xml_obj.__dict__
 

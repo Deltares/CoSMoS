@@ -4,26 +4,25 @@ Builds and uploads the interactive web viewer with time-series station data,
 map tile layers, and GeoJSON overlays for visualizing forecast results.
 """
 
+import copy
 import datetime
 import os
 import shutil
-import numpy as np
-import pandas as pd
 import time
-from scipy import interpolate
-from geojson import Point, Feature, FeatureCollection
-from pyproj import CRS
-from pyproj import Transformer
-import copy
 
-from .cosmos_argo import Argo
-from .cosmos_main import cosmos
-
-from cht_meteo import MeteoDataset
 import cht_utils.fileops as fo
 import cht_utils.misc_tools
-from cht_utils.misc_tools import dict2yaml
+import numpy as np
+import pandas as pd
+from cht_meteo import MeteoDataset
 from cht_tide.tide_stations import TideStationsDataset
+from cht_utils.misc_tools import dict2yaml
+from geojson import Feature, FeatureCollection, Point
+from pyproj import CRS, Transformer
+from scipy import interpolate
+
+from .cosmos import cosmos
+from .cosmos_argo import Argo
 
 
 class WebViewer:
@@ -51,7 +50,6 @@ class WebViewer:
         # Check whether web viewer already exists
         # If not, copy empty web viewer from templates
         if not self.exists:
-
             cosmos.log("Making new web viewer from " + self.version + " ...")
 
             fo.mkdir(self.path)
@@ -383,7 +381,6 @@ class WebViewer:
         cosmos.log("Making meteo map tiles ...")
 
         try:
-
             # Wind
             # Name of meteo dataset in scenario file (this one will be used for the wind map)
 
@@ -509,7 +506,6 @@ class WebViewer:
 
         for model in cosmos.scenario.model:
             if model.type == "xbeach":
-
                 # if os.path.exists(os.path.join(model.cycle_output_path,
                 #                           "beware_his.nc")) and not model.ensemble:
 
@@ -518,7 +514,6 @@ class WebViewer:
                 if os.path.exists(
                     os.path.join(model.cycle_post_path, "Sallengerregimes.csv")
                 ):
-
                     csv_file = os.path.join(
                         model.cycle_post_path, "Sallengerregimes.csv"
                     )
@@ -614,7 +609,6 @@ class WebViewer:
 
         for model in cosmos.scenario.model:
             if model.type == "beware":
-
                 try:
                     if (
                         os.path.exists(
@@ -622,7 +616,6 @@ class WebViewer:
                         )
                         and not model.ensemble
                     ):
-
                         model.domain.read_data(
                             os.path.join(model.cycle_output_path, "beware_his.nc")
                         )
@@ -852,7 +845,6 @@ class WebViewer:
                         r2max = dfx.columns.values
 
                         for ip in range(len(model.domain.filename)):
-
                             name = "Loc nr: " + str(model.domain.filename[ip])
 
                             id = np.argmax(model.domain.R2[ip, :])
@@ -912,7 +904,7 @@ class WebViewer:
 
                         self.map_variables.append(dct)
 
-                except:
+                except Exception:
                     cosmos.log("An error occurred when making BEWARE webviewer !")
 
     def make_twl_map(self):
@@ -921,7 +913,6 @@ class WebViewer:
         # Total water levels estimates (tide+surge+0.2*Hs)
 
         try:
-
             if not cosmos.config.run.bathtub:
                 return
 
@@ -931,7 +922,6 @@ class WebViewer:
 
             for model in cosmos.scenario.model:
                 if model.type == "sfincs":
-
                     # Here we collect all the TWL points from all SFINCS models where they exceeded the threshold (HAT)
                     # Each SFINCS bathtub model make a csv file with all points that exceeded the threshold
                     # This happens in cosmos_sfincs.py -> post_process -> make_bathtub_csv
@@ -1021,7 +1011,6 @@ class WebViewer:
         tide_dataset_loaded = False
 
         for model in cosmos.scenario.model:
-
             # For tide only, we do not put any time series in the web viewer
             if model.role == "tide_only":
                 # On to the next model
@@ -1029,7 +1018,6 @@ class WebViewer:
 
             if model.station:
                 for station in model.station:
-
                     cmp_file = None
                     obs_file = None
                     prd_file = None
@@ -1038,7 +1026,6 @@ class WebViewer:
                         pass
 
                     if station.type == station_type and station.upload:
-
                         if station_type == "twl_gauge":
                             # We only upload TWL stations when TWL exceeds threshold
                             # Therefore check if the file even exists
@@ -1114,7 +1101,6 @@ class WebViewer:
                             )
                             csv_file = ts_type + "." + station.id + ".observed.csv.js"
                             if os.path.exists(os.path.join(obs_pth, csv_file)):
-
                                 # Read in csv file to a dataframe
                                 df = pd.read_csv(
                                     os.path.join(obs_pth, csv_file),
@@ -1310,7 +1296,7 @@ class WebViewer:
                 username=cosmos.config.webserver.username,
                 password=cosmos.config.webserver.password,
             )
-        except:
+        except Exception:
             cosmos.log("Error! Could not connect to sftp server !")
             return
 
@@ -1322,7 +1308,7 @@ class WebViewer:
                 make_wv_on_ftp = True
             else:
                 # Check if web viewer exists on FTP
-                if not self.name in f.sftp.listdir(cosmos.config.webserver.path):
+                if self.name not in f.sftp.listdir(cosmos.config.webserver.path):
                     make_wv_on_ftp = True
 
             if make_wv_on_ftp:
@@ -1362,7 +1348,7 @@ class WebViewer:
 
             try:
                 f.sftp.close()
-            except:
+            except Exception:
                 pass
 
     def copy_to_opendap(self):
@@ -1377,7 +1363,7 @@ class WebViewer:
                 make_wv_on_ftp = True
             else:
                 # Check if web viewer exists on FTP
-                if not self.name in os.listdir(cosmos.config.webserver.path):
+                if self.name not in os.listdir(cosmos.config.webserver.path):
                     make_wv_on_ftp = True
 
             if make_wv_on_ftp:
@@ -1394,7 +1380,6 @@ class WebViewer:
                 # Check if scenario is already on ftp-server
 
                 if os.path.exists(os.path.join(remote_path, cosmos.scenario.name)):
-
                     # Check if scenario-cycle is already on ftp server
                     if cosmos.cycle_string in os.listdir(
                         os.path.join(remote_path, cosmos.scenario.name)

@@ -4,8 +4,8 @@ Provides the central CoSMoS object that manages initialization, scenario
 execution, logging, and coordination of all forecast components.
 """
 
-import os
 import datetime
+import os
 
 import cht_utils.fileops as fo
 
@@ -40,10 +40,11 @@ class CoSMoS:
 
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialize the CoSMoS singleton."""
         os.environ["HDF5_DISABLE_VERSION_CHECK"] = "2"
 
-    def initialize(self, main_path, config_file="config.toml"):
+    def initialize(self, main_path: str, config_file: str = "config.toml") -> None:
         """Initialize CoSMoS configuration based on configuration file and input arguments.
 
         Parameters
@@ -71,18 +72,22 @@ class CoSMoS:
         # Read in configuration
         self.config.set()
 
-    def run(self, scenario_name=None, cycle=None, last_cycle=None):
-        """Run a CoSMoS scenario:
-
-        - Initialize cosmos_main_loop and cosmos_model_loop
-        - Start cosmos_main_loop
+    def run(
+        self,
+        scenario_name: str = None,
+        cycle: str = None,
+        last_cycle: str = None,
+    ) -> None:
+        """Run a CoSMoS scenario.
 
         Parameters
         ----------
-        scenario_name : str
+        scenario_name : str, optional
             Name of the scenario to be run.
         cycle : str, optional
-            Cycle to start with (e.g. 20231213_00z), by default None
+            Cycle to start with (e.g. ``"20231213_00z"``).
+        last_cycle : str, optional
+            Last cycle to process (e.g. ``"20231215_00z"``).
 
         See Also
         -------
@@ -126,8 +131,14 @@ class CoSMoS:
 
         self.main_loop.start(cycle=cycle)
 
-    def stop(self, message: str):
-        """Stop main loop and model loop."""
+    def stop(self, message: str) -> None:
+        """Stop the forecast system and raise an exception.
+
+        Parameters
+        ----------
+        message : str
+            Error description to log.
+        """
         # Raise exception
         self.log("Error: " + message)
         print("Error: " + message)
@@ -135,13 +146,13 @@ class CoSMoS:
         # self.model_loop.scheduler.cancel()
         # self.main_loop.scheduler.cancel()
 
-    def log(self, message: str):
-        """Write log message to cosmos.log
+    def log(self, message: str) -> None:
+        """Write a timestamped message to ``cosmos.log`` and stdout.
 
         Parameters
         ----------
         message : str
-            Log message
+            Log message.
         """
         print(message)
         log_file = os.path.join(self.config.path.main, "cosmos.log")
@@ -154,16 +165,15 @@ class CoSMoS:
             f.write(tstr + message + "\n")
             f.close()
 
-    def make_webviewer(self, scenario_name: str, cycle=None):
-        """Just make webviewer
+    def make_webviewer(self, scenario_name: str, cycle: str = None) -> None:
+        """Build the web viewer for a scenario without running models.
 
         Parameters
         ----------
         scenario_name : str
-            Scenario name
-
+            Scenario name.
         cycle : str, optional
-            Cycle to start with (e.g. 20231213_00z), by default None
+            Cycle string (e.g. ``"20231213_00z"``).
 
         See Also
         -------
@@ -204,7 +214,7 @@ class CoSMoS:
                 current_path = os.getcwd()
                 try:
                     self.webviewer.upload()
-                except:
+                except Exception:
                     print("An error occurred when uploading web viewer to server !!!")
                 os.chdir(current_path)
         except Exception as e:
@@ -214,16 +224,15 @@ class CoSMoS:
         if cosmos.config.run.upload:
             self.webviewer.upload()
 
-    def upload_webviewer(self, scenario_name: str, cycle=None):
-        """Just upload webviewer
+    def upload_webviewer(self, scenario_name: str, cycle: str = None) -> None:
+        """Upload an existing web viewer to the remote server.
 
         Parameters
         ----------
         scenario_name : str
-            Scenario name
-
+            Scenario name.
         cycle : str, optional
-            Cycle to start with (e.g. 20231213_00z), by default None
+            Cycle string (e.g. ``"20231213_00z"``).
 
         See Also
         -------
@@ -232,9 +241,9 @@ class CoSMoS:
         cosmos.cosmos_webviewer.WebViewer
 
         """
-        from .cosmos_webviewer import WebViewer
-        from .cosmos_scenario import Scenario
         from .cosmos_cloud import Cloud
+        from .cosmos_scenario import Scenario
+        from .cosmos_webviewer import WebViewer
 
         self.cloud = Cloud()
 
@@ -249,17 +258,17 @@ class CoSMoS:
         # self.webviewer.cycle_path = os.path.join(self.config.path.main, "scenarios", scenario_name, self.cycle_string)
         self.webviewer.upload()
 
-    def post_process(self, scenario_name: str, model=None, cycle: str = None):
-        """Just post-process model results.
+    def post_process(self, scenario_name: str, model=None, cycle: str = None) -> None:
+        """Post-process model results without running simulations.
 
         Parameters
         ----------
         scenario_name : str
-            Scenario name
-        model : list or 'all', optional
-            Which models to post-process, by default None
-        cycle : _type_, optional
-            Cycle name, by default None
+            Scenario name.
+        model : list of str or ``"all"``, optional
+            Model names to post-process, or ``"all"`` for every model.
+        cycle : str, optional
+            Cycle string.
 
         See Also
         -------

@@ -4,19 +4,19 @@ Runs XBeach model jobs on remote workers or in the cloud, including nesting,
 tiling, and S3 data transfer.
 """
 
-import os
-import xarray as xr
-import sys
-import boto3
 import datetime
-import numpy as np
+import os
 import platform
+import sys
+
+import boto3
 
 # from cht_utils.argo import Argo
 import cht_utils.fileops as fo
-from cht_utils.misc_tools import yaml2dict
+import xarray as xr
 from cht_nestingp import nest2
 from cht_tiling import TiledWebMap
+from cht_utils.misc_tools import yaml2dict
 from cht_xbeach.xbeach import XBeach
 
 
@@ -40,9 +40,7 @@ def prepare_single(config):
 
         # Copy base input folder
         s3_key = config["scenario"] + "/" + "models" + "/" + config["model"] + "/"
-        local_file_path = (
-            f"/input/"  # Replace with the local path where you want to save the file
-        )
+        local_file_path = "/input/"
         objects = s3_client.list_objects(Bucket=bucket_name, Prefix=s3_key)
         if "Contents" in objects:
             for object in objects["Contents"]:
@@ -104,7 +102,7 @@ def prepare_single(config):
                 + "/"
                 + file_name
             )
-            local_file_path = f"/input/boundary"
+            local_file_path = "/input/boundary"
             fo.mkdir(local_file_path)
             # Download the file from S3
             s3_client.download_file(
@@ -140,7 +138,7 @@ def prepare_single(config):
                 + "/"
                 + file_name
             )
-            local_file_path = f"/input/boundary"
+            local_file_path = "/input/boundary"
             fo.mkdir(local_file_path)
             # Download the file from S3
             s3_client.download_file(
@@ -166,7 +164,6 @@ def map_tiles(config):
 
     # Make flood map tiles
     if "sedero_map" in config:
-
         # Make SFINCS object
         xb = XBeach()
 

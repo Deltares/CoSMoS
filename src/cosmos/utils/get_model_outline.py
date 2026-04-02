@@ -5,13 +5,10 @@ model grids for use in the CoSMoS web viewer.
 """
 
 import os
-import xarray as xr
-import numpy as np
-from scipy.interpolate import RegularGridInterpolator
 
-from hydromt_sfincs import SfincsModel
-from cht_tiling import make_index_tiles, make_topobathy_tiles_v2, make_topobathy_overlay
+from cht_tiling import make_topobathy_overlay
 from cht_tiling.utils import get_zoom_level_for_resolution
+from hydromt_sfincs import SfincsModel
 
 # def interpolate_netcdf_onto_grid(dem_list, x, y, crs):
 #     """Interpolate DEMs onto grid"""

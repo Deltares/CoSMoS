@@ -2,7 +2,7 @@
 
 # TODO: Add multiple scenarios to create a testebd
 
-from cosmos.cosmos_main import cosmos
+from cosmos.cosmos import cosmos
 
 # main_path = r"p:\11206085-onr-fhics\03_cosmos"
 main_path = r"c:\CoSMoS\run_folder"

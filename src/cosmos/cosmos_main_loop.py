@@ -4,23 +4,24 @@ Orchestrates the end-to-end forecast cycle: meteo download, track ensemble
 generation, scenario setup, model execution, web viewer creation, and cleanup.
 """
 
-import time
-import datetime
-import sched
-import os
 import copy
+import datetime
 import importlib
-import numpy as np
+import os
+import sched
+import time
 
-from .cosmos_main import cosmos
-from .cosmos_meteo import download_meteo, collect_meteo
-from .cosmos_track_ensemble import setup_track_ensemble
-from .cosmos_scenario import Scenario
+import numpy as np
+from cht_utils.misc_tools import dict2yaml
+
+from .cosmos import cosmos
+from .cosmos_clean_up import clean_up
 from .cosmos_cloud import Cloud
+from .cosmos_meteo import collect_meteo, download_meteo
+from .cosmos_scenario import Scenario
+from .cosmos_track_ensemble import setup_track_ensemble
 from .cosmos_tsunami import CoSMoS_Tsunami
 from .cosmos_webviewer import WebViewer
-from .cosmos_clean_up import clean_up
-from cht_utils.misc_tools import dict2yaml
 
 try:
     from .cosmos_argo import Argo
@@ -42,7 +43,7 @@ class MainLoop:
 
     See Also
     --------
-    cosmos.cosmos_main.CoSMoS
+    cosmos.cosmos.CoSMoS
     cosmos.cosmos_scenario.Scenario
     cosmos.cosmos_model_loop.ModelLoop
     cosmos.cosmos_model.Model
@@ -433,7 +434,7 @@ class MainLoop:
                     current_path = os.getcwd()
                     try:
                         cosmos.webviewer.upload()
-                    except:
+                    except Exception:
                         print(
                             "An error occurred when uploading web viewer to server !!!"
                         )
@@ -499,13 +500,11 @@ def get_start_and_stop_times():
     # Now for each of these models, loop up in the model tree until
     # not nested in any other model
     for not_nested_model in not_nested_models:
-
         nested = True
         model = not_nested_model
         nested_wave_start_time = start_time
 
         while nested:
-
             # nested_wave_start_time is the start time of the model that is nested in this model
             # this model should start at the same time or earlier
             model.wave_start_time = min(model.wave_start_time, nested_wave_start_time)
@@ -559,7 +558,6 @@ def get_start_and_stop_times():
         nested_flow_start_time = start_time
 
         while nested:
-
             # flow_start_time is minimum this model's flow_start_time and the flow_start_time of the model that is nested in it.
 
             model.flow_start_time = min(model.flow_start_time, nested_flow_start_time)

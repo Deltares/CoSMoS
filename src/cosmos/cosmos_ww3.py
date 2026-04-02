@@ -4,54 +4,51 @@ Handles reading, pre-processing, and job management for WaveWatch III
 spectral wave models within the CoSMoS forecast framework.
 """
 
-import shutil
 import os
+import shutil
 
-from .cosmos_main import cosmos
-from .cosmos_model import Model
 import cht_utils.xmlkit as xml
+
+from .cosmos import cosmos
+from .cosmos_model import Model
 
 
 class CoSMoS_WW3(Model):
+    """CoSMoS wrapper for WaveWatch III models."""
 
-    def read_model_specific(self):
-
-        # First set some defaults
+    def read_model_specific(self) -> None:
+        """Read WW3-specific attributes from the model XML file."""
         self.wave_spinup_time = 0.0
 
         xml_obj = xml.xml2obj(self.file_name)
         if hasattr(xml_obj, "wavespinup"):
             self.wave_spinup_time = float(xml_obj.wavespinup[0].value)
 
-    def move(self):
-
-        # Delete everything for now
+    def move(self) -> None:
+        """Remove the job folder after WW3 simulation completes."""
         job_path = os.path.join(cosmos.config.job_path, cosmos.scenario.name, self.name)
         files = os.listdir(job_path)
         for file_name in files:
-            full_file_name = os.path.join(job_path, file_name)
-            os.remove(full_file_name)
+            os.remove(os.path.join(job_path, file_name))
         try:
             os.rmdir(job_path)
-        except:
-            cosmos.log("Could not delete " + job_path)
+        except Exception:
+            cosmos.log(f"Could not delete {job_path}")
 
-    def pre_process(self):
-
+    def pre_process(self) -> None:
+        """Copy all WW3 input files to the job folder."""
         job_path = os.path.join(cosmos.config.job_path, cosmos.scenario.name, self.name)
         if not os.path.exists(job_path):
             os.mkdir(job_path)
 
-        # Copy all input files to job folder
         src = os.path.join(self.path, "input")
-        src_files = os.listdir(src)
-        for file_name in src_files:
+        for file_name in os.listdir(src):
             full_file_name = os.path.join(src, file_name)
             if os.path.isfile(full_file_name):
                 shutil.copy(full_file_name, job_path)
 
-    def post_process(self):
-        pass
+    def post_process(self) -> None:
+        """Post-process WW3 output (not implemented)."""
 
-    def submit_job(self):
-        pass
+    def submit_job(self) -> None:
+        """Submit WW3 job (not implemented)."""

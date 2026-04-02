@@ -1,8 +1,9 @@
 """Utility to convert CoSMoS model XML definitions to TOML format."""
 
 import os
-import toml
+
 import cht_utils.xmlkit as xml
+import toml
 
 region = "puerto_rico"
 name = "sfincs_puerto_rico"

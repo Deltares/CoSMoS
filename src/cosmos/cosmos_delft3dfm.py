@@ -5,21 +5,19 @@ Flexible Mesh hydrodynamic models within the CoSMoS forecast framework.
 """
 
 import os
-import pandas as pd
 
 # import numpy as np
 import platform
-
-from cht_delft3dfm.cht_delft3dfm import Delft3DFM
-import cht_utils.fileops as fo
-from cht_nesting.cht_nesting import nest1
-
-from .cosmos_main import cosmos
-from .cosmos_model import Model
-
-import hydrolib.core.dflowfm as hcdfm
-from cht_utils.misc_tools import findreplace
 from pathlib import Path
+
+import cht_utils.fileops as fo
+import hydrolib.core.dflowfm as hcdfm
+from cht_delft3dfm.cht_delft3dfm import Delft3DFM
+from cht_nesting.cht_nesting import nest1
+from cht_utils.misc_tools import findreplace
+
+from .cosmos import cosmos
+from .cosmos_model import Model
 
 
 class CoSMoS_Delft3DFM(Model):
@@ -42,7 +40,7 @@ class CoSMoS_Delft3DFM(Model):
     cosmos.cosmos_model.Model
     """
 
-    def read_model_specific(self):
+    def read_model_specific(self) -> None:
         """Read Delft3D FM specific model attributes.
 
         See Also
@@ -73,7 +71,7 @@ class CoSMoS_Delft3DFM(Model):
         self.domain.name = self.name
         self.domain.runid = self.runid
 
-    def pre_process(self):
+    def pre_process(self) -> None:
         """Preprocess Delft3D FM model.
 
         - Extract and write wave and water level conditions.
@@ -137,7 +135,6 @@ class CoSMoS_Delft3DFM(Model):
             or self.meteo_atmospheric_pressure
             or self.meteo_precipitation
         ):
-
             self.write_meteo_input_files("delft3dfm", refdate, path=job_path_flow)
 
             if self.meteo_wind:
@@ -199,7 +196,6 @@ class CoSMoS_Delft3DFM(Model):
 
         # Add observation points for nested models (Nesting 1)
         if self.nested_flow_models:
-
             if not self.domain.input.output.obsfile:
                 self.domain.input.output.obsfile[0] = hcdfm.XYNModel()
                 self.domain.input.output.obsfile[0].filepath = Path("dflowfm.xyn")
@@ -312,7 +308,7 @@ class CoSMoS_Delft3DFM(Model):
 
     #        self.domain.path = pth
 
-    def move(self):
+    def move(self) -> None:
         """Move Delft3D FM model input, output, and restart files."""
         # Move files from job folder to archive folder
 
@@ -373,7 +369,7 @@ class CoSMoS_Delft3DFM(Model):
             fo.move_file(os.path.join(joboutpath, "*.*"), input_path)
             fo.delete_folder(joboutpath)
 
-    def post_process(self):
+    def post_process(self) -> None:
         """Post-process Delft3D FM output: generate wave and water level timeseries."""
         import cht_utils.misc_tools
 
@@ -391,7 +387,6 @@ class CoSMoS_Delft3DFM(Model):
         hisfile = os.path.join(output_path, "flow_his.nc")
 
         if self.station:
-
             cosmos.log("Extracting time series from model " + self.name)
 
             v = self.domain.read_timeseries_output(file_name=hisfile)
@@ -420,9 +415,7 @@ class CoSMoS_Delft3DFM(Model):
 
         # Extract waves
         if self.wave:
-
             if self.station:
-
                 cosmos.log("Extracting wave time series from model " + self.name)
                 wavefile = [os.path.join(output_path, "wavh-wave-wave.nc")]
                 v = self.domain.read_timeseries_output(

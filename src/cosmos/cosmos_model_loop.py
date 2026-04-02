@@ -4,12 +4,11 @@ Manages the lifecycle of all models in a scenario: pre-processing, job
 submission, progress monitoring, post-processing, and web viewer updates.
 """
 
-import time
-import sched
 import os
-import platform
+import sched
+import time
 
-from .cosmos_main import cosmos
+from .cosmos import cosmos
 from .cosmos_cluster import cluster_dict as cluster
 
 try:
@@ -118,7 +117,6 @@ class ModelLoop:
 
         # Pre process all waiting simulations
         for model in waiting_list:
-
             cosmos.log("Pre-processing " + model.long_name + " ...")
 
             # Make job path and copy inputs
@@ -211,7 +209,7 @@ def check_for_finished_simulations():
                     file_name = os.path.join(model.job_path, "finished.txt")
                     if os.path.exists(file_name):
                         finished_list.append(model)
-        except:
+        except Exception:
             print("An error occurred when checking job status!")
 
     return finished_list
@@ -230,7 +228,6 @@ def update_waiting_list():
         cl.check_ready_to_run()
 
     for model in cosmos.scenario.model:
-
         if model.status == "waiting":
             # This model is waiting
 
@@ -276,7 +273,6 @@ def update_waiting_list():
             running = True
 
     if waiting_list:
-
         # Sort waiting list according to prioritization
         waiting_list.sort(key=lambda x: priorities, reverse=True)
         if cosmos.config.run.run_mode == "serial":

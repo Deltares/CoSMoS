@@ -6,23 +6,19 @@ at reef-lined coasts.
 """
 
 import os
-import pandas as pd
-import numpy as np
 import platform
 
 # from pyproj import CRS
 # from pyproj import Transformer
 import shutil
 
-from cht_beware.beware import BEWARE
 import cht_utils.fileops as fo
-from cht_utils.deltares_ini import IniStruct
-from cht_tide.tide_predict import predict
+import pandas as pd
+from cht_beware.beware import BEWARE
 from cht_utils.misc_tools import findreplace
 
-from .cosmos_main import cosmos
+from .cosmos import cosmos
 from .cosmos_model import Model
-from .cosmos_tiling import make_flood_map_tiles
 
 
 class CoSMoS_BEWARE(Model):
@@ -44,7 +40,7 @@ class CoSMoS_BEWARE(Model):
     cosmos.cosmos_model.Model
     """
 
-    def read_model_specific(self):
+    def read_model_specific(self) -> None:
         """Read BEWARE specific model attributes.
 
         See Also
@@ -59,7 +55,7 @@ class CoSMoS_BEWARE(Model):
         self.domain.name = self.name
         self.domain.runid = self.runid
 
-    def pre_process(self):
+    def pre_process(self) -> None:
         """Preprocess BEWARE model.
 
         - Extract and write wave and water level conditions.
@@ -139,7 +135,7 @@ class CoSMoS_BEWARE(Model):
             else:
                 self.workflow_name = "beware-deterministic-workflow"
 
-    def move(self):
+    def move(self) -> None:
         """Move BEWARE model input and output files."""
         # Move files from job folder to archive folder
 
@@ -153,7 +149,7 @@ class CoSMoS_BEWARE(Model):
         # Input
         fo.move_file(os.path.join(job_path, "*.*"), input_path)
 
-    def post_process(self):
+    def post_process(self) -> None:
         """Post-process BEWARE output: generate (probabilistic) runup timeseries.
 
         See Also
@@ -161,8 +157,6 @@ class CoSMoS_BEWARE(Model):
         cht_utils.prob_maps
         """
         # Post-processing occurs in cosmos_webviewer.py
-        import numpy as np
-        import cht_utils.prob_maps as pm
         import cht_utils.misc_tools
 
         output_path = self.cycle_output_path
@@ -182,7 +176,6 @@ class CoSMoS_BEWARE(Model):
             )
 
             for ip in range(len(self.domain.filename)):
-
                 d = {
                     "WL": self.domain.WL[ip, :, 0],
                     "Setup": self.domain.R2_setup[ip, :, 0],

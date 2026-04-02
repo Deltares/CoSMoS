@@ -5,32 +5,30 @@ model configuration, boundary conditions, nesting, station output, and tiling
 that all model-specific subclasses inherit from.
 """
 
-import os
-from pyproj import CRS
-from pyproj import Transformer
 import copy
-from matplotlib import path
-import pandas as pd
-from scipy import interpolate
-import numpy as np
-import toml
-import geopandas as gpd
-import shapely
+import os
 import platform
 
-from .cosmos_main import cosmos
+import cht_utils.fileops as fo
+import geopandas as gpd
+import numpy as np
+import pandas as pd
+import shapely
+import toml
+from cht_nesting import nest2
+from cht_utils.misc_tools import dict2yaml
+from pyproj import CRS, Transformer
+from scipy import interpolate
+
+from .cosmos import cosmos
 from .cosmos_cluster import cluster_dict as cluster
 from .cosmos_stations import read_station_set
-
-from cht_nesting import nest2
-import cht_utils.fileops as fo
-from cht_utils.misc_tools import dict2yaml
 
 
 class Model:
     """Read generic model data from toml file, prepare model run paths, and submit jobs."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize model attributes described in model.toml file."""
 
         self.flow = False
@@ -87,7 +85,7 @@ class Model:
         self.resolution = -999.0
         self.omp_num_threads = -1  # Use -1 to use max number available
 
-    def read_generic(self):
+    def read_generic(self) -> None:
         """Read model attributes from model.toml file.
 
         See Also
@@ -122,7 +120,7 @@ class Model:
 
         self.add_stations()
 
-    def get_exterior(self):
+    def get_exterior(self) -> None:
 
         # Need to find the exterior (polygon) and extent (bbox) of the model
         # This has always been a bit of a mess in CoSMoS ...
@@ -223,11 +221,10 @@ class Model:
         #     # GDF with outline of model
         #     self.outline = gpd.GeoDataFrame({"geometry": [geom]}).set_crs(self.crs).to_crs(4326)
 
-    def add_stations(self):
+    def add_stations(self) -> None:
 
         # Stations
         if self.station:
-
             # At this point, self.station is a list of filenames of station toml files. The files may be in cosmos\run_folder\configuration\stations.
             # Alternatively, they may also be in the model database in the model/stations folder.
 
@@ -235,7 +232,6 @@ class Model:
             self.station = []
 
             for station_file_name in station_list:
-
                 station_set_name = station_file_name.replace(".toml", "")
 
                 if station_set_name in cosmos.config.stations.station_set:
@@ -272,7 +268,7 @@ class Model:
                         st.y = y
                         self.station.append(st)
 
-    def write_config_yml(self):
+    def write_config_yml(self) -> None:
         # Write config file to be used in run_job.py
         config = {}
         config["model"] = self.name
@@ -314,9 +310,9 @@ class Model:
             elif self.flow_nested.type == "delft3d":
                 file_name = "delft3d_his.nc"
             config["flow_nested"]["overall_file"] = file_name
-            config["flow_nested"][
-                "boundary_water_level_correction"
-            ] = self.boundary_water_level_correction
+            config["flow_nested"]["boundary_water_level_correction"] = (
+                self.boundary_water_level_correction
+            )
         if self.wave_nested:
             # Wave forcing
             config["wave_nested"] = {}
@@ -527,7 +523,7 @@ class Model:
 
         dict2yaml(os.path.join(self.job_path, "config.yml"), config)
 
-    def submit_job(self):
+    def submit_job(self) -> None:
 
         # And now actually kick off this job
         # CoSMoS currently support three run modes: serial, parallel and cloud.
@@ -694,7 +690,7 @@ class Model:
         else:
             print("No run mode defined, should be either serial, parallel or cloud")
 
-    def set_paths(self):
+    def set_paths(self) -> None:
         """Set model paths (input, output, figures, restart, job).
 
         See Also
@@ -745,7 +741,7 @@ class Model:
         #                              self.name)
         self.job_path = self.cycle_path
 
-    def make_paths(self):
+    def make_paths(self) -> None:
         # Make model cycle paths
         fo.mkdir(self.cycle_path)
         # fo.mkdir(self.cycle_input_path)
@@ -755,7 +751,7 @@ class Model:
         fo.mkdir(self.restart_flow_path)
         fo.mkdir(self.restart_wave_path)
 
-    def get_nested_models(self):
+    def get_nested_models(self) -> None:
         """Get which model the current model is nested in."""
         if self.flow_nested_name:
             # Look up model from which it gets it boundary conditions
@@ -793,7 +789,7 @@ class Model:
                     model2.nested_bw_models.append(self)
                     break
 
-    def get_all_nested_models(self, tp, all_nested_models=None):
+    def get_all_nested_models(self, tp: str, all_nested_models=None) -> list:
         """Return a list of all models nested in this model."""
         # def get_all_nested_models(self, tp, all_nested_models=[]):
         # don't define empty list as default ! (https://nikos7am.com/posts/mutable-default-arguments/)
@@ -882,7 +878,7 @@ class Model:
 
     #         self.station.append(station)
 
-    def get_peak_boundary_conditions(self):
+    def get_peak_boundary_conditions(self) -> None:
         """Get boundary conditions from overall model and define peak."""
         # Water level boundary conditions
 
@@ -908,7 +904,6 @@ class Model:
 
         # Wave boundary conditions
         if self.wave_nested:
-
             # Get boundary conditions from overall model (Nesting 2)
             hm0_max = nest2(
                 self.wave_nested.domain,
@@ -937,7 +932,7 @@ class Model:
         self.peak_boundary_twl = twl[imax]
         self.peak_boundary_time = t[imax].to_pydatetime()
 
-    def set_stations_to_upload(self):
+    def set_stations_to_upload(self) -> None:
 
         all_nested_models = self.get_all_nested_models("flow")
         if self.type == "beware":
@@ -975,7 +970,7 @@ class Model:
                     if station.name in all_nested_stations and bw == 0:
                         station.upload = False
 
-    def write_meteo_input_files(self, prefix, tref, path=None, format="ascii"):
+    def write_meteo_input_files(self, prefix: str, tref, path: str = None, format: str = "ascii") -> None:
 
         if not path:
             path = self.job_path
@@ -1039,7 +1034,6 @@ class Model:
                 # Simple for now
 
                 if format == "netcdf":
-
                     params = []
 
                     if self.meteo_wind:
@@ -1060,7 +1054,6 @@ class Model:
                     )
 
                 else:
-
                     # ASCII format
 
                     if self.meteo_wind:
@@ -1093,7 +1086,7 @@ class Model:
                             header_comments=header_comments,
                         )
 
-    def get_restart_time(self):
+    def get_restart_time(self) -> "datetime.datetime":
         # If we play catch up (i.e. we may have missed one or more cycles),
         # then we write output at the last meteo analysis time.
         # However, if we want the next cycle to be the current cycle + interval, trstsec must be the
@@ -1133,7 +1126,7 @@ class Model:
         return trst
 
 
-def inpolygon(xq, yq, poly):
+def inpolygon(xq: float, yq: float, poly) -> bool:
     # if xq and yq are floats, turn into 1D arrays
     if isinstance(xq, float):
         xq = np.array([xq])

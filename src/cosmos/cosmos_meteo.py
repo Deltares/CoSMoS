@@ -4,26 +4,27 @@ Downloads, collects, and manages meteorological forcing data (wind, pressure)
 and tropical cyclone track data for driving the forecast models.
 """
 
-import os
-import glob
 import datetime
-import geopandas as gpd
+import glob
+import os
 
-from .cosmos_main import cosmos
 import cht_utils.fileops as fo
+import geopandas as gpd
 from cht_cyclones import TropicalCyclone, jtwc
 from cht_meteo import MeteoDatabase
 
+from .cosmos import cosmos
 
-def read_meteo_database():
-    """Read meteo database."""
+
+def read_meteo_database() -> None:
+    """Read the meteorological dataset catalogue from the configured path."""
     cosmos.meteo_database = MeteoDatabase()
     cosmos.meteo_database.path = cosmos.config.meteo_database.path
     cosmos.meteo_database.read_datasets()
 
 
-def download_meteo():
-    """Download meteo data."""
+def download_meteo() -> None:
+    """Download meteorological data for all required datasets."""
     # Loop through all available meteo datasets
     # Determine if the need to be downloaded
     # Get start and stop times for meteo data
@@ -55,8 +56,8 @@ def download_meteo():
             jtwc.download(jtwc_path)
 
 
-def collect_meteo():
-    """Collect meteo from netcdf files."""
+def collect_meteo() -> None:
+    """Collect meteorological data from NetCDF files and process cyclone tracks."""
     # Loop through all available meteo datasets
     # Determine if the need to be downloaded
     # Get start and stop times for meteo data
@@ -64,7 +65,6 @@ def collect_meteo():
     tau = 0
 
     for dataset_name, meteo_dataset in cosmos.meteo_database.dataset.items():
-
         collect = False
         t0 = datetime.datetime(2100, 1, 1, 0, 0, 0)
         t1 = datetime.datetime(1970, 1, 1, 0, 0, 0)
@@ -77,7 +77,6 @@ def collect_meteo():
                     t1 = max(t1, model.flow_stop_time)
 
         if collect:
-
             # Collect the data from netcdf files
             cosmos.log("Collecting meteo data : " + meteo_dataset.name)
             if cosmos.config.run.collect_meteo_up_to_cycle:
@@ -104,7 +103,7 @@ def collect_meteo():
                     + meteo_dataset.last_forecast_cycle_time.strftime("%Y%m%d_%H%M%S")
                 )
                 cstr = meteo_dataset.last_forecast_cycle_time.strftime("%Y%m%d_%Hz")
-                cosmos.scenario.meteo_string = f"{ cstr } ({ meteo_dataset.name })"
+                cosmos.scenario.meteo_string = f"{cstr} ({meteo_dataset.name})"
 
             else:
                 cosmos.scenario.meteo_string = (
@@ -127,7 +126,6 @@ def collect_meteo():
     # storm_name = None
 
     if cosmos.scenario.meteo_track is not None:
-
         # 1. Track name provided in scenario file (cosmos.scenario.meteo_track is the name without path or extension!)
 
         cosmos.log("Using track file provided in scenario file")
@@ -141,7 +139,6 @@ def collect_meteo():
         tc = TropicalCyclone(track_file=track_file_name, name=storm_name)
 
     elif cosmos.scenario.cyclone_track_forecast_source is not None:
-
         # 2) Track provided by cyclone_track_forecast_source (e.g. JTWC)
 
         # Make sure that the area file is available and exists
@@ -161,7 +158,6 @@ def collect_meteo():
             )
 
         if cosmos.scenario.cyclone_track_forecast_source.lower() == "jtwc":
-
             jtwc_path = os.path.join(cosmos.meteo_database.path, "tracks", "jtwc")
             t0 = cosmos.cycle.replace(tzinfo=None)
             t1 = cosmos.stop_time.replace(tzinfo=None)
@@ -179,11 +175,9 @@ def collect_meteo():
             tc = TropicalCyclone(track_file=track_file_name, name=storm_name)
 
     else:
-
         # 3) Track may be found in meteo data folders. This is now the case for COAMPS-TC.
 
         for dataset_name, meteo_dataset in cosmos.meteo_database.dataset.items():
-
             collect = False
 
             for model in cosmos.scenario.model:
@@ -192,7 +186,6 @@ def collect_meteo():
                         collect = True
 
             if collect:
-
                 # Check if track files are available in any of the cycle folders
                 cycle_folders = fo.list_folders(os.path.join(meteo_dataset.path, "*"))
                 track_file_list = []
@@ -214,9 +207,8 @@ def collect_meteo():
                             if len(track_files) > 0:
                                 track_file_list.append(track_files[0])
                                 storm_name = meteo_dataset.name
-                    except:
+                    except Exception:
                         print("Error in reading folder name")
-                        pass
 
                 if len(track_file_list) == 0:
                     cosmos.log("No track files found for dataset: " + dataset_name)
@@ -249,11 +241,9 @@ def collect_meteo():
         tc.compute_wind_field()
 
     elif cosmos.config.run.spw_wind_field == "meteo_data":
-
         # Use the meteo data
         for dataset_name, meteo_dataset in cosmos.meteo_database.dataset.items():
             if meteo_dataset.name == cosmos.scenario.meteo_dataset:
-
                 if len(meteo_dataset.subset) > 0:
                     times = meteo_dataset.subset[0].ds.time.values
                 else:

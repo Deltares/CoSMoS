@@ -5,11 +5,11 @@ clusters, and timing parameters that define a forecast scenario.
 """
 
 import os
+
 import toml
 
-from .cosmos_main import cosmos
-from .cosmos_cluster import cluster_dict
-from .cosmos_cluster import Cluster
+from .cosmos import cosmos
+from .cosmos_cluster import Cluster, cluster_dict
 
 
 class Scenario:
@@ -103,7 +103,6 @@ class Scenario:
                     models_in_scenario[name]["meteo_track"] = mdl["meteo_track"]
 
             else:
-
                 # Model by region and type
                 # First make list of all regions to include
                 region_list = ["empty"]  # List of regions
@@ -131,12 +130,12 @@ class Scenario:
                         if cosmos.all_models[name]["type"] in type_list:
                             models_in_scenario[name] = cosmos.all_models[name]
                             # Set meteo to one give in scenario
-                            models_in_scenario[name][
-                                "meteo_dataset"
-                            ] = self.meteo_dataset
-                            models_in_scenario[name][
-                                "meteo_spiderweb"
-                            ] = self.meteo_spiderweb
+                            models_in_scenario[name]["meteo_dataset"] = (
+                                self.meteo_dataset
+                            )
+                            models_in_scenario[name]["meteo_spiderweb"] = (
+                                self.meteo_spiderweb
+                            )
                             models_in_scenario[name]["meteo_track"] = self.meteo_track
                             # But override is separate dataset is provided for model
                             if "meteo_dataset" in mdl:
@@ -161,7 +160,6 @@ class Scenario:
 
         # Loop through models in scenario
         for name in models_in_scenario.keys():
-
             tp = models_in_scenario[name]["type"]
 
             # Initialize models
@@ -295,7 +293,7 @@ class Scenario:
                 type_list = []  # List of types
                 if "region" in cld:
                     for region in cld["region"]:
-                        if not region in region_list:
+                        if region not in region_list:
                             region_list.append(region)
                 if "type" in cld:
                     for tp in cld["type"]:
@@ -305,14 +303,14 @@ class Scenario:
                     for region in cosmos.config.super_region[super_region_name][
                         "region"
                     ]:
-                        if not region in region_list:
+                        if region not in region_list:
                             region_list.append(region)
 
                 # Loop through all available models
                 for model in self.model:
                     okay = True
                     if type_list:
-                        if not model.type in type_list:
+                        if model.type not in type_list:
                             okay = False
                             continue
                     if not model.flow_nested_name and not model.wave_nested_name:
@@ -320,7 +318,7 @@ class Scenario:
                         continue
                     # Filter by region
                     if region_list:
-                        if not model.region in region_list:
+                        if model.region not in region_list:
                             # Region of this model is not in region_list
                             okay = False
                             continue

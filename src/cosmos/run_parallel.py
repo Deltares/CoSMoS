@@ -4,8 +4,8 @@ Monitors a shared job folder and executes queued model simulations locally
 using the CosmosRunParallel job runner.
 """
 
-import sys
 import os
+import sys
 
 # either use single copy of cosmos_run_parallel and add path (e.g. c:\\fhics)
 sys.path.append(r"c:\\fhics")

@@ -4,22 +4,21 @@ Runs SFINCS model jobs on remote workers or in the cloud, including nesting,
 ensemble member setup, tiling, and S3 data transfer.
 """
 
-import os
-import boto3
 import datetime
-import pandas as pd
-import numpy as np
-import xarray as xr
-import sys
+import os
 import platform
+import sys
 
+import boto3
 import cht_utils.fileops as fo
-from cht_utils.misc_tools import yaml2dict
-from cht_utils.prob_maps import merge_nc_his
-from cht_utils.prob_maps import merge_nc_map
-from cht_tiling import TiledWebMap
-from hydromt_sfincs import SfincsModel
+import numpy as np
+import pandas as pd
+import xarray as xr
 from cht_nesting import nest2
+from cht_tiling import TiledWebMap
+from cht_utils.misc_tools import yaml2dict
+from cht_utils.prob_maps import merge_nc_his, merge_nc_map
+from hydromt_sfincs import SfincsModel
 
 # from cht_utils.argo import Argo
 
@@ -88,9 +87,7 @@ def prepare_single(config, member=None):
             )
         else:
             s3_key = config["scenario"] + "/" + "models" + "/" + config["model"] + "/"
-        local_path = (
-            f"/input/"  # Replace with the local path where you want to save the file
-        )
+        local_path = "/input/"
         objects = s3_client.list_objects(Bucket=bucket_name, Prefix=s3_key)
         if "Contents" in objects:
             for object in objects["Contents"]:
@@ -123,7 +120,7 @@ def prepare_single(config, member=None):
                 + member
                 + ".spw"
             )
-            local_file_path = f"/input/sfincs.spw"  # Replace with the local path where you want to save the file
+            local_file_path = "/input/sfincs.spw"
             # Download the file from S3
             try:
                 s3_client.download_file(bucket_name, s3_key, local_file_path)
@@ -136,7 +133,7 @@ def prepare_single(config, member=None):
             fo.copy_file(fname0, "sfincs.spw")
 
     # Read SFINCS model (necessary for nesting)
-    sf = SfincsModel(root=".", mode="r")
+    sf = SfincsModel(root=".", mode="r+", write_gis=False)
     sf.name = config["model"]
     sf.type = "sfincs"
 
@@ -175,7 +172,7 @@ def prepare_single(config, member=None):
                     + "/"
                     + file_name
                 )
-            local_file_path = f"/input/boundary"
+            local_file_path = "/input/boundary"
             fo.mkdir(local_file_path)
             # Download the file from S3
             s3_client.download_file(
@@ -246,7 +243,7 @@ def prepare_single(config, member=None):
                 + "/"
                 + file_name
             )
-            local_file_path = f"/input/boundary"
+            local_file_path = "/input/boundary"
             fo.mkdir(local_file_path)
             # Download the file from S3
             s3_client.download_file(
@@ -290,7 +287,7 @@ def prepare_single(config, member=None):
                 + "/"
                 + file_name
             )
-            local_file_path = f"/input/boundary"
+            local_file_path = "/input/boundary"
             fo.mkdir(local_file_path)
             # Download the file from S3
             s3_client.download_file(
@@ -382,7 +379,6 @@ def map_tiles(config):
 
     # Make flood map tiles
     if "flood_map" in config:
-
         print("Making flood map ...")
 
         flood_map_path = config["flood_map"]["png_path"]
@@ -391,7 +387,6 @@ def map_tiles(config):
         zsmax_path = config["flood_map"]["zsmax_path"]
 
         if os.path.exists(index_path) and os.path.exists(topo_path):
-
             print("Making flood map tiles for model " + config["model"] + " ...")
 
             # ... hour increments
@@ -433,7 +428,6 @@ def map_tiles(config):
             try:
                 # Inundation map over dt-hour increments
                 for it, t in enumerate(requested_times):
-
                     zsmax = _read_zsmax(
                         zsmax_file=zsmax_file,
                         time_range=[t - dt + dt1, t + dt1],
@@ -495,7 +489,6 @@ def map_tiles(config):
                 print("An error occured while making flood map tiles: " + str(e))
 
     if "water_level_map" in config:
-
         # Make water level map tiles
         print("Making water level map tiles ...")
 
@@ -516,7 +509,6 @@ def map_tiles(config):
             zbmax = -1.0
 
         if os.path.exists(index_path) and os.path.exists(topo_path):
-
             print("Making water level map tiles for model " + config["model"] + " ...")
 
             # start and stop time
@@ -561,7 +553,6 @@ def map_tiles(config):
 
                 # Water level map over dt-hour increments
                 for it, t in enumerate(requested_times):
-
                     zsmax = _read_zsmax(
                         zsmax_file=zsmax_file,
                         time_range=[t - dt + dt1, t + dt1],
@@ -624,7 +615,6 @@ def map_tiles(config):
                 )
 
     if "storm_surge_map" in config:
-
         # Make water level map tiles
         print("Making storm surge map tiles ...")
 
@@ -645,7 +635,6 @@ def map_tiles(config):
         #     zbmax = -1.0
 
         if os.path.exists(index_path) and os.path.exists(topo_path):
-
             print("Making storm surge map tiles for model " + config["model"] + " ...")
 
             # start and stop time
@@ -692,12 +681,10 @@ def map_tiles(config):
                 )
 
             try:
-
                 color_values = config["storm_surge_map"]["color_map"]["contours"]
 
                 # Water level map over dt-hour increments
                 for it, t in enumerate(requested_times):
-
                     # Rather than using sf.output.read_zsmax, we read the file here with xarray
                     ds = xr.open_dataset(zsmax_file)
                     ds_tide_only = xr.open_dataset(zsmax_file_tide_only)
@@ -778,7 +765,6 @@ def map_tiles(config):
                 os.remove(zsmax_file_tide_only)
 
     if "precipitation_map" in config:
-
         # Make precipitation map tiles
         print("Making precipitation map tiles ...")
 
@@ -787,7 +773,6 @@ def map_tiles(config):
         cumprcp_path = config["precipitation_map"]["output_path"]
 
         if os.path.exists(index_path):
-
             print(
                 "Making precipitation map tiles for model " + config["model"] + " ..."
             )

@@ -4,19 +4,19 @@ Handles reading, pre-processing, execution, and post-processing of XBeach
 nearshore morphodynamic models within the CoSMoS forecast framework.
 """
 
-import os
 import datetime
-import toml
-import xarray as xr
-import pandas as pd
+import os
 import platform
 
-from cosmos.cosmos_main import cosmos
-from cosmos.cosmos_model import Model
-
 import cht_utils.fileops as fo
+import pandas as pd
+import toml
+import xarray as xr
 from cht_xbeach.xbeach import XBeach
 from cht_xbeach.xbeach_output_morphology import Map
+
+from cosmos.cosmos import cosmos
+from cosmos.cosmos_model import Model
 
 
 class CoSMoS_XBeach(Model):
@@ -126,7 +126,6 @@ class CoSMoS_XBeach(Model):
 
         # Boundary conditions
         if self.wave_nested:
-
             # define whether you want to use jonstable or sp2-files as boundary conditions
             option = "timeseries"
 
@@ -226,7 +225,7 @@ class CoSMoS_XBeach(Model):
             # read xbeach output
             output_file = os.path.join(output_path, "xboutput.nc")
             dt = xr.open_dataset(output_file)
-        except:
+        except Exception:
             print("ERROR while making xbeach regimes")
             return
 

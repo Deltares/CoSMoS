@@ -5,14 +5,25 @@ contour specifications used for generating tiled map visualizations.
 """
 
 import os
-import toml
-import yaml
+
 import numpy as np
+import toml
 from cht_utils.misc_tools import rgb2hex
 
 
-def read_color_maps(file_name):
+def read_color_maps(file_name: str) -> dict:
+    """Read color map and contour definitions from a TOML configuration file.
 
+    Parameters
+    ----------
+    file_name : str
+        Path to the TOML file containing ``color_range`` definitions.
+
+    Returns
+    -------
+    dict
+        Mapping of contour set name to contour specification dict.
+    """
     map_contours = {}
 
     with open(file_name, "r") as f:
@@ -32,7 +43,6 @@ def read_color_maps(file_name):
             scale = tm["scale"]
 
         if "contour" in tm:
-
             # Contours are provided
 
             for c in tm["contour"]:
@@ -45,7 +55,6 @@ def read_color_maps(file_name):
 
                 map_type["contours"].append(cnt)
         else:
-
             # Contours from contour map in config folder
 
             filename = os.path.join(
@@ -67,14 +76,12 @@ def read_color_maps(file_name):
                 b = np.squeeze(vals[:, 2])
 
             if scale == "linear":
-
                 zmin = tm["lower"]
                 zmax = tm["upper"]
                 step = tm["step"]
                 nsteps = round((zmax - zmin) / step + 2)
 
                 for i in range(nsteps):
-
                     # Interpolate
                     zl = zmin + (i - 1) * step
                     zu = zl + step
@@ -103,7 +110,6 @@ def read_color_maps(file_name):
                     map_type["contours"].append(cnt)
 
             else:
-
                 # Logarithmic
 
                 zmin = tm["lower"]
@@ -222,7 +228,6 @@ def read_color_maps(file_name):
 
                 k = -1
                 for i in range(i0, i1 + 2):
-
                     k = k + 1
 
                     # Interpolate

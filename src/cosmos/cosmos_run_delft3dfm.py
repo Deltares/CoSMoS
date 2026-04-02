@@ -4,22 +4,16 @@ Runs Delft3D FM model jobs on remote workers or in the cloud, including nesting,
 ensemble member setup, tiling, and S3 data transfer.
 """
 
+# import boto3
 import os
-import pandas as pd
-import numpy as np
+import platform
 import sys
 
-# import boto3
-import datetime
-import platform
-
 import cht_utils.fileops as fo
-from cht_utils.misc_tools import yaml2dict
-from cht_utils.prob_maps import merge_nc_his
-from cht_utils.prob_maps import merge_nc_map
-from cht_tiling import TiledWebMap
 from cht_delft3dfm.delft3dfm import Delft3DFM
 from cht_nesting import nest2
+from cht_utils.misc_tools import yaml2dict
+from cht_utils.prob_maps import merge_nc_his, merge_nc_map
 
 # from cht_utils.argo import Argo
 
@@ -77,9 +71,7 @@ def prepare_single(config, member=None):
             )
         else:
             s3_key = config["scenario"] + "/" + "models" + "/" + config["model"] + "/"
-        local_file_path = (
-            f"/input/"  # Replace with the local path where you want to save the file
-        )
+        local_file_path = "/input/"
         objects = s3_client.list_objects(Bucket=bucket_name, Prefix=s3_key)
         if "Contents" in objects:
             for object in objects["Contents"]:
@@ -112,7 +104,7 @@ def prepare_single(config, member=None):
                 + member
                 + ".spw"
             )
-            local_file_path = f"/input/delft3dfm.spw"  # Replace with the local path where you want to save the file
+            local_file_path = "/input/delft3dfm.spw"
             # Download the file from S3
             try:
                 s3_client.download_file(bucket_name, s3_key, local_file_path)
@@ -152,7 +144,7 @@ def prepare_single(config, member=None):
                 + "/"
                 + file_name
             )
-            local_file_path = f"/input/boundary"
+            local_file_path = "/input/boundary"
             fo.mkdir(local_file_path)
             # Download the file from S3
             s3_client.download_file(

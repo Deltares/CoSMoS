@@ -4,22 +4,33 @@ Runs HurryWave model jobs on remote workers or in the cloud, including nesting,
 ensemble member setup, tiling, and S3 data transfer.
 """
 
-import os
-import pandas as pd
-import numpy as np
-import sys
-import boto3
 import datetime
+import os
 import platform
+import sys
+
+import boto3
 
 # from cht_utils.argo import Argo
 import cht_utils.fileops as fo
-from cht_utils.misc_tools import yaml2dict
-from cht_utils.prob_maps import merge_nc_his
-from cht_utils.prob_maps import merge_nc_map
-from cht_tiling import TiledWebMap
-from cht_hurrywave.hurrywave import HurryWave
+import pandas as pd
+import xarray as xr
 from cht_nesting import nest2
+from cht_tiling import TiledWebMap
+from cht_utils.misc_tools import yaml2dict
+from cht_utils.prob_maps import merge_nc_his, merge_nc_map
+from hydromt_hurrywave import HurrywaveModel
+
+
+def _read_hm0max(hm0max_file, time_range=None, parameter="hm0max"):
+    """Read maximum wave heights from HurryWave map output."""
+    ds = xr.open_dataset(hm0max_file)
+    data = ds[parameter]
+    if time_range is not None:
+        data = data.sel(timemax=slice(time_range[0], time_range[1]))
+    result = data.max(dim="timemax").values
+    ds.close()
+    return result
 
 
 def read_ensemble_members():
@@ -75,9 +86,7 @@ def prepare_single(config, member=None):
             )
         else:
             s3_key = config["scenario"] + "/" + "models" + "/" + config["model"] + "/"
-        local_file_path = (
-            f"/input/"  # Replace with the local path where you want to save the file
-        )
+        local_file_path = "/input/"
         objects = s3_client.list_objects(Bucket=bucket_name, Prefix=s3_key)
         if "Contents" in objects:
             for object in objects["Contents"]:
@@ -110,7 +119,7 @@ def prepare_single(config, member=None):
                 + member
                 + ".spw"
             )
-            local_file_path = f"/input/hurrywave.spw"  # Replace with the local path where you want to save the file
+            local_file_path = "/input/hurrywave.spw"
             # Download the file from S3
             try:
                 s3_client.download_file(bucket_name, s3_key, local_file_path)
@@ -123,10 +132,9 @@ def prepare_single(config, member=None):
             fo.copy_file(fname0, "hurrywave.spw")
 
     # Read HurryWave model (necessary for nesting)
-    hw = HurryWave(load=True)
+    hw = HurrywaveModel(root=".", mode="r+")
     hw.name = config["model"]
     hw.type = "hurrywave"
-    hw.path = "."
 
     # Nesting
     if "wave_nested" in config:
@@ -144,7 +152,7 @@ def prepare_single(config, member=None):
                 + "/"
                 + file_name
             )
-            local_file_path = f"/input/boundary"
+            local_file_path = "/input/boundary"
             fo.mkdir(local_file_path)
             # Download the file from S3
             s3_client.download_file(
@@ -221,16 +229,11 @@ def map_tiles(config):
 
     # Make flood map tiles
     if "hm0_map" in config:
-
-        # Make HW object
-        hw = HurryWave()
-
         hm0_path = config["hm0_map"]["png_path"]
         index_path = config["hm0_map"]["index_path"]
         output_path = config["hm0_map"]["output_path"]
 
         if os.path.exists(index_path):
-
             print("Making wave map tiles for model " + config["model"] + " ...")
 
             # ... hour increments
@@ -272,13 +275,11 @@ def map_tiles(config):
             try:
                 # Wave map over dt-hour increments
                 for it, t in enumerate(requested_times):
-
-                    hm0max = hw.read_hm0max(
+                    hm0max = _read_hm0max(
+                        hm0max_file,
                         time_range=[t - dt + dt1, t + dt1],
-                        hm0max_file=hm0max_file,
                         parameter=varname,
                     )
-                    hm0max = np.transpose(hm0max)
 
                     png_path = os.path.join(
                         hm0_path,
@@ -300,12 +301,11 @@ def map_tiles(config):
                     twm.make()
 
                 # Full simulation
-                hm0max = hw.read_hm0max(
+                hm0max = _read_hm0max(
+                    hm0max_file,
                     time_range=[t0 + dt1, t1 + dt1],
-                    hm0max_file=hm0max_file,
                     parameter=varname,
                 )
-                hm0max = np.transpose(hm0max)
 
                 png_path = os.path.join(
                     hm0_path,

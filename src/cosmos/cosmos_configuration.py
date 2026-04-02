@@ -5,38 +5,48 @@ model databases, meteo databases, web server settings, and cloud infrastructure.
 """
 
 import os
-import toml
-
-from .cosmos_stations import Stations
-from .cosmos_meteo import read_meteo_database
-from .cosmos_color_maps import read_color_maps
 
 # from cht_utils.misc_tools import rgb2hex
 import cht_utils.fileops as fo
+import toml
+
+from .cosmos_color_maps import read_color_maps
+from .cosmos_meteo import read_meteo_database
+from .cosmos_stations import Stations
 
 
 class Path:
-    def __init__(self):
+    """File system paths used by CoSMoS."""
+
+    def __init__(self) -> None:
         self.main = None
 
 
 class ModelDatabase:
-    def __init__(self):
+    """Model database path configuration."""
+
+    def __init__(self) -> None:
         self.path = None
 
 
 class MeteoDatabase:
-    def __init__(self):
+    """Meteorological database path configuration."""
+
+    def __init__(self) -> None:
         self.path = None
 
 
 class Conda:
-    def __init__(self):
+    """Conda environment path configuration."""
+
+    def __init__(self) -> None:
         self.path = None
 
 
 class Executables:
-    def __init__(self):
+    """Paths to model executables and Docker images."""
+
+    def __init__(self) -> None:
         self.sfincs_path = None
         self.sfincs_docker_image = None
         self.hurrywave_path = None
@@ -47,7 +57,9 @@ class Executables:
 
 
 class WebServer:
-    def __init__(self):
+    """Remote web server connection settings."""
+
+    def __init__(self) -> None:
         self.hostname = None
         self.path = None
         self.username = None
@@ -55,9 +67,9 @@ class WebServer:
 
 
 class WebViewer:
-    """Here the configuration of the webviewer is initialized, this includes for example the color maps and the intervals for the different layers."""
+    """Web viewer layout, color maps, and tile layer interval settings."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = None
         self.version = None
         self.path = None
@@ -89,7 +101,9 @@ class WebViewer:
 
 
 class CloudConfig:
-    def __init__(self):
+    """Kubernetes / Argo / S3 cloud infrastructure settings."""
+
+    def __init__(self) -> None:
         # The url through which the Argo client is available to submit a workflow
         self.host = None
         # Access key and secret (sort of like username/password) for reading/writing files to s3
@@ -104,7 +118,9 @@ class CloudConfig:
 
 
 class TrackEnsemble:
-    def __init__(self):
+    """Track ensemble error statistics and realization count."""
+
+    def __init__(self) -> None:
         # Error statistics - defaults are based on NHC of 2018-20210
         self.mean_abs_cte24 = (
             19.0397  # mean absolute error in cross-track error (CTE) in NM
@@ -121,7 +137,9 @@ class TrackEnsemble:
 
 
 class Run:
-    def __init__(self):
+    """Runtime settings controlling the forecast loop behaviour."""
+
+    def __init__(self) -> None:
         self.mode = "single_shot"
         self.interval = 6
         self.delay = 0
@@ -179,7 +197,8 @@ class Configuration:
     - Cloud configuration
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialize all configuration sub-objects with defaults."""
         self.path = Path()
         self.model_database = ModelDatabase()
         self.meteo_database = MeteoDatabase()
@@ -192,7 +211,7 @@ class Configuration:
         self.track_ensemble = TrackEnsemble()
         self.kwargs = {}
 
-    def set(self):
+    def set(self) -> None:
         """Set CoSMoS configuration settings.
 
         - Set configuration paths.
@@ -205,7 +224,7 @@ class Configuration:
         - Load color maps.
         """
 
-        from .cosmos_main import cosmos
+        from .cosmos import cosmos
 
         # Doing something new here. Configuration can sit in the run folder (as in the past) or one level up (as in the future).
 
@@ -293,7 +312,7 @@ class Configuration:
             cosmos.config.path.main, "webviewers", self.webviewer.name, "data"
         )
 
-    def read_config_file(self):
+    def read_config_file(self) -> None:
         """Read configuration file (.toml file)."""
         config_file = os.path.join(self.path.config, self.file_name)
 

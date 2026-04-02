@@ -1,9 +1,10 @@
 """Utility to batch-convert scenario XML files to TOML format."""
 
 import os
-import toml
-import cht_utils.xmlkit as xml
+
 import cht_utils.fileops as fo
+import cht_utils.xmlkit as xml
+import toml
 
 scenario_database_path = r"p:\11206085-onr-fhics\03_cosmos\scenarios"
 scenario_list = fo.list_folders(os.path.join(scenario_database_path, "*"))

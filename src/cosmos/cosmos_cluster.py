@@ -4,12 +4,9 @@ Groups models into clusters and applies run conditions (top-N, threshold,
 ensemble threshold) to selectively execute models based on boundary water levels.
 """
 
-import os
-from scipy import interpolate
 import numpy as np
-import pandas as pd
 
-from .cosmos_main import cosmos
+from .cosmos import cosmos
 
 
 class Cluster:
@@ -29,8 +26,14 @@ class Cluster:
     # 2) threshold : only run model is boundary twl exceeds threshold
     # 3) ensemble_threshold: always run model for "best track", but ensemble only if boundary threshold is exceeded
 
-    def __init__(self, name):
-        """Initialize cluster class."""
+    def __init__(self, name: str) -> None:
+        """Initialize cluster class.
+
+        Parameters
+        ----------
+        name : str
+            Cluster identifier.
+        """
         self.name = name
         self.topn = 10
         self.hm0fac = 0.2
@@ -40,25 +43,23 @@ class Cluster:
         self.model = {}
         self.ready = True
 
-    def add_model(self, model):
-        """Add model to cluster.
+    def add_model(self, model: "Model") -> None:
+        """Add a model to this cluster.
 
         Parameters
         ----------
-        model : CoSMoS model class
-            Model to be added to cluster.
+        model : Model
+            Model instance to be added.
         """
         self.model[model.name] = model
         model.cluster = self.name
 
-    def check_ready_to_run(self):
-
+    def check_ready_to_run(self) -> None:
+        """Evaluate run conditions and remove models that do not qualify."""
         # Only need to check if this cluster was not ready before
 
         if self.run_condition == "topn":
-
             if not self.ready:
-
                 okay = True
 
                 # First check if all overall models have finished
@@ -71,7 +72,6 @@ class Cluster:
                             okay = False
 
                 if okay:
-
                     self.ready = True
 
                     # All overall models have finished
@@ -79,7 +79,7 @@ class Cluster:
                     for model in self.model.values():
                         try:
                             model.get_peak_boundary_conditions()
-                        except:
+                        except Exception:
                             model.peak_boundary_twl = -999.0
                             model.peak_boundary_time = 0.0
 
@@ -117,14 +117,13 @@ class Cluster:
                             break
 
                     for model in self.model.values():
-                        if not model in keep_list:
+                        if model not in keep_list:
                             print("Removing from scenario : " + model.name)
                             cosmos.scenario.model.remove(model)
         #                            # Also remove from cluster?
         #                            self.remove(model)
 
         else:
-
             self.ready = True
 
             okay = True

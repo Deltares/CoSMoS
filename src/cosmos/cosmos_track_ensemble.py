@@ -4,17 +4,18 @@ Generates ensembles of synthetic cyclone tracks and associated wind fields
 from a best-track forecast for probabilistic storm surge predictions.
 """
 
+import copy
 import os
+
+import geopandas as gpd
 
 # from pyproj import CRS
 # import numpy as np
 # import datetime
 import shapely
-import copy
-import geopandas as gpd
-
-from .cosmos_main import cosmos
 from cht_cyclones.ensemble import TropicalCycloneEnsemble
+
+from .cosmos import cosmos
 
 # from cht_meteo.cht.meteo.meteo import filter_cyclones_TCvitals, find_priorityTC
 # import cht_utils.fileops as fo
@@ -22,8 +23,13 @@ from cht_cyclones.ensemble import TropicalCycloneEnsemble
 # import cht_utils.misc_tools
 
 
-def setup_track_ensemble():
+def setup_track_ensemble() -> None:
+    """Generate a tropical cyclone track ensemble and tag qualifying models.
 
+    Builds synthetic track realizations from the best-track forecast, writes
+    spiderweb files, determines which models fall within the ensemble cone, and
+    creates ensemble copies of those models in the scenario.
+    """
     tc = cosmos.tropical_cyclone
 
     if len(tc.track.gdf) < 3:
@@ -45,7 +51,6 @@ def setup_track_ensemble():
     spw_path = cosmos.scenario.cycle_track_ensemble_spw_path
 
     if not ensemble_generated_before:
-
         # Generate track ensemble
         cosmos.log("Generating track ensemble ...")
 

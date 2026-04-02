@@ -1,9 +1,10 @@
 """Utility to batch-convert model database XML files to TOML format."""
 
 import os
-import toml
-import cht_utils.xmlkit as xml
+
 import cht_utils.fileops as fo
+import cht_utils.xmlkit as xml
+import toml
 
 model_database_path = r"p:\11206085-onr-fhics\03_cosmos\models"
 region_list = fo.list_folders(os.path.join(model_database_path, "*"))
@@ -134,5 +135,5 @@ for region_path in region_list:
                 xxx = toml.load(tml_file)
 
                 pass
-            except:
+            except Exception:
                 print("error " + name)

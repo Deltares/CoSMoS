@@ -4,18 +4,17 @@ Monitors a shared job folder for queued model runs, claims and executes them
 locally, and manages concurrent process limits on worker nodes.
 """
 
-import time
-import sched
 import os
-import socket
+import sched
 import shutil
+import socket
+import time
+from random import random
 
 import psutil
-from random import random
 
 
 class CosmosRunParallel:
-
     def __init__(self):
         running = 0
         for i in psutil.process_iter():
@@ -79,7 +78,7 @@ class CosmosRunParallel:
                         if filename.endswith(".txt"):
                             model_name_list.append(filename)
                             job_path_list.append(os.path.join(dirpath, filename))
-            except:
+            except Exception:
                 time.sleep(10)
                 return None
 
@@ -92,7 +91,7 @@ class CosmosRunParallel:
                         model_path = fid.read()
                         fid.close()
                         os.remove(job_path)
-                    except:
+                    except Exception:
                         # model is already been copied to another instance
                         continue
 

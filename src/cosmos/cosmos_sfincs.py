@@ -5,32 +5,31 @@ Handles reading, pre-processing, execution, and post-processing of SFINCS
 """
 
 import os
-import pandas as pd
-import xarray as xr
 
 # import numpy as np
 import platform
 
-from hydromt_sfincs import SfincsModel
 import cht_utils.fileops as fo
+import pandas as pd
+import xarray as xr
 from cht_nesting import nest1
+from hydromt_sfincs import SfincsModel
 
-from .cosmos_main import cosmos
+from .cosmos import cosmos
 from .cosmos_model import Model
 
 
-def _read_sfincs_his(file_name, parameter="point_zs", ensemble_member=None):
+def _read_sfincs_his(file_name: str, parameter: str = "point_zs", ensemble_member: int = None) -> "pd.DataFrame":
     """Read SFINCS history output as DataFrame with station name columns."""
     ds = xr.open_dataset(file_name)
     var = ds[parameter]
     if ensemble_member is not None and "ensemble_member" in var.dims:
         var = var.isel(ensemble_member=ensemble_member)
     # Get station names
-    if "station_name" in ds:
-        names = ds["station_name"].values
-        names = [str(n).strip() for n in names]
-    else:
-        names = [f"station_{i}" for i in range(var.shape[1])]
+    stations = ds.station_name.values
+    names = []
+    for ist, st in enumerate(stations):
+        names.append(st.decode().strip())
     df = pd.DataFrame(
         var.values, index=pd.DatetimeIndex(var.time.values), columns=names
     )
@@ -58,7 +57,7 @@ class CoSMoS_SFINCS(Model):
     cosmos.cosmos_model.Model
     """
 
-    def read_model_specific(self):
+    def read_model_specific(self) -> None:
         """Read SFINCS specific model attributes.
 
         See Also
@@ -67,15 +66,14 @@ class CoSMoS_SFINCS(Model):
         """
         # Read in the SFINCS model
         self.domain = SfincsModel(
-            root=os.path.join(self.path, "input"),
-            mode="r",
+            root=os.path.join(self.path, "input"), mode="r+", write_gis=False
         )
-        # # Copy some attributes to the model domain (needed for nesting)
-        # self.domain.type  = self.type # why?
-        # self.domain.name  = self.name # why?
-        # self.domain.runid = self.runid # why
+        # # Set one (random) keyword in model before switch to rw+ mode
+        # self.domain.config.set("outputformat", "net")
+        # # Now switch to rw+ mode to be able to write input files in pre_process step
+        # self.domain.root.mode = "r+"
 
-    def pre_process(self):
+    def pre_process(self) -> None:
         """Preprocess SFINCS model.
 
         - Extract and write water level and wave conditions.
@@ -100,7 +98,7 @@ class CoSMoS_SFINCS(Model):
         self.domain.config.set("dtmapout", cosmos.config.run.dtmap)
         self.domain.config.set("dtmaxout", cosmos.config.run.dtmax)
         self.domain.config.set("dtwnd", cosmos.config.run.dtwnd)
-        self.domain.config.set("dtout", None, skip_validation=True)
+        # self.domain.config.set("dtout", None, skip_validation=True)
         self.domain.config.set("outputformat", "net")
 
         if self.role == "floodmap":
@@ -139,7 +137,9 @@ class CoSMoS_SFINCS(Model):
             bathtub = True
             self.domain.config.set("bathtub", 1, skip_validation=True)
             self.domain.config.set("bathtub_dt", 600.0, skip_validation=True)
-            self.domain.config.set("bathtub_fachs", cosmos.config.run.bathtub_fachs, skip_validation=True)
+            self.domain.config.set(
+                "bathtub_fachs", cosmos.config.run.bathtub_fachs, skip_validation=True
+            )
 
         # Turn on viscosity in all SFINCS models
         self.domain.config.set("viscosity", 1)
@@ -166,9 +166,13 @@ class CoSMoS_SFINCS(Model):
             existing_stations = self.domain.observation_points.list_names
             for station in self.station:
                 if station.name not in existing_stations:
-                    self.domain.observation_points.add_point(
-                        station.x, station.y, station.name
-                    )
+                    # Add try statement because hydromt-sfincs gives error if point is not inside domain
+                    try:
+                        self.domain.observation_points.add_point(
+                            station.x, station.y, station.name
+                        )
+                    except Exception as e:
+                        print(f"Error adding observation point {station.name}: {e}")
 
         # Add observation points for nested models (Nesting 1)
         if self.nested_flow_models:
@@ -188,7 +192,6 @@ class CoSMoS_SFINCS(Model):
 
         # Make restart file
         if not bathtub:
-
             # self.get_restart_time() sits in cosmos_model.py
             trst = self.get_restart_time()
             # # If we play catch up (i.e. we may have missed one or more cycles),
@@ -394,7 +397,7 @@ class CoSMoS_SFINCS(Model):
             else:
                 self.workflow_name = "sfincs-deterministic-workflow"
 
-    def move(self):
+    def move(self) -> None:
         job_path = self.job_path
         output_path = self.cycle_output_path
         input_path = self.cycle_input_path
@@ -410,7 +413,7 @@ class CoSMoS_SFINCS(Model):
         # Input (all the rest)
         fo.move_file(os.path.join(self.job_path, "*.*"), input_path)
 
-    def post_process(self):
+    def post_process(self) -> None:
         # Extract water levels
         # if self.role == "tide_only":
         #     # No post processing for tide only model
@@ -433,9 +436,7 @@ class CoSMoS_SFINCS(Model):
                     )
 
             else:
-                data["wl"] = _read_sfincs_his(
-                    his_file_name, parameter="point_zs"
-                )
+                data["wl"] = _read_sfincs_his(his_file_name, parameter="point_zs")
             # Loop through stations
             for station in self.station:
                 if self.ensemble:
