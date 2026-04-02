@@ -18,10 +18,21 @@ from cht_utils.misc_tools import yaml2dict
 from cht_utils.prob_maps import merge_nc_his
 from cht_utils.prob_maps import merge_nc_map
 from cht_tiling import TiledWebMap
-from cht_sfincs import SFINCS
+from hydromt_sfincs import SfincsModel
 from cht_nesting import nest2
 
 # from cht_utils.argo import Argo
+
+
+def _read_zsmax(zsmax_file, time_range=None, varname="zsmax"):
+    """Read maximum water levels from SFINCS map output."""
+    ds = xr.open_dataset(zsmax_file)
+    data = ds[varname]
+    if time_range is not None:
+        data = data.sel(timemax=slice(time_range[0], time_range[1]))
+    result = data.max(dim="timemax").values
+    ds.close()
+    return result
 
 
 def read_ensemble_members():
@@ -125,10 +136,9 @@ def prepare_single(config, member=None):
             fo.copy_file(fname0, "sfincs.spw")
 
     # Read SFINCS model (necessary for nesting)
-    sf = SFINCS(".", mode="r", read_grid_data=False)
+    sf = SfincsModel(root=".", mode="r")
     sf.name = config["model"]
     sf.type = "sfincs"
-    sf.path = "."
 
     # Nesting
     if "flow_nested" in config:
@@ -203,23 +213,24 @@ def prepare_single(config, member=None):
         # If this is a tsunami model, we want to adjust the start time of the model
         # Find first time in boundary conditions where wl exceeds 0.001 m
         if config["event_mode"] == "tsunami":
-            # Read boundary conditions
-            # Loop through points in gdf and find first time where water level exceeds 0.001 m
+            # Read boundary water levels written by nest2
+            tref = sf.config.get("tref")
+            bzs_data = np.loadtxt("sfincs.bzs")
+            times = [tref + datetime.timedelta(seconds=s) for s in bzs_data[:, 0]]
             t0 = datetime.datetime.max
-            for ind, row in sf.boundary_conditions.gdf.iterrows():
-                t = row["timeseries"].index
-                v = row["timeseries"]["wl"].values
+            for col_idx in range(1, bzs_data.shape[1]):
+                v = bzs_data[:, col_idx]
                 # Find first time where water level exceeds 0.001 m
                 if np.any(v > 0.001):
-                    tf = t[np.argmax(v > 0.001)]
+                    tf = times[np.argmax(v > 0.001)]
                     t0 = min(t0, tf)
             # Round down t0 to nearest hour
             t0 = t0.replace(minute=0, second=0, microsecond=0)
             print("Starting model at : ")
             print(t0)
             # Adjust start time of model
-            sf.input.variables.tstart = t0
-            sf.input.write()
+            sf.config.set("tstart", t0)
+            sf.config.write()
 
     if "wave_nested" in config:
         print("Nesting wave ...")
@@ -309,7 +320,7 @@ def prepare_single(config, member=None):
                 detail_crs=config["bw_nested"]["detail_crs"],
                 overall_crs=config["bw_nested"]["overall_crs"],
             )
-        sf.write_wavemaker_forcing_points()
+        sf.wave_makers.write()
 
 
 def merge_ensemble(config):
@@ -372,9 +383,6 @@ def map_tiles(config):
     # Make flood map tiles
     if "flood_map" in config:
 
-        # Make SFINCS object
-        sf = SFINCS()
-
         print("Making flood map ...")
 
         flood_map_path = config["flood_map"]["png_path"]
@@ -426,15 +434,13 @@ def map_tiles(config):
                 # Inundation map over dt-hour increments
                 for it, t in enumerate(requested_times):
 
-                    zsmax = sf.output.read_zsmax(
+                    zsmax = _read_zsmax(
                         zsmax_file=zsmax_file,
                         time_range=[t - dt + dt1, t + dt1],
                         varname=varname,
                     )
                     # Difference between MSL and NAVD88 (used in topo data)
                     zsmax += config["vertical_reference_level_difference_with_msl"]
-
-                    # zsmax = np.transpose(zsmax)
 
                     png_path = os.path.join(
                         flood_map_path,
@@ -457,7 +463,7 @@ def map_tiles(config):
                     twm.make()
 
                 # Full simulation
-                zsmax = sf.output.read_zsmax(
+                zsmax = _read_zsmax(
                     zsmax_file=zsmax_file,
                     time_range=[t0 + dt1, t1 + dt1],
                     varname=varname,
@@ -489,9 +495,6 @@ def map_tiles(config):
                 print("An error occured while making flood map tiles: " + str(e))
 
     if "water_level_map" in config:
-
-        # Make SFINCS object
-        sf = SFINCS()
 
         # Make water level map tiles
         print("Making water level map tiles ...")
@@ -559,13 +562,12 @@ def map_tiles(config):
                 # Water level map over dt-hour increments
                 for it, t in enumerate(requested_times):
 
-                    zsmax = sf.output.read_zsmax(
+                    zsmax = _read_zsmax(
                         zsmax_file=zsmax_file,
                         time_range=[t - dt + dt1, t + dt1],
                         varname=varname,
                     )
                     zsmax += water_level_correction
-                    # zsmax = np.transpose(zsmax)
 
                     png_path = os.path.join(
                         water_level_map_path,
@@ -588,14 +590,13 @@ def map_tiles(config):
                     twm.make()
 
                 # Full simulation
-                zsmax = sf.output.read_zsmax(
+                zsmax = _read_zsmax(
                     zsmax_file=zsmax_file,
                     time_range=[t0 + dt1, t1 + dt1],
                     varname=varname,
                 )
 
                 zsmax += water_level_correction
-                # zsmax = np.transpose(zsmax)
 
                 png_path = os.path.join(
                     water_level_map_path,
@@ -623,10 +624,6 @@ def map_tiles(config):
                 )
 
     if "storm_surge_map" in config:
-
-        # Make SFINCS object
-        sf = SFINCS()
-        # sf_only_tide = SFINCS()
 
         # Make water level map tiles
         print("Making storm surge map tiles ...")
@@ -781,9 +778,6 @@ def map_tiles(config):
                 os.remove(zsmax_file_tide_only)
 
     if "precipitation_map" in config:
-
-        # Make SFINCS object
-        sf = SFINCS()
 
         # Make precipitation map tiles
         print("Making precipitation map tiles ...")

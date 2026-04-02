@@ -9,7 +9,7 @@ import xarray as xr
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
 
-from cht_sfincs import SFINCS
+from hydromt_sfincs import SfincsModel
 from cht_tiling import make_index_tiles, make_topobathy_tiles_v2, make_topobathy_overlay
 from cht_tiling.utils import get_zoom_level_for_resolution
 
@@ -59,7 +59,7 @@ if not os.path.exists(index_path):
 if not os.path.exists(topo_path):
     os.makedirs(topo_path)
 
-sf = SFINCS(root=input_path, mode="r")
+sf = SfincsModel(root=input_path, mode="r")
 
 # outline = sf.grid.get_exterior()
 # geojson_file = os.path.join(misc_path, "outline.geojson")
