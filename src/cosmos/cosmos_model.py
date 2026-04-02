@@ -1,16 +1,16 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon May 10 14:38:37 2021
+"""Base model class for CoSMoS.
 
-@author: ormondt
+Defines the generic Model class with shared attributes and methods for reading
+model configuration, boundary conditions, nesting, station output, and tiling
+that all model-specific subclasses inherit from.
 """
 
 import os
 from pyproj import CRS
 from pyproj import Transformer
 import copy
-from matplotlib import path   
-import pandas as pd                     
+from matplotlib import path
+import pandas as pd
 from scipy import interpolate
 import numpy as np
 import toml
@@ -26,67 +26,66 @@ from cht_nesting import nest2
 import cht_utils.fileops as fo
 from cht_utils.misc_tools import dict2yaml
 
-class Model:
-    """Read generic model data from toml file, prepare model run paths, and submit jobs.
 
-    """
+class Model:
+    """Read generic model data from toml file, prepare model run paths, and submit jobs."""
+
     def __init__(self):
-        """Initialize model attributes described in model.toml file.
-        """
- 
-        self.flow               = False
-        self.wave               = False
-        self.priority           = 10    
-        self.flow_nested        = None
-        self.wave_nested        = None
-        self.bw_nested          = None
-        self.flow_nested_name   = None
-        self.wave_nested_name   = None
-        self.bw_nested_name     = None
+        """Initialize model attributes described in model.toml file."""
+
+        self.flow = False
+        self.wave = False
+        self.priority = 10
+        self.flow_nested = None
+        self.wave_nested = None
+        self.bw_nested = None
+        self.flow_nested_name = None
+        self.wave_nested_name = None
+        self.bw_nested_name = None
         self.nested_flow_models = []
         self.nested_wave_models = []
-        self.nested_bw_models   = []
-        self.flow_spinup_time   = 0.0
-        self.wave_spinup_time   = 0.0
-        self.xlim               = None
-        self.ylim               = None
-        self.flow_restart_file  = None
-        self.wave_restart_file  = None
+        self.nested_bw_models = []
+        self.flow_spinup_time = 0.0
+        self.wave_spinup_time = 0.0
+        self.xlim = None
+        self.ylim = None
+        self.flow_restart_file = None
+        self.wave_restart_file = None
         self.vertical_reference_level_name = "MSL"
         self.vertical_reference_level_difference_with_msl = 0.0
         self.boundary_water_level_correction = 0.0
-        self.station            = []
-        self.meteo_dataset      = None
-        self.meteo_spiderweb    = None
-        self.meteo_dataset      = None
-        self.meteo_wind         = True
+        self.station = []
+        self.meteo_dataset = None
+        self.meteo_spiderweb = None
+        self.meteo_dataset = None
+        self.meteo_wind = True
         self.meteo_atmospheric_pressure = True
         self.meteo_precipitation = True
-        self.runid              = None
-        self.polygon            = None
-        self.make_flood_map     = False
-        self.make_wave_map      = False
+        self.runid = None
+        self.polygon = None
+        self.make_flood_map = False
+        self.make_wave_map = False
         self.make_water_level_map = False
         self.make_precipitation_map = False
-        self.make_sedero_map    = False
+        self.make_sedero_map = False
         self.make_storm_surge_map = False
-        self.sa_correction      = None
-        self.ssa_correction     = None
-        self.wave               = False
-        self.mhhw               = 0.0
-        self.cluster            = None
+        self.sa_correction = None
+        self.ssa_correction = None
+        self.wave = False
+        self.mhhw = 0.0
+        self.cluster = None
         self.boundary_twl_treshold = 999.0
-        self.peak_boundary_twl     = None
-        self.peak_boundary_time    = None
-        self.zb_deshoal         = None
-        self.ensemble           = False
-        self.include_tide_only  = False
-        self.tide_only_model    = None
-        self.zs_ini_max         = -9999.9
-        self.exterior             = None
-        self.role               = "generic"  # can be "generic", "floodmap", "large_scale". Based on the role, we can set some predefined actions. This happens e.g. in cosmos_sfincs.py
-        self.resolution         = -999.0
-        self.omp_num_threads    = -1 # Use -1 to use max number available
+        self.peak_boundary_twl = None
+        self.peak_boundary_time = None
+        self.zb_deshoal = None
+        self.ensemble = False
+        self.include_tide_only = False
+        self.tide_only_model = None
+        self.zs_ini_max = -9999.9
+        self.exterior = None
+        self.role = "generic"  # can be "generic", "floodmap", "large_scale". Based on the role, we can set some predefined actions. This happens e.g. in cosmos_sfincs.py
+        self.resolution = -999.0
+        self.omp_num_threads = -1  # Use -1 to use max number available
 
     def read_generic(self):
         """Read model attributes from model.toml file.
@@ -99,13 +98,13 @@ class Model:
 
         mdl_dict = toml.load(self.file_name)
 
-        # Turn into object        
+        # Turn into object
         for key, value in mdl_dict.items():
             setattr(self, key, value)
 
-        self.flow_nested_name = self.flow_nested    
-        self.wave_nested_name = self.wave_nested    
-        self.bw_nested_name   = self.bw_nested
+        self.flow_nested_name = self.flow_nested
+        self.wave_nested_name = self.wave_nested
+        self.bw_nested_name = self.bw_nested
 
         # If running in bathtub mode and make_flood_map, set spin-up time to zero
         if cosmos.config.run.bathtub and self.role == "floodmap":
@@ -113,17 +112,17 @@ class Model:
             self.wave_spinup_time = 0.0
 
         # If this is a SFINCS model and self.wave_nested is not None, then this is a SFINCS/SnapWave model
-        # In that case, we set self.wave = True    
+        # In that case, we set self.wave = True
         if self.wave_nested is not None:
             self.wave = True
 
-        self.crs = CRS(self.crs) # Convert CRS name to pyproj CRS object
+        self.crs = CRS(self.crs)  # Convert CRS name to pyproj CRS object
 
         self.get_exterior()
 
         self.add_stations()
 
-    def get_exterior(self):    
+    def get_exterior(self):
 
         # Need to find the exterior (polygon) and extent (bbox) of the model
         # This has always been a bit of a mess in CoSMoS ...
@@ -134,25 +133,35 @@ class Model:
         # or geojson files "outline.geojson" or "exterior.geojson" in the "misc" folder
 
         if os.path.exists(os.path.join(self.path, "model.geojson")):
-            gdf = gpd.read_file(os.path.join(self.path, "model.geojson")).to_crs(self.crs)
+            gdf = gpd.read_file(os.path.join(self.path, "model.geojson")).to_crs(
+                self.crs
+            )
         elif os.path.exists(os.path.join(self.path, "misc", "exterior.geojson")):
-            gdf = gpd.read_file(os.path.join(self.path, "misc", "exterior.geojson")).to_crs(self.crs)
+            gdf = gpd.read_file(
+                os.path.join(self.path, "misc", "exterior.geojson")
+            ).to_crs(self.crs)
             gdf["name"] = "exterior"
         elif os.path.exists(os.path.join(self.path, "misc", "outline.geojson")):
-            gdf = gpd.read_file(os.path.join(self.path, "misc", "outline.geojson")).to_crs(self.crs)
+            gdf = gpd.read_file(
+                os.path.join(self.path, "misc", "outline.geojson")
+            ).to_crs(self.crs)
             gdf["name"] = "exterior"
         elif os.path.exists(os.path.join(self.path, "misc", self.name + ".geojson")):
-            gdf = gpd.read_file(os.path.join(self.path, "misc", self.name + ".geojson")).to_crs(self.crs)
+            gdf = gpd.read_file(
+                os.path.join(self.path, "misc", self.name + ".geojson")
+            ).to_crs(self.crs)
             gdf["name"] = "exterior"
         elif os.path.exists(os.path.join(self.path, "misc", self.name + ".txt")):
-            df = pd.read_csv(os.path.join(self.path, "misc", self.name + ".txt"),
-                             index_col=False,
-                             header=None,
-                             names=['x', 'y'],
-                             sep=r"\s+")
-            # Make gdf with outline 
+            df = pd.read_csv(
+                os.path.join(self.path, "misc", self.name + ".txt"),
+                index_col=False,
+                header=None,
+                names=["x", "y"],
+                sep=r"\s+",
+            )
+            # Make gdf with outline
             geom = shapely.geometry.Polygon(np.squeeze(df.to_numpy()))
-            # GDF with outline of model    
+            # GDF with outline of model
             gdf = gpd.GeoDataFrame({"geometry": [geom]}).set_crs(self.crs)
             gdf["name"] = "exterior"
 
@@ -191,9 +200,9 @@ class Model:
         #     geom    = outline.geometry[0]
         #     if not self.xlim:
         #         self.xlim = [geom.bounds[0], geom.bounds[2]]
-        #         self.ylim = [geom.bounds[1], geom.bounds[3]]                
-        #     self.polygon = path.Path(geom.exterior.coords)    
-        #     # GDF with outline of model    
+        #         self.ylim = [geom.bounds[1], geom.bounds[3]]
+        #     self.polygon = path.Path(geom.exterior.coords)
+        #     # GDF with outline of model
         #     self.outline = gpd.GeoDataFrame({"geometry": [geom]}).set_crs(self.crs).to_crs(4326)
         # elif os.path.exists(polygon_file):
         #     df = pd.read_csv(polygon_file,
@@ -201,7 +210,7 @@ class Model:
         #                      header=None,
         #                      names=['x', 'y'],
         #                      sep=r"\s+")
-                 
+
         #     xy = df.to_numpy()
         #     self.polygon = path.Path(xy)
         #     if not self.xlim:
@@ -209,13 +218,13 @@ class Model:
         #                      self.polygon.vertices.max(axis=0)[0]]
         #         self.ylim = [self.polygon.vertices.min(axis=0)[1],
         #                      self.polygon.vertices.max(axis=0)[1]]
-        #     # Make gdf with outline 
+        #     # Make gdf with outline
         #     geom = shapely.geometry.Polygon(np.squeeze(xy))
-        #     # GDF with outline of model    
+        #     # GDF with outline of model
         #     self.outline = gpd.GeoDataFrame({"geometry": [geom]}).set_crs(self.crs).to_crs(4326)
 
-    def add_stations(self):    
-           
+    def add_stations(self):
+
         # Stations
         if self.station:
 
@@ -232,12 +241,18 @@ class Model:
                 if station_set_name in cosmos.config.stations.station_set:
                     # The station set is in the commonly available stations
                     station_set = cosmos.config.stations.station_set[station_set_name]
-                elif os.path.exists(os.path.join(self.path, "stations", station_file_name)):
-                    # The station file is in the model database stations folder 
-                    station_set = read_station_set(os.path.join(self.path, "stations", station_file_name))
+                elif os.path.exists(
+                    os.path.join(self.path, "stations", station_file_name)
+                ):
+                    # The station file is in the model database stations folder
+                    station_set = read_station_set(
+                        os.path.join(self.path, "stations", station_file_name)
+                    )
                 else:
                     # Station set not found
-                    cosmos.log(f"Station set {station_set_name} not found for model {self.name}. Skipping these stations.")
+                    cosmos.log(
+                        f"Station set {station_set_name} not found for model {self.name}. Skipping these stations."
+                    )
                     continue
 
                 # Check that station is within model polygon
@@ -250,25 +265,27 @@ class Model:
                     if exterior.contains(point):
                         # Make a copy of the station object to avoid issues when the same station is used in multiple models
                         st = copy.deepcopy(station)
-                        x, y = transformer.transform(station.longitude,
-                                                     station.latitude)
+                        x, y = transformer.transform(
+                            station.longitude, station.latitude
+                        )
                         st.x = x
                         st.y = y
                         self.station.append(st)
 
-
-    def write_config_yml(self):            
+    def write_config_yml(self):
         # Write config file to be used in run_job.py
         config = {}
         config["model"] = self.name
         config["type"] = self.type
         config["region"] = self.region
         config["scenario"] = cosmos.scenario_name
-        config["cycle"]    = cosmos.cycle_string
+        config["cycle"] = cosmos.cycle_string
         config["ensemble"] = self.ensemble
         config["run_mode"] = cosmos.config.run.run_mode
         config["event_mode"] = cosmos.config.run.event_mode
-        config["vertical_reference_level_difference_with_msl"] = self.vertical_reference_level_difference_with_msl
+        config["vertical_reference_level_difference_with_msl"] = (
+            self.vertical_reference_level_difference_with_msl
+        )
 
         ## INPUT for nesting
         if self.ensemble:
@@ -285,8 +302,8 @@ class Model:
             # Water level forcing
             config["flow_nested"] = {}
             config["flow_nested"]["overall_model"] = self.flow_nested.name
-            config["flow_nested"]["overall_type"]  = self.flow_nested.type
-            config["flow_nested"]["overall_path"]  = self.flow_nested.cycle_output_path
+            config["flow_nested"]["overall_type"] = self.flow_nested.type
+            config["flow_nested"]["overall_path"] = self.flow_nested.cycle_output_path
             # This bit is needed for cloud mode (file needs to be downloaded from S3)
             if self.flow_nested.type == "sfincs":
                 file_name = "sfincs_his.nc"
@@ -296,26 +313,28 @@ class Model:
                 file_name = "flow_his.nc"
             elif self.flow_nested.type == "delft3d":
                 file_name = "delft3d_his.nc"
-            config["flow_nested"]["overall_file"]  = file_name
-            config["flow_nested"]["boundary_water_level_correction"] = self.boundary_water_level_correction
+            config["flow_nested"]["overall_file"] = file_name
+            config["flow_nested"][
+                "boundary_water_level_correction"
+            ] = self.boundary_water_level_correction
         if self.wave_nested:
             # Wave forcing
             config["wave_nested"] = {}
             config["wave_nested"]["overall_model"] = self.wave_nested.name
-            config["wave_nested"]["overall_type"]  = self.wave_nested.type
-            config["wave_nested"]["overall_path"]  = self.wave_nested.cycle_output_path
+            config["wave_nested"]["overall_type"] = self.wave_nested.type
+            config["wave_nested"]["overall_path"] = self.wave_nested.cycle_output_path
             # This bit is needed for cloud mode (file needs to be downloaded from S3)
             if self.wave_nested.type == "hurrywave":
                 file_name = "hurrywave_sp2.nc"
-            config["wave_nested"]["overall_file"]  = file_name
-        if self.bw_nested: 
+            config["wave_nested"]["overall_file"] = file_name
+        if self.bw_nested:
             # Beware forcing
             config["bw_nested"] = {}
             config["bw_nested"]["overall_model"] = self.bw_nested.name
-            config["bw_nested"]["overall_type"]  = self.bw_nested.type
-            config["bw_nested"]["overall_path"]  = self.bw_nested.cycle_output_path
-            config["bw_nested"]["overall_crs"]   = self.bw_nested.crs.to_epsg()
-            config["bw_nested"]["detail_crs"]   = self.crs.to_epsg()
+            config["bw_nested"]["overall_type"] = self.bw_nested.type
+            config["bw_nested"]["overall_path"] = self.bw_nested.cycle_output_path
+            config["bw_nested"]["overall_crs"] = self.bw_nested.crs.to_epsg()
+            config["bw_nested"]["detail_crs"] = self.crs.to_epsg()
         if self.type == "xbeach":
             config["xbeach"] = {}
             config["xbeach"]["tref"] = self.domain.tref.strftime("%Y%m%d %H%M%S")
@@ -333,22 +352,32 @@ class Model:
             if self.ensemble:
                 name = "flood_map_90"
             else:
-                name = "flood_map"    
+                name = "flood_map"
             config["flood_map"]["name"] = name
             if cosmos.config.run.run_mode == "cloud":
-                config["flood_map"]["png_path"]   = "/output"
+                config["flood_map"]["png_path"] = "/output"
                 config["flood_map"]["index_path"] = "/tiles/indices"
-                config["flood_map"]["topo_path"]  = "/tiles/topobathy"
-                config["flood_map"]["zsmax_path"]  = "/input"
+                config["flood_map"]["topo_path"] = "/tiles/topobathy"
+                config["flood_map"]["zsmax_path"] = "/input"
             else:
-                config["flood_map"]["png_path"]   = os.path.join(cosmos.config.webviewer.data_path)
-                config["flood_map"]["index_path"] = os.path.join(self.path, "tiling", "indices")
-                config["flood_map"]["topo_path"]  = os.path.join(self.path, "tiling", "topobathy")
-                config["flood_map"]["zsmax_path"]  = "."
+                config["flood_map"]["png_path"] = os.path.join(
+                    cosmos.config.webviewer.data_path
+                )
+                config["flood_map"]["index_path"] = os.path.join(
+                    self.path, "tiling", "indices"
+                )
+                config["flood_map"]["topo_path"] = os.path.join(
+                    self.path, "tiling", "topobathy"
+                )
+                config["flood_map"]["zsmax_path"] = "."
             config["flood_map"]["start_time"] = cosmos.cycle
-            config["flood_map"]["stop_time"]  = cosmos.stop_time
-            config["flood_map"]["interval"] = cosmos.config.webviewer.tile_layer["flood_map"]["interval"]
-            config["flood_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["flood_map"]["color_map"]]
+            config["flood_map"]["stop_time"] = cosmos.stop_time
+            config["flood_map"]["interval"] = cosmos.config.webviewer.tile_layer[
+                "flood_map"
+            ]["interval"]
+            config["flood_map"]["color_map"] = cosmos.config.map_contours[
+                cosmos.config.webviewer.tile_layer["flood_map"]["color_map"]
+            ]
 
         # Water level map
 
@@ -357,46 +386,66 @@ class Model:
             if self.ensemble:
                 name = "water_level_90"
             else:
-                name = "water_level"    
+                name = "water_level"
             config["water_level_map"]["name"] = name
             if cosmos.config.run.run_mode == "cloud":
-                config["water_level_map"]["png_path"]   = "/output"
+                config["water_level_map"]["png_path"] = "/output"
                 config["water_level_map"]["index_path"] = "/tiles/indices"
-                config["water_level_map"]["topo_path"]  = "/tiles/topobathy"
-                config["water_level_map"]["zsmax_path"]  = "/input"
+                config["water_level_map"]["topo_path"] = "/tiles/topobathy"
+                config["water_level_map"]["zsmax_path"] = "/input"
             else:
-                config["water_level_map"]["png_path"]   = os.path.join(cosmos.config.webviewer.data_path)
-                config["water_level_map"]["index_path"] = os.path.join(self.path, "tiling", "indices")
-                config["water_level_map"]["topo_path"]  = os.path.join(self.path, "tiling", "topobathy")
-                config["water_level_map"]["zsmax_path"]  = "."
+                config["water_level_map"]["png_path"] = os.path.join(
+                    cosmos.config.webviewer.data_path
+                )
+                config["water_level_map"]["index_path"] = os.path.join(
+                    self.path, "tiling", "indices"
+                )
+                config["water_level_map"]["topo_path"] = os.path.join(
+                    self.path, "tiling", "topobathy"
+                )
+                config["water_level_map"]["zsmax_path"] = "."
             config["water_level_map"]["start_time"] = cosmos.cycle
-            config["water_level_map"]["stop_time"]  = cosmos.stop_time
-            config["water_level_map"]["interval"] = cosmos.config.webviewer.tile_layer["water_level_map"]["interval"]
-            config["water_level_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["water_level_map"]["color_map"]]
+            config["water_level_map"]["stop_time"] = cosmos.stop_time
+            config["water_level_map"]["interval"] = cosmos.config.webviewer.tile_layer[
+                "water_level_map"
+            ]["interval"]
+            config["water_level_map"]["color_map"] = cosmos.config.map_contours[
+                cosmos.config.webviewer.tile_layer["water_level_map"]["color_map"]
+            ]
 
-        # Storm surge map    
+        # Storm surge map
 
         if cosmos.config.run.make_storm_surge_maps and self.make_storm_surge_map:
             config["storm_surge_map"] = {}
             if self.ensemble:
                 name = "storm_surge_90"
             else:
-                name = "storm_surge"    
+                name = "storm_surge"
             config["storm_surge_map"]["name"] = name
             if cosmos.config.run.run_mode == "cloud":
-                config["storm_surge_map"]["png_path"]   = "/output"
+                config["storm_surge_map"]["png_path"] = "/output"
                 config["storm_surge_map"]["index_path"] = "/tiles/indices"
-                config["storm_surge_map"]["topo_path"]  = "/tiles/topobathy"
-                config["storm_surge_map"]["zsmax_path"]  = "/input"
+                config["storm_surge_map"]["topo_path"] = "/tiles/topobathy"
+                config["storm_surge_map"]["zsmax_path"] = "/input"
             else:
-                config["storm_surge_map"]["png_path"]   = os.path.join(cosmos.config.webviewer.data_path)
-                config["storm_surge_map"]["index_path"] = os.path.join(self.path, "tiling", "indices")
-                config["storm_surge_map"]["topo_path"]  = os.path.join(self.path, "tiling", "topobathy")
-                config["storm_surge_map"]["zsmax_path"]  = "."
+                config["storm_surge_map"]["png_path"] = os.path.join(
+                    cosmos.config.webviewer.data_path
+                )
+                config["storm_surge_map"]["index_path"] = os.path.join(
+                    self.path, "tiling", "indices"
+                )
+                config["storm_surge_map"]["topo_path"] = os.path.join(
+                    self.path, "tiling", "topobathy"
+                )
+                config["storm_surge_map"]["zsmax_path"] = "."
             config["storm_surge_map"]["start_time"] = cosmos.cycle
-            config["storm_surge_map"]["stop_time"]  = cosmos.stop_time
-            config["storm_surge_map"]["interval"] = cosmos.config.webviewer.tile_layer["storm_surge_map"]["interval"]
-            config["storm_surge_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["storm_surge_map"]["color_map"]]
+            config["storm_surge_map"]["stop_time"] = cosmos.stop_time
+            config["storm_surge_map"]["interval"] = cosmos.config.webviewer.tile_layer[
+                "storm_surge_map"
+            ]["interval"]
+            config["storm_surge_map"]["color_map"] = cosmos.config.map_contours[
+                cosmos.config.webviewer.tile_layer["storm_surge_map"]["color_map"]
+            ]
 
         # Hm0 map
 
@@ -406,53 +455,75 @@ class Model:
                 name = "hm0_90"
             else:
                 name = "hm0"
-            config["hm0_map"]["name"]       = name
+            config["hm0_map"]["name"] = name
             if cosmos.config.run.run_mode == "cloud":
-                config["hm0_map"]["png_path"]   = "/output"
+                config["hm0_map"]["png_path"] = "/output"
                 config["hm0_map"]["index_path"] = "/tiles/indices"
-                config["hm0_map"]["output_path"]  = "/input"
+                config["hm0_map"]["output_path"] = "/input"
             else:
-                config["hm0_map"]["png_path"]   = os.path.join(cosmos.config.webviewer.data_path)
-                config["hm0_map"]["index_path"] = os.path.join(self.path, "tiling", "indices")
-                config["hm0_map"]["output_path"]  = "."
+                config["hm0_map"]["png_path"] = os.path.join(
+                    cosmos.config.webviewer.data_path
+                )
+                config["hm0_map"]["index_path"] = os.path.join(
+                    self.path, "tiling", "indices"
+                )
+                config["hm0_map"]["output_path"] = "."
             config["hm0_map"]["start_time"] = cosmos.cycle
-            config["hm0_map"]["stop_time"]  = cosmos.stop_time
-            config["hm0_map"]["interval"] = cosmos.config.webviewer.tile_layer["hm0"]["interval"]
-            config["hm0_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["hm0"]["color_map"]]
+            config["hm0_map"]["stop_time"] = cosmos.stop_time
+            config["hm0_map"]["interval"] = cosmos.config.webviewer.tile_layer["hm0"][
+                "interval"
+            ]
+            config["hm0_map"]["color_map"] = cosmos.config.map_contours[
+                cosmos.config.webviewer.tile_layer["hm0"]["color_map"]
+            ]
         if cosmos.config.run.make_sedero_maps and self.make_sedero_map:
             config["sedero_map"] = {}
-            name = "sedero" 
+            name = "sedero"
             config["sedero_map"]["name"] = name
             if cosmos.config.run.run_mode == "cloud":
-                config["sedero_map"]["png_path"]   = "/output"
+                config["sedero_map"]["png_path"] = "/output"
                 config["sedero_map"]["index_path"] = "/tiles/indices"
                 config["sedero_map"]["output_path"] = "/input"
             else:
-                config["sedero_map"]["index_path"] = os.path.join(self.path, "tiling", "indices")
-                config["sedero_map"]["png_path"] = os.path.join(cosmos.config.webviewer.data_path)
+                config["sedero_map"]["index_path"] = os.path.join(
+                    self.path, "tiling", "indices"
+                )
+                config["sedero_map"]["png_path"] = os.path.join(
+                    cosmos.config.webviewer.data_path
+                )
                 config["sedero_map"]["output_path"] = "."
             config["sedero_map"]["start_time"] = self.domain.tref
-            config["sedero_map"]["stop_time"]  = self.domain.tstop
-            config["sedero_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["sedero"]["color_map"]]    
-            config["sedero_map"]["color_map_zb"]  = cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["bed_levels"]["color_map"]]    
+            config["sedero_map"]["stop_time"] = self.domain.tstop
+            config["sedero_map"]["color_map"] = cosmos.config.map_contours[
+                cosmos.config.webviewer.tile_layer["sedero"]["color_map"]
+            ]
+            config["sedero_map"]["color_map_zb"] = cosmos.config.map_contours[
+                cosmos.config.webviewer.tile_layer["bed_levels"]["color_map"]
+            ]
         if cosmos.config.run.make_meteo_maps and self.make_precipitation_map:
             config["precipitation_map"] = {}
             if self.ensemble:
                 name = "precipitation_90"
             else:
-                name = "precipitation" 
+                name = "precipitation"
             config["precipitation_map"]["name"] = name
             if cosmos.config.run.run_mode == "cloud":
-                config["precipitation_map"]["png_path"]   = "/output"
+                config["precipitation_map"]["png_path"] = "/output"
                 config["precipitation_map"]["index_path"] = "/tiles/indices"
                 config["precipitation_map"]["output_path"] = "/input"
             else:
-                config["precipitation_map"]["index_path"] = os.path.join(self.path, "tiling", "indices")
-                config["precipitation_map"]["png_path"] = os.path.join(cosmos.config.webviewer.data_path)
+                config["precipitation_map"]["index_path"] = os.path.join(
+                    self.path, "tiling", "indices"
+                )
+                config["precipitation_map"]["png_path"] = os.path.join(
+                    cosmos.config.webviewer.data_path
+                )
                 config["precipitation_map"]["output_path"] = "."
             config["precipitation_map"]["start_time"] = cosmos.cycle
-            config["precipitation_map"]["stop_time"]  = cosmos.stop_time  
-            config["precipitation_map"]["color_map"]  = cosmos.config.map_contours[cosmos.config.webviewer.tile_layer["precipitation"]["color_map"]]
+            config["precipitation_map"]["stop_time"] = cosmos.stop_time
+            config["precipitation_map"]["color_map"] = cosmos.config.map_contours[
+                cosmos.config.webviewer.tile_layer["precipitation"]["color_map"]
+            ]
 
         dict2yaml(os.path.join(self.job_path, "config.yml"), config)
 
@@ -468,21 +539,31 @@ class Model:
 
         # Get the platform name
         platform_name = platform.system().lower()
-    
+
         cosmos.log("Submitting " + self.long_name + " ...")
         self.status = "running"
 
         if self.ensemble:
             # In case of ensemble, we move all inputs to base_input subfolder
             fo.mkdir(os.path.join(self.job_path, "base_input"))
-            fo.move_file(os.path.join(self.job_path, "*"), os.path.join(self.job_path, "base_input"))
+            fo.move_file(
+                os.path.join(self.job_path, "*"),
+                os.path.join(self.job_path, "base_input"),
+            )
             # Copy ensemble members file to job folder
-            fo.copy_file(os.path.join(self.job_path, "base_input", "ensemble_members.txt"), self.job_path)
+            fo.copy_file(
+                os.path.join(self.job_path, "base_input", "ensemble_members.txt"),
+                self.job_path,
+            )
             # Copy run_job_2.py to job folder
-            fo.copy_file(os.path.join(self.job_path, "base_input", "run_job_2.py"), self.job_path)
+            fo.copy_file(
+                os.path.join(self.job_path, "base_input", "run_job_2.py"), self.job_path
+            )
             # Copy config.yml to job folder
-            fo.copy_file(os.path.join(self.job_path, "base_input", "config.yml"), self.job_path)
-        
+            fo.copy_file(
+                os.path.join(self.job_path, "base_input", "config.yml"), self.job_path
+            )
+
         # First prepare batch file
         if cosmos.config.run.run_mode == "cloud":
             # No need for a batch file. Workflow template will take care of different steps.
@@ -494,9 +575,13 @@ class Model:
                 fid = open(os.path.join(self.job_path, "run_job.bat"), "w")
                 fid.write("@ echo off\n")
                 fid.write("DATE /T > running.txt\n")
-                fid.write('set CONDAPATH=' + cosmos.config.conda.path + '\n')
+                fid.write("set CONDAPATH=" + cosmos.config.conda.path + "\n")
                 if hasattr(cosmos.config.conda, "env"):
-                    fid.write(r"call %CONDAPATH%\Scripts\activate.bat "+ cosmos.config.conda.env + "\n")
+                    fid.write(
+                        r"call %CONDAPATH%\Scripts\activate.bat "
+                        + cosmos.config.conda.env
+                        + "\n"
+                    )
                 else:
                     fid.write(r"call %CONDAPATH%\Scripts\activate.bat cosmos" + "\n")
                 if self.ensemble:
@@ -504,14 +589,14 @@ class Model:
                     fid.write("python run_job_2.py simulate\n")
                     fid.write("python run_job_2.py merge_ensemble\n")
                     if not self.type == "beware":
-                        fid.write("python run_job_2.py map_tiles\n")   
-                    fid.write("python run_job_2.py clean_up\n")   
+                        fid.write("python run_job_2.py map_tiles\n")
+                    fid.write("python run_job_2.py clean_up\n")
                 else:
                     fid.write("python run_job_2.py simulate\n")
                     if not self.type == "beware":
-                        fid.write("python run_job_2.py map_tiles\n")   
+                        fid.write("python run_job_2.py map_tiles\n")
                 fid.write("move running.txt finished.txt\n")
-                #fid.write("exit\n")            
+                # fid.write("exit\n")
                 fid.close()
             else:
                 # Linux
@@ -525,7 +610,7 @@ class Model:
                     fid.write("python run_job_2.py simulate\n")
                     fid.write("python run_job_2.py merge_ensemble\n")
                     if not self.type == "beware":
-                        fid.write("python run_job_2.py map_tiles\n")   
+                        fid.write("python run_job_2.py map_tiles\n")
                     fid.write("python run_job_2.py clean_up\n")
                 else:
                     fid.write("python run_job_2.py simulate\n")
@@ -534,7 +619,7 @@ class Model:
                 fid.write("mv running.txt finished.txt\n")
                 fid.close()
 
-        # Run batch file (bat or sh) and python run_job_2.py are ready. Now actually submit the job.  
+        # Run batch file (bat or sh) and python run_job_2.py are ready. Now actually submit the job.
         if cosmos.config.run.run_mode == "serial":
             # Model needs to be run in serial mode (local on the job path of a windows machine) or on same HPC node as CoSMoS
             if platform_name == "windows":
@@ -545,7 +630,7 @@ class Model:
                 fid.write("call run_job.bat\n")
                 fid.write("exit\n")
                 fid.close()
-                os.system('start tmp.bat')
+                os.system("start tmp.bat")
             else:
                 # Run on HPC node
                 cosmos.log("Running on HPC node ...")
@@ -556,7 +641,7 @@ class Model:
                 fid.write("exit\n")
                 fid.close()
                 os.system("source ./tmp.sh")
-            
+
         elif cosmos.config.run.run_mode == "cloud":
             cosmos.log("Ready to submit to Argo - " + self.long_name + " ...")
             s3key = cosmos.scenario.name + "/" + "models" + "/" + self.name
@@ -568,34 +653,40 @@ class Model:
             cosmos.cloud.delete_folder("cosmos-scenarios", s3key)
             # Upload job folder to cloud storage
             cosmos.log("Uploading to S3 : " + s3key)
-            cosmos.cloud.upload_folder("cosmos-scenarios",
-                                        self.job_path,
-                                        s3key)
+            cosmos.cloud.upload_folder("cosmos-scenarios", self.job_path, s3key)
             if self.ensemble:
                 # Should really make sure this all happens cosmos_cloud
-                cosmos.cloud.upload_folder("cosmos-scenarios",
-                                            os.path.join(self.job_path, "base_input"),
-                                            s3key + "/base_input")
+                cosmos.cloud.upload_folder(
+                    "cosmos-scenarios",
+                    os.path.join(self.job_path, "base_input"),
+                    s3key + "/base_input",
+                )
             cosmos.log("Submitting template job : " + self.workflow_name)
             self.cloud_job = cosmos.argo.submit_template_job(
-                workflow_name=self.workflow_name, 
-                job_name=self.name, 
+                workflow_name=self.workflow_name,
+                job_name=self.name,
                 subfolder=s3key,
                 scenario=cosmos.scenario.name,
-                cycle=cosmos.cycle_string, 
+                cycle=cosmos.cycle_string,
                 webviewerfolder=webviewerfolder,
-                tilingfolder=tilesfolder
-                )
-
+                tilingfolder=tilesfolder,
+            )
 
         elif cosmos.config.run.run_mode == "parallel":
             # Model will be run on WCP node, write file to jobs folder (WCP nodes will pick up this job)
-            
-            # Make directory in jobs folder (if non-existent) 
-            os.makedirs(os.path.join(cosmos.config.path.jobs, cosmos.scenario.name), exist_ok=True)
-                        
+
+            # Make directory in jobs folder (if non-existent)
+            os.makedirs(
+                os.path.join(cosmos.config.path.jobs, cosmos.scenario.name),
+                exist_ok=True,
+            )
+
             # write file name containing job path to jobs folder
-            file_name = os.path.join(cosmos.config.path.jobs, cosmos.scenario.name, f"{self.name}_{cosmos.cycle_string}.txt")
+            file_name = os.path.join(
+                cosmos.config.path.jobs,
+                cosmos.scenario.name,
+                f"{self.name}_{cosmos.cycle_string}.txt",
+            )
             fid = open(file_name, "w")
             fid.write(self.job_path)
             fid.close()
@@ -609,15 +700,15 @@ class Model:
         See Also
         --------
         cosmos.cosmos_main_loop.MainLoop
-        """        
+        """
         # First model and restart folders if necessary
 
-        cycle_path      = cosmos.scenario.cycle_path
-        restart_path    = cosmos.scenario.restart_path
-#        timeseries_path = cosmos.scenario.cycle_timeseries_path
+        cycle_path = cosmos.scenario.cycle_path
+        restart_path = cosmos.scenario.restart_path
+        #        timeseries_path = cosmos.scenario.cycle_timeseries_path
         # region          = self.region
         # tp              = self.type
-        name            = self.name
+        name = self.name
 
         # # Path with model results in cycle
         # self.cycle_path = os.path.join(cycle_path,
@@ -626,30 +717,33 @@ class Model:
         # self.cycle_output_path  = os.path.join(cycle_path, "models", region, tp, name, "output")
         # self.cycle_figures_path = os.path.join(cycle_path, "models", region, tp, name, "figures")
         # self.cycle_post_path    = os.path.join(cycle_path, "models", region, tp, name, "timeseries")
-        
+
         # # Restart paths
         # self.restart_flow_path = os.path.join(restart_path,
         #                                       region, tp, name, "flow")
         # self.restart_wave_path = os.path.join(restart_path,
         #                                       region, tp, name, "wave")
 
-
         # Path with model results in cycle
-        self.cycle_path         = os.path.join(cycle_path, "models", name)
-        self.cycle_input_path   = os.path.join(cycle_path, "models", name, "input")
-        self.cycle_output_path  = os.path.join(cycle_path, "models", name, "output")
+        self.cycle_path = os.path.join(cycle_path, "models", name)
+        self.cycle_input_path = os.path.join(cycle_path, "models", name, "input")
+        self.cycle_output_path = os.path.join(cycle_path, "models", name, "output")
         self.cycle_figures_path = os.path.join(cycle_path, "models", name, "figures")
-        self.cycle_post_path    = os.path.join(cycle_path, "models", name, "timeseries")
-        
+        self.cycle_post_path = os.path.join(cycle_path, "models", name, "timeseries")
+
         # Restart paths (use deterministic name for restart files)
-        self.restart_flow_path = os.path.join(restart_path, self.deterministic_name, "flow")
-        self.restart_wave_path = os.path.join(restart_path, self.deterministic_name, "wave")
+        self.restart_flow_path = os.path.join(
+            restart_path, self.deterministic_name, "flow"
+        )
+        self.restart_wave_path = os.path.join(
+            restart_path, self.deterministic_name, "wave"
+        )
 
         # Model folder in the jobs folder
         # self.job_path = os.path.join(cosmos.config.path.jobs,
         #                              cosmos.scenario.name,
-        #                              self.name)        
-        self.job_path = self.cycle_path  
+        #                              self.name)
+        self.job_path = self.cycle_path
 
     def make_paths(self):
         # Make model cycle paths
@@ -662,8 +756,7 @@ class Model:
         fo.mkdir(self.restart_wave_path)
 
     def get_nested_models(self):
-        """Get which model the current model is nested in. 
-        """        
+        """Get which model the current model is nested in."""
         if self.flow_nested_name:
             # Look up model from which it gets it boundary conditions
             for model2 in cosmos.scenario.model:
@@ -675,7 +768,9 @@ class Model:
             # but that model is not included in the scenario. In that case, flow_nested is still a string.
             if isinstance(self.flow_nested, str):
                 self.flow_nested = None
-                cosmos.log_warning(f"Flow nested model {self.flow_nested_name} for model {self.name} not found in scenario models.")   
+                cosmos.log_warning(
+                    f"Flow nested model {self.flow_nested_name} for model {self.name} not found in scenario models."
+                )
         if self.wave_nested_name:
             # Look up model from which it gets it boundary conditions
             for model2 in cosmos.scenario.model:
@@ -687,7 +782,9 @@ class Model:
             # but that model is not included in the scenario. In that case, wave_nested is still a string.
             if isinstance(self.wave_nested, str):
                 self.wave_nested = None
-                cosmos.log(f"Wave nested model {self.wave_nested_name} for model {self.name} not found in scenario models.")   
+                cosmos.log(
+                    f"Wave nested model {self.wave_nested_name} for model {self.name} not found in scenario models."
+                )
         if self.bw_nested_name:
             # Look up model from which it gets it boundary conditions
             for model2 in cosmos.scenario.model:
@@ -697,31 +794,32 @@ class Model:
                     break
 
     def get_all_nested_models(self, tp, all_nested_models=None):
-        """Return a list of all models nested in this model.
-        """        
+        """Return a list of all models nested in this model."""
         # def get_all_nested_models(self, tp, all_nested_models=[]):
         # don't define empty list as default ! (https://nikos7am.com/posts/mutable-default-arguments/)
         # Return a list of all models nested in this model
 
         if all_nested_models is None:
-            all_nested_models = []        
-        
+            all_nested_models = []
+
         if tp == "flow":
             for mdl in self.nested_flow_models:
                 all_nested_models.append(mdl)
                 if mdl.nested_flow_models:
-                    all_nested_models = mdl.get_all_nested_models("flow",
-                                        all_nested_models=all_nested_models)
-        
+                    all_nested_models = mdl.get_all_nested_models(
+                        "flow", all_nested_models=all_nested_models
+                    )
+
         if tp == "wave":
             for mdl in self.nested_wave_models:
                 all_nested_models.append(mdl)
                 if mdl.nested_wave_models:
-                    all_nested_models = mdl.get_all_nested_models("wave",
-                                        all_nested_models=all_nested_models)
-        
+                    all_nested_models = mdl.get_all_nested_models(
+                        "wave", all_nested_models=all_nested_models
+                    )
+
         return all_nested_models
-        
+
     # def add_stations(self, name):
     #     """Add stations that are located within this model.
 
@@ -729,12 +827,12 @@ class Model:
     #     ----------
     #     name : str
     #         station file name or station name
-    #     """        
+    #     """
     #     wgs84 = CRS.from_epsg(4326)
     #     transformer = Transformer.from_crs(wgs84, self.crs, always_xy=True)
 
     #     exterior = self.exterior.to_crs(self.crs)
-        
+
     #     if name[-4:].lower() == "toml":
 
     #         # Get all stations in file
@@ -750,12 +848,12 @@ class Model:
 
     #             station.longitude_model = station.longitude
     #             station.latitude_model  = station.latitude
-                
+
     #             x, y = transformer.transform(station.longitude_model,
     #                                          station.latitude_model)
     #             station.x = x
     #             station.y = y
-                
+
     #             # Check whether this station lies with model domain
 
     #             for ip, polygon in exterior.iterrows():
@@ -763,142 +861,148 @@ class Model:
     #                 if inpol[0]:
     #                     self.station.append(station)
     #                     break
-                    
-    #             # if self.polygon:                            
+
+    #             # if self.polygon:
     #             #     if not self.polygon.contains_points([(x, y)])[0]:
     #             #         # On to the next station
     #             #         continue
     #             # self.station.append(station)
-                                        
+
     #     else:
 
     #         station = copy.copy(cosmos.config.stations.find_by_name(name))
 
     #         station.longitude_model = station.longitude
     #         station.latitude_model  = station.latitude
-            
+
     #         x, y = transformer.transform(station.longitude_model,
     #                                      station.latitude_model)
     #         station.x = x
     #         station.y = y
 
     #         self.station.append(station)
-            
+
     def get_peak_boundary_conditions(self):
-            """Get boundary conditions from overall model and define peak.
-            """      
-            # Water level boundary conditions
+        """Get boundary conditions from overall model and define peak."""
+        # Water level boundary conditions
+
+        # Get boundary conditions from overall model (Nesting 2)
+        zcor = (
+            self.boundary_water_level_correction
+            - self.vertical_reference_level_difference_with_msl
+        )
+
+        if self.type == "xbeach":
+            self.domain.tref = self.flow_start_time
+            self.domain.tstop = self.flow_stop_time
+
+        z_max = nest2(
+            self.flow_nested.domain,
+            self.domain,
+            output_path=self.flow_nested.cycle_output_path,
+            boundary_water_level_correction=zcor,
+            return_maximum=True,
+        )
+        t = z_max.index
+        z = z_max.values
+
+        # Wave boundary conditions
+        if self.wave_nested:
 
             # Get boundary conditions from overall model (Nesting 2)
-            zcor = self.boundary_water_level_correction - self.vertical_reference_level_difference_with_msl                    
+            hm0_max = nest2(
+                self.wave_nested.domain,
+                self.domain,
+                output_path=self.wave_nested.cycle_output_path,
+                option="timeseries",
+                return_maximum=True,
+            )
 
-            if self.type == "xbeach":
-                self.domain.tref  = self.flow_start_time
-                self.domain.tstop = self.flow_stop_time
+            # Interpolate to flow boundary times
+            flow_secs = z_max.index.values.astype(float)
+            wave_secs = hm0_max.index.values.astype(float)
+            f = interpolate.interp1d(wave_secs, hm0_max.values)
+            hm0 = f(flow_secs)
+            hm0 = np.nan_to_num(hm0)
 
-            z_max = nest2(self.flow_nested.domain,
-                          self.domain,
-                          output_path=self.flow_nested.cycle_output_path,
-                          boundary_water_level_correction=zcor,
-                          return_maximum=True)
-            t = z_max.index
-            z = z_max.values
+        else:
+            hm0 = np.zeros(np.size(z))
 
-            # Wave boundary conditions
-            if self.wave_nested:
-    
-                # Get boundary conditions from overall model (Nesting 2)
-                hm0_max = nest2(self.wave_nested.domain,
-                                self.domain,
-                                output_path=self.wave_nested.cycle_output_path,
-                                option="timeseries",
-                                return_maximum=True)
+        # Estimate total water level above MHHW with tide + surge + 0.2*Hm0
+        twl = z + cluster[self.cluster].hm0fac * hm0 - self.mhhw
 
-                # Interpolate to flow boundary times
-                flow_secs = z_max.index.values.astype(float)
-                wave_secs = hm0_max.index.values.astype(float)
-                f = interpolate.interp1d(wave_secs, hm0_max.values)
-                hm0 = f(flow_secs)
-                hm0 = np.nan_to_num(hm0)
-                            
-            else:
-                hm0 = np.zeros(np.size(z))
+        # Index of peak
+        imax = np.argmax(twl)
 
-            # Estimate total water level above MHHW with tide + surge + 0.2*Hm0
-            twl = z + cluster[self.cluster].hm0fac*hm0 - self.mhhw 
-            
-            # Index of peak
-            imax = np.argmax(twl)
-            
-            self.peak_boundary_twl  = twl[imax]
-            self.peak_boundary_time = t[imax].to_pydatetime()
+        self.peak_boundary_twl = twl[imax]
+        self.peak_boundary_time = t[imax].to_pydatetime()
 
     def set_stations_to_upload(self):
 
         all_nested_models = self.get_all_nested_models("flow")
-        if self.type=='beware':
+        if self.type == "beware":
             for station in self.station:
-                station.upload = False 
+                station.upload = False
 
         if all_nested_models:
             all_nested_stations = []
-            if all_nested_models[0].type == 'beware':
-                all_nested_models= [self]
-                bw=1
+            if all_nested_models[0].type == "beware":
+                all_nested_models = [self]
+                bw = 1
             else:
-                bw=0
+                bw = 0
             for mdl in all_nested_models:
                 for st in mdl.station:
                     all_nested_stations.append(st.name)
             for station in self.station:
                 if station.type == "tide_gauge":
-                    if station.name in all_nested_stations and bw==0:                            
-                        station.upload = False 
+                    if station.name in all_nested_stations and bw == 0:
+                        station.upload = False
 
         all_nested_models = self.get_all_nested_models("wave")
         if all_nested_models:
             all_nested_stations = []
-            if all_nested_models[0].type == 'beware':
-                all_nested_models= [self]
-                bw=1
+            if all_nested_models[0].type == "beware":
+                all_nested_models = [self]
+                bw = 1
             else:
-                bw=0
+                bw = 0
             for mdl in all_nested_models:
                 for st in mdl.station:
                     all_nested_stations.append(st.name)
             for station in self.station:
                 if station.type == "wave_buoy":
-                    if station.name in all_nested_stations and bw==0:
-                        station.upload = False 
+                    if station.name in all_nested_stations and bw == 0:
+                        station.upload = False
 
     def write_meteo_input_files(self, prefix, tref, path=None, format="ascii"):
-        
+
         if not path:
             path = self.job_path
 
         time_range = [self.flow_start_time, self.flow_stop_time]
-        
+
         header_comments = False
         if self.type.lower() == "delft3dfm":
             header_comments = True
-            
+
         # Check if the model uses 2d meteo forcing from weather model
-        
+
         if self.meteo_dataset:
             meteo_res = self.meteo_dataset.resolution
             if self.crs.is_geographic:
                 # Model is in geographical coordinates
-                dxy = self.resolution # if not provided, dxy is -999.0
+                dxy = self.resolution  # if not provided, dxy is -999.0
                 if meteo_res < dxy * 0.5:
                     # Meteo data is much finer than model resolution
                     meteo_dataset = self.meteo_dataset.cut_out(
                         lon_range=self.xlim,
                         lat_range=self.ylim,
                         time_range=time_range,
-                        dx=0.5*dxy, # new resolution of meteo dataset
-                        dy=0.5*dxy, # new resolution of meteo dataset
+                        dx=0.5 * dxy,  # new resolution of meteo dataset
+                        dy=0.5 * dxy,  # new resolution of meteo dataset
                         crs=self.crs,
-                        )
+                    )
                 else:
                     # Make a new cut-out that covers the domain of the model while using meteo resolution
                     meteo_dataset = self.meteo_dataset.cut_out(
@@ -906,30 +1010,36 @@ class Model:
                         lat_range=self.ylim,
                         time_range=time_range,
                         crs=self.crs,
-                        )                
+                    )
             else:
                 if self.meteo_dataset.crs.is_geographic:
-                    meteo_res = meteo_res * 111e3 # convert to meters
+                    meteo_res = meteo_res * 111e3  # convert to meters
                 # First check if the model has a resolution defined. If not, use meteo resolution or 20km
                 dxy = self.resolution if self.resolution > 0.0 else 20000.0
                 # If model resolution is larger than meteo resolution (very big default), use meteo resolution
                 if dxy > meteo_res:
                     dxy = meteo_res
-                x        = np.arange(self.xlim[0] - dxy, self.xlim[1] + dxy, dxy)
-                y        = np.arange(self.ylim[0] - dxy, self.ylim[1] + dxy, dxy)
+                x = np.arange(self.xlim[0] - dxy, self.xlim[1] + dxy, dxy)
+                y = np.arange(self.ylim[0] - dxy, self.ylim[1] + dxy, dxy)
                 # non-geographical coordinates always need to be reprojected to model CRS
                 meteo_dataset = self.meteo_dataset.cut_out(
                     x=x,
                     y=y,
                     time_range=time_range,
                     crs=self.crs,
-                    )
+                )
 
-            if self.type == "delft3d" or self.type == "delft3dfm" or self.type == "xbeach" or self.type == "hurrywave" or self.type == "sfincs":
+            if (
+                self.type == "delft3d"
+                or self.type == "delft3dfm"
+                or self.type == "xbeach"
+                or self.type == "hurrywave"
+                or self.type == "sfincs"
+            ):
                 # Simple for now
 
                 if format == "netcdf":
-                        
+
                     params = []
 
                     if self.meteo_wind:
@@ -939,41 +1049,49 @@ class Model:
                     if self.meteo_precipitation:
                         params.append("precipitation")
 
-                    meteo_dataset.to_delft3d(prefix,
-                                            format="netcdf",
-                                            parameters=params,
-                                            path=path,
-                                            refdate=tref,
-                                            time_range=time_range,
-                                            header_comments=header_comments)            
+                    meteo_dataset.to_delft3d(
+                        prefix,
+                        format="netcdf",
+                        parameters=params,
+                        path=path,
+                        refdate=tref,
+                        time_range=time_range,
+                        header_comments=header_comments,
+                    )
 
                 else:
 
                     # ASCII format
 
                     if self.meteo_wind:
-                        meteo_dataset.to_delft3d(prefix,
-                                                parameters=["wind"],
-                                                path=path,
-                                                refdate=tref,
-                                                time_range=time_range,
-                                                header_comments=header_comments)            
+                        meteo_dataset.to_delft3d(
+                            prefix,
+                            parameters=["wind"],
+                            path=path,
+                            refdate=tref,
+                            time_range=time_range,
+                            header_comments=header_comments,
+                        )
 
                     if self.meteo_atmospheric_pressure:
-                        meteo_dataset.to_delft3d(prefix,
-                                                parameters=["barometric_pressure"],
-                                                path=path,
-                                                refdate=tref,
-                                                time_range=time_range,
-                                                header_comments=header_comments)
-                                    
-                    if self.meteo_precipitation:                
-                        meteo_dataset.to_delft3d(prefix,
-                                                parameters=["precipitation"],
-                                                path=path,
-                                                refdate=tref,
-                                                time_range=time_range,
-                                                header_comments=header_comments)
+                        meteo_dataset.to_delft3d(
+                            prefix,
+                            parameters=["barometric_pressure"],
+                            path=path,
+                            refdate=tref,
+                            time_range=time_range,
+                            header_comments=header_comments,
+                        )
+
+                    if self.meteo_precipitation:
+                        meteo_dataset.to_delft3d(
+                            prefix,
+                            parameters=["precipitation"],
+                            path=path,
+                            refdate=tref,
+                            time_range=time_range,
+                            header_comments=header_comments,
+                        )
 
     def get_restart_time(self):
         # If we play catch up (i.e. we may have missed one or more cycles),
@@ -1001,7 +1119,9 @@ class Model:
                     trst = self.meteo_dataset.last_analysis_time.replace(tzinfo=None)
                 else:
                     trst = cosmos.next_cycle_time.replace(tzinfo=None)
-                    trst = min(trst, self.meteo_dataset.last_analysis_time.replace(tzinfo=None))
+                    trst = min(
+                        trst, self.meteo_dataset.last_analysis_time.replace(tzinfo=None)
+                    )
         else:
             # 2) Hindcast mode meteo
             if cosmos.next_cycle_time is None:
@@ -1010,7 +1130,8 @@ class Model:
             else:
                 trst = cosmos.next_cycle_time.replace(tzinfo=None)
 
-        return trst    
+        return trst
+
 
 def inpolygon(xq, yq, poly):
     # if xq and yq are floats, turn into 1D arrays
@@ -1020,5 +1141,5 @@ def inpolygon(xq, yq, poly):
         yq = np.array([yq])
     coords = np.column_stack((xq.ravel(), yq.ravel()))
     pts = shapely.points(coords)
-    inside = shapely.contains(poly, pts)   # vectorized
+    inside = shapely.contains(poly, pts)  # vectorized
     return inside.reshape(xq.shape)

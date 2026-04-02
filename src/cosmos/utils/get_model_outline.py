@@ -1,3 +1,9 @@
+"""Utility to generate model grid outlines and topo-bathymetry tiles.
+
+Creates index tiles, topography overlays, and spatial outlines from SFINCS
+model grids for use in the CoSMoS web viewer.
+"""
+
 import os
 import xarray as xr
 import numpy as np
@@ -7,11 +13,10 @@ from cht_sfincs import SFINCS
 from cht_tiling import make_index_tiles, make_topobathy_tiles_v2, make_topobathy_overlay
 from cht_tiling.utils import get_zoom_level_for_resolution
 
-
 # def interpolate_netcdf_onto_grid(dem_list, x, y, crs):
 #     """Interpolate DEMs onto grid"""
 #     # Interpolate DEMs onto grid
-#     dem = np.zeros((len(y), len(x)))    
+#     dem = np.zeros((len(y), len(x)))
 #     dem_name = dem_list[0]
 #     dem_file = dem_name
 #     if not os.path.exists(dem_file):
@@ -28,18 +33,17 @@ from cht_tiling.utils import get_zoom_level_for_resolution
 #     return dem
 
 
-
-region      = "us_west_coast_tsunami"
-model_type  = "sfincs"
+region = "us_west_coast_tsunami"
+model_type = "sfincs"
 # model_name  = "sfincs_us_west_coast_tsunami"
-model_name  = "sfincs_oregon_tsunami"
+model_name = "sfincs_oregon_tsunami"
 region_path = os.path.join("c:\\work\\cosmos\\model_database", region)
-model_path  = os.path.join(region_path, model_type, model_name)
-input_path  = os.path.join(model_path, "input")
-misc_path   = os.path.join(model_path, "misc")
+model_path = os.path.join(region_path, model_type, model_name)
+input_path = os.path.join(model_path, "input")
+misc_path = os.path.join(model_path, "misc")
 tiling_path = os.path.join(model_path, "tiling")
-index_path  = os.path.join(tiling_path, "indices")
-topo_path   = os.path.join(tiling_path, "topobathy")
+index_path = os.path.join(tiling_path, "indices")
+topo_path = os.path.join(tiling_path, "topobathy")
 
 zoom_range = [0, 10]
 
@@ -126,5 +130,5 @@ make_topobathy_overlay(
     hillshading_altitude=30,
     hillshading_exaggeration=10.0,
     quiet=False,
-    file_name="overlay.png"
+    file_name="overlay.png",
 )

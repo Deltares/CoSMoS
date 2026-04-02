@@ -1,15 +1,14 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed May 18 16:29:05 2022
+"""Script to run CoSMoS model jobs in parallel on a worker node.
 
-@author: goede_rl
+Monitors a shared job folder and executes queued model simulations locally
+using the CosmosRunParallel job runner.
 """
 
 import sys
 import os
 
 # either use single copy of cosmos_run_parallel and add path (e.g. c:\\fhics)
-sys.path.append(r'c:\\fhics')
+sys.path.append(r"c:\\fhics")
 from cosmos.cosmos_run_parallel import CosmosRunParallel
 
 # or use both from cosmos-package
@@ -19,7 +18,7 @@ main_path = "p:\\11206085-onr-fhics\\03_cosmos\\"
 # scenario = "gom_forecast"
 # scenario = "gom_forecast"
 scenario = None
-job_path = os.path.join(main_path,"jobs")
+job_path = os.path.join(main_path, "jobs")
 
 local_path = os.path.join("c:\\fhics", "running")
 if not os.path.exists(local_path):
@@ -27,4 +26,3 @@ if not os.path.exists(local_path):
 
 runloop = CosmosRunParallel()
 runloop.start(job_path, local_path, scenario)
-

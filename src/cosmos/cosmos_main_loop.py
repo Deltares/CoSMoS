@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon May 10 14:28:48 2021
+"""Main forecast loop for CoSMoS.
 
-@author: ormondt
+Orchestrates the end-to-end forecast cycle: meteo download, track ensemble
+generation, scenario setup, model execution, web viewer creation, and cleanup.
 """
 
 import time
@@ -100,7 +99,9 @@ class MainLoop:
         # Determine next cycle time
         if cosmos.config.run.mode == "continuous":
             # In continuous mode, but not catch up, the next cycle is based on current time + interval
-            cosmos.next_cycle_time = cosmos.cycle + datetime.timedelta(hours=cosmos.config.run.interval)
+            cosmos.next_cycle_time = cosmos.cycle + datetime.timedelta(
+                hours=cosmos.config.run.interval
+            )
             if cosmos.config.run.catch_up:
                 # Get max of next cycle time (current cycle plus interval) and current time round down to nearest interval
                 t = datetime.datetime.now(datetime.timezone.utc)
@@ -138,7 +139,7 @@ class MainLoop:
             # Sigle shot, so we can start now
             start_time = tnow + datetime.timedelta(seconds=1)
         else:
-            # Continuous, so we start at the cycle time (plus delay if this is set)            
+            # Continuous, so we start at the cycle time (plus delay if this is set)
             start_time = cosmos.cycle + delay + datetime.timedelta(seconds=5)
             # However, if start time has already passed, start immediately
             if start_time < tnow:
@@ -197,9 +198,7 @@ class MainLoop:
                 # This is a flow only model
                 if model.include_tide_only:
                     # This model should include tide only forcing
-                    cosmos.log(
-                        f"Adding tide only forcing to model {model.name}"
-                    )
+                    cosmos.log(f"Adding tide only forcing to model {model.name}")
                     # Create new model that is a copy of this one, but only for tide
                     tide_only_model = copy.deepcopy(model)
                     tide_only_model.name = model.name + "_tide_only"
@@ -209,10 +208,10 @@ class MainLoop:
                     # Turn off meteo forcing for this model
                     # We do not set the meteo dataset to None, because we need this for the restart file
                     # However, due to the deepcopy, we do need to set meteo_dataset again here to that of the original model
-                    tide_only_model.meteo_dataset      = model.meteo_dataset
-                    tide_only_model.meteo_spiderweb    = None
-                    tide_only_model.meteo_track        = None
-                    tide_only_model.meteo_wind         = False
+                    tide_only_model.meteo_dataset = model.meteo_dataset
+                    tide_only_model.meteo_spiderweb = None
+                    tide_only_model.meteo_track = None
+                    tide_only_model.meteo_wind = False
                     tide_only_model.meteo_atmospheric_pressure = False
                     tide_only_model.meteo_precipitation = False
                     # Turn off water_level_map for this model (this is not necessary, as )
@@ -277,7 +276,9 @@ class MainLoop:
             if model.flow:
                 if model.flow_restart_file:
                     # not the entire path
-                    rststr = f" (restart file : {model.flow_restart_file.split('/')[-1]})"
+                    rststr = (
+                        f" (restart file : {model.flow_restart_file.split('/')[-1]})"
+                    )
                 else:
                     rststr = " (no restart file)"
                 cosmos.log(
@@ -291,7 +292,9 @@ class MainLoop:
             else:
                 if model.wave_restart_file:
                     # not the entire path
-                    rststr = f" (restart file : {model.wave_restart_file.split('/')[-1]})"
+                    rststr = (
+                        f" (restart file : {model.wave_restart_file.split('/')[-1]})"
+                    )
                 else:
                     rststr = " (no restart file)"
                 cosmos.log(
@@ -313,13 +316,12 @@ class MainLoop:
             # Merge meteo data (in case of forcing with track file, this is also where the spiderweb is generated)
             collect_meteo()
 
-            if cosmos.scenario.run_ensemble and cosmos.tropical_cyclone:    
+            if cosmos.scenario.run_ensemble and cosmos.tropical_cyclone:
                 # Make track ensemble (this also add 'new' ensemble models that fall within the cone)
                 setup_track_ensemble()
             # elif cosmos.scenario.meteo_spiderweb or not os.path.isabs(cosmos.scenario.meteo_track):
             #     # Make spiderweb if does not exist yet
             #     track_to_spw()
-
 
         elif cosmos.config.run.event_mode == "tsunami":
             # Generate tsunami NetCDF file. Initial conditions for model(s) are generated from this file.
@@ -369,15 +371,17 @@ class MainLoop:
         if cosmos.config.run.clean_up:
             clean_up()
 
-        # Check if there is a custom post processing script 
-        if cosmos.config.run.post_processing_script is not None:            
+        # Check if there is a custom post processing script
+        if cosmos.config.run.post_processing_script is not None:
             # Run post processing script
             cosmos.log("Running post processing script ...")
             try:
                 # Check if file exists
                 if os.path.isfile(cosmos.config.run.post_processing_script):
                     # Write config file with all info about this cycle
-                    cycle_info_file = os.path.join(cosmos.scenario.cycle_path, "cycle_info.yml")
+                    cycle_info_file = os.path.join(
+                        cosmos.scenario.cycle_path, "cycle_info.yml"
+                    )
 
                     config = {}
 
@@ -386,7 +390,9 @@ class MainLoop:
                     config["cycle"] = cosmos.cycle_string
                     config["duration_hours"] = cosmos.scenario.runtime
                     config["meteo_dataset"] = cosmos.scenario.meteo_dataset
-                    config["cyclone_track_forecast_source"] = cosmos.scenario.cyclone_track_forecast_source
+                    config["cyclone_track_forecast_source"] = (
+                        cosmos.scenario.cyclone_track_forecast_source
+                    )
 
                     # Now paths of run folder, meteo database and model database
                     config["run_folder_path"] = cosmos.config.path.main
@@ -403,45 +409,50 @@ class MainLoop:
                         model_info["type"] = model.type
                         model_info["role"] = model.role
                         config["model"].append(model_info)
-    
+
                     dict2yaml(cycle_info_file, config)
 
                     # Import and run script
-                    spec = importlib.util.spec_from_file_location("custom_module", cosmos.config.run.post_processing_script)
+                    spec = importlib.util.spec_from_file_location(
+                        "custom_module", cosmos.config.run.post_processing_script
+                    )
                     custom_module = importlib.util.module_from_spec(spec)
                     spec.loader.exec_module(custom_module)
                     custom_module.main(cycle_info_file)
 
             except Exception as e:
                 print("An error occurred while running the post processing script !")
-                print(f"Error: {e}")    
+                print(f"Error: {e}")
 
         # Post process data (making floodmaps, uploading to server etc.)
         # Try to run post-processing. If it fails, print error message and continue.
         if cosmos.config.run.make_webviewer:
             try:
-                cosmos.webviewer.make()        
+                cosmos.webviewer.make()
                 if cosmos.config.run.upload:
                     current_path = os.getcwd()
                     try:
                         cosmos.webviewer.upload()
                     except:
-                        print("An error occurred when uploading web viewer to server !!!")
+                        print(
+                            "An error occurred when uploading web viewer to server !!!"
+                        )
                     os.chdir(current_path)
             except Exception as e:
                 print("An error occured while making web viewer !")
                 print(f"Error: {e}")
         else:
-            cosmos.log("Not making webviewer. Set make_webviewer to True in config file to make webviewer.")        
-                                
-        # Move log file to scenario cycle path               
+            cosmos.log(
+                "Not making webviewer. Set make_webviewer to True in config file to make webviewer."
+            )
+
+        # Move log file to scenario cycle path
         log_file = os.path.join(cosmos.config.path.main, "cosmos.log")
         fo.move_file(log_file, cosmos.scenario.cycle_path)
-        
+
         # Delete jobs folder
         if cosmos.config.run.run_mode == "serial":
-            pth = os.path.join(cosmos.config.path.jobs,
-                                cosmos.scenario.name)
+            pth = os.path.join(cosmos.config.path.jobs, cosmos.scenario.name)
             fo.rmdir(pth)
 
         # Check if we need to start a new cycle
@@ -514,7 +525,7 @@ def get_start_and_stop_times():
             if model.wave_nested:
                 # This model gets it's wave boundary conditions from another model
                 nested_wave_start_time = model.wave_start_time
-                # Set the new model to be 
+                # Set the new model to be
                 model = model.wave_nested
 
             else:

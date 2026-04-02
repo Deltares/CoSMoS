@@ -1,6 +1,5 @@
-"""
-@author: roelvink
-"""
+"""Utility to convert various XML and YAML configuration files to TOML format."""
+
 # Convert files to toml format
 import cht.misc.xmlkit as xml
 import cht.misc.fileops as fo
@@ -9,19 +8,21 @@ import xml.etree.ElementTree as ET
 import toml
 import os
 
+
 def xml2dict(element):
     if len(element) == 0:
         return element.text
     else:
         return {child.tag: xml2dict(child) for child in element}
 
-def xml2toml(foldername = None, file_list = None, format = 'xml', items = None):
+
+def xml2toml(foldername=None, file_list=None, format="xml", items=None):
     # Get all files of format in foldername
     if foldername is not None:
-        file_list = fo.list_files(foldername + '/*.' + format)
+        file_list = fo.list_files(foldername + "/*." + format)
 
     for file in file_list:
-        if file.endswith('.xml'):
+        if file.endswith(".xml"):
 
             xml_obj = xml.xml2obj(file)
             dct = xml_obj.__dict__
@@ -41,33 +42,45 @@ def xml2toml(foldername = None, file_list = None, format = 'xml', items = None):
                             valobj2 = getattr(item, key2)
                             val2 = valobj2[0].value
                             mdl[key2] = val2
-                        data[key].append(mdl) 
+                        data[key].append(mdl)
                 else:
                     val = valobj[0].value
                     if val == "no":
                         val = False
-                    elif val == "yes":   
-                        val = True    
+                    elif val == "yes":
+                        val = True
                     data[key] = val
 
-        elif file.endswith('.yml'):
+        elif file.endswith(".yml"):
             data = yaml2dict(file)
 
         # Convert content to TOML
-        tomldata = toml.dumps(data)    
-        newfilename = os.path.splitext(file)[0] + '.toml'
-        newfile = open(newfilename, "w")  
+        tomldata = toml.dumps(data)
+        newfilename = os.path.splitext(file)[0] + ".toml"
+        newfile = open(newfilename, "w")
         newfile.write(tomldata)
         newfile.close()
 
-xml2toml(file_list = [r"..\cosmos\meteo\meteo_subsets.xml",],
-                    items = ["meteo_subset",])
 
-folder = r'..\cosmos\configuration\stations\\'
-xml2toml(foldername = folder, items = ["station",])
+xml2toml(
+    file_list=[
+        r"..\cosmos\meteo\meteo_subsets.xml",
+    ],
+    items=[
+        "meteo_subset",
+    ],
+)
 
-folder = r'..\cosmos\model_database\puerto_rico3\sfincs\\'
-name_list = fo.list_folders(os.path.join(folder,"*"))
+folder = r"..\cosmos\configuration\stations\\"
+xml2toml(
+    foldername=folder,
+    items=[
+        "station",
+    ],
+)
+
+folder = r"..\cosmos\model_database\puerto_rico3\sfincs\\"
+name_list = fo.list_folders(os.path.join(folder, "*"))
 
 for name_path in name_list:
     name = os.path.basename(name_path).lower()
@@ -75,13 +88,15 @@ for name_path in name_list:
     # Check if xml file exists
     tml_file = os.path.join(name_path, "model.toml")
     data = toml.load(tml_file)
-    
+
     for key, value in data.items():
         if isinstance(value, list):
-            data[key] = [os.path.splitext(item)[0] + '.toml' if item.endswith('.xml') else item for item in value]
+            data[key] = [
+                os.path.splitext(item)[0] + ".toml" if item.endswith(".xml") else item
+                for item in value
+            ]
 
             # data[key] = os.path.splitext(value)[0] + '.toml'
-    
+
     with open(tml_file, "w") as f:
         new_toml_string = toml.dump(data, f)
-

@@ -1,9 +1,5 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Feb 27 15:29:34 2023
+"""Utility to convert CoSMoS model XML definitions to TOML format."""
 
-@author: maartenvanormondt
-"""
 import os
 import toml
 import cht_utils.xmlkit as xml
@@ -32,8 +28,8 @@ for key in dct:
 
     if val == "no":
         val = False
-    elif val == "yes":   
-        val = True    
+    elif val == "yes":
+        val = True
 
     if key == "priority":
         key = None
@@ -65,9 +61,7 @@ for key in dct:
         key = "crs"
     if key == "coordsystype":
         key = None
-            
-        
-            
+
     # # Read polygon around model
     # polygon_file  = os.path.join(self.path, "misc", self.name + ".txt")
     # if os.path.exists(polygon_file):
@@ -80,29 +74,31 @@ for key in dct:
     #                      self.polygon.vertices.max(axis=0)[0]]
     #         self.ylim = [self.polygon.vertices.min(axis=0)[1],
     #                      self.polygon.vertices.max(axis=0)[1]]
-       
+
     # # Stations
     # if hasattr(xml_obj, "station"):
 
     #     for istat in range(len(xml_obj.station)):
-            
+
     #         # Find matching stations from complete stations list
 
     #         name = xml_obj.station[istat].value
     #         self.add_stations(name)
 
-
     if key:
         model[key] = val
 
-if model["type"] == "sfincs" or model["type"] == "hurrywave" or model["type"] == "xbeach":
+if (
+    model["type"] == "sfincs"
+    or model["type"] == "hurrywave"
+    or model["type"] == "xbeach"
+):
     if "runid" in model:
         model.pop("runid")
 
 with open(tml_file, "w") as f:
     new_toml_string = toml.dump(model, f)
-    
-    
-    
+
+
 xxx = toml.load(tml_file)
-pass    
+pass

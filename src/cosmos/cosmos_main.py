@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon May 10 12:18:09 2021
+"""Main CoSMoS class and singleton instance.
 
-@author: ormondt
+Provides the central CoSMoS object that manages initialization, scenario
+execution, logging, and coordination of all forecast components.
 """
 
 import os
@@ -12,7 +11,6 @@ import cht_utils.fileops as fo
 
 
 class CoSMoS:
-
     """This is the main CoSMoS class.
 
     Parameters
@@ -41,9 +39,9 @@ class CoSMoS:
     cosmos.cosmos_xbeach.CoSMoS_XBeach
 
     """
-    
+
     def __init__(self):
-        os.environ['HDF5_DISABLE_VERSION_CHECK'] = '2'
+        os.environ["HDF5_DISABLE_VERSION_CHECK"] = "2"
 
     def initialize(self, main_path, config_file="config.toml"):
         """Initialize CoSMoS configuration based on configuration file and input arguments.
@@ -62,7 +60,7 @@ class CoSMoS:
         """
         from .cosmos_configuration import Configuration
 
-        self.config          = Configuration()
+        self.config = Configuration()
 
         # Set main path
         self.config.path.main = main_path
@@ -74,9 +72,8 @@ class CoSMoS:
         self.config.set()
 
     def run(self, scenario_name=None, cycle=None, last_cycle=None):
-
         """Run a CoSMoS scenario:
-    
+
         - Initialize cosmos_main_loop and cosmos_model_loop
         - Start cosmos_main_loop
 
@@ -86,7 +83,7 @@ class CoSMoS:
             Name of the scenario to be run.
         cycle : str, optional
             Cycle to start with (e.g. 20231213_00z), by default None
-        
+
         See Also
         -------
         cosmos.cosmos_main_loop.MainLoop
@@ -96,45 +93,49 @@ class CoSMoS:
         """
 
         # Determine which cycle is needs to be run
-        # If no cycle is given, then it will be determined later on        
+        # If no cycle is given, then it will be determined later on
         self.scenario_name = scenario_name
 
         if cycle:
-            cycle = datetime.datetime.strptime(cycle, "%Y%m%d_%HZ").replace(tzinfo=datetime.timezone.utc)
+            cycle = datetime.datetime.strptime(cycle, "%Y%m%d_%HZ").replace(
+                tzinfo=datetime.timezone.utc
+            )
         if last_cycle:
-            cosmos.last_cycle = datetime.datetime.strptime(last_cycle, "%Y%m%d_%HZ").replace(tzinfo=datetime.timezone.utc)
+            cosmos.last_cycle = datetime.datetime.strptime(
+                last_cycle, "%Y%m%d_%HZ"
+            ).replace(tzinfo=datetime.timezone.utc)
         else:
             cosmos.last_cycle = None
-        
+
         if not self.config.path.main:
-            cosmos.log("Error: CoSMoS main path not set! Do this by running cosmos.initialize(main_path) or passing main_path as input argument to cosmos.run().")
+            cosmos.log(
+                "Error: CoSMoS main path not set! Do this by running cosmos.initialize(main_path) or passing main_path as input argument to cosmos.run()."
+            )
             return
 
         from .cosmos_main_loop import MainLoop
         from .cosmos_model_loop import ModelLoop
-        self.main_loop  = MainLoop()
+
+        self.main_loop = MainLoop()
         self.model_loop = ModelLoop()
 
         # Why these things ?
         self.main_loop.just_initialize = self.config.run.just_initialize
-        self.main_loop.run_models      = self.config.run.run_models
-        self.main_loop.clean_up        = self.config.run.clean_up
-        
+        self.main_loop.run_models = self.config.run.run_models
+        self.main_loop.clean_up = self.config.run.clean_up
+
         self.main_loop.start(cycle=cycle)
 
-
-    def stop(self, message:str): 
-        """Stop main loop and model loop.
-        """ 
+    def stop(self, message: str):
+        """Stop main loop and model loop."""
         # Raise exception
-        self.log("Error: " + message) 
-        print("Error: " + message) 
+        self.log("Error: " + message)
+        print("Error: " + message)
         raise Exception("CoSMoS was stopped, because of an error.")
         # self.model_loop.scheduler.cancel()
         # self.main_loop.scheduler.cancel()
 
-
-    def log(self, message:str):  
+    def log(self, message: str):
         """Write log message to cosmos.log
 
         Parameters
@@ -144,12 +145,16 @@ class CoSMoS:
         """
         print(message)
         log_file = os.path.join(self.config.path.main, "cosmos.log")
-        tstr = "[" + datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S") + " UTC] "
-        with open(log_file, 'a') as f:
+        tstr = (
+            "["
+            + datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+            + " UTC] "
+        )
+        with open(log_file, "a") as f:
             f.write(tstr + message + "\n")
             f.close()
 
-    def make_webviewer(self, scenario_name:str, cycle = None):   
+    def make_webviewer(self, scenario_name: str, cycle=None):
         """Just make webviewer
 
         Parameters
@@ -159,7 +164,7 @@ class CoSMoS:
 
         cycle : str, optional
             Cycle to start with (e.g. 20231213_00z), by default None
-        
+
         See Also
         -------
         cosmos.cosmos_main_loop.MainLoop
@@ -167,17 +172,17 @@ class CoSMoS:
         cosmos.cosmos_webviewer.WebViewer
 
         """
-        
+
         # if not cosmos.config.path.main:
         #     cosmos.log("Error: CoSMoS main path not set! Do this by running cosmos.initialize(main_path) or passing main_path as input argument to cosmos.run().")
         #     return
-        
+
         # self.config.run.just_initialize  = True
         # self.config.run.run_models = False
         # self.run(scenario_name, cycle = cycle)
-                
+
         # from .cosmos_webviewer import WebViewer
-        
+
         # wv = WebViewer(cosmos.config.webviewer.name)
         # wv.make()
 
@@ -185,16 +190,16 @@ class CoSMoS:
         # if cosmos.config.run.run_mode != "parallel":
         #     fo.rmdir(os.path.join(cosmos.config.path.jobs,
         #                           cosmos.scenario_name))
-        
+
         # if cosmos.config.run.upload:
         #     wv.upload()
 
-        self.config.run.just_initialize  = True
+        self.config.run.just_initialize = True
         self.config.run.run_models = False
-        self.run(scenario_name, cycle = cycle)
+        self.run(scenario_name, cycle=cycle)
 
         try:
-            self.webviewer.make()        
+            self.webviewer.make()
             if self.config.run.upload:
                 current_path = os.getcwd()
                 try:
@@ -208,9 +213,8 @@ class CoSMoS:
 
         if cosmos.config.run.upload:
             self.webviewer.upload()
-    
 
-    def upload_webviewer(self, scenario_name:str, cycle = None):   
+    def upload_webviewer(self, scenario_name: str, cycle=None):
         """Just upload webviewer
 
         Parameters
@@ -220,7 +224,7 @@ class CoSMoS:
 
         cycle : str, optional
             Cycle to start with (e.g. 20231213_00z), by default None
-        
+
         See Also
         -------
         cosmos.cosmos_main_loop.MainLoop
@@ -238,18 +242,15 @@ class CoSMoS:
         self.cycle_string = cycle
 
         self.webviewer = WebViewer(self.config.webviewer.name)
-        self.webviewer.cycle_path = os.path.join(self.webviewer.path,
-                                       "data",
-                                       scenario_name,
-                                       cycle)
+        self.webviewer.cycle_path = os.path.join(
+            self.webviewer.path, "data", scenario_name, cycle
+        )
 
         # self.webviewer.cycle_path = os.path.join(self.config.path.main, "scenarios", scenario_name, self.cycle_string)
         self.webviewer.upload()
 
-
-
-    def post_process(self, scenario_name:str, model=None, cycle:str=None):   
-        """Just post-process model results. 
+    def post_process(self, scenario_name: str, model=None, cycle: str = None):
+        """Just post-process model results.
 
         Parameters
         ----------
@@ -258,29 +259,31 @@ class CoSMoS:
         model : list or 'all', optional
             Which models to post-process, by default None
         cycle : _type_, optional
-            Cycle name, by default None       
-    
+            Cycle name, by default None
+
         See Also
         -------
         cosmos.cosmos_main_loop.MainLoop
         cosmos.cosmos_model_loop.ModelLoop
 
         """
-                
+
         if not cosmos.config.path.main:
-            cosmos.log("Error: CoSMoS main path not set! Do this by running cosmos.initialize(main_path) or passing main_path as input argument to cosmos.run().")
+            cosmos.log(
+                "Error: CoSMoS main path not set! Do this by running cosmos.initialize(main_path) or passing main_path as input argument to cosmos.run()."
+            )
             return
-        
+
         # Overwrite settings for just_initialize and run_models
-        self.config.run.just_initialize  = True
+        self.config.run.just_initialize = True
         self.config.run.run_models = False
         self.run(scenario_name)
-        
+
         mdls = []
         if model == "all":
             for mdl in cosmos.scenario.model:
                 mdls.append(mdl)
-        else:    
+        else:
             for model2 in model:
                 for mdl in cosmos.scenario.model:
                     if mdl.name == model2:
@@ -304,12 +307,12 @@ class CoSMoS:
 
         # Delete job folder that was just created
         if cosmos.config.run.run_mode != "parallel":
-            fo.rmdir(os.path.join(cosmos.config.path.jobs,
-                                  cosmos.scenario_name))
+            fo.rmdir(os.path.join(cosmos.config.path.jobs, cosmos.scenario_name))
+
 
 # class Config:
-#     def __init__(self):        
+#     def __init__(self):
 #         self.main_path = None
 #         self.run_mode  = "serial"
-                        
+
 cosmos = CoSMoS()

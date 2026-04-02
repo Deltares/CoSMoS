@@ -1,3 +1,9 @@
+"""Argo Workflows integration for CoSMoS.
+
+Submits and monitors model simulation jobs on Kubernetes via Argo Workflows,
+enabling cloud-based parallel execution of forecast models.
+"""
+
 from hera.workflows import Workflow, WorkflowStatus, Task
 from hera.workflows.models import WorkflowTemplateRef
 from hera.shared import GlobalConfig
@@ -5,10 +11,11 @@ import time
 
 from .cosmos_main import cosmos
 
+
 class Argo:
 
     def __init__(self):
-        
+
         GlobalConfig.namespace = cosmos.config.cloud_config.namespace
         GlobalConfig.host = cosmos.config.cloud_config.host
         GlobalConfig.verify_ssl = False
@@ -16,7 +23,16 @@ class Argo:
 
         pass
 
-    def submit_template_job(self, workflow_name, job_name, subfolder, scenario, cycle, webviewerfolder=None, tilingfolder=None):
+    def submit_template_job(
+        self,
+        workflow_name,
+        job_name,
+        subfolder,
+        scenario,
+        cycle,
+        webviewerfolder=None,
+        tilingfolder=None,
+    ):
         """Submit a template job to Argo.
 
         Parameters
@@ -41,10 +57,10 @@ class Argo:
         wt_ref = WorkflowTemplateRef(name=workflow_name, cluster_scope=False)
 
         # Replace underscores with dashes in the job name
-        mname = job_name.replace("_","-")
+        mname = job_name.replace("_", "-")
 
         # Gather the arguments
-        arguments={"subfolder": subfolder, "scenario": scenario, "cycle": cycle}
+        arguments = {"subfolder": subfolder, "scenario": scenario, "cycle": cycle}
         if webviewerfolder is not None:
             arguments["webviewerfolder"] = webviewerfolder
         if tilingfolder is not None:
@@ -52,19 +68,26 @@ class Argo:
 
         # Create the workflow
         w = Workflow(
-            generate_name=mname+"-",
-            workflow_template_ref=wt_ref,
-            arguments=arguments
+            generate_name=mname + "-", workflow_template_ref=wt_ref, arguments=arguments
         )
 
         cosmos.log("Cloud Workflow started")
         w.create()
 
         return w
-    
+
     def submit_single_job(model):
-        with Workflow(model.name.replace('_', '-'), generate_name=True, workflow_template_ref="sfincs-workflow-xzv8r") as w:
-            Task("sfincs-cpu-argo", image="deltares/sfincs-cpu:latest", command=["/bin/bash", "-c", "--"], args= ["chmod +x /data/run.sh && /data/run.sh"])
+        with Workflow(
+            model.name.replace("_", "-"),
+            generate_name=True,
+            workflow_template_ref="sfincs-workflow-xzv8r",
+        ) as w:
+            Task(
+                "sfincs-cpu-argo",
+                image="deltares/sfincs-cpu:latest",
+                command=["/bin/bash", "-c", "--"],
+                args=["chmod +x /data/run.sh && /data/run.sh"],
+            )
 
         return w.create()
 
@@ -73,7 +96,9 @@ class Argo:
         status = "Unknown"
 
         try:
-            wf = workflow.workflows_service.get_workflow(workflow.name, namespace=workflow.namespace)
+            wf = workflow.workflows_service.get_workflow(
+                workflow.name, namespace=workflow.namespace
+            )
             status = WorkflowStatus.from_argo_status(wf.status.phase)
 
             cosmos.log("Status of workflow: " + status)
