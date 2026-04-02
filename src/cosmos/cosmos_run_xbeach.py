@@ -20,7 +20,7 @@ from cht_utils.misc_tools import yaml2dict
 from cht_xbeach.xbeach import XBeach
 
 
-def get_s3_client(config):
+def get_s3_client(config: dict):
     # Create an S3 client
     session = boto3.Session(
         aws_access_key_id=config["cloud"]["access_key"],
@@ -30,7 +30,7 @@ def get_s3_client(config):
     return session.client("s3")
 
 
-def prepare_single(config):
+def prepare_single(config: dict) -> None:
     # Copying, nesting
     # We're already in the correct folder
     if config["run_mode"] == "cloud":
@@ -160,7 +160,7 @@ def prepare_single(config):
         )
 
 
-def map_tiles(config):
+def map_tiles(config: dict) -> None:
 
     # Make flood map tiles
     if "sedero_map" in config:
@@ -230,7 +230,9 @@ def map_tiles(config):
             print("Bed level tiles done.")
 
 
-def make_sedero_tiles(config, sedero, index_path, sedero_map_path):
+def make_sedero_tiles(
+    config: dict, sedero, index_path: str, sedero_map_path: str
+) -> None:
 
     color_values = config["sedero_map"]["color_map"]["contours"]
 
@@ -246,7 +248,9 @@ def make_sedero_tiles(config, sedero, index_path, sedero_map_path):
     twm.make()
 
 
-def make_bedlevel_tiles(config, bedlevel, index_path, bedlevel_map_path):
+def make_bedlevel_tiles(
+    config: dict, bedlevel, index_path: str, bedlevel_map_path: str
+) -> None:
 
     color_values = config["sedero_map"]["color_map_zb"]["contours"]
 

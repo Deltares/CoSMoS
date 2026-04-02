@@ -9,14 +9,19 @@ import toml
 from cht.misc.misc_tools import yaml2dict
 
 
-def xml2dict(element):
+def xml2dict(element) -> dict:
     if len(element) == 0:
         return element.text
     else:
         return {child.tag: xml2dict(child) for child in element}
 
 
-def xml2toml(foldername=None, file_list=None, format="xml", items=None):
+def xml2toml(
+    foldername: str = None,
+    file_list: list = None,
+    format: str = "xml",
+    items: list = None,
+) -> None:
     # Get all files of format in foldername
     if foldername is not None:
         file_list = fo.list_files(foldername + "/*." + format)

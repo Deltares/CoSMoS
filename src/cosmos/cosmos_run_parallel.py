@@ -15,14 +15,14 @@ import psutil
 
 
 class CosmosRunParallel:
-    def __init__(self):
+    def __init__(self) -> None:
         running = 0
         for i in psutil.process_iter():
             if "cmd.exe" in i.name():
                 running = running + 1
         self.running = running
 
-    def start(self, job_path, local_path, scenario):
+    def start(self, job_path: str, local_path: str, scenario: str) -> None:
 
         self.status = "searching"
         if scenario is not None:
@@ -54,10 +54,10 @@ class CosmosRunParallel:
                     self.scheduler.enter(dt, 1, self.run, ())
                     self.scheduler.run()
 
-    def stop(self):
+    def stop(self) -> None:
         self.scheduler.cancel()
 
-    def run(self):
+    def run(self) -> None:
         # first check whether something is running already
         running = 0
         for i in psutil.process_iter():

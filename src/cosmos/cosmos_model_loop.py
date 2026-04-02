@@ -41,10 +41,10 @@ class ModelLoop:
     cosmos.cosmos_xbeach.CoSMoS_XBeach
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
-    def start(self):
+    def start(self) -> None:
         """Start cosmos_model_loop.run with scheduler.
 
         See Also
@@ -63,11 +63,11 @@ class ModelLoop:
             self.scheduler.enter(dt, 1, self.run, ())
             self.scheduler.run()
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop cosmos_model_loop."""
         self.scheduler.cancel()
 
-    def run(self):
+    def run(self) -> None:
         """Run all cosmos models defined in the scenario file.
 
         - Check for finished simulations and move them to scenario folder
@@ -193,7 +193,7 @@ class ModelLoop:
             pass
 
 
-def check_for_finished_simulations():
+def check_for_finished_simulations() -> list:
     """Check if there are finished simulations to be post-processed."""
     finished_list = []
 
@@ -215,7 +215,7 @@ def check_for_finished_simulations():
     return finished_list
 
 
-def update_waiting_list():
+def update_waiting_list() -> list:
     """Check which models can be run next according to their status and prioritization level."""
     # Check which models need to run next
 

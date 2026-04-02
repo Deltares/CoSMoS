@@ -23,7 +23,7 @@ class Scenario:
 
     """
 
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         """Initialize cosmos scenario.
 
         Parameters
@@ -66,7 +66,7 @@ class Scenario:
         self.meteo_string = ""
         self.storm_number = None
 
-    def read(self):
+    def read(self) -> None:
         """Read scenario file, set model paths and settings, initialize models and read model generic and model specific data."""
 
         # Read scenario file
@@ -330,7 +330,7 @@ class Scenario:
 
         cosmos.log("Finished reading scenario")
 
-    def set_paths(self):
+    def set_paths(self) -> None:
         """Set cycle paths."""
         self.cycle_path = os.path.join(self.path, cosmos.cycle_string)
         self.cycle_models_path = os.path.join(self.path, cosmos.cycle_string, "models")

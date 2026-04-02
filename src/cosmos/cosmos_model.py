@@ -970,7 +970,9 @@ class Model:
                     if station.name in all_nested_stations and bw == 0:
                         station.upload = False
 
-    def write_meteo_input_files(self, prefix: str, tref, path: str = None, format: str = "ascii") -> None:
+    def write_meteo_input_files(
+        self, prefix: str, tref, path: str = None, format: str = "ascii"
+    ) -> None:
 
         if not path:
             path = self.job_path

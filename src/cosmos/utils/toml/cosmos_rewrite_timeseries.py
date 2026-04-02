@@ -3,7 +3,7 @@
 import os
 
 
-def rename_files1(directory):
+def rename_files1(directory: str) -> None:
     for filename in os.listdir(directory):
         # Check if the file matches the expected pattern
         if filename.startswith("waterlevel") and filename.endswith(".csv.js"):
@@ -21,7 +21,7 @@ def rename_files1(directory):
             print(f"Renamed: {filename} to {new_filename}")
 
 
-def rename_files2(directory):
+def rename_files2(directory: str) -> None:
     for filename in os.listdir(directory):
         # Check if the file matches the expected pattern
         if filename.startswith("wl") and filename.endswith(".js"):
@@ -39,7 +39,7 @@ def rename_files2(directory):
             print(f"Renamed: {filename} to {new_filename}")
 
 
-def rename_files_waves(directory):
+def rename_files_waves(directory: str) -> None:
     for filename in os.listdir(directory):
         # Check if the file matches the expected pattern
         if filename.startswith("waves") and filename.endswith(".csv.js"):
@@ -61,7 +61,7 @@ def rename_files_waves(directory):
             print(f"Renamed: {filename} to {new_filename}")
 
 
-def rename_files_waves2(directory):
+def rename_files_waves2(directory: str) -> None:
     for filename in os.listdir(directory):
         # Check if the file matches the expected pattern
         if filename.startswith("wl") and filename.endswith(".csv.js"):

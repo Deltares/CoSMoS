@@ -19,7 +19,7 @@ from PIL import Image
 
 # Helper class for cloud functions, note this is a copy of necessary functionalities of cosmos_cloud
 class Cloud:
-    def __init__(self, config):
+    def __init__(self, config: dict) -> None:
         # Create a session using your AWS credentials (or configure it in other ways)
         session = boto3.Session(
             aws_access_key_id=config["cloud"]["access_key"],
@@ -39,7 +39,7 @@ class Cloud:
         #     verbose=True,
         # )
 
-    def list_folders(self, bucket_name, s3_folder):
+    def list_folders(self, bucket_name: str, s3_folder: str) -> list:
         if s3_folder[-1] != "/":
             s3_folder = s3_folder + "/"
         folders = []
@@ -85,7 +85,9 @@ class Cloud:
             for file in flist:
                 upf(file, local_folder, s3_folder, bucket_name, self.s3_client, quiet)
 
-    def bulk_upload_folder(self, bucket_name, local_folder, s3_folder, num_threads=8):
+    def bulk_upload_folder(
+        self, bucket_name: str, local_folder: str, s3_folder: str, num_threads: int = 8
+    ) -> None:
         local_folder = local_folder.replace("\\\\", "\\")
         local_folder = local_folder.replace("\\", "/")
         self.bulkboto_agent.upload_dir_to_storage(
@@ -95,7 +97,9 @@ class Cloud:
             n_threads=num_threads,
         )
 
-    def download_and_extract_tgz(self, bucket_name, s3_folder, local_folder):
+    def download_and_extract_tgz(
+        self, bucket_name: str, s3_folder: str, local_folder: str
+    ) -> None:
         """
         Download and extract a .tgz file from S3.
         """
@@ -121,7 +125,7 @@ class Cloud:
         print("Removing {}".format(local_tgz_path))
         os.remove(local_tgz_path)
 
-    def check_file_exists(self, bucket_name, s3_key):
+    def check_file_exists(self, bucket_name: str, s3_key: str) -> bool:
         from botocore.exceptions import ClientError
 
         try:
@@ -134,7 +138,14 @@ class Cloud:
                 raise
 
 
-def upf(file, local_folder, s3_folder, bucket_name, s3_client, quiet):
+def upf(
+    file: str,
+    local_folder: str,
+    s3_folder: str,
+    bucket_name: str,
+    s3_client,
+    quiet: bool,
+) -> None:
     file1 = file.replace("\\", "/")
     file1 = file1.replace(local_folder, "")
     s3_key = s3_folder + file1
@@ -144,7 +155,7 @@ def upf(file, local_folder, s3_folder, bucket_name, s3_client, quiet):
         # print("Uploaded " + file)
 
 
-def list_all_files(src):
+def list_all_files(src: str) -> list:
     # Recursively list all files and folders in a folder
     import pathlib
 
@@ -158,7 +169,7 @@ def list_all_files(src):
 
 
 # Helper functions, these should be put into cht_tiling?
-def merge_images(image1_path, image2_path, output_path):
+def merge_images(image1_path: str, image2_path: str, output_path: str) -> None:
     """
     Merge two images by overlaying image2 on image1 and save the result.
     """
@@ -172,7 +183,7 @@ def merge_images(image1_path, image2_path, output_path):
         im.save(output_path)
 
 
-def merge_model_tiles(model_tiles, merged_tiles):
+def merge_model_tiles(model_tiles: str, merged_tiles: str) -> None:
     """
     Process tiles from multiple models and merge them if they already exist in the shared directory.
     """
@@ -197,7 +208,7 @@ def merge_model_tiles(model_tiles, merged_tiles):
                     shutil.move(src_path, dest_path)
 
 
-def merge_tiles(config, quiet=True):
+def merge_tiles(config: dict, quiet: bool = True) -> None:
     """Merge tiles for a specific variable from individual models into a shared directory."""
     # Load the configuration file
     variable = config["variable"]["name"]

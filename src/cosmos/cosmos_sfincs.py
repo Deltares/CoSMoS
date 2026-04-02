@@ -19,7 +19,9 @@ from .cosmos import cosmos
 from .cosmos_model import Model
 
 
-def _read_sfincs_his(file_name: str, parameter: str = "point_zs", ensemble_member: int = None) -> "pd.DataFrame":
+def _read_sfincs_his(
+    file_name: str, parameter: str = "point_zs", ensemble_member: int = None
+) -> "pd.DataFrame":
     """Read SFINCS history output as DataFrame with station name columns."""
     ds = xr.open_dataset(file_name)
     var = ds[parameter]

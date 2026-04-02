@@ -39,7 +39,7 @@ class CoSMoS_XBeach(Model):
     cosmos.cosmos_model.Model
     """
 
-    def read_model_specific(self):
+    def read_model_specific(self) -> None:
         """Read XBeach specific model attributes.
 
         See Also
@@ -77,7 +77,7 @@ class CoSMoS_XBeach(Model):
         self.domain.name = self.name
         self.domain.runid = self.runid
 
-    def pre_process(self):
+    def pre_process(self) -> None:
         """Preprocess XBeach model.
 
         - Extract and write water level and wave conditions.
@@ -198,7 +198,7 @@ class CoSMoS_XBeach(Model):
         # Set the path back to the one in cosmos\models\etc.
         self.domain.path = pth
 
-    def move(self):
+    def move(self) -> None:
         """Move XBeach model input and output files."""
         # Move files from job folder to archive folder
 
@@ -215,7 +215,7 @@ class CoSMoS_XBeach(Model):
         # Input
         fo.move_file(os.path.join(job_path, "*.*"), input_path)
 
-    def post_process(self):
+    def post_process(self) -> None:
         """Post-process XBeach output: generate Sallenger regimes."""
 
         output_path = self.cycle_output_path

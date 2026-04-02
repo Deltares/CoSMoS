@@ -49,13 +49,13 @@ class MainLoop:
     cosmos.cosmos_model.Model
     """
 
-    def __init__(self):
-        # Try to kill all instances of main loop and model loop
+    def __init__(self) -> None:
+        """Initialize main loop state."""
         self.just_initialize = False
         self.run_models = True
         self.clean_up = False
 
-    def start(self, cycle=None):
+    def start(self, cycle=None) -> None:
         """Update the configuration, read the scenario.toml file, determine cycle times, initialize webviewer, and start cosmos_main_loop.run with scheduler.
 
         Parameters
@@ -160,7 +160,7 @@ class MainLoop:
         self.scheduler.enter(dt.seconds, 1, self.run, ())
         self.scheduler.run()
 
-    def run(self):
+    def run(self) -> None:
         """Run main loop.
 
         - Prepare models: Get list of nested models and set paths
@@ -365,7 +365,7 @@ class MainLoop:
             cosmos.log("Starting model loop ...")
             cosmos.model_loop.start()
 
-    def finish(self):
+    def finish(self) -> None:
         """Finish the main loop by performing clean up and making web viewer."""
 
         # Run clean up first (this has to be done before making the webviewer, as it removes some cycle folders)
@@ -464,7 +464,7 @@ class MainLoop:
             cosmos.log("All done.")
 
 
-def get_start_and_stop_times():
+def get_start_and_stop_times() -> None:
     """Get cycle start and stop times."""
 
     y = cosmos.cycle.year
@@ -593,7 +593,7 @@ def get_start_and_stop_times():
                 model.flow_stop_time = model.wave_stop_time
 
 
-def check_for_wave_restart_files(model):
+def check_for_wave_restart_files(model) -> tuple:
     """Check if there are wave restart files."""
     restart_time = None
     restart_file = None
@@ -627,7 +627,7 @@ def check_for_wave_restart_files(model):
     return restart_time, restart_file
 
 
-def check_for_flow_restart_files(model):
+def check_for_flow_restart_files(model) -> tuple:
     """Check if there are flow restart files."""
     restart_time = None
     restart_file = None

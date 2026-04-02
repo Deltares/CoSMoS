@@ -28,7 +28,7 @@ from .cosmos_argo import Argo
 class WebViewer:
     """Cosmos webviewer class"""
 
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         """Initialize webviewer.
         - Makes local copy of the webviewer from a template. If such a copy already exists, data will be copied to the existing webviewer.
         - Updating the scenario.js with the current scenario.
@@ -66,7 +66,7 @@ class WebViewer:
                 cosmos.scenario.long_name,
             )
 
-    def make(self):
+    def make(self) -> None:
 
         # Make scenario folder in web viewer
         self.cycle_path = os.path.join(
@@ -344,7 +344,7 @@ class WebViewer:
 
         self.map_variables.append(dct)
 
-    def make_xb_markers(self):
+    def make_xb_markers(self) -> None:
         """Make geojson file with markers for XBeach models that ran."""
         # Markers for XBeach models that ran
         features = []
@@ -376,7 +376,7 @@ class WebViewer:
                 stations_file, feature_collection, "var xb_markers ="
             )
 
-    def make_meteo_maps(self):
+    def make_meteo_maps(self) -> None:
 
         cosmos.log("Making meteo map tiles ...")
 
@@ -497,7 +497,7 @@ class WebViewer:
         except Exception as e:
             print(str(e))
 
-    def make_xb_regimes(self):
+    def make_xb_regimes(self) -> None:
         """Make Sallenger regimes markers for webviewer."""
         output_path = self.cycle_path
         df_all = pd.DataFrame()
@@ -600,7 +600,7 @@ class WebViewer:
 
             self.map_variables.append(dct)
 
-    def make_runup_map(self):
+    def make_runup_map(self) -> None:
         """Make runup markers and timeseries for webviewer."""
 
         output_path = self.cycle_path
@@ -907,7 +907,7 @@ class WebViewer:
                 except Exception:
                     cosmos.log("An error occurred when making BEWARE webviewer !")
 
-    def make_twl_map(self):
+    def make_twl_map(self) -> None:
         """Make SFINCS bathtub total water levels and timeseries for webviewer."""
 
         # Total water levels estimates (tide+surge+0.2*Hs)
@@ -985,7 +985,7 @@ class WebViewer:
         except Exception as e:
             cosmos.log("An error occurred when making BEWARE webviewer !")
 
-    def make_timeseries(self, ts_type):
+    def make_timeseries(self, ts_type: str) -> None:
         """Generic function to make time series for the webviewer."""
         if ts_type == "waves":
             prefix = "waves"
@@ -1201,7 +1201,7 @@ class WebViewer:
                 buoys_file, feature_collection, "var " + station_var + " ="
             )
 
-    def update_scenarios_js(self, other_js_source=None):
+    def update_scenarios_js(self, other_js_source: str = None) -> None:
         # Check if there is a scenarios.js file
         # If so, append it with the current scenario
 
@@ -1270,7 +1270,7 @@ class WebViewer:
 
         cht_utils.misc_tools.write_json_js(sc_file, scs, "var scenario =")
 
-    def upload(self):
+    def upload(self) -> None:
         if cosmos.config.run.run_mode == "cloud":
             # Upload to S3
             self.upload_to_s3()
@@ -1284,7 +1284,7 @@ class WebViewer:
         else:
             self.upload_to_opendap()
 
-    def upload_to_opendap(self):
+    def upload_to_opendap(self) -> None:
         """Upload web viewer to web server."""
         from cht_utils.sftp import SSHSession
 
@@ -1351,7 +1351,7 @@ class WebViewer:
             except Exception:
                 pass
 
-    def copy_to_opendap(self):
+    def copy_to_opendap(self) -> None:
         cosmos.log("Copying webviewer to OpenDap ...")
 
         # Upload entire copy of local web viewer to web server
@@ -1438,7 +1438,7 @@ class WebViewer:
             cosmos.log("An error occurred while copying !")
             cosmos.log(str(e))
 
-    def upload_to_s3(self):
+    def upload_to_s3(self) -> None:
         """Upload web viewer to S3"""
         cosmos.log("Uploading web viewer to S3 ...")
         try:
@@ -1463,7 +1463,7 @@ class WebViewer:
             cosmos.log("An error occurred while uploading !")
             cosmos.log(str(e))
 
-    def merge_map_tiles(self):
+    def merge_map_tiles(self) -> None:
         """Merge output map-tiles from different models for web viewer.
         For now only used in run_mode==cloud"""
 
@@ -1632,7 +1632,7 @@ def merge_timeseries(
         return None
 
 
-def make_legend(type: str = None, mp=None):
+def make_legend(type: str = None, mp=None) -> str:
     if type:
         mp = next(
             (

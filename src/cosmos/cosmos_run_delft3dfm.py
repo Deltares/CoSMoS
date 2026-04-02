@@ -18,14 +18,14 @@ from cht_utils.prob_maps import merge_nc_his, merge_nc_map
 # from cht_utils.argo import Argo
 
 
-def read_ensemble_members():
+def read_ensemble_members() -> list:
     with open("ensemble_members.txt") as f:
         ensemble_members = f.readlines()
     ensemble_members = [x.strip() for x in ensemble_members]
     return ensemble_members
 
 
-def get_s3_client(config):
+def get_s3_client(config: dict):
     # Create an S3 client
     session = boto3.Session(
         aws_access_key_id=config["cloud"]["access_key"],
@@ -35,7 +35,7 @@ def get_s3_client(config):
     return session.client("s3")
 
 
-def prepare_ensemble(config):
+def prepare_ensemble(config: dict) -> None:
     # In case of ensemble, make folders for each ensemble member and copy necessary scripts to these folders
     # Read in the list of ensemble members
     ensemble_members = read_ensemble_members()
@@ -48,7 +48,7 @@ def prepare_ensemble(config):
         fo.copy_file(os.path.join("base_input", "ensemble_members.txt"), member)
 
 
-def prepare_single(config, member=None):
+def prepare_single(config: dict, member: str = None) -> None:
     # Copying, nesting, spiderweb
     # We're already in the correct folder
     if config["run_mode"] == "cloud":
@@ -184,7 +184,7 @@ def prepare_single(config, member=None):
         pass
 
 
-def merge_ensemble(config):
+def merge_ensemble(config: dict) -> None:
     print("Merging ...")
     if config["run_mode"] == "cloud":
         folder_path = "/input"
@@ -213,7 +213,7 @@ def merge_ensemble(config):
     )
 
 
-def clean_up(config):
+def clean_up(config: dict) -> None:
     if config["ensemble"]:
         # Remove all ensemble members
         # Read in the list of ensemble members
