@@ -14,7 +14,7 @@ import cht_utils.fileops as fo
 import hydrolib.core.dflowfm as hcdfm
 from cht_delft3dfm.cht_delft3dfm import Delft3DFM
 from cht_nesting.cht_nesting import nest1
-from cht_utils.misc_tools import findreplace
+from cht_utils.fileops import find_replace
 
 from .cosmos import cosmos
 from .cosmos_model import Model
@@ -103,7 +103,7 @@ class CoSMoS_Delft3DFM(Model):
         if self.wave:
             tstr = cosmos.scenario.ref_date.strftime("%Y-%m-%d")
             mdw_file = os.path.join(job_path_wave, "wave.mdw")
-            findreplace(mdw_file, "REFDATEKEY", tstr)
+            find_replace(mdw_file, "REFDATEKEY", tstr)
 
             t0 = (tstart - refdate).total_seconds()
             t1 = (tstop - refdate).total_seconds()
@@ -111,7 +111,7 @@ class CoSMoS_Delft3DFM(Model):
             #            tstr = str(0.0) + " " + str(dt) + " " + str(t1 - t0)
             tstr = str(0.0) + " " + str(dt) + " " + str(t1)
             dmr_file = os.path.join(self.job_path, "dimr_config.xml")
-            findreplace(dmr_file, "TIMEKEY", tstr)
+            find_replace(dmr_file, "TIMEKEY", tstr)
 
         # Make sure model starts and stops automatically
         self.domain.input.general.autostart = 2
@@ -214,7 +214,7 @@ class CoSMoS_Delft3DFM(Model):
             self.domain.write_observation_points(path=job_path_flow)
         if self.wave:
             self.domain.write_observation_points(path=job_path_wave)
-            findreplace(
+            find_replace(
                 mdw_file,
                 "OBSFILEKEY",
                 os.path.join(self.domain.input.output.obsfile[0].filepath),
@@ -371,7 +371,7 @@ class CoSMoS_Delft3DFM(Model):
 
     def post_process(self) -> None:
         """Post-process Delft3D FM output: generate wave and water level timeseries."""
-        import cht_utils.misc_tools
+        from cht_utils.fileio.json_js import write_csv_js
 
         # Extract water levels
 
@@ -409,7 +409,7 @@ class CoSMoS_Delft3DFM(Model):
                         float_format="%.3f",
                         header=False,
                     )
-                    cht_utils.misc_tools.write_csv_js(
+                    write_csv_js(
                         csv_file, s, "var csv = `date_time,wl"
                     )
 
@@ -435,6 +435,6 @@ class CoSMoS_Delft3DFM(Model):
                             float_format="%.3f",
                             header=False,
                         )
-                        cht_utils.misc_tools.write_csv_js(
+                        write_csv_js(
                             csv_file, s, "var csv = `date_time,hm0,tp"
                         )

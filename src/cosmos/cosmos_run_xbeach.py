@@ -16,7 +16,7 @@ import cht_utils.fileops as fo
 import xarray as xr
 from cht_nestingp import nest2
 from cht_tiling import TiledWebMap
-from cht_utils.misc_tools import yaml2dict
+from cht_utils.fileio.yaml import yaml2dict
 from cht_xbeach.xbeach import XBeach
 
 

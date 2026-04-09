@@ -2,7 +2,7 @@
 
 import os
 
-import cht_utils.xmlkit as xml
+import cht_utils.fileio.xml as xml
 import toml
 
 path = "c:\\work\\cosmos\\run_folder\\configuration"

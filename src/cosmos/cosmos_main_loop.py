@@ -12,7 +12,7 @@ import sched
 import time
 
 import numpy as np
-from cht_utils.misc_tools import dict2yaml
+from cht_utils.fileio.yaml import dict2yaml
 
 from .cosmos import cosmos
 from .cosmos_clean_up import clean_up

@@ -16,7 +16,7 @@ import pandas as pd
 import shapely
 import toml
 from cht_nesting import nest2
-from cht_utils.misc_tools import dict2yaml
+from cht_utils.fileio.yaml import dict2yaml
 from pyproj import CRS, Transformer
 from scipy import interpolate
 

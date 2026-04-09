@@ -8,7 +8,7 @@ import os
 
 import numpy as np
 import toml
-from cht_utils.misc_tools import rgb2hex
+from cht_utils.colors import rgb2hex
 
 
 def read_color_maps(file_name: str) -> dict:

@@ -16,8 +16,8 @@ import pandas as pd
 import xarray as xr
 from cht_nesting import nest2
 from cht_tiling import TiledWebMap
-from cht_utils.misc_tools import yaml2dict
-from cht_utils.prob_maps import merge_nc_his, merge_nc_map
+from cht_utils.fileio.yaml import yaml2dict
+from cht_utils.probabilistic.prob_maps import merge_nc_his, merge_nc_map
 from hydromt_sfincs import SfincsModel
 
 # from cht_utils.argo import Argo

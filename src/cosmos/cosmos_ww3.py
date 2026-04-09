@@ -7,7 +7,7 @@ spectral wave models within the CoSMoS forecast framework.
 import os
 import shutil
 
-import cht_utils.xmlkit as xml
+import cht_utils.fileio.xml as xml
 
 from .cosmos import cosmos
 from .cosmos_model import Model

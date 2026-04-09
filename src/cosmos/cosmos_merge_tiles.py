@@ -13,7 +13,7 @@ from multiprocessing.pool import ThreadPool
 
 import boto3
 import numpy as np
-from cht_utils.misc_tools import yaml2dict
+from cht_utils.fileio.yaml import yaml2dict
 from PIL import Image
 
 

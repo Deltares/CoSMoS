@@ -15,7 +15,7 @@ import shutil
 import cht_utils.fileops as fo
 import pandas as pd
 from cht_beware.beware import BEWARE
-from cht_utils.misc_tools import findreplace
+from cht_utils.fileops import find_replace
 
 from .cosmos import cosmos
 from .cosmos_model import Model
@@ -116,7 +116,7 @@ class CoSMoS_BEWARE(Model):
                 src = os.path.join(cosmos.config.executables.beware_path, "run_bw.bas")
                 batch_file = os.path.join(self.job_path, "run_simulation.bat")
                 shutil.copyfile(src, batch_file)
-                findreplace(
+                find_replace(
                     batch_file, "EXEPATHKEY", cosmos.config.executables.beware_path
                 )
             else:
@@ -124,7 +124,7 @@ class CoSMoS_BEWARE(Model):
                 src = os.path.join(cosmos.config.executables.beware_path, "run_bw.sh")
                 batch_file = os.path.join(self.job_path, "run_simulation.sh")
                 shutil.copyfile(src, batch_file)
-                findreplace(
+                find_replace(
                     batch_file, "EXEPATHKEY", cosmos.config.executables.beware_path
                 )
 
@@ -157,7 +157,7 @@ class CoSMoS_BEWARE(Model):
         cht_utils.prob_maps
         """
         # Post-processing occurs in cosmos_webviewer.py
-        import cht_utils.misc_tools
+        from cht_utils.fileio.json_js import write_csv_js
 
         output_path = self.cycle_output_path
         post_path = self.cycle_post_path
@@ -220,7 +220,7 @@ class CoSMoS_BEWARE(Model):
                     + str(self.domain.filename[ip])
                     + ".csv.js",
                 )
-                cht_utils.misc_tools.write_csv_js(
+                write_csv_js(
                     file_name,
                     s,
                     "var csv = `date_time,wl,setup,swash,runup, setup_5, setup_50, setup_95, runup_5, runup_50, runup_95",
@@ -272,7 +272,7 @@ class CoSMoS_BEWARE(Model):
                     + str(self.domain.filename[ip])
                     + ".csv.js",
                 )
-                cht_utils.misc_tools.write_csv_js(
+                write_csv_js(
                     file_name, s, "var csv = `date_time,wl,setup,swash,runup"
                 )
 
