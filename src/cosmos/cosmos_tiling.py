@@ -7,7 +7,7 @@ spatial output variables for display in the CoSMoS web viewer.
 from typing import Any, Dict
 
 import numpy as np
-from cht_tiling.tiling import make_floodmap_tiles, make_png_tiles
+from cht_tiling import TiledWebMap
 
 from .cosmos import cosmos
 
@@ -41,17 +41,20 @@ def make_flood_map_tiles(
     mp = next((x for x in cosmos.config.map_contours if x["name"] == "flood_map"), None)
     color_values = mp["contours"]
 
-    make_floodmap_tiles(
-        zsmax,
-        index_path,
+    twm = TiledWebMap(
         flood_map_path,
-        topo_path,
-        option="deterministic",
+        data=zsmax,
+        type="rgba",
+        parameter="flood_map",
         color_values=color_values,
-        zoom_range=[0, 13],
+        index_path=index_path,
+        topo_path=topo_path,
         zbmax=1.0,
+        zoom_range=[0, 13],
+        make_lower_levels=True,
         quiet=True,
     )
+    twm.make()
 
 
 def make_wave_map_tiles(
@@ -75,14 +78,18 @@ def make_wave_map_tiles(
     """
     mp = next((x for x in cosmos.config.map_contours if x["name"] == contour_set), None)
     if mp is not None:
-        make_png_tiles(
-            hm0max,
-            index_path,
+        twm = TiledWebMap(
             wave_map_path,
+            data=hm0max,
+            type="rgba",
+            parameter="other",
             color_values=mp["contours"],
+            index_path=index_path,
             zoom_range=[0, 9],
+            make_lower_levels=True,
             quiet=True,
         )
+        twm.make()
 
 
 def make_precipitation_tiles(
@@ -110,14 +117,18 @@ def make_precipitation_tiles(
 
     mp = next((x for x in cosmos.config.map_contours if x == contour_set), None)
     if mp is not None:
-        make_png_tiles(
-            pcum,
-            index_path,
+        twm = TiledWebMap(
             p_map_path,
+            data=pcum,
+            type="rgba",
+            parameter="other",
             color_values=cosmos.config.map_contours[mp]["contours"],
+            index_path=index_path,
             zoom_range=[0, 10],
+            make_lower_levels=True,
             quiet=True,
         )
+        twm.make()
 
 
 def make_sedero_tiles(
@@ -136,14 +147,18 @@ def make_sedero_tiles(
     """
     mp = next((x for x in cosmos.config.map_contours if x["name"] == "sedero"), None)
     if mp is not None:
-        make_png_tiles(
-            sedero,
-            index_path,
+        twm = TiledWebMap(
             sedero_map_path,
+            data=sedero,
+            type="rgba",
+            parameter="other",
             color_values=mp["contours"],
+            index_path=index_path,
             zoom_range=[0, 16],
+            make_lower_levels=True,
             quiet=True,
         )
+        twm.make()
 
 
 def make_bedlevel_tiles(
@@ -164,11 +179,15 @@ def make_bedlevel_tiles(
         (x for x in cosmos.config.map_contours if x["name"] == "bed_levels"), None
     )
     if mp is not None:
-        make_png_tiles(
-            bedlevel,
-            index_path,
+        twm = TiledWebMap(
             bedlevel_map_path,
+            data=bedlevel,
+            type="rgba",
+            parameter="other",
             color_values=mp["contours"],
+            index_path=index_path,
             zoom_range=[0, 16],
+            make_lower_levels=True,
             quiet=True,
         )
+        twm.make()

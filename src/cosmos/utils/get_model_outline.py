@@ -6,7 +6,9 @@ model grids for use in the CoSMoS web viewer.
 
 import os
 
-from cht_tiling import make_topobathy_overlay
+# NOTE: make_topobathy_overlay was removed from cht_tiling.
+# This script needs to be rewritten to use TiledWebMap or TopoBathyMap.
+# from cht_tiling import make_topobathy_overlay
 from cht_tiling.utils import get_zoom_level_for_resolution
 from hydromt_sfincs import SfincsModel
 
