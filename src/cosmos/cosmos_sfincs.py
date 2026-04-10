@@ -162,8 +162,8 @@ class CoSMoS_SFINCS(Model):
             self.domain.config.set("pavbnd", -999.0)
 
         # Make observation points
+        stations_added = False
         if self.station:
-            self.domain.config.set("obsfile", "sfincs.obs")
             # Only add stations that do not already exist
             existing_stations = self.domain.observation_points.list_names
             for station in self.station:
@@ -173,21 +173,24 @@ class CoSMoS_SFINCS(Model):
                         self.domain.observation_points.add_point(
                             station.x, station.y, station.name
                         )
+                        stations_added = True
                     except Exception as e:
                         print(f"Error adding observation point {station.name}: {e}")
+            # self.domain.config.set("obsfile", "sfincs.obs")
 
         # Add observation points for nested models (Nesting 1)
         if self.nested_flow_models:
-            if not self.domain.config.get("obsfile"):
-                self.domain.config.set("obsfile", "sfincs.obs")
+            # if not self.domain.config.get("obsfile"):
+            #     self.domain.config.set("obsfile", "sfincs.obs")
 
             for nested_model in self.nested_flow_models:
                 nest1(
                     self.domain, nested_model.domain, obs_point_prefix=nested_model.name
                 )
+                stations_added = True
 
-        # Add other observation stations
-        if self.nested_flow_models or len(self.station) > 0:
+        if stations_added > 0:
+            # Stations were added
             if not self.domain.config.get("obsfile"):
                 self.domain.config.set("obsfile", "sfincs.obs")
             self.domain.observation_points.write()
