@@ -16,3 +16,4 @@ tmp.bat
 src/cosmos/run_cosmos.py
 cosmos_run_folder/priority_storm.txt
 /src/cosmos.egg-info
+/docs/build

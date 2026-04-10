@@ -7,7 +7,7 @@ To setup CoSMoS for your area of interest, you:
 
 **Step 1: Install CoSMoS**
 
-:ref:`Install CoSMoS <getting_started>` on your device.
+Install CoSMoS on your device (see the README for instructions).
 
 **Step 2: Make a local copy of the CoSMoS run folder.**
 
@@ -27,7 +27,7 @@ Also, make sure to link to the correct *model_database* and *meteo_database* fol
 
 :ref:`Setup a scenario file <scenario>` in which you describe which models of your model database you want to run, 
 for which period, and with which metereological data. 
-For a first CoSMoS run, choose one of the meteoreological data options listed in the default *meteo_subsets* file (see :ref:`Meteo <meteo>`).
+For a first CoSMoS run, choose one of the meteorological data options listed in the default *meteo_subsets* file (see :ref:`Meteo <meteo>`).
 You can also add the NOAA-COOPS tide station file (see :ref:`Observation stations <stations>`) to your scenario file to compare observed and computed water levels.
 
 **Step 6: Run CoSMoS.**
@@ -43,7 +43,7 @@ Advanced CoSMoS configurations:
 In addition to the regular NOAA-COOPS tide stations, for which water level data is downloaded automatically from a server, 
 you can :ref:`manually add observation station locations and data <stations>`.
 
-**Step 8: Add meteoreological data.**
+**Step 8: Add meteorological data.**
 
 There are several options to manually include meteorological data to force your model(s) (see :ref:`Meteo <meteo>`). 
 You can generate your own regularly gridded meteorological forcing or include a spiderweb file. 

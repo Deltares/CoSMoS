@@ -1,67 +1,60 @@
-# CoSMoS package
+# CoSMoS — Coastal Storm Modelling System
 
-Welcome to the GitHub repository of the Coastal Storm Modelling System
+CoSMoS is an operational flood forecasting framework that orchestrates
+hydrodynamic, wave, and morphodynamic models for coastal storm impact
+assessment. It automates the full forecast cycle: meteorological data
+download, model nesting, parallel execution (local or cloud), tiled map
+generation, and web viewer publication.
 
+## Supported models
 
+| Model | Library |
+|-------|---------|
+| SFINCS | hydromt-sfincs |
+| HurryWave | hydromt-hurrywave |
+| Delft3D FM | cht-delft3dfm |
+| XBeach | cht-xbeach |
+| BEWARE | cht-beware |
 
-To export the cosmos environment to a yml file:
+## Installation
 
-conda activate cosmos
+1. Clone the repository:
 
-conda env export --no-builds -f cosmos_environment.yml
+       git clone https://github.com/Deltares/CoSMoS.git
+       cd CoSMoS
 
-To create the cosmos_environment.yml somewhere else: 
+2. Install as an editable package:
 
-conda env create -f cosmos_environment.yml
+       pip install -e .
 
+## Quick start
 
+```python
+from cosmos.cosmos import cosmos
 
-To build the CoSMoS package, open Anaconda Powershell.
+cosmos.initialize("path/to/run_folder", config_file="config.toml")
+cosmos.run("scenario_name")
+```
 
-To make sure you have the latest version of build:
+## Building and publishing
 
-py -m pip install --upgrade build
+Build the package:
 
-and to build the package, e.g.: 
+    pip install --upgrade build
+    python -m build
 
-cd d:\checkouts\github\CoSMoS
+Upload to PyPI:
 
-py -m build
+    pip install --upgrade twine
+    python -m twine upload dist/*
 
+## License
 
+CoSMoS is licensed under the [GNU General Public License v3.0](LICENSE).
+This means you may use, modify, and redistribute the code, but any
+derivative work must also be distributed under the GPL v3. Incorporating
+CoSMoS code into proprietary software is not permitted.
 
-Upload to Pypi with:
+## Documentation
 
-cd d:\checkouts\github\CoSMoS
-
-py -m pip install --upgrade twine
-
-py -m twine upload dist/*
-
-
-
-For an editable package, make the package with e.g.:
-
-cd d:\checkouts\github\CoSMoS
-
-pip install -e .
-
-or something like:
-
-pip install -e d:\checkouts\github\CoSMoS
-
-
-Steps to install including CoSMoS environment:
-Install packages:
-
-	1) Make local Git clone of https://github.com/Deltares/CoSMoS, e.g. in d:\repos\CoSMoS\
-	
-	2) Open Miniconda3 (anaconda prompt)
-	
-	3) Cd d:\repos\CoSMoS\
-	
-	4) conda env create -f cosmos_environment.yml
-	
-	5) pip install -e d:\repos\CoSMoS\
-	
-	6) conda activate cosmos
+See the `docs/` folder for the full manual.

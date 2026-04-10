@@ -5,7 +5,7 @@ Setting up a scenario
 
 A scenario file is a simple toml-structured text file that defines which models you want to run, for which hindcast or forecast period, and with which data sources.
 
-Below, two examples of scenario files are given. The first is a determininistic simulation of hurricane Laura, the second an ensemble run for hurricane Maria.
+Below, two examples of scenario files are given. The first is a deterministic simulation of hurricane Laura, the second an ensemble run for hurricane Maria.
 
 .. include:: examples/scenario.toml
        :literal: 
@@ -168,7 +168,7 @@ The following settings can be included in the scenario file:
      -
 
    * - run_condition
-     - How to select mmodels within cluster to run conditionally. Option: "topn"
+     - How to select models within cluster to run conditionally. Option: "topn"
      - "topn"
      -
      
