@@ -101,7 +101,7 @@ For forecasts, the netcdf files are contained in a folder with the cycle time na
 CoSMoS gets the meteo data in two steps:
 
 - Download
-    If the keyword *get_meteo* is set to True (see :py:class:`cosmos.cosmos.CoSMoS`), meteo data are downloaded from a webserver. The following datasets can be downloaded automatically:
+    If the keyword *get_meteo* is set to True (see :py:class:`cosmos.CoSMoS`), meteo data are downloaded from a webserver. The following datasets can be downloaded automatically:
     
    .. list-table::
       :widths: 30 70
@@ -128,7 +128,7 @@ CoSMoS gets the meteo data in two steps:
 - Collect
     CoSMoS loops through the *meteo_database.toml* data and finds datasets that match the *meteo_dataset* specified in the scenario file. 
     For each *meteo_dataset*, CoSMoS collects the data from the netcdf files that are located in the specific meteo folder. 
-    The individual CoSMoS model classes (see :ref:`Model classes <modelclasses>`) then write the meteo input files.
+    The individual CoSMoS model classes then write the meteo input files.
 
 Spiderweb forcing
 ^^^^^^^^^^^^
@@ -147,7 +147,7 @@ In this way, we can obtain a probabilistic estimate of nearshore water levels, w
 The cyclone tracks are generated based on De Maria et al. (2009), taking into account along-track (AT), cross-track (CT), and maximum wind speed (VE) errors.
 For more information, see the `Advanced Tropical Cyclone Toolbox <https://publicwiki.deltares.nl/display/DDB/Advanced+Tropical+Cyclone>`_.
 
-- To run a scenario in ensemble mode, set the keyword *ensemble* to True (see :ref:`Running CoSMoS <running>` and :py:class:`cosmos.cosmos.CoSMoS`).
+- To run a scenario in ensemble mode, set the keyword *ensemble* to True (see :ref:`Running CoSMoS <running>` and :py:class:`cosmos.CoSMoS`).
 - The keyword *track_ensemble_nr_realizations* in the scenario file specifies the number of tracks that need to be generated. CoSMoS starts running in ensemble mode if this keyword is defined.
 - There are two options for meteo ensemble forcing:
 

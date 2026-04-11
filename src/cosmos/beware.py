@@ -18,7 +18,7 @@ from cht_beware.beware import BEWARE
 from cht_utils.fileops import find_replace
 
 from .cosmos import cosmos
-from .cosmos_model import Model
+from .model import Model
 
 
 class CoSMoS_BEWARE(Model):
@@ -35,9 +35,9 @@ class CoSMoS_BEWARE(Model):
 
     See Also
     ----------
-    cosmos.cosmos_scenario.Scenario
-    cosmos.cosmos_model_loop.ModelLoop
-    cosmos.cosmos_model.Model
+    cosmos.scenario.Scenario
+    cosmos.model_loop.ModelLoop
+    cosmos.model.Model
     """
 
     def read_model_specific(self) -> None:
@@ -97,7 +97,7 @@ class CoSMoS_BEWARE(Model):
         # Copy the correct run script to run_job.py
         pth = os.path.dirname(__file__)
         fo.copy_file(
-            os.path.join(pth, "cosmos_run_beware.py"),
+            os.path.join(pth, "run_beware.py"),
             os.path.join(self.job_path, "run_job_2.py"),
         )
 
@@ -272,9 +272,7 @@ class CoSMoS_BEWARE(Model):
                     + str(self.domain.filename[ip])
                     + ".csv.js",
                 )
-                write_csv_js(
-                    file_name, s, "var csv = `date_time,wl,setup,swash,runup"
-                )
+                write_csv_js(file_name, s, "var csv = `date_time,wl,setup,swash,runup")
 
         # output_path = self.cycle_output_path
         # post_path   = self.cycle_post_path

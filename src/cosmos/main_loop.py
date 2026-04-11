@@ -14,17 +14,17 @@ import time
 import numpy as np
 from cht_utils.fileio.yaml import dict2yaml
 
+from .clean_up import clean_up
+from .cloud import Cloud
 from .cosmos import cosmos
-from .cosmos_clean_up import clean_up
-from .cosmos_cloud import Cloud
-from .cosmos_meteo import collect_meteo, download_meteo
-from .cosmos_scenario import Scenario
-from .cosmos_track_ensemble import setup_track_ensemble
-from .cosmos_tsunami import CoSMoS_Tsunami
-from .cosmos_webviewer import WebViewer
+from .meteo import collect_meteo, download_meteo
+from .scenario import Scenario
+from .track_ensemble import setup_track_ensemble
+from .tsunami import CoSMoS_Tsunami
+from .webviewer import WebViewer
 
 try:
-    from .cosmos_argo import Argo
+    from .argo import Argo
 except Exception:
     print("Argo not available")
 
@@ -44,9 +44,9 @@ class MainLoop:
     See Also
     --------
     cosmos.cosmos.CoSMoS
-    cosmos.cosmos_scenario.Scenario
-    cosmos.cosmos_model_loop.ModelLoop
-    cosmos.cosmos_model.Model
+    cosmos.Scenario
+    cosmos.ModelLoop
+    cosmos.Model
     """
 
     def __init__(self) -> None:
@@ -65,8 +65,8 @@ class MainLoop:
 
         See Also
         --------
-        cosmos.cosmos_configuration.Configuration
-        cosmos.cosmos_main_loop.MainLoop.run
+        cosmos.Configuration
+        cosmos.MainLoop.run
         """
 
         # Determines cycle time and runs main loop
@@ -173,11 +173,11 @@ class MainLoop:
 
         See Also
         --------
-        cosmos.cosmos_model.Model.get_nested_models
-        cosmos.cosmos_model.Model.set_paths
-        cosmos.cosmos_meteo.Meteo.download_and_collect_meteo
-        cosmos.cosmos_track_ensemble.setup_track_ensemble
-        cosmos.cosmos_model_loop.ModelLoop.start
+        cosmos.Model.get_nested_models
+        cosmos.Model.set_paths
+        cosmos.meteo.Meteo.download_and_collect_meteo
+        cosmos.track_ensemble.setup_track_ensemble
+        cosmos.ModelLoop.start
         """
 
         # Start by reading all available models, stations, etc.

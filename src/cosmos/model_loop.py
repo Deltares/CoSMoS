@@ -8,11 +8,11 @@ import os
 import sched
 import time
 
+from .cluster import cluster_dict as cluster
 from .cosmos import cosmos
-from .cosmos_cluster import cluster_dict as cluster
 
 try:
-    from .cosmos_argo import Argo
+    from .argo import Argo
 except Exception:
     print("Argo not available")
 import cht_utils.fileops as fo
@@ -32,13 +32,13 @@ class ModelLoop:
 
     See Also
     -------
-    cosmos.cosmos_main_loop.MainLoop
-    cosmos.cosmos_model.Model
-    cosmos.cosmos_beware.CoSMoS_BEWARE
-    cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM
-    cosmos.cosmos_hurrywave.CoSMoS_HurryWave
-    cosmos.cosmos_sfincs.CoSMoS_SFINCS
-    cosmos.cosmos_xbeach.CoSMoS_XBeach
+    cosmos.MainLoop
+    cosmos.Model
+    cosmos.beware.CoSMoS_BEWARE
+    cosmos.delft3dfm.CoSMoS_Delft3DFM
+    cosmos.hurrywave.CoSMoS_HurryWave
+    cosmos.sfincs.CoSMoS_SFINCS
+    cosmos.xbeach.CoSMoS_XBeach
     """
 
     def __init__(self) -> None:
@@ -49,7 +49,7 @@ class ModelLoop:
 
         See Also
         -------
-        cosmos.cosmos_model_loop.ModelLoop.run
+        cosmos.ModelLoop.run
         """
 
         self.status = "running"
@@ -77,10 +77,10 @@ class ModelLoop:
 
         See Also
         -------
-        cosmos.cosmos_sfincs.CoSMoS_SFINCS.move
-        cosmos.cosmos_sfincs.CoSMoS_SFINCS.pre_process
-        cosmos.cosmos_model.Model.submit_job
-        cosmos.cosmos_sfincs.CoSMoS_SFINCS.post_process
+        cosmos.sfincs.CoSMoS_SFINCS.move
+        cosmos.sfincs.CoSMoS_SFINCS.pre_process
+        cosmos.Model.submit_job
+        cosmos.sfincs.CoSMoS_SFINCS.post_process
         """
 
         # First check for finished simulations (returns a list with model objects that just finished)

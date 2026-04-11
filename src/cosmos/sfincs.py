@@ -16,7 +16,7 @@ from cht_nesting import nest1
 from hydromt_sfincs import SfincsModel
 
 from .cosmos import cosmos
-from .cosmos_model import Model
+from .model import Model
 
 
 def _read_sfincs_his(
@@ -54,9 +54,9 @@ class CoSMoS_SFINCS(Model):
 
     See Also
     ----------
-    cosmos.cosmos_scenario.Scenario
-    cosmos.cosmos_model_loop.ModelLoop
-    cosmos.cosmos_model.Model
+    cosmos.scenario.Scenario
+    cosmos.model_loop.ModelLoop
+    cosmos.model.Model
     """
 
     def read_model_specific(self) -> None:
@@ -336,7 +336,7 @@ class CoSMoS_SFINCS(Model):
         pth = os.path.dirname(__file__)
         # Keep calling it run_job_2.py for now, otherwise the cloud workflow will not work
         fo.copy_file(
-            os.path.join(pth, "cosmos_run_sfincs.py"),
+            os.path.join(pth, "run_sfincs.py"),
             os.path.join(self.job_path, "run_job_2.py"),
         )
 

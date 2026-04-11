@@ -30,7 +30,7 @@ generation, and web viewer publication.
 ## Quick start
 
 ```python
-from cosmos.cosmos import cosmos
+from cosmos import cosmos
 
 cosmos.initialize("path/to/run_folder", config_file="config.toml")
 cosmos.run("scenario_name")

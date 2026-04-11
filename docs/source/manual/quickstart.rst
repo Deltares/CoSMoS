@@ -1,56 +1,74 @@
 .. _quickstart:
 
-Quickstart CoSMoS
-------------
+Getting started
+---------------
 
-To setup CoSMoS for your area of interest, you:
+This section walks you through installing CoSMoS and running your first scenario.
 
-**Step 1: Install CoSMoS**
+Step 1: Install CoSMoS
+^^^^^^^^^^^^^^^^^^^^^^
 
-Install CoSMoS on your device (see the README for instructions).
+Clone the repository and install in editable mode::
 
-**Step 2: Make a local copy of the CoSMoS run folder.**
+    git clone https://github.com/Deltares/CoSMoS.git
+    cd CoSMoS
+    pip install -e .
 
-Copy the default folders *run_folder*, *model_database*, and *meteo_database* from your CoSMoS installation folder to the folder where you want to run CoSMoS.
+Step 2: Set up a run folder
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Step 3: Add models to the model database.**
+Copy the default folders ``run_folder``, ``model_database``, and
+``meteo_database`` from the CoSMoS installation to the location where you want
+to run CoSMoS.
 
-:ref:`Add wave and/or flow models <models>` for your domain of interest.
+Step 3: Add models to the model database
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Step 4: Adjust your model executable paths.**
+:ref:`Add wave and/or flow models <models>` for your domain of interest to the
+``model_database`` folder.
 
-In the *configuration* folder, you can find the file :ref:`*config.toml* <configuration>`. 
-Adjust the model executable paths (for the models that you want to be running) to your local installations. 
-Also, make sure to link to the correct *model_database* and *meteo_database* folders.
+Step 4: Configure paths
+^^^^^^^^^^^^^^^^^^^^^^^
 
-**Step 5: Setup a scenario file.**
+Edit ``configuration/config.toml`` (see :ref:`Configuration <configuration>`):
 
-:ref:`Setup a scenario file <scenario>` in which you describe which models of your model database you want to run, 
-for which period, and with which metereological data. 
-For a first CoSMoS run, choose one of the meteorological data options listed in the default *meteo_subsets* file (see :ref:`Meteo <meteo>`).
-You can also add the NOAA-COOPS tide station file (see :ref:`Observation stations <stations>`) to your scenario file to compare observed and computed water levels.
+- Set the model executable paths for the models you want to run.
+- Set the ``model_database`` and ``meteo_database`` paths.
 
-**Step 6: Run CoSMoS.**
+Step 5: Set up a scenario
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Once you have completed Step 1 to 5, you can :ref:`execute a first CoSMoS run <running>`. 
-The output is stored in the scenario folder, and you can view the results of your run in the  webviewer (see :ref:`Output <output>`)
+Create a :ref:`scenario file <scenario>` (``scenarios/<name>/scenario.toml``)
+describing which models to run, for which period, and with which meteorological
+data. For a first run, choose one of the meteorological data options listed in
+the meteo database (see :ref:`Meteo <meteo>`).
 
-Advanced CoSMoS configurations:
-^^^^^^^^^^^^
+You can also add observation stations (see :ref:`Observation stations <stations>`)
+to compare model results with measurements.
+
+Step 6: Run CoSMoS
+^^^^^^^^^^^^^^^^^^^
+
+.. include:: examples/run_cosmos.py
+       :literal:
+
+Once you have completed steps 1 to 5, you can :ref:`execute your first CoSMoS run <running>`.
+Output is stored in the scenario folder and can be viewed in the
+:ref:`web viewer <webviewer>`.
+
+Advanced configuration
+^^^^^^^^^^^^^^^^^^^^^^
 
 **Step 7: Add observation data.**
-
-In addition to the regular NOAA-COOPS tide stations, for which water level data is downloaded automatically from a server, 
-you can :ref:`manually add observation station locations and data <stations>`.
+In addition to NOAA CO-OPS tide stations (downloaded automatically), you can
+:ref:`manually add observation station locations and data <stations>`.
 
 **Step 8: Add meteorological data.**
+There are several options to manually include meteorological data
+(see :ref:`Meteo <meteo>`): regularly gridded forcing, spiderweb files, or
+cyclone track ensembles for probabilistic predictions.
 
-There are several options to manually include meteorological data to force your model(s) (see :ref:`Meteo <meteo>`). 
-You can generate your own regularly gridded meteorological forcing or include a spiderweb file. 
-Alternatively, you can create an ensemble of cyclone tracks to obtain a probabilistic hazard prediction.
-
-**Step 9: Organize your models in a super region file.**
-
-If you have created a large database of models and want to include them efficiently in your scenario file, 
-you can organize the models in a *super region* file (see :ref:`Super regions <super_regions>`). Instead of calling all models in the scenario file, you now call this 
-*super region* file.  
+**Step 9: Organize models in super regions.**
+For large model databases, you can group models into
+:ref:`super region files <super_regions>` and reference them efficiently in your
+scenario file.

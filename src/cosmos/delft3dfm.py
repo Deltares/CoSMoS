@@ -17,7 +17,7 @@ from cht_nesting.cht_nesting import nest1
 from cht_utils.fileops import find_replace
 
 from .cosmos import cosmos
-from .cosmos_model import Model
+from .model import Model
 
 
 class CoSMoS_Delft3DFM(Model):
@@ -35,9 +35,9 @@ class CoSMoS_Delft3DFM(Model):
 
     See Also
     ----------
-    cosmos.cosmos_scenario.Scenario
-    cosmos.cosmos_model_loop.ModelLoop
-    cosmos.cosmos_model.Model
+    cosmos.scenario.Scenario
+    cosmos.model_loop.ModelLoop
+    cosmos.model.Model
     """
 
     def read_model_specific(self) -> None:
@@ -253,7 +253,7 @@ class CoSMoS_Delft3DFM(Model):
         # Copy the correct run script to run_job.py
         pth = os.path.dirname(__file__)
         fo.copy_file(
-            os.path.join(pth, "cosmos_run_delft3dfm.py"),
+            os.path.join(pth, "run_delft3dfm.py"),
             os.path.join(self.job_path, "run_job_2.py"),
         )
 
@@ -409,9 +409,7 @@ class CoSMoS_Delft3DFM(Model):
                         float_format="%.3f",
                         header=False,
                     )
-                    write_csv_js(
-                        csv_file, s, "var csv = `date_time,wl"
-                    )
+                    write_csv_js(csv_file, s, "var csv = `date_time,wl")
 
         # Extract waves
         if self.wave:
@@ -435,6 +433,4 @@ class CoSMoS_Delft3DFM(Model):
                             float_format="%.3f",
                             header=False,
                         )
-                        write_csv_js(
-                            csv_file, s, "var csv = `date_time,hm0,tp"
-                        )
+                        write_csv_js(csv_file, s, "var csv = `date_time,hm0,tp")

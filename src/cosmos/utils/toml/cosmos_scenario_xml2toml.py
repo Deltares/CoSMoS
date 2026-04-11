@@ -2,8 +2,8 @@
 
 import os
 
-import cht_utils.fileops as fo
 import cht_utils.fileio.xml as xml
+import cht_utils.fileops as fo
 import toml
 
 scenario_database_path = r"p:\11206085-onr-fhics\03_cosmos\scenarios"

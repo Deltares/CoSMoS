@@ -20,9 +20,9 @@ from cht_utils.fileio.yaml import dict2yaml
 from pyproj import CRS, Transformer
 from scipy import interpolate
 
+from .cluster import cluster_dict as cluster
 from .cosmos import cosmos
-from .cosmos_cluster import cluster_dict as cluster
-from .cosmos_stations import read_station_set
+from .stations import read_station_set
 
 
 class Model:
@@ -90,8 +90,8 @@ class Model:
 
         See Also
         --------
-        cosmos.cosmos_scenario.Scenario
-        cosmos.cosmos_model_loop.ModelLoop
+        cosmos.Scenario
+        cosmos.ModelLoop
         """
 
         mdl_dict = toml.load(self.file_name)
@@ -695,7 +695,7 @@ class Model:
 
         See Also
         --------
-        cosmos.cosmos_main_loop.MainLoop
+        cosmos.MainLoop
         """
         # First model and restart folders if necessary
 

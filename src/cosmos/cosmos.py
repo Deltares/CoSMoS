@@ -30,13 +30,13 @@ class CoSMoS:
 
     See Also
     -------
-    cosmos.cosmos_main_loop.MainLoop
-    cosmos.cosmos_model.Model
-    cosmos.cosmos_beware.CoSMoS_BEWARE
-    cosmos.cosmos_delft3dfm.CoSMoS_Delft3DFM
-    cosmos.cosmos_hurrywave.CoSMoS_HurryWave
-    cosmos.cosmos_sfincs.CoSMoS_SFINCS
-    cosmos.cosmos_xbeach.CoSMoS_XBeach
+    cosmos.MainLoop
+    cosmos.Model
+    cosmos.beware.CoSMoS_BEWARE
+    cosmos.delft3dfm.CoSMoS_Delft3DFM
+    cosmos.hurrywave.CoSMoS_HurryWave
+    cosmos.sfincs.CoSMoS_SFINCS
+    cosmos.xbeach.CoSMoS_XBeach
 
     """
 
@@ -56,10 +56,10 @@ class CoSMoS:
 
         See Also
         -------
-        cosmos.cosmos_configuration.Configuration
+        cosmos.Configuration
 
         """
-        from .cosmos_configuration import Configuration
+        from .configuration import Configuration
 
         self.config = Configuration()
 
@@ -91,9 +91,9 @@ class CoSMoS:
 
         See Also
         -------
-        cosmos.cosmos_main_loop.MainLoop
-        cosmos.cosmos_model_loop.ModelLoop
-        cosmos.cosmos_webviewer.WebViewer
+        cosmos.MainLoop
+        cosmos.ModelLoop
+        cosmos.webviewer.WebViewer
 
         """
 
@@ -118,8 +118,8 @@ class CoSMoS:
             )
             return
 
-        from .cosmos_main_loop import MainLoop
-        from .cosmos_model_loop import ModelLoop
+        from .main_loop import MainLoop
+        from .model_loop import ModelLoop
 
         self.main_loop = MainLoop()
         self.model_loop = ModelLoop()
@@ -177,9 +177,9 @@ class CoSMoS:
 
         See Also
         -------
-        cosmos.cosmos_main_loop.MainLoop
-        cosmos.cosmos_model_loop.ModelLoop
-        cosmos.cosmos_webviewer.WebViewer
+        cosmos.MainLoop
+        cosmos.ModelLoop
+        cosmos.webviewer.WebViewer
 
         """
 
@@ -191,7 +191,7 @@ class CoSMoS:
         # self.config.run.run_models = False
         # self.run(scenario_name, cycle = cycle)
 
-        # from .cosmos_webviewer import WebViewer
+        # from .webviewer import WebViewer
 
         # wv = WebViewer(cosmos.config.webviewer.name)
         # wv.make()
@@ -236,14 +236,14 @@ class CoSMoS:
 
         See Also
         -------
-        cosmos.cosmos_main_loop.MainLoop
-        cosmos.cosmos_model_loop.ModelLoop
-        cosmos.cosmos_webviewer.WebViewer
+        cosmos.MainLoop
+        cosmos.ModelLoop
+        cosmos.webviewer.WebViewer
 
         """
-        from .cosmos_cloud import Cloud
-        from .cosmos_scenario import Scenario
-        from .cosmos_webviewer import WebViewer
+        from .cloud import Cloud
+        from .scenario import Scenario
+        from .webviewer import WebViewer
 
         self.cloud = Cloud()
 
@@ -272,8 +272,8 @@ class CoSMoS:
 
         See Also
         -------
-        cosmos.cosmos_main_loop.MainLoop
-        cosmos.cosmos_model_loop.ModelLoop
+        cosmos.MainLoop
+        cosmos.ModelLoop
 
         """
 

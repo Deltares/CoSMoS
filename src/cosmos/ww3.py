@@ -10,7 +10,7 @@ import shutil
 import cht_utils.fileio.xml as xml
 
 from .cosmos import cosmos
-from .cosmos_model import Model
+from .model import Model
 
 
 class CoSMoS_WW3(Model):

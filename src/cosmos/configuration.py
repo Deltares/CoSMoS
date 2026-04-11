@@ -10,9 +10,9 @@ import os
 import cht_utils.fileops as fo
 import toml
 
-from .cosmos_color_maps import read_color_maps
-from .cosmos_meteo import read_meteo_database
-from .cosmos_stations import Stations
+from .color_maps import read_color_maps
+from .meteo import read_meteo_database
+from .stations import Stations
 
 
 class Path:

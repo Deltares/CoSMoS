@@ -15,8 +15,8 @@ import xarray as xr
 from cht_xbeach.xbeach import XBeach
 from cht_xbeach.xbeach_output_morphology import Map
 
-from cosmos.cosmos import cosmos
-from cosmos.cosmos_model import Model
+from .cosmos import cosmos
+from .model import Model
 
 
 class CoSMoS_XBeach(Model):
@@ -34,9 +34,9 @@ class CoSMoS_XBeach(Model):
 
     See Also
     ----------
-    cosmos.cosmos_scenario.Scenario
-    cosmos.cosmos_model_loop.ModelLoop
-    cosmos.cosmos_model.Model
+    cosmos.scenario.Scenario
+    cosmos.model_loop.ModelLoop
+    cosmos.model.Model
     """
 
     def read_model_specific(self) -> None:
@@ -145,7 +145,7 @@ class CoSMoS_XBeach(Model):
         # Copy the correct run script to run_job.py
         pth = os.path.dirname(__file__)
         fo.copy_file(
-            os.path.join(pth, "cosmos_run_xbeach.py"),
+            os.path.join(pth, "run_xbeach.py"),
             os.path.join(self.job_path, "run_job_2.py"),
         )
 

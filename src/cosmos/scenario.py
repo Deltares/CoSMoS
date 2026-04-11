@@ -8,8 +8,8 @@ import os
 
 import toml
 
+from .cluster import Cluster, cluster_dict
 from .cosmos import cosmos
-from .cosmos_cluster import Cluster, cluster_dict
 
 
 class Scenario:
@@ -17,9 +17,9 @@ class Scenario:
 
     See Also
     ----------
-    cosmos.cosmos_main_loop.MainLoop
-    cosmos.cosmos_model_loop.ModelLoop
-    cosmos.cosmos_model.Model
+    cosmos.MainLoop
+    cosmos.ModelLoop
+    cosmos.Model
 
     """
 
@@ -164,33 +164,33 @@ class Scenario:
 
             # Initialize models
             if tp.lower() == "ww3":
-                from cosmos.cosmos_ww3 import CoSMoS_WW3
+                from cosmos.ww3 import CoSMoS_WW3
 
                 model = CoSMoS_WW3()
                 model.wave = True
             elif tp.lower() == "hurrywave":
-                from cosmos.cosmos_hurrywave import CoSMoS_HurryWave
+                from cosmos.hurrywave import CoSMoS_HurryWave
 
                 model = CoSMoS_HurryWave()
                 model.wave = True
             elif tp.lower() == "sfincs":
-                from cosmos.cosmos_sfincs import CoSMoS_SFINCS
+                from cosmos.sfincs import CoSMoS_SFINCS
 
                 model = CoSMoS_SFINCS()
                 model.flow = True
             elif tp.lower() == "delft3dfm":
-                from cosmos.cosmos_delft3dfm import CoSMoS_Delft3DFM
+                from cosmos.delft3dfm import CoSMoS_Delft3DFM
 
                 model = CoSMoS_Delft3DFM()
                 model.flow = True
             elif tp.lower() == "xbeach":
-                from cosmos.cosmos_xbeach import CoSMoS_XBeach
+                from cosmos.xbeach import CoSMoS_XBeach
 
                 model = CoSMoS_XBeach()
                 model.wave = True
                 model.flow = True
             elif tp.lower() == "beware":
-                from cosmos.cosmos_beware import CoSMoS_BEWARE
+                from cosmos.beware import CoSMoS_BEWARE
 
                 model = CoSMoS_BEWARE()
                 model.wave = True

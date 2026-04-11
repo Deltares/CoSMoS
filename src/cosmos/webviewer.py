@@ -11,19 +11,19 @@ import shutil
 import time
 
 import cht_utils.fileops as fo
-from cht_utils.fileio.json_js import read_json_js, write_json_js, write_csv_js
-from cht_utils.fileops import find_replace
 import numpy as np
 import pandas as pd
 from cht_meteo import MeteoDataset
 from cht_tide.tide_stations import TideStationsDataset
+from cht_utils.fileio.json_js import read_json_js, write_csv_js, write_json_js
 from cht_utils.fileio.yaml import dict2yaml
+from cht_utils.fileops import find_replace
 from geojson import Feature, FeatureCollection, Point
 from pyproj import CRS, Transformer
 from scipy import interpolate
 
+from .argo import Argo
 from .cosmos import cosmos
-from .cosmos_argo import Argo
 
 
 class WebViewer:
@@ -239,9 +239,7 @@ class WebViewer:
         # Write map variables to file
         cosmos.log("Writing variables ...")
         mv_file = os.path.join(self.cycle_path, "variables.js")
-        write_json_js(
-            mv_file, self.map_variables, "var map_variables ="
-        )
+        write_json_js(mv_file, self.map_variables, "var map_variables =")
 
         # Update scenario.js
         self.update_scenarios_js()
@@ -373,9 +371,7 @@ class WebViewer:
         if features:
             feature_collection = FeatureCollection(features)
             stations_file = os.path.join(self.cycle_path, "xbeach.geojson.js")
-            write_json_js(
-                stations_file, feature_collection, "var xb_markers ="
-            )
+            write_json_js(stations_file, feature_collection, "var xb_markers =")
 
     def make_meteo_maps(self) -> None:
 
@@ -551,9 +547,7 @@ class WebViewer:
             output_path_regime = os.path.join(output_path, "sallenger\\")
             fo.mkdir(output_path_regime)
             file_name = os.path.join(output_path_regime, "sallenger.geojson.js")
-            write_json_js(
-                file_name, feature_collection, "var regimes ="
-            )
+            write_json_js(file_name, feature_collection, "var regimes =")
 
             dct = {}
             dct["name"] = "sallenger"
@@ -588,9 +582,7 @@ class WebViewer:
             output_path_regime = os.path.join(output_path, "erosionregimes\\")
             fo.mkdir(output_path_regime)
             file_name = os.path.join(output_path_regime, "erosionregimes.geojson.js")
-            write_json_js(
-                file_name, feature_collection_ero, "var regimes ="
-            )
+            write_json_js(file_name, feature_collection_ero, "var regimes =")
 
             dct = {}
             dct["name"] = "erosion_regimes"
@@ -664,9 +656,7 @@ class WebViewer:
                             file_name = os.path.join(
                                 output_path_runup, "extreme_runup_height.geojson.js"
                             )
-                            write_json_js(
-                                file_name, feature_collection, "var runup ="
-                            )
+                            write_json_js(file_name, feature_collection, "var runup =")
 
                         dct = {}
                         dct["name"] = "extreme_runup_height"
@@ -796,9 +786,7 @@ class WebViewer:
                                 output_path_waves,
                                 "extreme_sea_level_and_wave_height.geojson.js",
                             )
-                            write_json_js(
-                                file_name, feature_collection, "var swl ="
-                            )
+                            write_json_js(file_name, feature_collection, "var swl =")
 
                         dct = {}
                         dct["name"] = "extreme_sea_level_and_wave_height"
@@ -966,9 +954,7 @@ class WebViewer:
                 file_name = os.path.join(
                     output_path, "estimated_total_water_level.geojson.js"
                 )
-                write_json_js(
-                    file_name, feature_collection, "var etwl ="
-                )
+                write_json_js(file_name, feature_collection, "var etwl =")
 
                 dct = {}
                 dct["name"] = "estimated_total_water_level"
@@ -1198,9 +1184,7 @@ class WebViewer:
         if features and station_file is not None:
             feature_collection = FeatureCollection(features)
             buoys_file = os.path.join(self.cycle_path, station_file)
-            write_json_js(
-                buoys_file, feature_collection, "var " + station_var + " ="
-            )
+            write_json_js(buoys_file, feature_collection, "var " + station_var + " =")
 
     def update_scenarios_js(self, other_js_source: str = None) -> None:
         # Check if there is a scenarios.js file

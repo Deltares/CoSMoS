@@ -16,7 +16,7 @@ from cht_nesting import nest1
 from hydromt_hurrywave import HurrywaveModel
 
 from .cosmos import cosmos
-from .cosmos_model import Model
+from .model import Model
 
 
 def _read_hurrywave_his(file_name: str, parameter: str = "point_hm0") -> "pd.DataFrame":
@@ -59,9 +59,9 @@ class CoSMoS_HurryWave(Model):
 
     See Also
     ----------
-    cosmos.cosmos_scenario.Scenario
-    cosmos.cosmos_model_loop.ModelLoop
-    cosmos.cosmos_model.Model
+    cosmos.scenario.Scenario
+    cosmos.model_loop.ModelLoop
+    cosmos.model.Model
     """
 
     def read_model_specific(self) -> None:
@@ -229,7 +229,7 @@ class CoSMoS_HurryWave(Model):
         # Copy the correct run script to run_job.py
         pth = os.path.dirname(__file__)
         fo.copy_file(
-            os.path.join(pth, "cosmos_run_hurrywave.py"),
+            os.path.join(pth, "run_hurrywave.py"),
             os.path.join(self.job_path, "run_job_2.py"),
         )
 
