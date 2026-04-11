@@ -103,14 +103,17 @@ class ModelLoop:
                     )
                 # Moving files to input, output and restart folders
                 cosmos.log("Moving model " + model.long_name)
-                # First make folders
-                fo.mkdir(model.cycle_input_path)
-                fo.mkdir(model.cycle_output_path)
-                # fo.mkdir(model.cycle_figures_path)
-                fo.mkdir(model.cycle_post_path)
-                # Call model specific move function (this will move new restart files to restart folder, inputs to input folder, and outputs to output folder)
-                model.move()
-                model.status = "simulation_finished"
+                try:
+                    fo.mkdir(model.cycle_input_path)
+                    fo.mkdir(model.cycle_output_path)
+                    fo.mkdir(model.cycle_post_path)
+                    model.move()
+                    model.status = "simulation_finished"
+                except Exception as e:
+                    cosmos.log(
+                        f"ERROR: Failed to move output for model {model.name}: {e}"
+                    )
+                    model.status = "failed"
 
         # Now prepare new models ready to run (returns a list with model objects that are ready to run)
         waiting_list = update_waiting_list()
@@ -119,22 +122,27 @@ class ModelLoop:
         for model in waiting_list:
             cosmos.log("Pre-processing " + model.long_name + " ...")
 
-            # Make job path and copy inputs
-            fo.rmdir(model.job_path)
-            fo.mkdir(model.job_path)
-            # Also make restart paths in scenario folder
-            fo.mkdir(model.restart_flow_path)
-            fo.mkdir(model.restart_wave_path)
+            try:
+                # Make job path and copy inputs
+                fo.rmdir(model.job_path)
+                fo.mkdir(model.job_path)
+                # Also make restart paths in scenario folder
+                fo.mkdir(model.restart_flow_path)
+                fo.mkdir(model.restart_wave_path)
 
-            # Copy base inputs to job folder
-            src = os.path.join(model.path, "input", "*")
-            fo.copy_file(src, model.job_path)
+                # Copy base inputs to job folder
+                src = os.path.join(model.path, "input", "*")
+                fo.copy_file(src, model.job_path)
 
-            # Do some pre-processing (meteo and nesting step 1)
-            model.pre_process()  # Adjust model input (this happens in model.job_path)
+                # Do some pre-processing (meteo and nesting step 1)
+                model.pre_process()
 
-            # And submit the job
-            model.submit_job()
+                # And submit the job
+                model.submit_job()
+
+            except Exception as e:
+                cosmos.log(f"ERROR: Pre-processing failed for model {model.name}: {e}")
+                model.status = "failed"
 
         # Now do post-processing on simulations that were finished
         for model in finished_list:

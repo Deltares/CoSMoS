@@ -1,193 +1,236 @@
 .. _scenario:
 
-Setting up a scenario
-------------
+Scenario configuration
+----------------------
 
-A scenario file is a simple toml-structured text file that defines which models you want to run, for which hindcast or forecast period, and with which data sources.
+A scenario file defines which models to run, the simulation period, and the
+meteorological forcing to apply. It is a TOML-formatted text file located at
+``scenarios/<scenario_name>/scenario.toml``. The scenario name is derived from
+the folder name (see :ref:`Folder structure <folder_structure>`).
 
-Below, two examples of scenario files are given. The first is a deterministic simulation of hurricane Laura, the second an ensemble run for hurricane Maria.
+Below are two examples: a deterministic simulation of Hurricane Laura and an
+ensemble run for Hurricane Maria.
 
 .. include:: examples/scenario.toml
-       :literal: 
+       :literal:
 
 .. include:: examples/scenario2.toml
-       :literal: 
+       :literal:
 
-The scenario file must always be named *scenario.toml*. CoSMoS assigns the scenario *name* based on the folder name 
-(see also :ref:`Folder structure <folder_structure>`).
-
-The following settings can be included in the scenario file:
+General settings
+^^^^^^^^^^^^^^^^
 
 .. list-table::
-   :widths: 30 70 30 30
+   :widths: 25 55 10 10
    :header-rows: 1
 
-   * - general settings
-     - description
-     - default setting
-     - unit
+   * - Parameter
+     - Description
+     - Default
+     - Unit
 
    * - long_name
-     - Long name as displayed in the webviewer.
+     - Display name shown in the web viewer.
      - name
-     - 
+     -
+
+   * - description
+     - Textual description of the scenario.
+     - name
+     -
 
    * - cycle
-     - Cycle start time.
+     - Starting cycle time (e.g. ``"20231213_00z"``). If omitted, CoSMoS
+       determines the cycle automatically.
      -
      -
 
    * - runtime
-     - Cycle run time.
+     - Simulation duration.
      -
-     -
-
-   * - description
-     - Long description of the scenario.
-     - name
-     -
+     - hours
 
    * - runinterval
-     - If ran in forecast mode: interval between forecast predictions.
+     - Interval between forecast cycles (forecast mode only).
      -
-     -
+     - hours
 
    * - track_ensemble_nr_realizations
-     - If ran in ensemble mode: number of cyclone tracks to be generated.
+     - Number of synthetic cyclone tracks for ensemble mode. Setting this
+       value enables ensemble mode.
      - 0
      -
 
-   * - **webviewer settings**
-     - **description**
-     - **default setting**
-     - **unit**
+Web viewer settings
+^^^^^^^^^^^^^^^^^^^
+
+.. list-table::
+   :widths: 25 55 10 10
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+     - Default
+     - Unit
 
    * - lon, lat
-     - Longitude and latitude of area of interest (used in webviewer).
+     - Initial map centre coordinates for the web viewer.
      - 0, 0
-     - degree
+     - degrees
 
    * - zoom
-     - Zoom level for webviewer.
+     - Initial map zoom level.
      - 10
      -
 
    * - observations_path
-     - Optional path to local observations of waves and water levels.
+     - Path to local observation data (water levels and waves).
      - None
      -
 
-   * - **General model settings**
-     - **Can be overwritten by model-specific settings.**
-     - **default setting**
-     - **unit**
+Meteorological forcing
+^^^^^^^^^^^^^^^^^^^^^^
+
+These settings apply to all models in the scenario unless overridden per model.
+See :ref:`Meteorological forcing <meteo>` for details.
+
+.. list-table::
+   :widths: 25 55 10 10
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+     - Default
+     - Unit
 
    * - meteo_dataset
-     - Meteo dataset to use from meteo_database\\meteo_database.toml (see :ref:`Meteo <meteo>`).
+     - Gridded dataset name from ``meteo_database.toml``.
      - None
      -
 
    * - meteo_spiderweb
-     - Meteo spiderweb to use from meteo_database\\spiderwebs (see :ref:`Meteo <meteo>`).
+     - Spiderweb file name (without extension) from ``spiderwebs`` folder.
      - None
      -
 
    * - meteo_track
-     - Meteo track file (.cyc) to use from meteo_database\\tracks (see :ref:`Meteo <meteo>`).
+     - Cyclone track file (``.cyc``) from ``tracks`` folder.
      - None
      -
 
    * - wind
-     - Wind forcing.
-     - True
+     - Enable wind forcing.
+     - true
      -
 
-   * - atmospheric pressure
-     - Atmospheric pressure.
-     - True
+   * - atmospheric_pressure
+     - Enable atmospheric pressure forcing.
+     - true
      -
 
    * - precipitation
-     - Precipitation.
-     - True
+     - Enable precipitation forcing.
+     - true
      -
 
    * - make_flood_map
-     - Make flood maps. 
-     - False
+     - Generate flood map tiles for all applicable models.
+     - false
      -
 
    * - make_wave_map
-     - Make wave maps.
-     - False
+     - Generate wave map tiles for all applicable models.
+     - false
      -
 
-   * - **[[model]]**
-     - **Model-specific settings** (overwrite general model settings)
-     - **default setting**
-     - **unit**
+Model selection
+^^^^^^^^^^^^^^^
+
+Models are added to the scenario using ``[[model]]`` sections. Each section
+can specify an individual model by name, or select multiple models by region
+or super region.
+
+.. list-table::
+   :widths: 25 55 10 10
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+     - Default
+     - Unit
 
    * - name
-     - Model name as specified in the model folder.
+     - Name of an individual model (must match a folder in the model database).
      -
      -
 
    * - region
-     - Instead of model name: region for which all models are run (with same settings). When using the keyword *region* to add models, you must specify the model *type* as indicated in the example scenario file.
-     - 
-     - 
+     - Select all models in a given region. Requires ``type`` to be specified.
+     -
+     -
 
    * - super_region
-     - Instead of model name: super region for which all models are run (with same settings) (see :ref:`Super regions <super_regions>`). When using the keyword *super_region* to add models, you must specify the model *type* as indicated in the example scenario file.
+     - Select all models in a super region (see
+       :ref:`Regions and super regions <super_regions>`). Requires ``type``.
      -
      -
 
    * - type
-     - Model type (optional): delft3dfm, sfincs, beware, hurrywave
+     - Model type filter: ``sfincs``, ``hurrywave``, ``delft3dfm``, ``xbeach``,
+       ``beware``.
      -
      -
 
-   * - **[[cluster]]**
-     - **Settings to selectively run models depending on other model output.**
-     - **default setting**
-     - **unit**
+Per-model ``meteo_dataset``, ``meteo_spiderweb``, and ``meteo_track`` settings
+can be specified within a ``[[model]]`` section to override the scenario-level
+defaults.
+
+Model clustering
+^^^^^^^^^^^^^^^^
+
+Clusters allow selective execution of models based on boundary water level
+conditions. They are defined using ``[[cluster]]`` sections.
+
+.. list-table::
+   :widths: 25 55 10 10
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+     - Default
+     - Unit
 
    * - name
-     - Name of model cluster.
+     - Cluster identifier.
      -
      -
 
    * - super_region
-     - Super region of models to cluster.
+     - Super region whose models are included in this cluster.
      -
      -
 
    * - type
-     - Which type of models to cluster.
+     - Model type(s) to cluster.
      -
      -
 
    * - run_condition
-     - How to select models within cluster to run conditionally. Option: "topn"
-     - "topn"
+     - Selection strategy. Currently supported: ``"topn"``.
+     - topn
      -
-     
+
    * - topn
-     - Top x number of models to run per cluster
+     - Maximum number of models to run within the cluster.
      - 10
      -
 
    * - hm0fac
-     - Factor of Hm0 to add to TWL component. 
+     - Wave height factor added to the total water level estimate.
      - 0.2
      -
 
    * - boundary_twl_margin
-     - Boundary TWL margin for clustering models.
+     - Margin applied to the boundary total water level threshold.
      - 0.0
-     -
-
-
-
-
-
+     - m

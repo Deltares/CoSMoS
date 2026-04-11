@@ -1,158 +1,183 @@
 .. _meteo:
 
-Meteo collection
-------------
-CoSMoS automatically downloads, collects and writes meteorological data for each model based on user-defined settings in the :ref:`scenario file <scenario>`. 
-The path to your meteo database must be specified in the :ref:`*config.toml* <configuration>` file. An example of a meteo folder structure is given below:
+Meteorological forcing
+----------------------
+
+CoSMoS automatically downloads, collects, and writes meteorological forcing
+data for each model based on the settings in the
+:ref:`scenario file <scenario>`. The path to the meteorological database is
+specified in the :ref:`configuration file <configuration>`.
+
+An example of the meteo database folder structure:
 
 .. include:: examples/meteo_folder.txt
-       :literal: 
+       :literal:
 
-This example meteo folders shows the three main types of meteo data:
+Three types of meteorological forcing are supported:
 
-- **Regularly gridded meteo data** (keyword: *meteo_dataset* in scenario file). The *gfs_forecast_0p25_north_atlantic* and *gfs_anl_0p50_north_atlantic* folders are examples of regularly gridded meteo data.
-- **Spiderweb grid meteo data** (keyword: *meteo_spiderweb* in scenario file). The *irma.spw* file in the folder *spiderwebs* is an example of spiderweb forcing.
-- **Ensemble of tracks** (keyword: *meteo_track* in scenario file). The *irma.cyc* file in the folder *tracks* is an example of cyclone file. 
+- **Gridded meteorological data** (scenario keyword: ``meteo_dataset``).
+  Regularly spaced wind, pressure, and precipitation fields stored as NetCDF
+  files.
+- **Spiderweb forcing** (scenario keyword: ``meteo_spiderweb``). Cyclone-centred
+  wind and pressure fields on a polar grid.
+- **Track ensemble** (scenario keyword: ``meteo_track``). A cyclone track file
+  from which CoSMoS generates an ensemble of synthetic tracks for probabilistic
+  predictions.
 
-Metadata for the *meteo_datasets*, *spiderweb*, and *track* files are contained in the *meteo_database.toml* file:
+Metadata for all data sources is stored in ``meteo_database.toml``:
 
 .. include:: examples/meteo_database.toml
        :literal:
 
-The following attributes can be included in the meteo datasets:
+Dataset attributes
+^^^^^^^^^^^^^^^^^^
 
 .. list-table::
-   :widths: 30 70 30 30
-   :header-rows: 0
-
-   * - name
-     - Name of the meteo dataset
-     - default setting
-     - unit
-
-   * - source
-     - Source of meteo dataset. Options: gfs_anl_0p50, gfs_forecast_0p25, coamps_analysis, coamps_tc_hindcast, coamps_tc_forecast, alternative
-     -
-     - 
-
-   * - x_range, y_range
-     - Optional: X and Y range for which meteo data needs to be downloaded / collected (in EPSG 4326).
-     - None
-     - Degree
-
-   * - xystride
-     - Optional: Reduce the resolution of the meteo dataset by a factor xystride.
-     - 1
-     - 
-
-
-
-Regularly gridded meteo data
-^^^^^^^^^^^^
-
-Regularly gridded meteorological datasets contain *netcdf* files with the following information:
-
-.. list-table::
-   :widths: 30 70 30 30
+   :widths: 25 55 10 10
    :header-rows: 1
 
-   * - parameter
-     - description
-     - dimensions
-     - unit
+   * - Attribute
+     - Description
+     - Default
+     - Unit
+
+   * - name
+     - Dataset identifier.
+     -
+     -
+
+   * - source
+     - Data source. Options: ``gfs_anl_0p50``, ``gfs_forecast_0p25``,
+       ``coamps_analysis``, ``coamps_tc_hindcast``, ``coamps_tc_forecast``,
+       ``alternative``.
+     -
+     -
+
+   * - x_range, y_range
+     - Geographic extent for download and collection (EPSG 4326).
+     - None
+     - degrees
+
+   * - xystride
+     - Sub-sampling factor to reduce dataset resolution.
+     - 1
+     -
+
+Gridded meteorological data
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Gridded datasets consist of NetCDF files containing the following variables:
+
+.. list-table::
+   :widths: 25 45 15 15
+   :header-rows: 1
+
+   * - Variable
+     - Description
+     - Dimensions
+     - Unit
 
    * - lat
-     - Latitude
+     - Latitude.
      - lat
-     - degree
+     - degrees
 
    * - lon
-     - Longitude
+     - Longitude.
      - lon
-     - degree
+     - degrees
 
    * - wind_u
-     - Wind speed in x direction
+     - Eastward wind component.
      - [lon, lat]
      - m/s
-    
 
    * - wind_v
-     - Wind speed in y direction
+     - Northward wind component.
      - [lon, lat]
      - m/s
 
    * - barometric_pressure
-     - Barometric pressure
+     - Sea-level pressure.
      - [lon, lat]
      - Pa
 
    * - precipitation
-     - Precipitation
+     - Precipitation rate.
      - [lon, lat]
      - mm/hr
 
-The netcdf files must be named as follows:
+NetCDF files must follow the naming convention:
+``<dataset_name>.<yyyymmdd_hhmm>.nc``. For forecast datasets, the files are
+organised in sub-folders named by cycle time.
 
-<dataset_name>.<yyyymmdd_hhmm>.nc. 
+CoSMoS processes meteorological data in two stages:
 
-For forecasts, the netcdf files are contained in a folder with the cycle time name (see meteo folder structure above).   
+1. **Download** — if ``download_meteo`` is enabled in the
+   :ref:`configuration <configuration>`, data is fetched from a remote server.
+   The following datasets can be downloaded automatically:
 
-CoSMoS gets the meteo data in two steps:
-
-- Download
-    If the keyword *get_meteo* is set to True (see :py:class:`cosmos.CoSMoS`), meteo data are downloaded from a webserver. The following datasets can be downloaded automatically:
-    
    .. list-table::
       :widths: 30 70
       :header-rows: 1
-      
-      * - dataset
-        - description
+
+      * - Dataset
+        - Description
 
       * - gfs_anl_0p50
-        - Global Forecast System (GFS) analysis
+        - Global Forecast System (GFS) analysis (0.50° resolution).
 
       * - gfs_forecast_0p25
-        - Global Forecast System (GFS) forecast
+        - Global Forecast System (GFS) forecast (0.25° resolution).
 
       * - coamps_analysis
-        - Coupled Ocean/Atmosphere Mesoscale Prediction System (COAMPS) analysis
+        - COAMPS analysis fields.
 
       * - coamps_tc_hindcast
-        - Coupled Ocean/Atmosphere Mesoscale Prediction System (COAMPS) tropical cyclone hindcast
+        - COAMPS tropical cyclone hindcast.
 
       * - coamps_tc_forecast
-        - Coupled Ocean/Atmosphere Mesoscale Prediction System (COAMPS) tropical cyclone hindcast
+        - COAMPS tropical cyclone forecast.
 
-- Collect
-    CoSMoS loops through the *meteo_database.toml* data and finds datasets that match the *meteo_dataset* specified in the scenario file. 
-    For each *meteo_dataset*, CoSMoS collects the data from the netcdf files that are located in the specific meteo folder. 
-    The individual CoSMoS model classes then write the meteo input files.
+2. **Collect** — CoSMoS reads the downloaded NetCDF files for each dataset
+   referenced in the scenario and passes the data to the model-specific classes,
+   which write the forcing files in the format required by each model.
 
 Spiderweb forcing
-^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^
 
-For cyclone forecasting, spiderweb grids are commonly used. 
-Spiderwebs are circular grids, for which each time in the time series of space varying wind and pressure (and potentially precipitation) 
-the position of the cyclone eye must be given. For more information, see also the `Tropical Cyclone Toolbox <https://publicwiki.deltares.nl/display/DDB/Tropical+Cyclone>`_ and the `Delft3D-FLOW manual <https://oss.deltares.nl/web/delft3d/manuals>`_.  
+Spiderweb files provide cyclone wind and pressure fields on a moving polar grid
+centred on the storm eye. They are commonly used for tropical cyclone
+forecasting. For details on the file format, see the
+`Tropical Cyclone Toolbox documentation
+<https://publicwiki.deltares.nl/display/DDB/Tropical+Cyclone>`_.
 
-When using a single spiderweb as forcing, use the keyword: *<meteo_spiderweb>* in the scenario file, 
-indicating the name of the spiderweb (without extension) that is located in the *spiderwebs* folder of your meteo database.
+To use a spiderweb file, set the ``meteo_spiderweb`` keyword in the scenario
+file to the file name (without extension) located in the ``spiderwebs`` folder
+of the meteo database.
 
 Track ensemble
-^^^^^^^^^^^^
-To include track uncertainties in cyclone forecasting, CoSMoS can also generate an ensemble of tracks. 
-In this way, we can obtain a probabilistic estimate of nearshore water levels, waves, and inundation. 
-The cyclone tracks are generated based on De Maria et al. (2009), taking into account along-track (AT), cross-track (CT), and maximum wind speed (VE) errors.
-For more information, see the `Advanced Tropical Cyclone Toolbox <https://publicwiki.deltares.nl/display/DDB/Advanced+Tropical+Cyclone>`_.
+^^^^^^^^^^^^^^
 
-- To run a scenario in ensemble mode, set the keyword *ensemble* to True (see :ref:`Running CoSMoS <running>` and :py:class:`cosmos.CoSMoS`).
-- The keyword *track_ensemble_nr_realizations* in the scenario file specifies the number of tracks that need to be generated. CoSMoS starts running in ensemble mode if this keyword is defined.
-- There are two options for meteo ensemble forcing:
+CoSMoS can generate an ensemble of synthetic tropical cyclone tracks to produce
+probabilistic estimates of storm surge, waves, and inundation. Track
+perturbations follow the methodology of DeMaria et al. (2009), accounting for
+along-track, cross-track, and maximum wind speed errors. Error statistics can
+be configured in the :ref:`[track_ensemble] <configuration>` section of the
+configuration file.
 
-  - The keyword *meteo_dataset* is defined in the scenario file: a cyclone track is estimated from regularly gridded wind field data. This track is then used to generate an ensemble of tracks.
-  - The keyword *meteo_track* is defined in the scenario file: a track ensemble is generated based on this best track file.
+To enable ensemble mode:
 
-CoSMoS determines which models to run in ensemble mode based on the cone of the generated tracks. All models that lie within this cone are run for the track ensemble.
+- Set ``track_ensemble_nr_realizations`` in the scenario file to the desired
+  number of realisations. CoSMoS enables ensemble mode automatically when this
+  keyword is present.
+- Provide the meteorological source:
 
+  - ``meteo_dataset`` — CoSMoS extracts a cyclone track from the gridded wind
+    fields and generates an ensemble from it.
+  - ``meteo_track`` — CoSMoS generates an ensemble directly from the provided
+    best-track file.
+
+CoSMoS determines which models to run in ensemble mode based on the geographic
+extent of the generated track cone. Only models whose domain intersects the
+cone are included in the ensemble.

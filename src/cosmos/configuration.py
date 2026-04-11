@@ -314,13 +314,30 @@ class Configuration:
 
     def read_config_file(self) -> None:
         """Read configuration file (.toml file)."""
+        from .cosmos import cosmos
+
         config_file = os.path.join(self.path.config, self.file_name)
 
-        # Read config file
-        config_dict = toml.load(config_file)
+        if not os.path.exists(config_file):
+            raise FileNotFoundError(
+                f"Configuration file not found: {config_file}\n"
+                f"  Make sure '{self.file_name}' exists in: {self.path.config}"
+            )
+
+        try:
+            config_dict = toml.load(config_file)
+        except toml.TomlDecodeError as e:
+            raise ValueError(
+                f"Failed to parse configuration file {config_file}: {e}"
+            ) from e
 
         # Turn into object
-        for key in config_dict:
-            obj = getattr(self, key)
-            for key, value in config_dict[key].items():
+        for section_key in config_dict:
+            if not hasattr(self, section_key):
+                cosmos.log(
+                    f"Warning: Unknown section [{section_key}] in {self.file_name} — skipping."
+                )
+                continue
+            obj = getattr(self, section_key)
+            for key, value in config_dict[section_key].items():
                 setattr(obj, key, value)

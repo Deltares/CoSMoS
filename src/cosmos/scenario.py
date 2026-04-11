@@ -73,7 +73,22 @@ class Scenario:
         cosmos.log("Reading scenario file ...")
         self.path = os.path.join(cosmos.config.path.scenarios, self.name)
         scenario_file = os.path.join(self.path, "scenario.toml")
-        sc_dict = toml.load(scenario_file)
+
+        if not os.path.exists(self.path):
+            cosmos.stop(
+                f"Scenario folder not found: {self.path}\n"
+                f"  Make sure a folder named '{self.name}' exists under: {cosmos.config.path.scenarios}"
+            )
+        if not os.path.exists(scenario_file):
+            cosmos.stop(
+                f"Scenario file not found: {scenario_file}\n"
+                f"  Each scenario folder must contain a 'scenario.toml' file."
+            )
+
+        try:
+            sc_dict = toml.load(scenario_file)
+        except toml.TomlDecodeError as e:
+            cosmos.stop(f"Failed to parse scenario file {scenario_file}: {e}")
 
         # Turn into object
         for key, value in sc_dict.items():
@@ -84,11 +99,22 @@ class Scenario:
 
         # First find all the models and store in dict models_in_scenario
         models_in_scenario = {}
+        if "model" not in sc_dict:
+            cosmos.stop(
+                f"No [[model]] entries found in scenario file: {scenario_file}\n"
+                f"  At least one [[model]] section is required."
+            )
         for mdl in sc_dict["model"]:
             # Add the models in this scenario
             if "name" in mdl:
                 # Individual model
                 name = mdl["name"].lower()
+                if name not in cosmos.all_models:
+                    cosmos.stop(
+                        f"Model '{name}' not found in model database.\n"
+                        f"  Check that a folder named '{name}' exists in: {cosmos.config.model_database.path}\n"
+                        f"  Available models: {', '.join(sorted(cosmos.all_models.keys()))}"
+                    )
                 models_in_scenario[name] = cosmos.all_models[name]
                 # Set meteo to one give in scenario
                 models_in_scenario[name]["meteo_dataset"] = self.meteo_dataset

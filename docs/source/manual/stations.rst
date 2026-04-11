@@ -1,77 +1,94 @@
 .. _stations:
 
 Observation stations
-------------
+--------------------
 
-To compare model results (water levels and wave conditions) with observations, station locations and observation data can be added to the CoSMoS database. 
-Station locations can be referenced in the *model.toml* files, while observation data can be referenced in the *scenario.toml* file. 
+Observation stations allow model results to be compared with measured water
+levels and wave conditions. Station locations are defined in TOML files and
+referenced from ``model.toml``; observation data can be provided manually or
+downloaded automatically.
 
 Station locations
-^^^^^^^^^^^^
-To add observation points in models, stations must be referenced in a station file located in *configuration/stations*. 
-An example of a station file is given below:
+^^^^^^^^^^^^^^^^^
 
- .. include:: examples/ndbc_buoy.toml
-       :literal: 
+Station files are located in ``configuration/stations``. Each file defines one
+or more stations with their coordinates and metadata.
 
-In the :ref:`*model.toml* <models>` file you can refer to one or more station files using the keyword *station*. 
-The following attributes can be described in the station file:
+Example station file:
+
+.. include:: examples/ndbc_buoy.toml
+       :literal:
+
+In the :ref:`model TOML file <models>`, reference one or more station files
+using the ``station`` keyword. The following attributes can be specified per
+station:
 
 .. list-table::
    :widths: 30 70
-   :header-rows: 0
+   :header-rows: 1
+
+   * - Attribute
+     - Description
 
    * - name
-     - Name of the observation station.
+     - Station identifier.
 
    * - longname
-     - Long name of the observation station.
+     - Descriptive name for display.
 
    * - longitude, latitude
-     - Coordinates of the observation station.
+     - Geographic coordinates.
 
    * - type
-     - Type: wave_buoy or tide_gauge
+     - Station type: ``wave_buoy`` or ``tide_gauge``.
 
    * - coops_id
-     - Optional: NOAA CO-OPS tide gauge id.
+     - NOAA CO-OPS tide gauge identifier (optional).
 
    * - ndbc_id
-     - Optional: NDBC wave buoy id.
+     - NDBC wave buoy identifier (optional).
 
    * - water_level_correction
-     - Optional: Water level correction.
+     - Vertical datum correction applied to observations (optional).
 
    * - mllw
-     - Mean lower low water level (m).
+     - Mean Lower Low Water level in metres (optional).
 
-The default *cosmos_run_folder* contains toml files with locations of the NDBC wave buoys and the NOAA CO-OPS water level stations. 
-Other observation locations can be added manually. 
+The default run folder includes station files for NDBC wave buoys and NOAA
+CO-OPS water level stations. Additional station locations can be added by
+creating new TOML files in the ``configuration/stations`` folder.
 
 Observation data
-^^^^^^^^^^^^
-Observation data for the station locations defined in the *stations* folder are either automatically extracted by CoSMoS 
-or can be manually added to the observations folder. 
-For the NOAA CO-OPS water level stations, water levels are automatically extracted from the NOAA CO-OPS server.
-For the NDBC wave buoys, the wave buoy data must be manually extracted from the NDBC website (https://www.ndbc.noaa.gov/),
-where you can find historical wave buoy data. The following script converts the NDBC text files to csv files that can be used by CoSMoS:
+^^^^^^^^^^^^^^^^
 
- .. include:: examples/ndbc2csv.py
-       :literal: 
+Observation data for defined stations are either downloaded automatically or
+provided manually:
 
-Note: this script requires the Coastalhazardstoolkit.
+- **NOAA CO-OPS water level stations** — data is downloaded automatically from
+  the NOAA CO-OPS server during each forecast cycle.
+- **NDBC wave buoys** — historical data must be downloaded manually from the
+  `NDBC website <https://www.ndbc.noaa.gov/>`_. The following script converts
+  NDBC text files to the CSV format used by CoSMoS:
 
-The csv-files must be stored under: 
-*observations//[observations_path]//waves//waves.[stationid].observed.csv*
+.. include:: examples/ndbc2csv.py
+       :literal:
 
-Similarly, other water level or wave data can be added to the observation folder, using the format given below. Note that water level data must be stored using the following format:
-*observations//[observations_path]//waterlevels//waterlevel.[stationid].observed.csv*
+.. note::
 
- .. include:: examples/waves.42060.observed.csv.js
-       :literal: 
+   This script requires the Coastal Hazards Toolkit (``cht_observations``).
 
- .. include:: examples/waterlevel.42060.observed.csv.js
-       :literal: 
+Observation files must follow this naming convention:
 
-In the :ref:`scenario file <scenario>`, you must refer to the *observations_path* to include these observations in the webviewer.
+- Water levels: ``observations/<observations_path>/waterlevels/waterlevel.<stationid>.observed.csv``
+- Waves: ``observations/<observations_path>/waves/waves.<stationid>.observed.csv``
 
+Example CSV formats:
+
+.. include:: examples/waves.42060.observed.csv.js
+       :literal:
+
+.. include:: examples/waterlevel.42060.observed.csv.js
+       :literal:
+
+In the :ref:`scenario file <scenario>`, set the ``observations_path`` keyword
+to include these observations in the web viewer.

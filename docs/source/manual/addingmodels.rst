@@ -1,215 +1,243 @@
 .. _models:
 
-Adding models to the database
-------------
-
-
 Model database
-^^^^^^^^^^^^
-The CoSMoS model database contains all model input files. The path to your model database must be specified in the :ref:`*config.toml* <configuration>` file. 
-CoSMoS automatically nests the models and collects the required meteorological data. Therefore, the model folders contain only the grid and input files for the individual models.
-A separate toml file describes, among other things, in which model it is nested and which meteo sources and observation stations are to be used:
+--------------
+
+The model database contains the input files for all available models. The path
+to the database is specified in the :ref:`configuration file <configuration>`.
+
+CoSMoS handles model nesting and meteorological forcing automatically. Each
+model folder therefore contains only the grid and input files for that
+individual model. A ``model.toml`` file describes model metadata such as the
+model type, nesting relationships, and which observation stations to include.
+
+Example ``model.toml``:
 
 .. include:: examples/model.toml
-       :literal: 
+       :literal:
 
-Within CoSMoS, the name of your model is equal to the folder name in which the *model.toml* file is located 
-(see also :ref:`Folder structure <folder_structure>`).
+The model name within CoSMoS corresponds to the folder name containing the
+``model.toml`` file (see :ref:`Folder structure <folder_structure>`).
 
-The following settings can be included in the model file:
+Model settings
+^^^^^^^^^^^^^^
+
+The following settings can be specified in ``model.toml``:
 
 .. list-table::
-   :widths: 30 70 30 30
+   :widths: 30 50 10 10
    :header-rows: 1
 
-   * - parameter
-     - description
-     - default
-     - unit
+   * - Parameter
+     - Description
+     - Default
+     - Unit
 
    * - longname
-     - Model long name (shown in webviewer)
+     - Display name shown in the web viewer.
      - name
      -
 
    * - runid
-     - Model id used in CoSMoS.
+     - Model identifier used internally by CoSMoS.
      - None
      -
 
    * - type
-     - Model type (options: beware, delft3dfm, hurrywave, sfincs, xbeach)
+     - Model type: ``beware``, ``delft3dfm``, ``hurrywave``, ``sfincs``, or ``xbeach``.
      -
      -
 
    * - crs
-     - Coordinate system
+     - Coordinate reference system (e.g. ``"EPSG:4326"``).
      -
      -
 
    * - flow
-     - Run flow model.
-     - False
+     - Enable flow simulation.
+     - false
      -
 
    * - wave
-     - Run wave model.
-     - False
+     - Enable wave simulation.
+     - false
      -
 
    * - priority
-     - Optional to define order in which models are run.
+     - Execution priority (lower values run first).
      - 10
      -
 
    * - flow_nested
-     - Name of model in which current model is nested (flow)   
+     - Name of the parent model providing flow boundary conditions.
      - None
      -
 
    * - wave_nested
-     - Name of model in which current model is nested (waves) 
+     - Name of the parent model providing wave boundary conditions.
      - None
      -
 
    * - bw_nested
-     - Name of model in which current model is nested (BEWARE) 
+     - Name of the parent BEWARE model.
      - None
-     -  
-  
-   * - flow_spinup_time 
-     - Spinup time (flow)   
+     -
+
+   * - flow_spinup_time
+     - Flow model spin-up time.
      - 0
      - hours
 
-   * - wave_spinup_time 
-     - Spinup time (waves)  
-     - 0  
+   * - wave_spinup_time
+     - Wave model spin-up time.
+     - 0
      - hours
 
    * - vertical_reference_level_name
-     - Name of vertical reference level
-     - 'MSL'
+     - Name of the vertical reference level.
+     - MSL
      -
 
    * - vertical_reference_level_difference_with_msl
-     - Difference of vertical reference level with MSL
+     - Offset between the vertical reference level and MSL.
      - 0
      - m
 
-   * - boundary_water_level_correction 
-     - Water level correction at boundary
+   * - boundary_water_level_correction
+     - Datum correction applied to boundary water levels.
      - 0
      - m
 
    * - station
-     - List of station toml files (located in cosmos//stations) added as observation points in model.
+     - List of station TOML files (from ``configuration/stations``) to add as
+       observation points.
      -
      -
 
    * - make_wave_map
-     - Make wave maps 
-     - False 
+     - Generate wave height map tiles.
+     - false
      -
 
    * - make_flood_map
-     - Make flood maps
-     - False
+     - Generate flood map tiles.
+     - false
      -
 
    * - make_sedero_map
-     - Make sedimentation/erosion maps
-     - False
+     - Generate sedimentation/erosion map tiles.
+     - false
      -
 
    * - mhhw
-     - Mean Higher High Water to estimate total water level for clustering of models.
+     - Mean Higher High Water level, used for total water level estimation
+       when clustering models.
      - 0
      - m
 
-
 Model-specific input
-^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^
 
-There are currently five types of models that can be included in CoSMoS. 
-The specific input for these models is described below.
+CoSMoS supports five model types. The required input for each type is described
+below.
 
 BEWARE
-"""""""""""""""
+""""""
 
-BEWARE is a meta-model based on XBeach for predicting nearshore wave heights and total water levels at reef-lined coasts.
+`BEWARE <https://oss.deltares.nl/web/beware>`_ is a meta-model based on XBeach
+for predicting nearshore wave heights and total water levels at reef-lined
+coasts.
 
-The BEWARE executable folder, whose location is specified in the :ref:`*config.toml* <configuration>` file, must contain the following files:
+The BEWARE executable folder (specified in
+:ref:`config.toml <configuration>`) must contain:
 
-- XBeach_BEWARE_database.nc: the database of XBeach runup and wave condition predictions.
-- run_bw.bas: file to run *run_beware.py*.
-- run_beware.py: script to run BEWARE. To be able to run *run_beware.py*, you must have installed the Coastal Hazards Toolkit in an environment called cosmos. 
+- ``XBeach_BEWARE_database.nc`` — the XBeach runup and wave condition database.
+- ``run_bw.bas`` — batch file to execute ``run_beware.py``.
+- ``run_beware.py`` — BEWARE execution script.
 
-The BEWARE input folder in your model database must contain the following information:
+The model ``input`` folder must contain:
 
-- *beware.inp*: BEWARE input file
-- *r2matchfile* as specified in *beware.inp*: a *.mat* that describes the matching probabilities for each input profile.
-- *profsfile* as specified in *beware.inp*: a profile describing the characteristics of the BEWARE input profiles. The profsfile must contain the following information:
+- ``beware.inp`` — BEWARE input file.
+- The file referenced by ``r2matchfile`` in ``beware.inp`` — a ``.mat`` file
+  describing matching probabilities for each input profile.
+- The file referenced by ``profsfile`` in ``beware.inp`` — a profile file with
+  the following columns:
 
-  - profid: ID of profile.
-  - x_off: Offshore x-coordinate (for nesting in wave model).
-  - y_off: Offshore y-coordinate (for nesting in wave model).
-  - x_coast: X-coordinate of intersection with the coastline (for plotting total water levels).
-  - y_coast: Y-coordinate of intersection with the coastline (for plotting total water levels).
-  - x_flow: Nearshore x-coordinate for nesting in flow model (to include surge in total water level estimation).
-  - y_flow: Nearshore y-coordinate for nesting in flow model (to include surge in total water level estimation).
-  - beachslope: Beach slope of transect for total water level prediction.
+  - ``profid`` — profile ID.
+  - ``x_off``, ``y_off`` — offshore coordinates (for wave model nesting).
+  - ``x_coast``, ``y_coast`` — coastline intersection coordinates.
+  - ``x_flow``, ``y_flow`` — nearshore coordinates (for flow model nesting).
+  - ``beachslope`` — beach slope for total water level prediction.
 
-- *runup.x* and *runup.y*: files describing the x and y coordinates (in the coordinate system as specified in the *model.toml* file) for different runup levels (here between 0 and 15 m). The format is as follows:
- 
+- ``runup.x`` and ``runup.y`` — coordinates for different runup levels, in the
+  format:
+
 .. code-block:: text
 
-	    <runup_level1> <runup_level1> <runup_level3>  
-	
-	    <profid> <x runup_level1> <x runup_level1> <x runup_level3>  
+      <runup_level1> <runup_level2> <runup_level3>
+
+      <profid> <x_level1> <x_level2> <x_level3>
 
       e.g.
       0 2 4
       29 163960.98 163961.75 164154.9
       35 163961.98 163962.75 164156.9
 
-Delft3D-FM
-"""""""""""""""
+Delft3D FM
+""""""""""
 
-`Delft3D-FM <https://www.deltares.nl/en/software-and-data/products/delft3d-flexible-mesh-suite>`_ can be run as separate flow model, or as coupled flow-wave model. 
-The Delft3D-FM *input* folder must contain the following folders and files:
+`Delft3D FM <https://www.deltares.nl/en/software-and-data/products/delft3d-flexible-mesh-suite>`_
+can be run as a standalone flow model or as a coupled flow-wave model. The
+model ``input`` folder must contain:
 
-- *flow* folder containing flow model input. The *.mdu* file name must be equal to the *runid* keyword specified in the *model.toml* file.
-- *wave* folder containing wave model input. The *.mdw* file must be called *wave.mdw*. The grid for which you want to generate output timeseries must be called *wave.grd*. You can also add a nested model called *nest.grd*.
-The following settings in the *.mdw* are adjusted by CoSMoS:
+- A ``flow`` folder with flow model input. The ``.mdu`` file name must match
+  the ``runid`` specified in ``model.toml``.
+- A ``wave`` folder (optional) with wave model input. The ``.mdw`` file must be
+  named ``wave.mdw``. The output grid must be named ``wave.grd``; an optional
+  nested grid can be named ``nest.grd``. CoSMoS adjusts the following settings
+  in the ``.mdw`` file automatically:
 
-  - ReferenceDate         = REFDATEKEY
-  - LocationFile          = OBSFILEKEY
-- *dimr_config.xml* file that describes the working directories for the flow and wave models. The <time> (starttime of the simulation) is set by CoSMoS by replacing the keyword *TIMEKEY*.
+  - ``ReferenceDate = REFDATEKEY``
+  - ``LocationFile = OBSFILEKEY``
 
-The *misc* folder must contain a text file with the same name as the model name, containing the coordinates of the model outline.
+- A ``dimr_config.xml`` file specifying flow and wave working directories.
+  CoSMoS sets the simulation start time by replacing the keyword ``TIMEKEY``.
+
+The ``misc`` folder must contain a text file (named after the model) with
+the coordinates of the model outline.
 
 HurryWave
-"""""""""""""""
-HurryWave is a computationally efficient third generation spectral wave model, with physics similar to those of SWAN and WAVEWATCH III.
+"""""""""
 
-HurryWave model input files are located in the *input* folder of your HurryWave model directory. 
-In the *tiling* folder, *indices* and *topobathy* folders must be included to generate wave maps.
+`HurryWave <https://hurrywave.readthedocs.io/>`_ is a computationally efficient
+third-generation spectral wave model with physics similar to SWAN and
+WaveWatch III.
 
-The *misc* folder must contain a text file with the same name as the model name, containing the coordinates of the model outline.
+Model input files are located in the ``input`` folder. To generate wave map
+tiles, the ``tiling`` folder must contain ``indices`` and ``topobathy``
+sub-folders.
+
+The ``misc`` folder must contain a text file (named after the model) with
+the coordinates of the model outline.
 
 SFINCS
-"""""""""""""""
+""""""
 
-`SFINCS <https://sfincs.readthedocs.io/en/latest/>`_ model input files are located in the *input* folder of your SFINCS model directory. 
-In the *tiling* folder, *indices* and *topobathy* folders must be included to generate flood maps.
+`SFINCS <https://sfincs.readthedocs.io/en/latest/>`_ (Super-Fast INundation of
+CoastS) is a reduced-complexity flood model. Model input files are located in
+the ``input`` folder. To generate flood map tiles, the ``tiling`` folder must
+contain ``indices`` and ``topobathy`` sub-folders.
 
-The *misc* folder must contain a text file with the same name as the model name, containing the coordinates of the model outline.
+The ``misc`` folder must contain a text file (named after the model) with
+the coordinates of the model outline.
 
 XBeach
-"""""""""""""""
+""""""
 
-`XBeach <https://xbeach.readthedocs.io/en/latest/>`_ model input files are located in the *input* folder of your XBeach model directory. 
-In the *tiling* folder, an *indices* folder must be included to generate pre and post-storm bed level maps.
+`XBeach <https://xbeach.readthedocs.io/en/latest/>`_ is a nearshore
+morphodynamic model. Model input files are located in the ``input`` folder. To
+generate bed level map tiles, the ``tiling`` folder must contain an ``indices``
+sub-folder.
 
-The *misc* folder must contain a text file with the same name as the model name, containing the coordinates of the model outline.
+The ``misc`` folder must contain a text file (named after the model) with
+the coordinates of the model outline.

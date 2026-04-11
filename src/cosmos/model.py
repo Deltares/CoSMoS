@@ -94,7 +94,16 @@ class Model:
         cosmos.ModelLoop
         """
 
-        mdl_dict = toml.load(self.file_name)
+        if not os.path.exists(self.file_name):
+            cosmos.stop(
+                f"Model file not found: {self.file_name}\n"
+                f"  Each model folder must contain a 'model.toml' file."
+            )
+
+        try:
+            mdl_dict = toml.load(self.file_name)
+        except toml.TomlDecodeError as e:
+            cosmos.stop(f"Failed to parse model file {self.file_name}: {e}")
 
         # Turn into object
         for key, value in mdl_dict.items():
@@ -114,7 +123,16 @@ class Model:
         if self.wave_nested is not None:
             self.wave = True
 
-        self.crs = CRS(self.crs)  # Convert CRS name to pyproj CRS object
+        if not self.crs:
+            cosmos.stop(
+                f"No 'crs' defined in model file: {self.file_name}\n"
+                f'  Every model must specify a coordinate reference system (e.g. crs = "EPSG:4326").'
+            )
+
+        try:
+            self.crs = CRS(self.crs)
+        except Exception as e:
+            cosmos.stop(f"Invalid CRS '{self.crs}' in model {self.name}: {e}")
 
         self.get_exterior()
 
@@ -764,8 +782,8 @@ class Model:
             # but that model is not included in the scenario. In that case, flow_nested is still a string.
             if isinstance(self.flow_nested, str):
                 self.flow_nested = None
-                cosmos.log_warning(
-                    f"Flow nested model {self.flow_nested_name} for model {self.name} not found in scenario models."
+                cosmos.log(
+                    f"Warning: Flow nested model '{self.flow_nested_name}' for model '{self.name}' not found in scenario. Running without flow nesting."
                 )
         if self.wave_nested_name:
             # Look up model from which it gets it boundary conditions

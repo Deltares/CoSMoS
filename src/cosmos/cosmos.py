@@ -99,6 +99,7 @@ class CoSMoS:
         scenario_name: str = None,
         cycle: str = None,
         last_cycle: str = None,
+        validate: bool = True,
     ) -> None:
         """Run a CoSMoS scenario.
 
@@ -110,6 +111,8 @@ class CoSMoS:
             Cycle to start with (e.g. ``"20231213_00z"``).
         last_cycle : str, optional
             Last cycle to process (e.g. ``"20231215_00z"``).
+        validate : bool, optional
+            Run validation before starting. Set to ``False`` to skip.
 
         See Also
         -------
@@ -118,6 +121,12 @@ class CoSMoS:
         cosmos.webviewer.WebViewer
 
         """
+
+        # Validate scenario before running
+        if validate:
+            if not self.validate(scenario_name):
+                self.log("Validation failed — aborting run.")
+                return
 
         # Determine which cycle needs to be run
         # If no cycle is given, check the scenario file for one
@@ -150,9 +159,9 @@ class CoSMoS:
         self.model_loop = ModelLoop()
 
         # Why these things ?
-        #self.main_loop.just_initialize = self.config.run.just_initialize
-        #self.main_loop.run_models = self.config.run.run_models
-        #self.main_loop.clean_up = self.config.run.clean_up
+        # self.main_loop.just_initialize = self.config.run.just_initialize
+        # self.main_loop.run_models = self.config.run.run_models
+        # self.main_loop.clean_up = self.config.run.clean_up
 
         self.main_loop.start(cycle=cycle)
 

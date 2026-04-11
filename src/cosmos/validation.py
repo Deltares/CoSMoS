@@ -125,9 +125,10 @@ def validate_scenario(cosmos_instance, scenario_name: str) -> bool:
                     if not os.path.exists(full_path + ".toml"):
                         errors.append(f"Station file not found: {full_path}")
 
-    # ── Executable checks ────────────────────────────────────────────
+    # ── Executable checks (only relevant for local execution) ───────
 
-    _check_executables(models_in_scenario, config, errors, warnings)
+    if config.run.run_mode == "serial":
+        _check_executables(models_in_scenario, config, errors, warnings)
 
     # ── Print report ─────────────────────────────────────────────────
 
