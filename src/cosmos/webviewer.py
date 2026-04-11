@@ -1243,7 +1243,7 @@ class WebViewer:
         newsc["cycle_mode"] = cosmos.config.run.mode
         newsc["meteo_string"] = cosmos.scenario.meteo_string
         newsc["duration"] = str(cosmos.scenario.runtime)
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.now(datetime.timezone.utc)
         newsc["last_update"] = now.strftime("%Y/%m/%d %H:%M:%S" + " (UTC)")
         newsc["previous_cycles"] = previous_cycles
         if isame > -1:

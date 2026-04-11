@@ -72,6 +72,28 @@ class CoSMoS:
         # Read in configuration
         self.config.set()
 
+    def validate(self, scenario_name: str) -> bool:
+        """Validate a scenario without running it.
+
+        Checks configuration paths, scenario file, model database, nesting
+        chains, meteo references, station files, and executable paths.
+
+        Call this after ``initialize()`` and before ``run()``.
+
+        Parameters
+        ----------
+        scenario_name : str
+            Name of the scenario to validate.
+
+        Returns
+        -------
+        bool
+            ``True`` if no errors were found, ``False`` otherwise.
+        """
+        from .validation import validate_scenario
+
+        return validate_scenario(self, scenario_name)
+
     def run(
         self,
         scenario_name: str = None,
@@ -97,9 +119,12 @@ class CoSMoS:
 
         """
 
-        # Determine which cycle is needs to be run
-        # If no cycle is given, then it will be determined later on
+        # Determine which cycle needs to be run
+        # If no cycle is given, check the scenario file for one
         self.scenario_name = scenario_name
+
+        if not cycle:
+            cycle = self._read_cycle_from_scenario(scenario_name)
 
         if cycle:
             cycle = datetime.datetime.strptime(cycle, "%Y%m%d_%HZ").replace(
@@ -125,9 +150,9 @@ class CoSMoS:
         self.model_loop = ModelLoop()
 
         # Why these things ?
-        self.main_loop.just_initialize = self.config.run.just_initialize
-        self.main_loop.run_models = self.config.run.run_models
-        self.main_loop.clean_up = self.config.run.clean_up
+        #self.main_loop.just_initialize = self.config.run.just_initialize
+        #self.main_loop.run_models = self.config.run.run_models
+        #self.main_loop.clean_up = self.config.run.clean_up
 
         self.main_loop.start(cycle=cycle)
 
@@ -317,6 +342,32 @@ class CoSMoS:
         # Delete job folder that was just created
         if cosmos.config.run.run_mode != "parallel":
             fo.rmdir(os.path.join(cosmos.config.path.jobs, cosmos.scenario_name))
+
+    def _read_cycle_from_scenario(self, scenario_name: str) -> str:
+        """Peek at the scenario TOML file to extract the cycle string.
+
+        Parameters
+        ----------
+        scenario_name : str
+            Scenario name.
+
+        Returns
+        -------
+        str or None
+            Cycle string (e.g. ``"20231213_00z"``) if defined, otherwise ``None``.
+        """
+        import toml
+
+        scenario_file = os.path.join(
+            self.config.path.scenarios, scenario_name, "scenario.toml"
+        )
+        if not os.path.exists(scenario_file):
+            return None
+        try:
+            sc = toml.load(scenario_file)
+            return sc.get("cycle")
+        except Exception:
+            return None
 
 
 # class Config:
