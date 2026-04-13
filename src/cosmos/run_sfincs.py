@@ -908,7 +908,10 @@ elif option == "simulate":
     # Never called in cloud mode where this is done in a workflow
     # Make the run string (platform dependent)
     if platform.system() == "Windows":
-        run_string = "call run_simulation.bat"
+        # Use ".\" so the script is found even when cmd.exe is configured
+        # with NoDefaultCurrentDirectoryInExePath=1 (which excludes CWD
+        # from the executable search path).
+        run_string = r"call .\run_simulation.bat"
     else:
         run_string = "source ./run_simulation.sh"
     if config["ensemble"]:

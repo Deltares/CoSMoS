@@ -8,6 +8,7 @@ that all model-specific subclasses inherit from.
 import copy
 import os
 import platform
+import subprocess
 
 import cht_utils.fileops as fo
 import geopandas as gpd
@@ -637,14 +638,25 @@ class Model:
         if cosmos.config.run.run_mode == "serial":
             # Model needs to be run in serial mode (local on the job path of a windows machine) or on same HPC node as CoSMoS
             if platform_name == "windows":
-                cosmos.log("Writing tmp.bat in " + os.getcwd() + " ...")
-                fid = open("tmp.bat", "w")
-                fid.write(self.job_path[0:2] + "\n")
-                fid.write("cd " + self.job_path + "\n")
-                fid.write("call run_job.bat\n")
-                fid.write("exit\n")
-                fid.close()
-                os.system("start tmp.bat")
+                cosmos.log("Launching run_job.bat in " + self.job_path + " ...")
+                # Spawn the job in a fresh console window so simulation output
+                # is visible to the user, and so the model loop can keep
+                # polling for finished.txt. Using subprocess.Popen rather than
+                # `start tmp.bat` works even in non-interactive contexts.
+                # The full path to run_job.bat is required because cmd.exe
+                # on machines with NoDefaultCurrentDirectoryInExePath=1 will
+                # not look in CWD for executables.
+                creationflags = 0
+                if hasattr(subprocess, "CREATE_NEW_PROCESS_GROUP"):
+                    creationflags |= subprocess.CREATE_NEW_PROCESS_GROUP
+                if hasattr(subprocess, "CREATE_NEW_CONSOLE"):
+                    creationflags |= subprocess.CREATE_NEW_CONSOLE
+                subprocess.Popen(
+                    ["cmd.exe", "/c", os.path.join(self.job_path, "run_job.bat")],
+                    cwd=self.job_path,
+                    creationflags=creationflags,
+                    close_fds=True,
+                )
             else:
                 # Run on HPC node
                 cosmos.log("Running on HPC node ...")
