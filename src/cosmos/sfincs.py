@@ -5,9 +5,10 @@ Handles reading, pre-processing, execution, and post-processing of SFINCS
 """
 
 import os
-
+from pathlib import Path
 # import numpy as np
 import platform
+import copy
 
 import cht_utils.fileops as fo
 import pandas as pd
@@ -59,6 +60,19 @@ class CoSMoS_SFINCS(Model):
     cosmos.model.Model
     """
 
+    def clone(self):
+        new = self.__class__.__new__(self.__class__)
+
+        # 1. Copy simple attributes
+        for k, v in self.__dict__.items():
+            try:
+                setattr(new, k, copy.deepcopy(v))
+            except Exception:
+                # fallback: shallow copy if deepcopy fails
+                setattr(new, k, v)
+
+        return new
+
     def read_model_specific(self) -> None:
         """Read SFINCS specific model attributes.
 
@@ -90,7 +104,7 @@ class CoSMoS_SFINCS(Model):
         """
         # Set path temporarily to job path
         pth = self.domain.root.path
-        self.domain.root.set(self.job_path)
+        self.domain.root.set(Path(self.job_path))
 
         # Start and stop times
         self.domain.config.set("tref", cosmos.scenario.ref_date)

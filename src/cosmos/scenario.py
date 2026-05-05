@@ -287,11 +287,13 @@ class Scenario:
                     if "model_type" in station:
                         mdltype = station["model_type"]
                         if tp.lower() in mdltype:
-                            model.add_stations(toml_file_name)
+                            model.station.append(toml_file_name)
+                            model.add_stations()
                     if "model_name" in station:
                         mdlname = station["model_name"]
                         if name.lower() in mdlname:
-                            model.add_stations(toml_file_name)
+                            model.station.append(toml_file_name)
+                            model.add_stations()
 
             self.model.append(model)
 

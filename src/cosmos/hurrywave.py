@@ -6,6 +6,7 @@ spectral wave models within the CoSMoS forecast framework.
 
 import os
 import platform
+from pathlib import Path
 
 import cht_utils.fileops as fo
 import pandas as pd
@@ -91,7 +92,7 @@ class CoSMoS_HurryWave(Model):
         """
         # Set path temporarily to job path
         pth = self.domain.root.path
-        self.domain.root.set(self.job_path)
+        self.domain.root.set(Path(self.job_path))
 
         # Start and stop times
         self.domain.config.set("tref", cosmos.scenario.ref_date)
