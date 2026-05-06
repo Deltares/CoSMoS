@@ -226,3 +226,87 @@ lower = 1.0
 upper = 26.0
 scale = "log121"
 
+[[color_range]]
+name = "water_level_map"
+legend_text = "Water level (m + MSL)"
+color_map = "cyan_purple_jet"
+lower = 0.5
+upper = 4.0
+step = 0.25
+
+[[color_range]]
+name = "storm_surge_map"
+legend_text = "Storm Surge (m)"
+color_map = "cyan_purple_jet"
+lower = 0.0
+upper = 5.0
+step = 0.5
+
+[[color_range]]
+name = "sallenger_regimes"
+legend_text = "Sallenger regimes"
+[[color_range.contour]]
+lower = 4.9
+upper = 5.1
+rgb = [ 255, 0, 0,]
+text = "Breaching"
+
+[[color_range.contour]]
+lower = 3.9
+upper = 4.1
+rgb = [ 255, 165, 0,]
+text = "Inundation"
+
+[[color_range.contour]]
+lower = 2.9
+upper = 3.1
+rgb = [ 255, 255, 0,]
+text = "Overwash"
+
+[[color_range.contour]]
+lower = 1.9
+upper = 2.1
+rgb = [ 0, 255, 0,]
+text = "Collision"
+
+[[color_range.contour]]
+lower = 0.9
+upper = 1.1
+rgb = [ 255, 255, 255,]
+text = "Swash"
+
+
+[[color_range]]
+name = "erosion_regimes"
+legend_text = "Erosion regimes"
+[[color_range.contour]]
+lower = 3.9
+upper = 4.1
+rgb = [ 255, 0, 0,]
+text = "Breaching"
+
+[[color_range.contour]]
+lower = 2.9
+upper = 3.1
+rgb = [ 255, 165, 0,]
+text = "Dune retreat"
+
+[[color_range.contour]]
+lower = 1.9
+upper = 2.1
+rgb = [ 255, 255, 0,]
+text = "Beach erosion"
+
+[[color_range.contour]]
+lower = 0.9
+upper = 1.1
+rgb = [ 0, 255, 0,]
+text = "Minor erosion"
+
+[[color_range.contour]]
+lower = -0.1
+upper = 0.1
+rgb = [ 255, 255, 255,]
+text = "No erosion"
+
+
