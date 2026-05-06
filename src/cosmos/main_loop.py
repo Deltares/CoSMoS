@@ -201,7 +201,7 @@ class MainLoop:
                     # This model should include tide only forcing
                     cosmos.log(f"Adding tide only forcing to model {model.name}")
                     # Create new model that is a copy of this one, but only for tide
-                    tide_only_model = model.clone()
+                    tide_only_model = copy.deepcopy(model)
                     tide_only_model.name = model.name + "_tide_only"
                     tide_only_model.deterministic_name = tide_only_model.name
                     tide_only_model.long_name = model.long_name + " (tide only)"
