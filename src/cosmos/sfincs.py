@@ -9,6 +9,7 @@ from pathlib import Path
 # import numpy as np
 import platform
 import copy
+import geopandas as gpd
 
 import cht_utils.fileops as fo
 import pandas as pd
@@ -60,19 +61,6 @@ class CoSMoS_SFINCS(Model):
     cosmos.model.Model
     """
 
-    def clone(self):
-        new = self.__class__.__new__(self.__class__)
-
-        # 1. Copy simple attributes
-        for k, v in self.__dict__.items():
-            try:
-                setattr(new, k, copy.deepcopy(v))
-            except Exception:
-                # fallback: shallow copy if deepcopy fails
-                setattr(new, k, v)
-
-        return new
-
     def read_model_specific(self) -> None:
         """Read SFINCS specific model attributes.
 
@@ -103,19 +91,23 @@ class CoSMoS_SFINCS(Model):
         cht_nesting.nest2
         """
         # Set path temporarily to job path
+        self.domain.config.read()
         pth = self.domain.root.path
         self.domain.root.set(Path(self.job_path))
 
-        # Start and stop times
-        self.domain.config.set("tref", cosmos.scenario.ref_date)
-        self.domain.config.set("tstart", self.flow_start_time)
-        self.domain.config.set("tstop", self.flow_stop_time)
-        self.domain.config.set("dthisout", cosmos.config.run.dthis)
-        self.domain.config.set("dtmapout", cosmos.config.run.dtmap)
-        self.domain.config.set("dtmaxout", cosmos.config.run.dtmax)
-        self.domain.config.set("dtwnd", cosmos.config.run.dtwnd)
-        # self.domain.config.set("dtout", None, skip_validation=True)
-        self.domain.config.set("outputformat", "net")
+        # Set start and stop times
+        self.domain.config.update(
+            {
+                "tref": cosmos.scenario.ref_date,
+                "tstart": self.flow_start_time,
+                "tstop": self.flow_stop_time,
+                "dthisout": cosmos.config.run.dthis,
+                "dtmapout": cosmos.config.run.dtmap,
+                "dtmaxout": cosmos.config.run.dtmax,
+                "dtwnd": cosmos.config.run.dtwnd,
+                "outputformat": "net",
+            }
+        )
 
         if self.role == "floodmap":
             # We need to make a flood map, but not max water levels
@@ -178,18 +170,27 @@ class CoSMoS_SFINCS(Model):
         # Make observation points
         stations_added = False
         if self.station:
-            # Only add stations that do not already exist
-            existing_stations = self.domain.observation_points.list_names
-            for station in self.station:
-                if station.name not in existing_stations:
-                    # Add try statement because hydromt-sfincs gives error if point is not inside domain
-                    try:
-                        self.domain.observation_points.add_point(
-                            station.x, station.y, station.name
-                        )
-                        stations_added = True
-                    except Exception as e:
-                        print(f"Error adding observation point {station.name}: {e}")
+            existing_stations = set(self.domain.observation_points.list_names)
+            # Create full GeoDataFrame from all stations
+            names, xs, ys = zip(*[(s.name, s.x, s.y) for s in self.station])
+
+            gdf = gpd.GeoDataFrame(
+                {
+                    "name": names,
+                },
+                geometry=gpd.points_from_xy(xs, ys),
+                crs=self.crs,
+            )
+
+            # Remove stations that already exist
+            gdf = gdf[~gdf["name"].isin(existing_stations)]
+
+            if not gdf.empty:
+                try:
+                    self.domain.observation_points.set(gdf, merge=True, skip_validation=True)
+                    stations_added = True
+                except Exception as e:
+                    print(f"Error adding observation points batch: {e}")
             # self.domain.config.set("obsfile", "sfincs.obs")
 
         # Add observation points for nested models (Nesting 1)
@@ -239,11 +240,11 @@ class CoSMoS_SFINCS(Model):
             trstsec = (trst - self.domain.config.get("tref")).total_seconds()
 
             self.domain.config.set("trstout", trstsec)
-            self.domain.config.set("dtrst", 0.0, skip_validation=True)
+            self.domain.config.set("dtrstout", 0.0, skip_validation=True)
 
         else:
             self.domain.config.set("trstout", 0.0)
-            self.domain.config.set("dtrst", 0.0, skip_validation=True)
+            self.domain.config.set("dtrstout", 0.0, skip_validation=True)
 
         # Get restart file from previous cycle
         if self.flow_restart_file and not bathtub:
