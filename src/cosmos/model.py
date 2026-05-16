@@ -699,23 +699,39 @@ class Model:
             )
 
         elif cosmos.config.run.run_mode == "parallel":
-            # Model will be run on WCP node, write file to jobs folder (WCP nodes will pick up this job)
-
-            # Make directory in jobs folder (if non-existent)
-            os.makedirs(
-                os.path.join(cosmos.config.path.jobs, cosmos.scenario.name),
-                exist_ok=True,
-            )
-
-            # write file name containing job path to jobs folder
-            file_name = os.path.join(
-                cosmos.config.path.jobs,
-                cosmos.scenario.name,
-                f"{self.name}_{cosmos.cycle_string}.txt",
-            )
-            fid = open(file_name, "w")
-            fid.write(self.job_path)
-            fid.close()
+            if platform_name == "windows":
+                # Drop a job-pointer file in the shared jobs folder for the
+                # WCP (Windows Compute Pool) nodes to pick up.
+                os.makedirs(
+                    os.path.join(cosmos.config.path.jobs, cosmos.scenario.name),
+                    exist_ok=True,
+                )
+                file_name = os.path.join(
+                    cosmos.config.path.jobs,
+                    cosmos.scenario.name,
+                    f"{self.name}_{cosmos.cycle_string}.txt",
+                )
+                fid = open(file_name, "w")
+                fid.write(self.job_path)
+                fid.close()
+            else:
+                # On Linux/HPC, CoSMoS itself is already running inside an
+                # sbatch allocation. Launch run_job.sh as a detached background
+                # process on the same compute node so the main loop can keep
+                # submitting more jobs concurrently. Completion is detected by
+                # the existing finished.txt poll in model_loop.
+                cosmos.log("Launching run_job.sh in background - " + self.long_name + " ...")
+                log_path = os.path.join(self.job_path, "stdout.log")
+                log_fh = open(log_path, "w")
+                subprocess.Popen(
+                    ["bash", "run_job.sh"],
+                    cwd=self.job_path,
+                    stdout=log_fh,
+                    stderr=subprocess.STDOUT,
+                    stdin=subprocess.DEVNULL,
+                    start_new_session=True,
+                    close_fds=True,
+                )
 
         else:
             print("No run mode defined, should be either serial, parallel or cloud")

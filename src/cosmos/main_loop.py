@@ -6,17 +6,20 @@ generation, scenario setup, model execution, web viewer creation, and cleanup.
 
 import copy
 import datetime
-import importlib
 import os
 import sched
 import time
 
 import numpy as np
-from cht_utils.fileio.yaml import dict2yaml
 
 from .clean_up import clean_up
 from .cloud import Cloud
 from .cosmos import cosmos
+from .custom_processing import (
+    run_post_processing,
+    run_pre_processing,
+    write_cycle_info_yml,
+)
 from .meteo import collect_meteo, download_meteo
 from .scenario import Scenario
 from .track_ensemble import setup_track_ensemble
@@ -307,6 +310,12 @@ class MainLoop:
                     + rststr
                 )
 
+        # Always write cycle_info.yml so downstream consumers (custom
+        # pre/post-processing scripts, external dashboards) can rely on it.
+        write_cycle_info_yml()
+
+        run_pre_processing()
+
         if cosmos.config.run.event_mode == "meteo":
             # Running storm or other weather event
 
@@ -372,58 +381,7 @@ class MainLoop:
         if cosmos.config.run.clean_up:
             clean_up()
 
-        # Check if there is a custom post processing script
-        if cosmos.config.run.post_processing_script is not None:
-            # Run post processing script
-            cosmos.log("Running post processing script ...")
-            try:
-                # Check if file exists
-                if os.path.isfile(cosmos.config.run.post_processing_script):
-                    # Write config file with all info about this cycle
-                    cycle_info_file = os.path.join(
-                        cosmos.scenario.cycle_path, "cycle_info.yml"
-                    )
-
-                    config = {}
-
-                    # Scenario info
-                    config["scenario_name"] = cosmos.scenario.name
-                    config["cycle"] = cosmos.cycle_string
-                    config["duration_hours"] = cosmos.scenario.runtime
-                    config["meteo_dataset"] = cosmos.scenario.meteo_dataset
-                    config["cyclone_track_forecast_source"] = (
-                        cosmos.scenario.cyclone_track_forecast_source
-                    )
-
-                    # Now paths of run folder, meteo database and model database
-                    config["run_folder_path"] = cosmos.config.path.main
-                    config["meteo_database_path"] = cosmos.config.meteo_database.path
-                    config["model_database_path"] = cosmos.config.model_database.path
-
-                    # Now loop through all models and add their info
-                    config["model"] = []
-                    for model in cosmos.scenario.model:
-                        model_info = {}
-                        model_info["name"] = model.name
-                        model_info["long_name"] = model.long_name
-                        model_info["region"] = model.region
-                        model_info["type"] = model.type
-                        model_info["role"] = model.role
-                        config["model"].append(model_info)
-
-                    dict2yaml(cycle_info_file, config)
-
-                    # Import and run script
-                    spec = importlib.util.spec_from_file_location(
-                        "custom_module", cosmos.config.run.post_processing_script
-                    )
-                    custom_module = importlib.util.module_from_spec(spec)
-                    spec.loader.exec_module(custom_module)
-                    custom_module.main(cycle_info_file)
-
-            except Exception as e:
-                print("An error occurred while running the post processing script !")
-                print(f"Error: {e}")
+        run_post_processing()
 
         # Post process data (making floodmaps, uploading to server etc.)
         # Try to run post-processing. If it fails, print error message and continue.

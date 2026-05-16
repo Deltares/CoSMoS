@@ -169,10 +169,17 @@ class CoSMoS_SFINCS(Model):
 
         # Make observation points
         stations_added = False
+
         if self.station:
-            existing_stations = set(self.domain.observation_points.list_names)
-            # Create full GeoDataFrame from all stations
-            names, xs, ys = zip(*[(s.name, s.x, s.y) for s in self.station])
+
+            # str() because some observation_points names come back as int
+            # (numeric-looking IDs like NDBC buoy 42039 are parsed as numbers
+            # somewhere upstream), and the isin() dedup below needs both sides
+            # to share a dtype to actually match.
+            existing_stations = {str(n) for n in self.domain.observation_points.list_names}
+
+            # Create full GeoDataFrame from all stations.
+            names, xs, ys = zip(*[(str(s.name), s.x, s.y) for s in self.station])
 
             gdf = gpd.GeoDataFrame(
                 {

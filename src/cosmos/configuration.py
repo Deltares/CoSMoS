@@ -176,6 +176,9 @@ class Run:
         self.bathtub_fachs = 0.4
         self.sfincs_docker = False
         self.hurrywave_docker = False
+        self.pre_processing_script = (
+            None  # Custom pre processing script to be run at the start of each cycle, just before the meteo download
+        )
         self.post_processing_script = (
             None  # Custom post processing script to be run after each model loop
         )

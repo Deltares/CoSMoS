@@ -6,8 +6,7 @@ from a best-track forecast for probabilistic storm surge predictions.
 
 import copy
 import os
-
-import geopandas as gpd
+from glob import glob
 
 # from pyproj import CRS
 # import numpy as np
@@ -23,6 +22,48 @@ from .cosmos import cosmos
 # import cht_utils.misc_tools
 
 
+def _meteo_track_ensemble_dir() -> str | None:
+    """Return the meteo-database ``track_ensemble`` folder for this cycle.
+
+    The folder is derived from the meteo dataset that supplied the
+    deterministic track (``cosmos.tropical_cyclone``): its track file lives at
+    ``<meteo_dataset>/<cycle>/<storm>.cyc``, so the ensemble cyc files are
+    expected in ``<meteo_dataset>/<cycle_string>/track_ensemble``. Returns
+    ``None`` if it cannot be determined.
+    """
+    track_file = getattr(cosmos.tropical_cyclone, "track_file", None)
+    if not track_file:
+        return None
+    if isinstance(track_file, list):
+        track_file = track_file[0]
+    meteo_dataset_dir = os.path.dirname(os.path.dirname(track_file))
+    return os.path.join(meteo_dataset_dir, cosmos.cycle_string, "track_ensemble")
+
+
+def _write_cone_and_tracks(track_ensemble):
+    """Write the ensemble track geojson / pli files and return the cone gdf."""
+    track_ensemble.to_gdf(
+        option="tracks",
+        varname="track_ensemble_data",
+        filename=os.path.join(
+            cosmos.scenario.cycle_track_ensemble_path, "track_ensemble.geojson.js"
+        ),
+    )
+    track_ensemble.to_gdf(
+        option="tracks",
+        filename=os.path.join(
+            cosmos.scenario.cycle_track_ensemble_path, "track_ensemble.pli"
+        ),
+    )
+    return track_ensemble.to_gdf(
+        option="outline",
+        buffer=200000.0,
+        filename=os.path.join(
+            cosmos.scenario.cycle_track_ensemble_path, "ensemble_cone.geojson"
+        ),
+    )
+
+
 def setup_track_ensemble() -> None:
     """Generate a tropical cyclone track ensemble and tag qualifying models.
 
@@ -36,13 +77,6 @@ def setup_track_ensemble() -> None:
         # Track too short
         return
 
-    # Check if track ensemble is already generated in a previous attempt
-    if os.path.exists(cosmos.scenario.cycle_track_ensemble_path):
-        # Track ensemble already generated
-        ensemble_generated_before = True
-    else:
-        ensemble_generated_before = False
-
     tstart = cosmos.cycle.replace(tzinfo=None)
     tend = cosmos.stop_time.replace(tzinfo=None)
     dt = 3
@@ -50,8 +84,53 @@ def setup_track_ensemble() -> None:
     track_path = cosmos.scenario.cycle_track_ensemble_cyc_path
     spw_path = cosmos.scenario.cycle_track_ensemble_spw_path
 
-    if not ensemble_generated_before:
-        # Generate track ensemble
+    # Decide how to obtain the track ensemble, in priority order:
+    # 1. cyc files in the meteo database track_ensemble folder for this cycle ->
+    #    use those tracks and compute a parametric spiderweb for each.
+    # 2. Otherwise -> generate a synthetic ensemble from the best track (DeMaria).
+    meteo_track_ensemble_dir = _meteo_track_ensemble_dir()
+    meteo_cyc_files = []
+    if meteo_track_ensemble_dir and os.path.exists(meteo_track_ensemble_dir):
+        meteo_cyc_files = sorted(
+            glob(os.path.join(meteo_track_ensemble_dir, "*.cyc"))
+        )
+
+    if meteo_cyc_files:
+
+        # 1. Track ensemble provided as cyc files in the meteo database cycle
+        # folder. Use those tracks and compute a parametric (Holland) spiderweb
+        # for each member.
+        cosmos.log("Generating track ensemble from meteo database cyc files ...")
+        cosmos.scenario.track_ensemble = TropicalCycloneEnsemble(
+            tc,
+            name="ensemble",
+            number_of_realizations=0,
+            compute_wind_fields=False,
+            dt=dt,
+            tstart=tstart,
+            tend=tend,
+            track_path=track_path,
+            spw_path=spw_path,
+        )
+        # Spiderweb settings mirror the deterministic parametric track in meteo.py:
+        # larger radius when there is no background meteo wind field.
+        if cosmos.scenario.meteo_dataset is None:
+            spiderweb_radius = 800.0
+        else:
+            spiderweb_radius = 400.0
+        cosmos.scenario.track_ensemble.generate_from_track_files(
+            meteo_track_ensemble_dir,
+            spiderweb_radius=spiderweb_radius,
+            nr_radial_bins=100,
+        )
+        cosmos.scenario.track_ensemble_nr_realizations = (
+            cosmos.scenario.track_ensemble.number_of_realizations
+        )
+        cone = _write_cone_and_tracks(cosmos.scenario.track_ensemble)
+
+    else:
+
+        # 2. Generate a synthetic track ensemble from the best track (DeMaria).
         cosmos.log("Generating track ensemble ...")
 
         cosmos.scenario.track_ensemble = tc.make_ensemble(
@@ -71,48 +150,7 @@ def setup_track_ensemble() -> None:
             bias_ve=cosmos.config.track_ensemble.bias_ve,  # bias per hour
         )
 
-        trks = cosmos.scenario.track_ensemble.to_gdf(
-            option="tracks",
-            varname="track_ensemble_data",
-            filename=os.path.join(
-                cosmos.scenario.cycle_track_ensemble_path, "track_ensemble.geojson.js"
-            ),
-        )
-
-        trks = cosmos.scenario.track_ensemble.to_gdf(
-            option="tracks",
-            filename=os.path.join(
-                cosmos.scenario.cycle_track_ensemble_path, "track_ensemble.pli"
-            ),
-        )
-
-        # Get outline of ensemble
-        cone = cosmos.scenario.track_ensemble.to_gdf(
-            option="outline",
-            buffer=200000.0,
-            filename=os.path.join(
-                cosmos.scenario.cycle_track_ensemble_path, "ensemble_cone.geojson"
-            ),
-        )
-
-    else:
-        # Could also read in ensemble from file, but then we need to build that functionality in the TropicalCycloneEnsemble class
-        cosmos.scenario.track_ensemble = TropicalCycloneEnsemble(
-            tc,
-            number_of_realizations=nens,
-            dt=dt,
-            tstart=tstart,
-            tend=tend,
-            track_path=track_path,
-            spw_path=spw_path,
-        )
-
-        # Read the cone from geojson file and turn into gdf
-        cone = gpd.read_file(
-            os.path.join(
-                cosmos.scenario.cycle_track_ensemble_path, "ensemble_cone.geojson"
-            )
-        )
+        cone = _write_cone_and_tracks(cosmos.scenario.track_ensemble)
 
     # Loop through all models and check if they fall within cone
     models_to_add = []

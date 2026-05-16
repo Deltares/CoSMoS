@@ -10,7 +10,8 @@ import os
 
 import cht_utils.fileops as fo
 import geopandas as gpd
-from cht_cyclones import TropicalCyclone, jtwc
+from cht_cyclones import TropicalCyclone
+from cht_cyclones.jtwc import jtwc
 from cht_meteo import MeteoDatabase
 
 from .cosmos import cosmos
@@ -125,7 +126,18 @@ def collect_meteo() -> None:
     # track_file_name = None
     # storm_name = None
 
+    # How do we determine where the deterministic track forecast is coming from? We check in the following order:
+    # 1. A track file is provided in the scenario file (cosmos.scenario.meteo_track)
+    # 2. A track forecast source is provided in the scenario file (cosmos.scenario.cyclone_track_forecast_source).
+    #    Track forecast source is "jtwc" or "nhc", or some other provider.
+    #    In this case, we also need either:
+    #      A. an area file (cosmos.scenario.cyclone_track_forecast_area_file) to determine which track to use.
+    #      B. a storm number (cosmos.scenario.storm_number) to determine which track to use.
+    # 3. If not 1 or 2, we look for track files in the meteo data folders. This is now the case for COAMPS-TC, but also
+    #    for ECMWF as used by PAGASA.
+
     if cosmos.scenario.meteo_track is not None:
+
         # 1. Track name provided in scenario file (cosmos.scenario.meteo_track is the name without path or extension!)
 
         cosmos.log("Using track file provided in scenario file")
@@ -139,11 +151,13 @@ def collect_meteo() -> None:
         tc = TropicalCyclone(track_file=track_file_name, name=storm_name)
 
     elif cosmos.scenario.cyclone_track_forecast_source is not None:
+
         # 2) Track provided by cyclone_track_forecast_source (e.g. JTWC)
 
-        # Make sure that the area file is available and exists
         if cosmos.scenario.cyclone_track_forecast_area_file is not None:
-            # Read the file (geojson) and get the Polygon geometry
+
+            # A. Read the file (geojson) and get the Polygon geometry
+
             forecast_area = gpd.read_file(
                 os.path.join(
                     cosmos.config.path.main,
@@ -152,13 +166,21 @@ def collect_meteo() -> None:
                     cosmos.scenario.cyclone_track_forecast_area_file,
                 )
             ).geometry.iloc[0]
+
+        elif cosmos.scenario.storm_number is not None:
+
+            # B. Get the storm number from the scenario file and use that to find the track 
+            forecast_area = None    
+
         else:
             cosmos.stop(
                 "Track forecast area file (cyclone_track_forecast_area_file) not provided in scenario.toml !"
             )
 
         if cosmos.scenario.cyclone_track_forecast_source.lower() == "jtwc":
+
             jtwc_path = os.path.join(cosmos.meteo_database.path, "tracks", "jtwc")
+
             t0 = cosmos.cycle.replace(tzinfo=None)
             t1 = cosmos.stop_time.replace(tzinfo=None)
 
@@ -174,10 +196,14 @@ def collect_meteo() -> None:
             # Make a TropicalCyclone object
             tc = TropicalCyclone(track_file=track_file_name, name=storm_name)
 
+
+
     else:
+
         # 3) Track may be found in meteo data folders. This is now the case for COAMPS-TC.
 
         for dataset_name, meteo_dataset in cosmos.meteo_database.dataset.items():
+
             collect = False
 
             for model in cosmos.scenario.model:
@@ -189,7 +215,7 @@ def collect_meteo() -> None:
                 # Check if track files are available in any of the cycle folders
                 cycle_folders = fo.list_folders(os.path.join(meteo_dataset.path, "*"))
                 track_file_list = []
-                tau = meteo_dataset.tau
+                # tau = meteo_dataset.tau
                 # Loop through folders and determine time of cycle
                 for folder in cycle_folders:
                     try:
@@ -203,7 +229,7 @@ def collect_meteo() -> None:
                         # Track start time needs to be after or at the start time of the scenario.
                         if t >= t0:
                             # Check if track file is available
-                            track_files = glob.glob(os.path.join(folder, "*.trk"))
+                            track_files = glob.glob(os.path.join(folder, "*.cyc"))
                             if len(track_files) > 0:
                                 track_file_list.append(track_files[0])
                                 storm_name = meteo_dataset.name

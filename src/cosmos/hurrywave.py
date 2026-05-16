@@ -145,13 +145,15 @@ class CoSMoS_HurryWave(Model):
             # Copy all spiderwebs to jobs folder
             self.domain.config.set("spwfile", "hurrywave.spw")
 
-        # Make observation points
+        # Make observation points.
+        # str() coerces numeric-looking station IDs (e.g. NDBC buoy 42039,
+        # parsed as int upstream) so downstream code sees a consistent dtype.
         if self.station:
             for station in self.station:
                 if not self.domain.config.get("obsfile"):
                     self.domain.config.set("obsfile", "hurrywave.obs")
                 self.domain.observation_points.add_point(
-                    station.x, station.y, station.name
+                    station.x, station.y, str(station.name)
                 )
 
         # Add observation points for nested models (Nesting 1)
