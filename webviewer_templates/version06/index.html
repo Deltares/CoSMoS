@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>CoSMoS Event Viewer</title>
+
+  <!-- 3rd-party CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/2.0.6/pure-min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" />
+
+  <!-- Application CSS -->
+  <link rel="stylesheet" href="css/leaflet-velocity.css" />
+  <link rel="stylesheet" href="css/main.css" />
+
+  <!-- 3rd-party JS (must load before the cosmos.* modules) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet-src.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+  <script src="js/vendor/leaflet-velocity.js"></script>
+</head>
+
+<body>
+  <div class="flex-container">
+
+    <div class="header">
+      <h3>CoSMoS Event Viewer</h3>
+    </div>
+
+    <div class="map-container">
+      <div id="map"></div>
+
+      <img id="primary_logo"   src="img/logos/logo_blue.png" alt="Deltares" />
+      <img id="secondary_logo" src="img/logos/NRL_logo_Reverse_100.png" alt="NRL" />
+
+      <div class="map-control">
+        <div class="pure-form" style="width: 370px; margin-left: 10px;">
+          <fieldset id="scenarios"><legend>Storm Scenario</legend></fieldset>
+          <fieldset id="description"><div id="description_text"></div></fieldset>
+          <fieldset id="variables"><legend>Impact</legend></fieldset>
+          <fieldset id="times"><legend>Time</legend></fieldset>
+        </div>
+      </div>
+
+      <div class="infographic">
+        <div id="map_info"></div>
+        <div class="infographic-frame-wrap">
+          <iframe id="myIframe" src="img/infographics/empty.html"
+                  title="Infographic" height="300" width="480"></iframe>
+        </div>
+      </div>
+    </div>
+
+    <span id="status_text">Status: PROTOTYPE</span>
+  </div>
+
+  <!--
+    Application scripts. Load order matters: each file attaches its exports
+    to the `cosmos.*` namespace, and downstream files destructure from it.
+
+    Order: namespace → config → state → loaders → layers → ui → main.
+  -->
+  <script src="js/_namespace.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/loaders.js"></script>
+
+  <script src="js/layers/tile.js"></script>
+  <script src="js/layers/geojson.js"></script>
+  <script src="js/layers/wind.js"></script>
+  <script src="js/layers/stations.js"></script>
+  <script src="js/layers/cyclone.js"></script>
+
+  <script src="js/ui/panel.js"></script>
+  <script src="js/ui/legend.js"></script>
+  <script src="js/ui/icon-legend.js"></script>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
