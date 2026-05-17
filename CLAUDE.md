@@ -113,6 +113,25 @@ SFINCS and HurryWave can additionally be executed in a Docker container (e.g. fo
 
 `config.run.pre_processing_script` / `post_processing_script` point at user Python files exposing `main(cycle_info_file)`. The path to a generated `cycle_info.yml` (scenario summary + active models) is passed in. See `custom_processing.py`.
 
+## Web viewer
+
+The Python side (`cosmos.webviewer.WebViewer`) builds a static, browser-only viewer per scenario cycle. It copies a **template** from `webviewer_templates/<version>/` into `run_folder/webviewers/<viewer_name>/` (one viewer per `config.webviewer.name`) and emits data files into that viewer's `data/<scenario>/<cycle>/` subtree. The version to copy is selected by `config.webviewer.version` (e.g. `"version06"`).
+
+**Data contract is JSONP-style, not JSON.** Every data file is a `.js` that begins with `var <name> = ...` and is loaded by the JS side via a dynamically-injected `<script>` tag — the loader then reads `window[<name>]`. The known globals are documented at the top of [version06/js/loaders.js](webviewer_templates/version06/js/loaders.js) (`scenario`, `map_variables`, `stations`, `buoys`, `track_data`, `wind`, `runup`, etc., plus `csv` / `csv_obs` for timeseries). When changing a data filename or the global it assigns to, update both the Python emitter AND that loaders.js comment block.
+
+**Versioned templates.** Each `webviewer_templates/version0X/` is a complete, self-contained viewer:
+- **v02–v05** are legacy. Many files were copy-paste duplicates (seven near-identical `<plot>_timeseries.html` files, a `wil-layers.js` grab-bag, ~17 loose globals).
+- **v06** is a structural rewrite. Same JSONP contract with Python — no Python changes were needed. Architecture:
+  - **Classic `<script>` tags**, NOT ES modules, so it works from `file://` for local previewing. Loaded in dependency order in `index.html` and `html/timeseries.html`.
+  - **Single `window.cosmos` namespace** populated by IIFE-wrapped modules (`cosmos.config`, `cosmos.state`, `cosmos.loaders`, `cosmos.layers.{tile,geojson,wind,stations,cyclone}`, `cosmos.ui.{panel,legend,iconLegend}`, `cosmos.timeseries.{core,plotTypes}`). Replaces v05's ~17 loose globals.
+  - **Table-driven GeoJSON layers**: new variable types are added by appending one entry to `GEOJSON_SPECS` in `layers/geojson.js`, not by writing a new `make*Layer` function.
+  - **One unified `html/timeseries.html`** replaces v05's seven timeseries pages; dispatches on `?type=<plot type>&...` to a function in `timeseries/plot-types.js`. The popup URL is constructed JS-side (in `layers/geojson.js` / `layers/stations.js`), so Python doesn't know or care about the URL scheme.
+  - **Map library is Leaflet 1.7.1.** A MapLibre swap was discussed but deferred to a future v07. The modular structure isolates the swap-points (`layers/*`, parts of `main.js`); the `state`, `loaders`, `panel`, and `timeseries/` modules are framework-agnostic.
+
+**Local preview.** Just open `webviewer_templates/version06/index.html` in a browser — classic scripts mean `file://` works. The page needs a `data/` folder next to `index.html`; junction one in from a real deployment to test (`New-Item -ItemType Junction -Path data -Target <run_folder>\webviewers\<name>\data`).
+
+**Production deployment** is handled by `WebViewer.upload()` (SFTP via `webserver.*` config) or by AWS S3 sync in cloud mode. The Python side never serves the viewer itself.
+
 ## Conventions worth knowing
 
 - **Cycle strings** are formatted `YYYYMMDD_HHz` (lowercase z), but parsed with `%Y%m%d_%HZ` (uppercase) — this asymmetry is deliberate and present throughout the codebase.
