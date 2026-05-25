@@ -111,16 +111,30 @@ async function plotWaterLevelEnsemble(plot, p, win) {
     });
   }
 
+  // Live NOAA CO-OPS observations + astronomic prediction by station id.
+  if (p.id && p.id !== 'Empty') {
+    fetchCoops(p.id, win.t0, win.t1, 'water_level').then(function (d) {
+      if (d.times.length) Plotly.addTraces(plot, lineTrace(d.times, d.values,
+        { name: 'Observed', color: '#00cc00' }));
+    });
+    fetchCoops(p.id, win.t0, win.t1, 'predictions').then(function (d) {
+      if (d.times.length) Plotly.addTraces(plot, lineTrace(d.times, d.values,
+        { name: 'Astronomic prediction', color: '#0000ff' }));
+    });
+  }
+
+  // File-based observations/predictions (labelled "(file)" to avoid clashing
+  // with the CO-OPS traces above when a station has both).
   if (p.obsfile && p.obsfile !== 'Empty') {
     tryCsv(paths.obsFile(p), 1, 'csv_obs').then(function (csv) {
       if (csv) Plotly.addTraces(plot, lineTrace(csv.times, csv.columns[0],
-        { name: 'Observed', color: '#00cc00' }));
+        { name: 'Observed (file)', color: '#00cc00' }));
     });
   }
   if (p.prdfile && p.prdfile !== 'Empty') {
     tryCsv(paths.prdFile(p), 1, 'csvprd').then(function (csv) {
       if (csv) Plotly.addTraces(plot, lineTrace(csv.times, csv.columns[0],
-        { name: 'Astronomic prediction', color: '#0000ff' }));
+        { name: 'Astronomic prediction (file)', color: '#0000ff' }));
     });
   }
 }

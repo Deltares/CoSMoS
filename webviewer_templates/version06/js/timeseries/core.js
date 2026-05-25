@@ -24,6 +24,19 @@ function readParams() {
 // --- Time window ---
 
 /**
+ * Parse a cosmos cycle string "YYYYMMDD_HHz" into a UTC Date. Falls back to
+ * native Date parsing for ISO-style strings. (new Date("20260517_00z") is
+ * Invalid Date, which previously broke the CO-OPS date formatting.)
+ */
+function parseCycle(s) {
+  const m = /^(\d{4})(\d{2})(\d{2})_(\d{2})z?$/i.exec(s);
+  if (m) {
+    return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], 0, 0));
+  }
+  return new Date(s);
+}
+
+/**
  * Build the t0 / t0Axis / t1 timestamps used by all timeseries plots.
  *   • cycle   = forecast cycle (Date)
  *   • t0      = cycle − 36 h  (data fetched from here)
@@ -31,7 +44,7 @@ function readParams() {
  *   • t1      = cycle + duration h  (end of plot)
  */
 function timeWindow(cycleString, durationHours) {
-  const cycle = new Date(cycleString);
+  const cycle = parseCycle(cycleString);
   return {
     cycle:  cycle,
     t0:     new Date(cycle.getTime() - 36 * 3600 * 1000),
