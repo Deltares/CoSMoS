@@ -51,12 +51,16 @@ class WebViewer:
         # Check whether web viewer already exists
         # If not, copy empty web viewer from templates
         if not self.exists:
+
             cosmos.log("Making new web viewer from " + self.version + " ...")
 
             fo.mkdir(self.path)
 
+            # cosmos repository, so we can be sure it is always there
+            cosmos_repo_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
             template_path = os.path.join(
-                cosmos.config.path.config, "webviewer_templates", self.version, "*"
+                cosmos_repo_path, "webviewer_templates", self.version, "*"
             )
             fo.copy_file(template_path, self.path)
 
