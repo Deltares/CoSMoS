@@ -117,6 +117,34 @@ class CloudConfig:
         self.token = None
 
 
+class BatchConfig:
+    """AWS Batch job submission settings (used when ``run.run_mode = 'batch'``).
+
+    With the command-override approach a single job definition is reused for
+    every step; the command, queue, and (optionally) resource requirements are
+    supplied at submit time. Simulation steps go to ``gpu_queue``; the
+    prepare/merge/tile steps go to ``cpu_queue`` (tiling is CPU/IO-bound, so
+    there's no reason to run it on a GPU instance).
+    """
+
+    def __init__(self) -> None:
+        self.bucket = "cosmos-scenarios"  # S3 bucket holding job input/output
+        # The image (and therefore the job definition) differs per model type,
+        # so the definition name is derived from the model type at submit time.
+        # `job_definition` (if set) overrides the template for every model.
+        self.job_definition_template = "cosmos-{type}-fat"
+        self.job_definition = None
+        self.gpu_queue = None  # queue for the simulation step
+        self.cpu_queue = None  # queue for prepare / merge / tile steps
+        self.region = None  # falls back to cloud_config.region when None
+        # Container resource overrides. `gpus` is applied only to the
+        # simulation steps (run_all / prepare_and_simulate); the merge+tile
+        # step runs CPU-only so it can schedule on the CPU queue.
+        self.vcpus = None
+        self.memory = None  # MiB
+        self.gpus = 1
+
+
 class TrackEnsemble:
     """Track ensemble error statistics and realization count."""
 
@@ -211,6 +239,7 @@ class Configuration:
         self.webviewer = WebViewer()
         self.run = Run()
         self.cloud_config = CloudConfig()
+        self.batch = BatchConfig()
         self.track_ensemble = TrackEnsemble()
         self.kwargs = {}
 

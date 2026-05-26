@@ -12,6 +12,7 @@ import time
 
 import numpy as np
 
+from .batch import Batch
 from .clean_up import clean_up
 from .cloud import Cloud
 from .cosmos import cosmos
@@ -80,6 +81,10 @@ class MainLoop:
         if cosmos.config.run.run_mode == "cloud":
             cosmos.cloud = Cloud()
             cosmos.argo = Argo()
+        elif cosmos.config.run.run_mode == "batch":
+            # AWS Batch: S3 for data staging, Batch for job submission/polling.
+            cosmos.cloud = Cloud()
+            cosmos.batch = Batch()
 
         # Read scenario
         cosmos.scenario = Scenario(cosmos.scenario_name)

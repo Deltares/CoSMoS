@@ -92,14 +92,19 @@ class ModelLoop:
             # (so that pre-processing of next model can commence)
             # Post-processing will happen later
             if not model.status == "failed":
-                if cosmos.config.run.run_mode == "cloud":
+                if cosmos.config.run.run_mode in ("cloud", "batch"):
                     # Download job folder from cloud storage (ideally we do not need to do this, but then extraction of time series data needs to be done in the cloud as well)
                     # Alternatively, we could just download the his file for local post-processing
                     subfolder = (
                         cosmos.scenario.name + "/" + "models" + "/" + model.name + "/"
                     )
+                    bucket = (
+                        cosmos.config.batch.bucket
+                        if cosmos.config.run.run_mode == "batch"
+                        else "cosmos-scenarios"
+                    )
                     cosmos.cloud.download_folder(
-                        "cosmos-scenarios", subfolder, model.job_path
+                        bucket, subfolder, model.job_path
                     )
                 # Moving files to input, output and restart folders
                 cosmos.log("Moving model " + model.long_name)
@@ -212,6 +217,15 @@ def check_for_finished_simulations() -> list:
                     # TODO: Implement handling of failed workflow. What happens
                     #      when a workflow fails?
                     if Argo.get_task_status(model.cloud_job) != "Running":
+                        finished_list.append(model)
+                elif cosmos.config.run.run_mode == "batch":
+                    # Poll the (tail) Batch job. For ensembles model.cloud_job
+                    # is the merge job, which depends on the whole simulation
+                    # array — so a terminal merge status captures the chain.
+                    status = cosmos.batch.get_job_status(model.cloud_job)
+                    if cosmos.batch.is_finished(status):
+                        if cosmos.batch.is_failed(status):
+                            model.status = "failed"
                         finished_list.append(model)
                 else:
                     file_name = os.path.join(model.job_path, "finished.txt")

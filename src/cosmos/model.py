@@ -580,8 +580,9 @@ class Model:
             )
 
         # First prepare batch file
-        if cosmos.config.run.run_mode == "cloud":
-            # No need for a batch file. Workflow template will take care of different steps.
+        if cosmos.config.run.run_mode in ("cloud", "batch"):
+            # No local run script needed: the Argo workflow template (cloud) or
+            # the model image entrypoint (batch) drives the steps.
             pass
         else:
             # Now loop through models
@@ -697,6 +698,89 @@ class Model:
                 webviewerfolder=webviewerfolder,
                 tilingfolder=tilesfolder,
             )
+
+        elif cosmos.config.run.run_mode == "batch":
+            # Submit to AWS Batch. Stage input to S3, then submit either one
+            # job (deterministic: prepare → simulate → tile) or a 2-job chain
+            # (ensemble: array simulate per member → dependent merge + tile).
+            #
+            # The command tokens below ("run_all", "prepare_and_simulate",
+            # "merge_and_tile") are a contract with the model image's
+            # entrypoint, which maps each to the corresponding run_job_2.py
+            # step(s) and does the S3 sync in/out around them.
+            bc = cosmos.config.batch
+            s3key = cosmos.scenario.name + "/" + "models" + "/" + self.name
+            tilesfolder = self.region + "/" + self.type + "/" + self.deterministic_name
+            webviewerfolder = cosmos.config.webviewer.name + "/data"
+            # Image (and thus job definition) is pinned per model type.
+            job_def = bc.job_definition or bc.job_definition_template.format(
+                type=self.type
+            )
+
+            cosmos.log("Deleting model folder on S3 : " + self.name)
+            cosmos.cloud.delete_folder(bc.bucket, s3key)
+            cosmos.log("Uploading to S3 : " + s3key)
+            cosmos.cloud.upload_folder(bc.bucket, self.job_path, s3key)
+            if self.ensemble:
+                cosmos.cloud.upload_folder(
+                    bc.bucket,
+                    os.path.join(self.job_path, "base_input"),
+                    s3key + "/base_input",
+                )
+
+            environment = {
+                "BUCKET": bc.bucket,
+                "SUBFOLDER": s3key,
+                "SCENARIO": cosmos.scenario.name,
+                "CYCLE": cosmos.cycle_string,
+                "MODEL": self.name,
+                "MODEL_TYPE": self.type,
+                "WEBVIEWER_FOLDER": webviewerfolder,
+                "TILING_FOLDER": tilesfolder,
+            }
+
+            if self.ensemble:
+                # Count members from the list pre_process wrote into the job
+                # folder; the array job runs one element per member.
+                with open(
+                    os.path.join(self.job_path, "ensemble_members.txt")
+                ) as f:
+                    n_members = len(
+                        [ln for ln in f.read().splitlines() if ln.strip()]
+                    )
+                cosmos.log(
+                    f"Submitting Batch ensemble chain for {self.name} "
+                    f"({n_members} members)"
+                )
+                sim_job = cosmos.batch.submit_job(
+                    job_name=self.name + "-sim",
+                    queue=bc.gpu_queue,
+                    job_definition=job_def,
+                    command=["prepare_and_simulate"],
+                    environment=environment,
+                    array_size=n_members,
+                    gpus=bc.gpus,  # simulation needs the GPU
+                )
+                # Poll only the merge job: it depends on the whole array.
+                # Merge + tile is CPU-only, so it can run on the CPU queue.
+                self.cloud_job = cosmos.batch.submit_job(
+                    job_name=self.name + "-merge",
+                    queue=bc.cpu_queue,
+                    job_definition=job_def,
+                    command=["merge_and_tile"],
+                    environment=environment,
+                    depends_on=[sim_job],
+                )
+            else:
+                cosmos.log("Submitting Batch job for " + self.name)
+                self.cloud_job = cosmos.batch.submit_job(
+                    job_name=self.name,
+                    queue=bc.gpu_queue,
+                    job_definition=job_def,
+                    command=["run_all"],
+                    environment=environment,
+                    gpus=bc.gpus,  # simulation needs the GPU
+                )
 
         elif cosmos.config.run.run_mode == "parallel":
             if platform_name == "windows":

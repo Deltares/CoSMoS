@@ -958,3 +958,43 @@ elif option == "map_tiles":
 elif option == "clean_up":
     # Remove all ensemble members
     clean_up(config)
+
+# ── Composite steps for run_mode = "batch" (Option B fat image) ──────────────
+# The fat-image entrypoint owns S3 staging: it syncs the job folder to /data,
+# runs ONE of the tokens below, then syncs /data back. So these steps operate
+# on local files in the current working directory (cwd = /data).
+#
+# NOTE (remaining work, must be validated against real AWS): prepare_single /
+# map_tiles / clean_up still contain `run_mode == "cloud"` vs local branches.
+# The local branch uses orchestrator paths (config["spw_path"], parent model
+# cycle_output_path) that do not exist in the container, and the cloud branch
+# uses Argo mount paths + the cosmos-scenarios bucket. A `run_mode == "batch"`
+# staging path (fetch per-member spiderwebs and cross-model boundary files from
+# S3, write tiles to ./tiles) is needed before these run end-to-end. Tracked in
+# the aws_batch README.
+
+elif option == "run_all":
+    # Deterministic model: prepare -> simulate -> tile, in one container.
+    prepare_single(config)
+    os.system("sfincs")  # binary is on PATH in the fat image
+    map_tiles(config)
+
+elif option == "prepare_and_simulate":
+    # One ensemble member, selected by the Batch array index. Runs in a
+    # per-member subfolder so members don't collide on the synced /data.
+    if member is None:
+        idx = int(os.environ["COSMOS_MEMBER_INDEX"])
+        member = read_ensemble_members()[idx]
+    print("Array member: " + member)
+    fo.mkdir(member)
+    curdir = os.getcwd()
+    os.chdir(member)
+    prepare_single(config, member=member)
+    os.system("sfincs")
+    os.chdir(curdir)
+
+elif option == "merge_and_tile":
+    # Ensemble fan-in: merge member output, tile, then clean up the members.
+    merge_ensemble(config)
+    map_tiles(config)
+    clean_up(config)
