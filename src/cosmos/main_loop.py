@@ -319,6 +319,12 @@ class MainLoop:
         if cosmos.config.run.event_mode == "meteo":
             # Running storm or other weather event
 
+            # Detect whether the meteo dataset has one subfolder per ensemble
+            # member (each with its own gridded nc files + <member>.cyc).
+            # When yes, the per-member spw + amu/amv flow downstream branches
+            # on cosmos.scenario.meteo_ensemble_mode.
+            cosmos.scenario.detect_meteo_ensemble_mode()
+
             # Download meteo data
             if cosmos.config.run.download_meteo:
                 download_meteo()

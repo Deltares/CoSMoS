@@ -107,31 +107,28 @@ def prepare_single(config: dict, member: str = None) -> None:
             # We're already in the right member path
             fo.copy_file(os.path.join("..", "base_input", "*.*"), ".")
 
-    # Copy spiderweb file
-    if config["ensemble"]:
-        print("Copying spiderweb file ...")
-        if config["run_mode"] == "cloud":
-            s3_key = (
-                config["scenario"]
-                + "/"
-                + "track_ensemble"
-                + "/"
-                + "spw"
-                + "/ensemble"
-                + member
-                + ".spw"
-            )
-            local_file_path = "/input/hurrywave.spw"
-            # Download the file from S3
-            try:
-                s3_client.download_file(bucket_name, s3_key, local_file_path)
-                print(f"File downloaded successfully to '{local_file_path}'")
-            except Exception as e:
-                print(f"Error: {e}")
-        else:
-            # Copy all spiderwebs to jobs folder
-            fname0 = os.path.join(config["spw_path"], "ensemble" + member + ".spw")
-            fo.copy_file(fname0, "hurrywave.spw")
+    # Spiderweb file: in local mode the per-member hurrywave.spw was staged
+    # into the member folder during CoSMoS pre-process
+    # (Model.write_meteo_input_files), so nothing to do here. In cloud mode it
+    # still has to be pulled from S3.
+    if config["ensemble"] and config["run_mode"] == "cloud":
+        print("Downloading spiderweb file from S3 ...")
+        s3_key = (
+            config["scenario"]
+            + "/"
+            + "track_ensemble"
+            + "/"
+            + "spw"
+            + "/ensemble_"
+            + member
+            + ".spw"
+        )
+        local_file_path = "/input/hurrywave.spw"
+        try:
+            s3_client.download_file(bucket_name, s3_key, local_file_path)
+            print(f"File downloaded successfully to '{local_file_path}'")
+        except Exception as e:
+            print(f"Error: {e}")
 
     # Read HurryWave model (necessary for nesting)
     hw = HurrywaveModel(root=".", mode="r+")

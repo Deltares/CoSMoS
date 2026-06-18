@@ -24,8 +24,104 @@ def read_meteo_database() -> None:
     cosmos.meteo_database.read_datasets()
 
 
+def _collect_meteo_ensemble_deterministic() -> None:
+    """Per-member ensemble meteo: load the deterministic representative.
+
+    The last (sorted) ensemble member supplies the deterministic best track:
+    its gridded data is collected once into the dataset, and its <member>.cyc
+    is loaded as ``cosmos.tropical_cyclone``. The wind field is taken straight
+    from the gridded data (per-member ensembles never use parametric spws),
+    and ``storm.spw`` / ``storm.cyc`` are written to ``cycle_track_spw_path``.
+
+    The OTHER members' spw + amu/amv are produced later by
+    ``setup_track_ensemble()`` and ``Model.write_meteo_input_files()``, which
+    re-call ``meteo_dataset.collect(subfolder=<member>)`` per member.
+    """
+    member = cosmos.scenario.meteo_ensemble_deterministic
+    dataset_name = cosmos.scenario.meteo_dataset
+    meteo_dataset = cosmos.meteo_database.dataset.get(dataset_name)
+    if meteo_dataset is None:
+        cosmos.stop(
+            f"Per-member ensemble meteo dataset '{dataset_name}' "
+            f"not found in meteo database."
+        )
+
+    # Same t0/t1 logic as the regular collect: cover all models that point at
+    # this dataset.
+    t0 = datetime.datetime(2100, 1, 1, 0, 0, 0)
+    t1 = datetime.datetime(1970, 1, 1, 0, 0, 0)
+    for model in cosmos.scenario.model:
+        if model.meteo_dataset and model.meteo_dataset.name == dataset_name:
+            t0 = min(t0, model.flow_start_time)
+            t1 = max(t1, model.flow_stop_time)
+
+    last_meteo_cycle = cosmos.cycle if cosmos.config.run.collect_meteo_up_to_cycle else None
+
+    cosmos.log(
+        f"Collecting meteo data (per-member, deterministic={member}) : {meteo_dataset.name}"
+    )
+    meteo_dataset.collect([t0, t1], last_cycle=last_meteo_cycle, subfolder=member)
+
+    meteo_dataset.resolution = float(
+        meteo_dataset.ds["lon"].values[1] - meteo_dataset.ds["lon"].values[0]
+    )
+    if meteo_dataset.last_forecast_cycle_time:
+        cstr = meteo_dataset.last_forecast_cycle_time.strftime("%Y%m%d_%Hz")
+        cosmos.scenario.meteo_string = f"{cstr} ({meteo_dataset.name})"
+    else:
+        cosmos.scenario.meteo_string = meteo_dataset.name
+
+    # Load the last member's .cyc as the deterministic tc.
+    cyc_file = os.path.join(
+        meteo_dataset.path, cosmos.cycle_string, member, f"{member}.cyc"
+    )
+    if not os.path.exists(cyc_file):
+        cosmos.stop(f"Deterministic track file not found: {cyc_file}")
+    tc = TropicalCyclone(track_file=cyc_file, name=member)
+
+    # Per-member ensembles always derive the spw from the gridded data —
+    # this is the whole point. (Equivalent to spw_wind_field == "meteo_data".)
+    tc.track.resample(1, method="spline")
+    if len(meteo_dataset.subset) > 0:
+        times = meteo_dataset.subset[0].ds.time.values
+    else:
+        times = meteo_dataset.ds.time.values
+    tend = datetime.datetime.utcfromtimestamp(
+        times[-1].astype(datetime.datetime) / 1e9
+    )
+    tc.track.shorten(tend=tend)
+    tc.get_wind_field_from_meteo_dataset(meteo_dataset)
+
+    # Write storm.spw / storm.cyc / track.geojson.js — same as the standard
+    # deterministic flow below.
+    cosmos.scenario.meteo_spiderweb = "storm.spw"
+    fo.mkdir(cosmos.scenario.cycle_track_spw_path)
+    spwfile = os.path.join(
+        cosmos.scenario.cycle_track_spw_path, cosmos.scenario.meteo_spiderweb
+    )
+    if not os.path.exists(spwfile):
+        tc.write_spiderweb(spwfile, format="ascii", include_rainfall=True)
+    cycfile = os.path.join(cosmos.scenario.cycle_track_spw_path, "storm.cyc")
+    tc.track.write(cycfile)
+    jsfile = os.path.join(cosmos.scenario.cycle_track_spw_path, "track.geojson.js")
+    tc.track.to_gdf(
+        filename=jsfile, classification=cosmos.config.webviewer.storm_classification
+    )
+
+    cosmos.tropical_cyclone = tc
+
+
 def download_meteo() -> None:
     """Download meteorological data for all required datasets."""
+    # Per-member ensemble meteo (scenario.detect_meteo_ensemble_mode()) is
+    # assumed to be pre-staged on disk in the per-cycle, per-member layout —
+    # the cht_meteo download flow doesn't know about subfolders. Skip.
+    if cosmos.scenario.meteo_ensemble_mode:
+        cosmos.log(
+            "Per-member meteo ensemble: skipping download_meteo "
+            "(data is pre-staged in member subfolders)."
+        )
+        return
     # Loop through all available meteo datasets
     # Determine if the need to be downloaded
     # Get start and stop times for meteo data
@@ -59,6 +155,15 @@ def download_meteo() -> None:
 
 def collect_meteo() -> None:
     """Collect meteorological data from NetCDF files and process cyclone tracks."""
+    # Per-member ensemble meteo: handled separately. The "deterministic"
+    # representative is the last (sorted) member; we collect ONLY that member
+    # here and use its track + grids to build storm.spw / storm.cyc.
+    # The per-member loop (spw + amu/amv for every other member) lives in
+    # setup_track_ensemble() and Model.write_meteo_input_files().
+    if cosmos.scenario.meteo_ensemble_mode:
+        _collect_meteo_ensemble_deterministic()
+        return
+
     # Loop through all available meteo datasets
     # Determine if the need to be downloaded
     # Get start and stop times for meteo data

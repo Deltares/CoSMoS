@@ -125,12 +125,11 @@ class CoSMoS_HurryWave(Model):
 
         if self.meteo_spiderweb or self.meteo_track and not self.ensemble:
             self.domain.config.set("spwfile", "hurrywave.spw")
-            # Spiderweb file given, copy to job folder
-            if cosmos.scenario.run_ensemble:
-                spwfile = os.path.join(
-                    cosmos.scenario.cycle_track_ensemble_spw_path, "ensemble00000.spw"
-                )
-            elif self.meteo_spiderweb:
+            # Spiderweb file given, copy to job folder. Mirrors the SFINCS path —
+            # the deterministic model always reads cycle_track_spw_path/storm.spw
+            # (a hardcoded ensemble00000.spw used to be picked here when
+            # run_ensemble=true, which broke under the per-member layout).
+            if self.meteo_spiderweb:
                 spwfile = os.path.join(
                     cosmos.scenario.cycle_track_spw_path, self.meteo_spiderweb
                 )

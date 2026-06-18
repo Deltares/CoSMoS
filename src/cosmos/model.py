@@ -562,7 +562,7 @@ class Model:
             # In case of ensemble, we move all inputs to base_input subfolder
             fo.mkdir(os.path.join(self.job_path, "base_input"))
             fo.move_file(
-                os.path.join(self.job_path, "*"),
+                os.path.join(self.job_path, "*.*"),
                 os.path.join(self.job_path, "base_input"),
             )
             # Copy ensemble members file to job folder
@@ -1031,7 +1031,17 @@ class Model:
 
         # Check if the model uses 2d meteo forcing from weather model
 
-        if self.meteo_dataset:
+        if not self.meteo_dataset:
+            return
+
+        # Per-member ensembles re-collect the gridded data for each member
+        # and write the cut-out into a <path>/<member>/ subfolder.
+        # Deterministic models keep the existing single-shot behaviour.
+        per_member = self.ensemble and cosmos.scenario.meteo_ensemble_mode
+
+        def _emit_for(out_path):
+            """Cut self.meteo_dataset to this model's domain and write the
+            Delft3D-style forcing files into ``out_path``."""
             meteo_res = self.meteo_dataset.resolution
             if self.crs.is_geographic:
                 # Model is in geographical coordinates
@@ -1055,13 +1065,14 @@ class Model:
                         crs=self.crs,
                     )
             else:
+                meteo_res_local = meteo_res
                 if self.meteo_dataset.crs.is_geographic:
-                    meteo_res = meteo_res * 111e3  # convert to meters
+                    meteo_res_local = meteo_res_local * 111e3  # convert to meters
                 # First check if the model has a resolution defined. If not, use meteo resolution or 20km
                 dxy = self.resolution if self.resolution > 0.0 else 20000.0
                 # If model resolution is larger than meteo resolution (very big default), use meteo resolution
-                if dxy > meteo_res:
-                    dxy = meteo_res
+                if dxy > meteo_res_local:
+                    dxy = meteo_res_local
                 x = np.arange(self.xlim[0] - dxy, self.xlim[1] + dxy, dxy)
                 y = np.arange(self.ylim[0] - dxy, self.ylim[1] + dxy, dxy)
                 # non-geographical coordinates always need to be reprojected to model CRS
@@ -1095,7 +1106,7 @@ class Model:
                         prefix,
                         format="netcdf",
                         parameters=params,
-                        path=path,
+                        path=out_path,
                         refdate=tref,
                         time_range=time_range,
                         header_comments=header_comments,
@@ -1108,7 +1119,7 @@ class Model:
                         meteo_dataset.to_delft3d(
                             prefix,
                             parameters=["wind"],
-                            path=path,
+                            path=out_path,
                             refdate=tref,
                             time_range=time_range,
                             header_comments=header_comments,
@@ -1118,7 +1129,7 @@ class Model:
                         meteo_dataset.to_delft3d(
                             prefix,
                             parameters=["barometric_pressure"],
-                            path=path,
+                            path=out_path,
                             refdate=tref,
                             time_range=time_range,
                             header_comments=header_comments,
@@ -1128,11 +1139,44 @@ class Model:
                         meteo_dataset.to_delft3d(
                             prefix,
                             parameters=["precipitation"],
-                            path=path,
+                            path=out_path,
                             refdate=tref,
                             time_range=time_range,
                             header_comments=header_comments,
                         )
+
+        if per_member:
+            # Loop members. Each iteration re-collects that member's gridded
+            # data into self.meteo_dataset.ds, then writes amu/amv/amp into
+            # <path>/<member>/. Only one member is in memory at a time.
+            # We also stage the per-member spw alongside (named <prefix>.spw)
+            # so the runner doesn't need to copy anything at runtime — the
+            # member subfolder is self-contained.
+            last_cycle = (
+                cosmos.cycle if cosmos.config.run.collect_meteo_up_to_cycle else None
+            )
+            spw_src_dir = cosmos.scenario.cycle_track_ensemble_spw_path
+            for member in cosmos.scenario.ensemble_names:
+                cosmos.log(
+                    f"  meteo forcing files for ensemble member {member} ..."
+                )
+                self.meteo_dataset.collect(
+                    time_range, last_cycle=last_cycle, subfolder=member
+                )
+                member_path = os.path.join(path, member)
+                fo.mkdir(member_path)
+                _emit_for(member_path)
+                # Copy this member's spw into its subfolder as <prefix>.spw
+                # (the name the model binary expects).
+                spw_src = os.path.join(spw_src_dir, "ensemble_" + member + ".spw")
+                if os.path.exists(spw_src):
+                    fo.copy_file(spw_src, os.path.join(member_path, prefix + ".spw"))
+                else:
+                    cosmos.log(
+                        f"  warning: ensemble spw not found for member {member}: {spw_src}"
+                    )
+        else:
+            _emit_for(path)
 
     def get_restart_time(self) -> "datetime.datetime":
         # If we play catch up (i.e. we may have missed one or more cycles),

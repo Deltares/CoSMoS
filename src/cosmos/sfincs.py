@@ -27,8 +27,14 @@ def _read_sfincs_his(
     """Read SFINCS history output as DataFrame with station name columns."""
     ds = xr.open_dataset(file_name)
     var = ds[parameter]
-    if ensemble_member is not None and "ensemble_member" in var.dims:
-        var = var.isel(ensemble_member=ensemble_member)
+    # merge_nc_his (cht_utils) names the ensemble dim "ensemble"; some older
+    # writers used "ensemble_member". Accept either so post-processing works
+    # regardless of which produced the merged his file.
+    if ensemble_member is not None:
+        for ens_dim in ("ensemble", "ensemble_member"):
+            if ens_dim in var.dims:
+                var = var.isel({ens_dim: ensemble_member})
+                break
     # Get station names
     stations = ds.station_name.values
     names = []

@@ -65,6 +65,15 @@ class Scenario:
         self.run_ensemble = False  # Move this to config.run?
         self.meteo_string = ""
         self.storm_number = None
+        # Per-member ensemble mode: when the meteo dataset's cycle folder
+        # contains one subdir per ensemble member (each with its own gridded
+        # nc files + <member>.cyc track), CoSMoS produces a per-member spw
+        # AND per-member amu/amv from THAT member's gridded data. Detected
+        # at runtime by `detect_meteo_ensemble_mode()`; the last (sorted)
+        # member also acts as the deterministic best track.
+        self.meteo_ensemble_mode = False
+        self.ensemble_names = []
+        self.meteo_ensemble_deterministic = None  # last-sorted member name
 
     def read(self) -> None:
         """Read scenario file, set model paths and settings, initialize models and read model generic and model specific data."""
@@ -382,4 +391,55 @@ class Scenario:
         self.timeseries_path = os.path.join(self.path, "timeseries")
         self.cycle_timeseries_path = os.path.join(
             self.path, "timeseries", cosmos.cycle_string
+        )
+
+    def detect_meteo_ensemble_mode(self) -> None:
+        """Detect whether the meteo dataset for this cycle is laid out per
+        ensemble member.
+
+        Layout we accept:
+            <meteo_db>/<dataset>/<cycle>/<member>/
+                <member>.cyc                    # member's track
+                <member>.YYYYMMDD_HHMM.nc ...   # member's gridded forcing
+
+        When present, set ``self.meteo_ensemble_mode = True``, populate
+        ``self.ensemble_names`` from the (sorted) subdir names, and pick the
+        last one as the deterministic best track. Otherwise leaves the flag
+        ``False`` so the existing flat-layout flow is used.
+
+        Called from main_loop after cycle + meteo_database are known.
+        """
+        self.meteo_ensemble_mode = False
+        self.ensemble_names = []
+        self.meteo_ensemble_deterministic = None
+
+        if not self.run_ensemble or not self.meteo_dataset:
+            return
+        ds = cosmos.meteo_database.dataset.get(self.meteo_dataset)
+        if ds is None:
+            return
+        cycle_folder = os.path.join(ds.path, cosmos.cycle_string)
+        if not os.path.isdir(cycle_folder):
+            return
+
+        members = []
+        for entry in sorted(os.listdir(cycle_folder)):
+            sub = os.path.join(cycle_folder, entry)
+            if not os.path.isdir(sub):
+                continue
+            # A member subfolder must contain <member>.cyc — that's the
+            # signature that distinguishes it from any other stray directory.
+            if os.path.exists(os.path.join(sub, entry + ".cyc")):
+                members.append(entry)
+
+        if not members:
+            return
+
+        self.meteo_ensemble_mode = True
+        self.ensemble_names = members
+        self.meteo_ensemble_deterministic = members[-1]
+        self.track_ensemble_nr_realizations = len(members)
+        cosmos.log(
+            f"Per-member meteo ensemble detected: {len(members)} members "
+            f"({', '.join(members)}); deterministic = {members[-1]}"
         )
