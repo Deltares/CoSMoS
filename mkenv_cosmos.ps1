@@ -1,26 +1,29 @@
 # To create the cosmos environment, do the following:
 #
+# set $gitpath below to the folder that contains your git repositories
 # open conda powershell
-# cd c:\work\cosmos\run_folder
-# ./mkenv.ps1
+# cd to the folder that contains this script
+# ./mkenv_cosmos.ps1
+
+$gitpath = "c:\github"
 
 conda create -n cosmos python=3.11 pip
 conda activate cosmos
-pip install -e c:\github\cosmos
-pip install -e c:\github\hydromt_sfincs
-pip install -e c:\github\hydromt-hurrywave
-pip install -e c:\github\cht_utils
-pip install -e c:\github\cht_physics
-pip install -e c:\github\cht_bathymetry
-pip install -e c:\github\cht_tsunami
-pip install -e c:\github\cht_tide
-pip install -e c:\github\cht_cyclones
-pip install -e c:\github\cht_meteo
-pip install -e c:\github\cht_sfincs
-pip install -e c:\github\cht_hurrywave
-pip install -e c:\github\cht_delft3dfm
-pip install -e c:\github\cht_beware
-pip install -e c:\github\cht_xbeach
-pip install -e c:\github\cht_nesting
-pip install -e c:\github\cht_tiling
+pip install -e $gitpath\cosmos
+pip install -e $gitpath\hydromt_sfincs
+pip install -e $gitpath\hydromt-hurrywave
+pip install -e $gitpath\cht_utils
+pip install -e $gitpath\cht_physics
+pip install -e $gitpath\cht_bathymetry
+pip install -e $gitpath\cht_tsunami
+pip install -e $gitpath\cht_tide
+pip install -e $gitpath\cht_cyclones
+pip install -e $gitpath\cht_meteo
+pip install -e $gitpath\cht_sfincs
+pip install -e $gitpath\cht_hurrywave
+pip install -e $gitpath\cht_delft3dfm
+pip install -e $gitpath\cht_beware
+pip install -e $gitpath\cht_xbeach
+pip install -e $gitpath\cht_nesting
+pip install -e $gitpath\cht_tiling
 pip install boto3
