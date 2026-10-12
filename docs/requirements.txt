@@ -1,17 +1,3 @@
-numpy
-pandas
-pillow
-pyproj
-matplotlib
-scipy
-netCDF4
 sphinx
 sphinx_rtd_theme
-cht_bathymetry
-cht_cyclones
-cht_hurrywave
-cht_sfincs
-cht_utils
-cht_meteo
-sphinx_autoapi
 sphinx-autoapi
