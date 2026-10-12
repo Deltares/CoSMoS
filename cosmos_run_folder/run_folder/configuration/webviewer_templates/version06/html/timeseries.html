@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CoSMoS timeseries</title>
+  <style>
+    body { margin: 0; font-family: sans-serif; }
+    #plot { width: 100%; height: 460px; }
+    #model_text { font-size: x-small; margin: 4px 8px; }
+  </style>
+  <!-- Plotly (loaded once; fetch + URLSearchParams replace D3). -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+  <div id="plot"></div>
+  <p id="model_text"></p>
+
+  <!--
+    Scripts run in order. The timeseries page reuses cosmos.loaders for
+    loading the CSV-as-JS files, then defines its own cosmos.timeseries.*
+    helpers and dispatches on ?type=<name>.
+  -->
+  <script src="../js/_namespace.js"></script>
+  <script src="../js/loaders.js"></script>
+  <script src="../js/timeseries/core.js"></script>
+  <script src="../js/timeseries/plot-types.js"></script>
+  <script src="../js/timeseries/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,162 @@
+/* main.css — CoSMoS Event Viewer (version06)
+ *
+ * Layout summary:
+ *   .flex-container   – full-height page wrapper
+ *     .header         – fixed-height title strip
+ *     .map-container  – flex row; map on the left, control panel on the right
+ *       #map          – Leaflet map (flex-grow)
+ *       .map-control  – right-hand scenario/variable/time panel
+ *       .infographic  – iframe overlay (bottom-left infographic)
+ *       #primary_logo / #secondary_logo – pinned logos
+ */
+
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+/* Note: deliberately NO global font-size here. The control-panel widgets
+ * inherit the browser default (~16px), and the small bits (timeselector,
+ * status line, legends) opt down to fixed sizes below. v05 had a stray
+ * `.html { font-size: 11px }` rule that did nothing (no `.html` class
+ * exists) — preserving the same effective sizing by not adding one. */
+
+.flex-container {
+  margin-left: 20px;
+  width: calc(100% - 20px);
+  height: 100%;
+}
+
+.header {
+  height: 40px;
+  line-height: 40px;
+  max-width: calc(100% - 300px);
+}
+.header h3 {
+  text-align: center;
+  white-space: nowrap;
+  margin: 0;
+}
+
+.map-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: calc(100% - 70px);
+  position: relative;
+}
+
+#map {
+  height: 100%;
+  flex: 1 1 80%;
+}
+
+.map-control {
+  display: block;
+  flex: 0 0 350px;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* --- Pinned logos. Override per deployment by changing the src or position.
+ * Height is set to auto so the logo keeps its native aspect ratio; only the
+ * width is fixed. --- */
+#primary_logo {
+  position: absolute;
+  bottom: 40px;
+  left: 5px;
+  width: 150px;
+  height: auto;
+  z-index: 400;
+  pointer-events: none;
+}
+#secondary_logo {
+  position: absolute;
+  bottom: 100px;
+  left: 10px;
+  width: 100px;
+  height: auto;
+  z-index: 400;
+  pointer-events: none;
+}
+
+/* --- Right-hand control panel --- */
+#description_text {
+  width: 320px;
+  font-size: 15px;
+  border-style: none;
+}
+
+.timeselector { font-size: 11px; }
+
+legend       { font-weight: bold; }
+
+/* --- Infographic iframe wrapper (positioned in front of the map) --- */
+.infographic-frame-wrap {
+  position: relative;
+  width: 10px;
+  margin-left: -480px;
+  margin-top: 708px;
+}
+.infographic-frame-wrap iframe { border: none; }
+
+#status_text {
+  font-size: 0.715rem;
+  height: 30px;
+  line-height: 30px;
+  white-space: nowrap;
+  overflow-x: hidden;
+}
+
+/* --- Leaflet legend boxes (bottom-right contour legend, top-left icon legend) --- */
+.info {
+  width: 120px;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.8);
+}
+.info h4 { margin: 0 0 5px; color: #777; }
+.legend  { font-size: 0.825rem; line-height: 18px; }
+.legend i {
+  width: 20px;
+  height: 15px;
+  float: left;
+  margin-right: 8px;
+  opacity: 0.7;
+  border: 1px solid;
+}
+/* Align marker thumbnails (in the icon legend) with surrounding text
+ * regardless of image height. Without this, the tall hurricane icon
+ * pushes the row baseline down. */
+.legend img       { vertical-align: middle; }
+.legend input     { vertical-align: middle; }
+
+/* --- Custom map markers (island labels etc.) --- */
+.island_marker {
+  border: none;
+  border-radius: 5px;
+  border-top-left-radius: 0;
+  background-color: rgba(0, 0, 255, 0.7);
+  padding: 1px 3px;
+  color: white;
+  text-align: center;
+  display: block;
+}
+.island-div-icon { border: 0; }
+
+/* --- Leaflet crispness override (keeps tiles sharp when scaled past native zoom) --- */
+.leaflet-container .leaflet-overlay-pane svg,
+.leaflet-container .leaflet-marker-pane img,
+.leaflet-container .leaflet-shadow-pane img,
+.leaflet-container .leaflet-tile-pane img,
+.leaflet-container img.leaflet-image-layer {
+  max-width: none !important;
+  image-rendering: optimizeSpeed;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -o-crisp-edges;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: optimize-contrast;
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+  -ms-interpolation-mode: nearest-neighbor;
+}
