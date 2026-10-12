@@ -18,7 +18,7 @@ to web-based visualization.
    manual/quickstart
    manual/folderstructure
 
- .. toctree::
+.. toctree::
    :maxdepth: 1
    :caption: Setting up a system
 
@@ -29,22 +29,17 @@ to web-based visualization.
    manual/stations
    manual/superregions
 
- .. toctree::
+.. toctree::
    :maxdepth: 1
    :caption: Running and results
 
    manual/running
    manual/output
    manual/webviewer
-   
+
 .. toctree::
    :maxdepth: 1
    :caption: Background
 
    manual/workflow
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Developer guide
-
-   architecture
+   manual/architecture
