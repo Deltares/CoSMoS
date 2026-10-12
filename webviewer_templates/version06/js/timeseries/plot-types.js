@@ -29,7 +29,7 @@ const paths = {
   waves:   function (p) { return '../data/' + p.scenario + '/' + p.cycle_string + '/timeseries/waves.' + p.name + '.' + p.model_name + '.csv.js'; },
   runup:   function (p) { return '../data/' + p.scenario + '/extreme_runup_height/extreme_runup_height.' + p.model_name + '.' + p.name + '.csv.js'; },
   twl:     function (p) { return '../data/' + p.scenario + '/timeseries/extreme_runup_height.' + p.model_name + '.' + p.name + '.csv.js'; },
-  obsFile: function (p) { return '../data/' + p.scenario + '/timeseries/' + p.obsfile; },
+  obsFile: function (p) { return '../data/' + p.scenario + '/' + p.cycle_string + '/timeseries/' + p.obsfile; },
   prdFile: function (p) { return '../data/' + p.scenario + '/' + p.cycle_string + '/timeseries/' + p.prdfile; },
 };
 

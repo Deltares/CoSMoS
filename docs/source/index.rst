@@ -12,21 +12,36 @@ to web-based visualization.
 
 .. toctree::
    :maxdepth: 1
-   :caption: User manual
+   :caption: Getting started
 
    manual/introduction
    manual/quickstart
-   manual/workflow
-   manual/running
+   manual/folderstructure
+
+ .. toctree::
+   :maxdepth: 1
+   :caption: Setting up a system
+
    manual/addingmodels
-   manual/stations
-   manual/meteo
-   manual/scenario
-   manual/superregions
    manual/configuration
+   manual/scenario
+   manual/meteo
+   manual/stations
+   manual/superregions
+
+ .. toctree::
+   :maxdepth: 1
+   :caption: Running and results
+
+   manual/running
    manual/output
    manual/webviewer
-   manual/folderstructure
+   
+.. toctree::
+   :maxdepth: 1
+   :caption: Background
+
+   manual/workflow
 
 .. toctree::
    :maxdepth: 1

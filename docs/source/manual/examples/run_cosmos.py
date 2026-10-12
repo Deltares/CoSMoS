@@ -1,10 +1,10 @@
-"""Example script to run CoSMoS for a single scenario."""
+"""Run CoSMoS for a single scenario."""
 
 from cosmos import cosmos
 
 main_path = r"c:\work\cosmos\run_folder"
 
-scenario_name = "philippines_nov2013_ifs"
+scenario_name = "example_forecast_2026"
 
 # CoSMoS is always initialized with the main path and optionally a configuration file
 cosmos.initialize(
@@ -13,10 +13,10 @@ cosmos.initialize(
 )
 
 # Optionally, you can overwrite configuration settings like this:
-# cosmos.config.run.mode = "single"
-# cosmos.config.run.just_initialize = False
+# cosmos.config.run.mode = "single_shot"
+# cosmos.config.run.download_meteo = False
 # cosmos.config.run.clean_up = False
-cosmos.config.run.download_meteo = False
+# cosmos.config.run.upload = False
 
 # Finally, run the scenario and optionally specify the cycle
-cosmos.run(scenario_name, cycle="20131107_00z")
+cosmos.run(scenario_name, cycle="20261001_00z")

@@ -8,18 +8,45 @@ This section walks you through installing CoSMoS and running your first scenario
 Step 1: Install CoSMoS
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Clone the repository and install in editable mode::
+CoSMoS depends on a set of Deltares packages (``cht_*``, ``hydromt_sfincs``,
+``hydromt-hurrywave``) that are installed from source alongside CoSMoS itself.
+Two PowerShell scripts in the repository do this for you. Both assume the
+repositories live in ``c:\github``; edit the paths in the scripts if you use a
+different folder.
 
-    git clone https://github.com/Deltares/CoSMoS.git
-    cd CoSMoS
-    pip install -e .
+1. Clone CoSMoS and its dependencies. Download
+   :repo:`clone_repos_cosmos.ps1` and run it from a conda PowerShell prompt::
+
+       ./clone_repos_cosmos.ps1
+
+2. Create the ``cosmos`` conda environment (Python 3.11) and install all
+   packages in editable mode with :repo:`mkenv_cosmos.ps1`::
+
+       cd c:\github\cosmos
+       ./mkenv_cosmos.ps1
+
+3. Activate the environment and check that CoSMoS can be imported::
+
+       conda activate cosmos
+       python -c "from cosmos import cosmos"
+
+.. note::
+
+   Running ``pip install -e .`` in the CoSMoS folder alone installs CoSMoS
+   but none of its dependencies.
+
+The model executables (SFINCS, HurryWave, Delft3D FM, XBeach, BEWARE) are not
+part of this installation. Install the ones you need separately and point to
+them in the configuration file (Step 4).
 
 Step 2: Set up a run folder
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Copy the default folders ``run_folder``, ``model_database``, and
-``meteo_database`` from the CoSMoS installation to the location where you want
-to run CoSMoS.
+Copy the template folder :repo:`cosmos_run_folder` from your local CoSMoS
+repository to the location where you want to run CoSMoS (feel free to rename
+it). The folder contains templates for the ``run_folder`` and the
+``meteo_database``, together with the example script ``run_cosmos.py``. Also create
+an empty ``model_database`` folder (path to specify in Step 4); you will fill it in Step 3.
 
 Step 3: Add models to the model database
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -49,9 +76,6 @@ to compare model results with measurements.
 Step 6: Run CoSMoS
 ^^^^^^^^^^^^^^^^^^^
 
-.. include:: examples/run_cosmos.py
-       :literal:
-
 Once you have completed steps 1 to 5, you can :ref:`execute your first CoSMoS run <running>`.
 Output is stored in the scenario folder and can be viewed in the
 :ref:`web viewer <webviewer>`.
@@ -60,7 +84,7 @@ Advanced configuration
 ^^^^^^^^^^^^^^^^^^^^^^
 
 **Step 7: Add observation data.**
-In addition to NOAA CO-OPS tide stations (downloaded automatically), you can
+In addition to NOAA CO-OPS tide stations (fetched automatically), you can
 :ref:`manually add observation station locations and data <stations>`.
 
 **Step 8: Add meteorological data.**

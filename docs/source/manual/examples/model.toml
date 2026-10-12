@@ -1,7 +1,8 @@
-long_name = "HurryWave North Atlantic"
-type = "hurrywave"
-crs = "WGS 84"
-flow_spinup_time = 0.0
-wave_spinup_time = 24.0
-station = [ "ndbc_buoys_all.toml",]
-make_wave_map = true
+long_name = "SFINCS Puerto Rico 20 m"
+crs = "EPSG:32619"
+flow_nested = "sfincs_caribbean_500m"
+wave_nested = "hurrywave_caribbean"
+flow_spinup_time = 6.0
+wave_spinup_time = 12.0
+role = "floodmap"
+station = ["coops_stations_all.toml"]

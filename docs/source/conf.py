@@ -27,6 +27,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
     'sphinx.ext.autosectionlabel',
+    'sphinx.ext.extlinks',
 ]
 
 autosummary_generate = False
@@ -40,6 +41,10 @@ intersphinx_mapping = {
 intersphinx_disabled_domains = ['std']
 
 templates_path = ['_templates']
+
+extlinks = {
+    "repo": ("https://github.com/Deltares/CoSMoS/tree/main/%s", "%s"),
+}
 
 # -- Options for HTML output
 

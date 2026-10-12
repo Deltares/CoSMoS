@@ -1125,7 +1125,7 @@ class WebViewer:
                                             self.cycle_path, "timeseries", obs_file
                                         ),
                                         s,
-                                        "var csv = `date_time," + var_string,
+                                        "var csv_obs = `date_time," + var_string,
                                     )
 
                         # Check if we need to make tidal predictions (right now, this only works for IHO stations!)
