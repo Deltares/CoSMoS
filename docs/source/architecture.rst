@@ -1,149 +1,165 @@
-Code Architecture
+Code architecture
 =================
 
-This page describes how the CoSMoS codebase is organized and how the main
-components interact during a forecast cycle.
+This page describes how the CoSMoS code is organized. It is meant for
+developers who want to change or extend CoSMoS. For what happens during a run
+(the Main Loop and the Model Loop), see :ref:`How CoSMoS works <workflow>`.
+
+Figure 1 shows the main classes and methods, and which loop calls them.
+
+.. figure:: manual/pngs/detailed_workflow.*
+   :width: 100%
+   :alt: Classes and methods of CoSMoS
+
+   Figure 1: Classes and methods of CoSMoS. Row colours indicate whether a
+   method is called from the Main Loop (blue) or the Model Loop (yellow).
 
 Overview
 --------
 
-CoSMoS is structured around three layers:
+The code is organized in three layers:
 
-1. **Orchestration** — the main loop and model loop that drive the forecast cycle.
-2. **Model wrappers** — model-specific classes that handle pre-processing, execution, and post-processing for each supported model.
-3. **Supporting services** — meteorological data handling, observation stations, map tiling, web viewer generation, and cloud infrastructure.
+1. **Orchestration** — the ``cosmos`` object and the Main Loop and Model Loop
+   that drive the forecast cycle.
+2. **Model wrappers** — one class per model type that prepares, starts, and
+   post-processes the models, plus a job script per model type that runs the
+   simulation.
+3. **Supporting modules** — meteorological data, cyclone track ensembles,
+   observation stations, map tiles, the web viewer, and cloud execution.
 
-All classes are importable from the top-level ``cosmos`` package::
+Almost every module imports the ``cosmos`` object (``from .cosmos import
+cosmos``), which holds the configuration and the state of the current run
+(``cosmos.config``, ``cosmos.scenario``, ``cosmos.cycle``, ...).
 
-    from cosmos import cosmos, MainLoop, Configuration, CoSMoS_SFINCS
+The core classes can be imported from the top-level package::
+
+    from cosmos import cosmos, MainLoop, ModelLoop, Configuration, Scenario
+
+The model wrappers are not imported at the top level, because they depend on
+optional model packages. Import them from their module::
+
+    from cosmos.sfincs import CoSMoS_SFINCS
 
 Orchestration
 -------------
 
-The forecast cycle is controlled by three classes:
-
 .. list-table::
-   :widths: 25 75
+   :widths: 30 70
    :header-rows: 0
 
-   * - :py:class:`~cosmos.CoSMoS`
-     - The central singleton (``cosmos``). Manages initialization, configuration,
-       and provides ``run()``, ``post_process()``, and ``make_webviewer()`` entry
-       points.
+   * - :py:class:`~cosmos.cosmos.CoSMoS`
+     - The central object (``cosmos``). Provides ``initialize()``,
+       ``validate()``, ``run()``, ``post_process()``, and
+       ``make_webviewer()``.
 
-   * - :py:class:`~cosmos.MainLoop`
-     - Runs once per forecast cycle. Reads the scenario, downloads meteorological
-       data, determines cycle times, generates track ensembles (if applicable),
-       and starts the model loop.
+   * - :py:class:`~cosmos.main_loop.MainLoop`
+     - Runs once per cycle: reads the scenario, sets the cycle times,
+       downloads and collects meteo data, generates the track ensemble,
+       starts the Model Loop, and finishes the cycle (clean-up, web viewer).
 
-   * - :py:class:`~cosmos.ModelLoop`
-     - Iterates every second while models are running. Pre-processes waiting
-       models, submits jobs, monitors for completion, moves output, runs
-       post-processing, and builds the web viewer when all models finish.
+   * - :py:class:`~cosmos.model_loop.ModelLoop`
+     - Repeats every second until all models have finished: pre-processes
+       and submits models that are ready, and moves and post-processes
+       finished models.
 
-A typical forecast cycle proceeds as follows::
+   * - :py:class:`~cosmos.configuration.Configuration`
+     - Reads the configuration file and holds all settings.
 
-    cosmos.initialize(main_path, config_file="config.toml")
-    cosmos.run("scenario_name")
+   * - :py:class:`~cosmos.scenario.Scenario`
+     - Reads the scenario file and creates the models and clusters.
 
-    # Internally:
-    # MainLoop.start()
-    #   → read scenario, download meteo, set cycle times
-    #   → ModelLoop.start()
-    #       → pre-process → submit → wait → move → post-process
-    #       → (repeat for all models)
-    #   → build web viewer
-    #   → clean up
+   * - :py:class:`~cosmos.cluster.Cluster`
+     - Selects which models in a cluster are run.
 
-Configuration and scenario
---------------------------
+   * - :py:class:`~cosmos.stations.Stations`
+     - Reads the observation station files.
 
-.. list-table::
-   :widths: 25 75
-   :header-rows: 0
+Model wrappers and job scripts
+------------------------------
 
-   * - :py:class:`~cosmos.Configuration`
-     - Reads ``config.toml`` and stores all settings: paths, executables,
-       web server credentials, cloud config, and runtime parameters.
+Each model type has two parts:
 
-   * - :py:class:`~cosmos.Scenario`
-     - Reads ``scenario.toml`` and initializes the collection of models,
-       clusters, timing parameters, and nesting relationships.
+- A **wrapper class** that inherits from :py:class:`~cosmos.model.Model`. It
+  runs in the CoSMoS process and has access to the ``cosmos`` object. It
+  implements ``read_model_specific()``, ``pre_process()``, ``move()``, and
+  ``post_process()``.
+- A **job script** (e.g. :py:mod:`cosmos.run_sfincs`) that is copied to the
+  job folder as ``run_job_2.py`` and runs independently, possibly on another
+  machine or in a container. It only has access to the job folder and a
+  ``config.yml`` written by the wrapper. It carries out nesting step 2, runs
+  the simulation, and makes the map tiles; for ensembles it also prepares and
+  merges the ensemble members.
 
-   * - :py:class:`~cosmos.Cluster`
-     - Groups models and applies conditional run logic (top-N by water level,
-       threshold-based, or ensemble threshold).
-
-   * - :py:class:`~cosmos.Stations`
-     - Reads observation station definitions (tide gauges, wave buoys) from
-       TOML files for model validation.
-
-Model wrappers
---------------
-
-Each supported model has a wrapper class that inherits from :py:class:`~cosmos.Model`
-and implements four methods: ``read_model_specific()``, ``pre_process()``,
-``move()``, and ``post_process()``.
+When adding functionality to a model, decide whether it belongs in the
+wrapper (needs the ``cosmos`` object) or in the job script (must run where the
+model runs).
 
 .. list-table::
-   :widths: 25 75
-   :header-rows: 0
+   :widths: 30 25 45
+   :header-rows: 1
 
-   * - :py:class:`~cosmos.Model`
-     - Base class with shared functionality: reading ``model.toml``, nesting
-       setup, station assignment, meteo file writing, job submission, and
-       restart file management.
+   * - Wrapper class
+     - Job script
+     - Model
 
-   * - :py:class:`~cosmos.CoSMoS_SFINCS`
-     - SFINCS flood model (via ``hydromt_sfincs.SfincsModel``).
+   * - :py:class:`~cosmos.model.Model`
+     -
+     - Base class: reads ``model.toml``, nesting, stations, meteo forcing
+       files, job submission, restart files.
 
-   * - :py:class:`~cosmos.CoSMoS_HurryWave`
-     - HurryWave spectral wave model (via ``hydromt_hurrywave.HurrywaveModel``).
+   * - :py:class:`~cosmos.sfincs.CoSMoS_SFINCS`
+     - ``run_sfincs.py``
+     - SFINCS (via ``hydromt_sfincs``)
 
-   * - :py:class:`~cosmos.CoSMoS_Delft3DFM`
-     - Delft3D Flexible Mesh hydrodynamic model.
+   * - :py:class:`~cosmos.hurrywave.CoSMoS_HurryWave`
+     - ``run_hurrywave.py``
+     - HurryWave (via ``hydromt_hurrywave``)
 
-   * - :py:class:`~cosmos.CoSMoS_XBeach`
-     - XBeach nearshore morphodynamic model.
+   * - :py:class:`~cosmos.delft3dfm.CoSMoS_Delft3DFM`
+     - ``run_delft3dfm.py``
+     - Delft3D FM
 
-   * - :py:class:`~cosmos.CoSMoS_BEWARE`
-     - BEWARE reef-coast wave runup meta-model.
+   * - :py:class:`~cosmos.xbeach.CoSMoS_XBeach`
+     - ``run_xbeach.py``
+     - XBeach
 
-Each wrapper also has a standalone job runner script (e.g. ``run_sfincs.py``)
-that is copied to the job folder and executed independently. These scripts
-handle nesting (step 2), simulation execution, ensemble merging, map tile
-generation, and cleanup.
+   * - :py:class:`~cosmos.beware.CoSMoS_BEWARE`
+     - ``run_beware.py``
+     - BEWARE
 
-Supporting services
--------------------
+Supporting modules
+------------------
 
 .. list-table::
-   :widths: 25 75
+   :widths: 30 70
    :header-rows: 0
 
-   * - :py:class:`~cosmos.WebViewer`
-     - Builds the interactive web viewer with time-series plots, map tile
-       layers, and GeoJSON overlays.
+   * - :py:mod:`cosmos.meteo`
+     - Downloads and collects gridded meteo data and cyclone tracks.
 
-   * - :py:class:`~cosmos.Cloud`
-     - AWS S3 upload/download and Argo Workflows job submission for
-       cloud-based execution.
+   * - :py:mod:`cosmos.track_ensemble`
+     - Generates cyclone track ensembles.
 
-   * - ``meteo``
-     - Downloads and collects meteorological forcing data (gridded wind,
-       pressure, precipitation) and tropical cyclone tracks.
+   * - :py:mod:`cosmos.tsunami`
+     - Computes the initial water level for tsunami events.
 
-   * - ``tiling`` / ``merge_tiles``
-     - Generates and merges PNG map tiles (flood maps, wave heights, water
-       levels, storm surge) for the web viewer.
+   * - :py:class:`~cosmos.webviewer.WebViewer`
+     - Builds and publishes the web viewer.
 
-   * - ``track_ensemble``
-     - Generates synthetic tropical cyclone track ensembles for probabilistic
-       storm surge prediction.
+   * - :py:mod:`cosmos.tiling`, :py:mod:`cosmos.merge_tiles`
+     - Makes and merges map tiles.
 
-   * - ``tsunami``
-     - Computes initial water surface deformation from earthquake fault
-       parameters.
+   * - :py:class:`~cosmos.cloud.Cloud`, :py:mod:`cosmos.argo`
+     - AWS S3 transfer and Argo Workflows job submission (cloud mode).
+
+   * - :py:mod:`cosmos.validation`
+     - Checks a scenario before it is run.
+
+   * - :py:mod:`cosmos.custom_processing`
+     - Runs the user's pre- and post-processing scripts.
+
+   * - :py:mod:`cosmos.clean_up`
+     - Removes old files after a cycle.
 
 Module layout
 -------------
@@ -151,35 +167,39 @@ Module layout
 ::
 
     cosmos/
-    ├── __init__.py          # Public API re-exports
-    ├── cosmos.py            # CoSMoS singleton class
-    ├── main_loop.py         # Forecast cycle loop
-    ├── model_loop.py        # Model execution loop
-    ├── model.py             # Base Model class
-    ├── configuration.py     # Configuration reader
-    ├── scenario.py          # Scenario reader
-    ├── cluster.py           # Conditional model execution
-    ├── stations.py          # Observation station management
+    ├── __init__.py          # Public classes
+    ├── __main__.py          # Command line interface (python -m cosmos)
+    ├── cosmos.py            # The cosmos object
+    ├── main_loop.py         # Main Loop
+    ├── model_loop.py        # Model Loop
+    ├── configuration.py     # Configuration file
+    ├── scenario.py          # Scenario file
+    ├── cluster.py           # Model clusters
+    ├── stations.py          # Observation stations
+    ├── validation.py        # Scenario validation
+    ├── custom_processing.py # User pre/post-processing scripts
     │
+    ├── model.py             # Base model class
     ├── sfincs.py            # SFINCS wrapper
     ├── hurrywave.py         # HurryWave wrapper
     ├── delft3dfm.py         # Delft3D FM wrapper
     ├── xbeach.py            # XBeach wrapper
     ├── beware.py            # BEWARE wrapper
     │
-    ├── run_sfincs.py        # SFINCS standalone job runner
-    ├── run_hurrywave.py     # HurryWave standalone job runner
-    ├── run_delft3dfm.py     # Delft3D FM standalone job runner
-    ├── run_xbeach.py        # XBeach standalone job runner
-    ├── run_beware.py        # BEWARE standalone job runner
+    ├── run_sfincs.py        # SFINCS job script
+    ├── run_hurrywave.py     # HurryWave job script
+    ├── run_delft3dfm.py     # Delft3D FM job script
+    ├── run_xbeach.py        # XBeach job script
+    ├── run_beware.py        # BEWARE job script
+    ├── run_parallel.py      # Worker script for parallel mode
     │
-    ├── meteo.py             # Meteorological data handling
-    ├── track_ensemble.py    # Cyclone track ensemble generation
-    ├── tsunami.py           # Tsunami source generation
-    ├── cloud.py             # S3 / Argo cloud operations
-    ├── argo.py              # Argo Workflows client
-    ├── webviewer.py         # Web viewer builder
-    ├── tiling.py            # Map tile generation
+    ├── meteo.py             # Meteo data and cyclone tracks
+    ├── track_ensemble.py    # Track ensembles
+    ├── tsunami.py           # Tsunami source
+    ├── webviewer.py         # Web viewer
+    ├── tiling.py            # Map tiles
     ├── merge_tiles.py       # Tile merging (cloud)
-    ├── color_maps.py        # Contour / color definitions
-    └── clean_up.py          # Cleanup routines
+    ├── color_maps.py        # Colour scales
+    ├── cloud.py             # S3 operations
+    ├── argo.py              # Argo Workflows client
+    └── clean_up.py          # Clean-up
