@@ -7,7 +7,7 @@ developers who want to change or extend CoSMoS. For what happens during a run
 
 Figure 1 shows the main classes and methods, and which loop calls them.
 
-.. figure:: manual/pngs/detailed_workflow.*
+.. figure:: pngs/detailed_workflow.*
    :width: 100%
    :alt: Classes and methods of CoSMoS
 
